@@ -9,24 +9,18 @@ data class Project(
         val args: String = "",
         val files: List<ProjectFile> = listOf(),
         val confType: String = "java",
-        val originUrl: String? = null,
         val readOnlyFileNames: List<String> = emptyList(),
-        val expectedOutput: String? = null,
-        val compilerVersion: String? = null
+        val expectedOutput: String? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ProjectFile(
         val text: String = "",
         val name: String = "",
-        val publicId: String = "",
-        val type: Type = Type.KOTLIN_FILE,
-        val modifiable: Boolean = true
+        val type: Type = Type.KOTLIN_FILE
 )
 
 enum class Type {
     KOTLIN_FILE,
-    KOTLIN_TEST_FILE,
-    SOLUTION_FILE,
-    JAVA_FILE
+    KOTLIN_TEST_FILE
 }
