@@ -1,5 +1,7 @@
-package com.compiler.server.compiler
+package com.compiler.server.compiler.components
 
+import com.compiler.server.compiler.KotlinFile
+import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.compiler.model.*
 import com.intellij.openapi.Disposable
 import com.intellij.psi.PsiElement

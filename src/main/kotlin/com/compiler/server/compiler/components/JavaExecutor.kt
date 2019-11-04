@@ -1,13 +1,15 @@
-package com.compiler.server.compiler
+package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
+import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
 
-object JavaExecutor {
+@Component
+class JavaExecutor {
 
     data class ProgramOutput(
             val standardOutput: String,

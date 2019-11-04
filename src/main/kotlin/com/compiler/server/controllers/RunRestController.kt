@@ -1,7 +1,7 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.compiler.KotlinCompiler
-import com.compiler.server.compiler.KotlinEnvironment
+import com.compiler.server.compiler.components.KotlinCompiler
+import com.compiler.server.compiler.components.KotlinEnvironment
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.model.JavaExecutionResult
 import com.compiler.server.compiler.model.Project

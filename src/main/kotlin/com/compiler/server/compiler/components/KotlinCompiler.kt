@@ -1,4 +1,4 @@
-package com.compiler.server.compiler
+package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
@@ -18,9 +18,12 @@ import java.nio.file.Paths
 import java.util.*
 
 @Component
-class KotlinCompiler(val environment: KotlinEnvironment) {
+class KotlinCompiler(
+        val environment: KotlinEnvironment,
+        val javaExecutor: JavaExecutor
+) {
 
-    open class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
+    class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
     fun compile(files: List<KtFile>): Compiled {
         val generationState = generationStateFor(files)
@@ -38,7 +41,7 @@ class KotlinCompiler(val environment: KotlinEnvironment) {
                     exception = ExceptionDescriptor("Something went wrong", "Exception")
             )
         val output = write(compiled)
-        return JavaExecutor.execute(argsFrom(compiled.mainClass!!, output, environment))
+        return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, environment))
                 .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
     }
 

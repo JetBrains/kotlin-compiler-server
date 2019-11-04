@@ -1,6 +1,6 @@
 package com.compiler.server.compiler.configuration
 
-import com.compiler.server.compiler.KotlinEnvironment
+import com.compiler.server.compiler.components.KotlinEnvironment
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.io.File
