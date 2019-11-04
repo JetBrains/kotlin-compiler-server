@@ -62,11 +62,11 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
             file: KotlinFile,
             line: Int,
             character: Int
-    ) = with(file.insert("xxxxxxxxxxxxxxxxxxxxxxx ", line, character)) {
+    ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
         elementAt(line, character)?.let { element ->
             val descriptorInfo = descriptorsFrom(this, element)
             val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
-                    .substringBefore("xxxxxxxxxxxxxxxxxxxxxxx").let { if (it.endsWith(".")) "" else it }
+                    .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
             descriptorInfo.descriptors.toMutableList().apply {
                 sortWith(Comparator { a, b ->
                     val (a1, a2) = a.presentableName()
