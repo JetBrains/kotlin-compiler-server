@@ -7,7 +7,6 @@ import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.TokenSet
-import com.compiler.server.compiler.model.*
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
@@ -50,14 +49,7 @@ import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 import java.io.File
 import java.util.UUID
-import kotlin.Boolean
 import kotlin.Comparator
-import kotlin.Int
-import kotlin.String
-import kotlin.apply
-import kotlin.let
-import kotlin.to
-import kotlin.with
 
 data class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: KotlinCoreEnvironment) {
 

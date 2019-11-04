@@ -1,24 +1,22 @@
 package com.compiler.server.compiler
 
+import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.lang.StringBuilder
-import java.util.Timer
-import java.util.TimerTask
+import java.util.*
 
 object JavaExecutor {
 
-    data class StackTraceElement(val className: String, val methodName: String, val fileName: String, val lineNumber: Int)
-    data class ExceptionDescriptor(val message: String, val fullName: String, val stackTrace: List<StackTraceElement> = emptyList(), val cause: ExceptionDescriptor? = null)
-
     data class ProgramOutput(val standardOutput: String, val errorOutput: String, val exception: Exception? = null) {
         fun asExecutionResult(): JavaExecutionResult {
-            return JavaExecutionResult(text = "<outStream>$standardOutput\n</outStream>", exception = exception?.let {
-                ExceptionDescriptor(it.message
-                        ?: "no message", it::class.java.toString())
-            })
+            return JavaExecutionResult(
+                    text = "<outStream>$standardOutput\n</outStream>",
+                    exception = exception?.let {
+                        ExceptionDescriptor(it.message
+                                ?: "no message", it::class.java.toString())
+                    })
         }
     }
 
@@ -33,7 +31,11 @@ object JavaExecutor {
             standardThread.start()
             val errorThread = appendTo(errorText, standardError)
             errorThread.start()
-            interruptAfter(60000, this, listOf(standardThread, errorThread))
+            interruptAfter(
+                    delay = 60000,
+                    process = this,
+                    threads = listOf(standardThread, errorThread)
+            )
             try {
                 waitFor()
                 standardThread.join(10000)
@@ -54,7 +56,11 @@ object JavaExecutor {
         }
     }
 
-    private fun <T> Process.use(body: Process.() -> T) = try { body() } finally { destroy() }
+    private fun <T> Process.use(body: Process.() -> T) = try {
+        body()
+    } finally {
+        destroy()
+    }
 
     private fun interruptAfter(delay: Long, process: Process, threads: List<Thread>) {
         Timer(true).schedule(object : TimerTask() {

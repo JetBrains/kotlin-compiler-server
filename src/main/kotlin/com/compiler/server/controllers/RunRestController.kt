@@ -4,6 +4,7 @@ import com.compiler.server.compiler.JavaExecutor
 import com.compiler.server.compiler.KotlinCompiler
 import com.compiler.server.compiler.KotlinEnvironment
 import com.compiler.server.compiler.KotlinFile
+import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
 import com.compiler.server.compiler.model.Project
 import com.compiler.server.compiler.model.Severity
@@ -39,7 +40,7 @@ class RunRestController {
                 val output = write(compilation)
                 JavaExecutor.execute(argsFrom(compilation.mainClass!!, output, environment))
                         .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
-            } else JavaExecutionResult("", JavaExecutor.ExceptionDescriptor("Something went wrong", "Exception"))
+            } else JavaExecutionResult("", ExceptionDescriptor("Something went wrong", "Exception"))
         }
     }
 
