@@ -12,6 +12,7 @@ import com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
+import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
@@ -21,6 +22,7 @@ import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.container.getService
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -264,19 +266,39 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
     }
 
     companion object {
-        fun with(classpath: List<File>) = KotlinEnvironment(classpath, KotlinCoreEnvironment.createForTests(
-                parentDisposable = Disposable {},
-                extensionConfigs = EnvironmentConfigFiles.JVM_CONFIG_FILES,
-                initialConfiguration = CompilerConfiguration().apply {
-                    addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
-                    put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-                    put(JVMConfigurationKeys.ADD_BUILT_INS_FROM_COMPILER_TO_DEPENDENCIES, true)
-                    put(CommonConfigurationKeys.MODULE_NAME, UUID.randomUUID().toString())
-                    with(K2JVMCompilerArguments()) {
-                        put(JVMConfigurationKeys.DISABLE_PARAM_ASSERTIONS, noParamAssertions)
-                        put(JVMConfigurationKeys.DISABLE_CALL_ASSERTIONS, noCallAssertions)
+        /**
+         * This list allows to configure behavior of webdemo compiler. Its effect is equivalent
+         * to passing this list of string to CLI compiler.
+         *
+         * See [org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments] and
+         * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
+         */
+        private val additionalCompilerArguments: List<String> = listOf(
+                "-Xuse-experimental=kotlin.Experimental",
+                "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
+                "-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
+                "-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+                "-XXLanguage:+InlineClasses"
+        )
+
+        fun with(classpath: List<File>): KotlinEnvironment {
+            val arguments = K2JVMCompilerArguments()
+            parseCommandLineArguments(additionalCompilerArguments, arguments)
+            return KotlinEnvironment(classpath, KotlinCoreEnvironment.createForTests(
+                    parentDisposable = Disposable {},
+                    extensionConfigs = EnvironmentConfigFiles.JVM_CONFIG_FILES,
+                    initialConfiguration = CompilerConfiguration().apply {
+                        addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
+                        put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+                        put(JVMConfigurationKeys.ADD_BUILT_INS_FROM_COMPILER_TO_DEPENDENCIES, true)
+                        put(CommonConfigurationKeys.MODULE_NAME, UUID.randomUUID().toString())
+                        with(K2JVMCompilerArguments()) {
+                            put(JVMConfigurationKeys.DISABLE_PARAM_ASSERTIONS, noParamAssertions)
+                            put(JVMConfigurationKeys.DISABLE_CALL_ASSERTIONS, noCallAssertions)
+                        }
+                        languageVersionSettings = arguments.configureLanguageVersionSettings(this[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]!!)
                     }
-                }
-        ))
+            ))
+        }
     }
 }
