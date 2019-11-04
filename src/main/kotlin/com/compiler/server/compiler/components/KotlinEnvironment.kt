@@ -31,13 +31,14 @@ import org.jetbrains.kotlin.diagnostics.Diagnostic
 import org.jetbrains.kotlin.diagnostics.Errors
 import org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
 import org.jetbrains.kotlin.idea.codeInsight.ReferenceVariantsHelper
+import org.jetbrains.kotlin.idea.core.isVisible
+import org.jetbrains.kotlin.idea.imports.importableFqName
 import org.jetbrains.kotlin.idea.util.IdeDescriptorRenderers
+import org.jetbrains.kotlin.idea.util.getResolutionScope
 import org.jetbrains.kotlin.lexer.KtKeywordToken
 import org.jetbrains.kotlin.lexer.KtTokens
-import org.jetbrains.kotlin.psi.KtExpression
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtQualifiedExpression
-import org.jetbrains.kotlin.psi.KtSimpleNameExpression
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.renderer.ClassifierNamePolicy
 import org.jetbrains.kotlin.renderer.ParameterNameRenderingPolicy
 import org.jetbrains.kotlin.resolve.BindingContext
@@ -80,7 +81,7 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
                     val (b1, b2) = b.presentableName()
                     ("$a1$a2").compareTo("$b1$b2", true)
                 })
-            }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor) } + keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) + keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix)
+            }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } + keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) + keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix)
         } ?: emptyList()
     }
 
@@ -88,8 +89,13 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
         return errorsFrom(analysisOf(files).analysisResult.bindingContext.diagnostics.all(), files.map { it.name to anylizeErrorsFrom(it) }.toMap())
     }
 
-    private fun completionVariantFor(prefix: String, descriptor: DeclarationDescriptor): Completion? {
-        val (name, tail) = descriptor.presentableName()
+    private fun completionVariantFor(
+            prefix: String,
+            descriptor: DeclarationDescriptor,
+            element: PsiElement
+    ): Completion? {
+        val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
+        val (name, tail) = descriptor.presentableName(isCallableReference)
         val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
         var completionText = fullName
         var position = completionText.indexOf('(')
@@ -110,17 +116,27 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
         } else null
     }
 
-    private fun DeclarationDescriptor.presentableName() = when (this) {
-        is FunctionDescriptor -> name.asString() + renderer.renderFunctionParameters(this) to when {
-            returnType != null -> renderer.renderType(returnType!!)
-            else -> (extensionReceiverParameter?.let { param ->
-                " for ${renderer.renderType(param.type)} in ${DescriptorUtils.getFqName(containingDeclaration)}"
-            } ?: "")
-        }
-        else -> name.asString() to when (this) {
-            is VariableDescriptor -> renderer.renderType(type)
-            is ClassDescriptor -> " (${DescriptorUtils.getFqName(containingDeclaration)})"
-            else -> renderer.render(this)
+    private fun DeclarationDescriptor.presentableName(isCallableReferenceCompletion: Boolean = false): Pair<String, String> {
+        var presentableText = if (this is ConstructorDescriptor)
+            this.constructedClass.name.asString()
+        else
+            this.name.asString()
+        return when (this) {
+            is FunctionDescriptor -> {
+                if (!isCallableReferenceCompletion)
+                    presentableText += renderer.renderFunctionParameters(this)
+                presentableText + renderer.renderFunctionParameters(this) to when {
+                    returnType != null -> renderer.renderType(returnType!!)
+                    else -> (extensionReceiverParameter?.let { param ->
+                        " for ${renderer.renderType(param.type)} in ${DescriptorUtils.getFqName(containingDeclaration)}"
+                    } ?: "")
+                }
+            }
+            else -> presentableText to when (this) {
+                is VariableDescriptor -> renderer.renderType(type)
+                is ClassDescriptor -> " (${DescriptorUtils.getFqName(containingDeclaration)})"
+                else -> renderer.render(this)
+            }
         }
     }
 
@@ -155,14 +171,31 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
         if (it is KtKeywordToken && it.value.startsWith(prefix)) Completion(it.value, it.value, "", "") else null
     }
 
-    private fun Analysis.referenceVariantsFrom(element: PsiElement) = when (element) {
-        is KtSimpleNameExpression -> ReferenceVariantsHelper(
-                analysisResult.bindingContext,
-                resolutionFacade = KotlinResolutionFacade(kotlinEnvironment.project, componentProvider),
-                moduleDescriptor = analysisResult.moduleDescriptor,
-                visibilityFilter = { true }
-        ).getReferenceVariants(element, DescriptorKindFilter.ALL, { true }, true, true, true, null).toList()
-        else -> null
+    private fun Analysis.referenceVariantsFrom(element: PsiElement): List<DeclarationDescriptor>? {
+        val elementKt = element as? KtElement ?: return emptyList()
+        val bindingContext = analysisResult.bindingContext
+        val resolutionFacade = KotlinResolutionFacade(
+                project = kotlinEnvironment.project,
+                componentProvider = componentProvider,
+                moduleDescriptor = analysisResult.moduleDescriptor
+        )
+        val inDescriptor: DeclarationDescriptor = elementKt.getResolutionScope(bindingContext, resolutionFacade).ownerDescriptor
+        return when (element) {
+            is KtSimpleNameExpression -> ReferenceVariantsHelper(
+                    analysisResult.bindingContext,
+                    resolutionFacade = resolutionFacade,
+                    moduleDescriptor = analysisResult.moduleDescriptor,
+                    visibilityFilter = VisibilityFilter(inDescriptor, bindingContext, element, resolutionFacade)
+            ).getReferenceVariants(
+                    element,
+                    DescriptorKindFilter.ALL,
+                    NAME_FILTER,
+                    filterOutJavaGettersAndSetters = true,
+                    filterOutShadowed = true,
+                    excludeNonInitializedVariable = true,
+                    useReceiverType = null).toList()
+            else -> null
+        }
     }
 
     private fun descriptorsFrom(file: KotlinFile, element: PsiElement): DescriptorInfo =
@@ -273,6 +306,50 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
         )
     }
 
+    private val NAME_FILTER = { name: Name ->
+        !name.isSpecial
+    }
+
+
+    private fun KtElement.isCallableReference() =
+            parent is KtCallableReferenceExpression && this == (parent as KtCallableReferenceExpression).callableReference
+
+    // This code is a fragment of org.jetbrains.kotlin.idea.completion.CompletionSession from Kotlin IDE Plugin
+    // with a few simplifications which were possible because webdemo has very restricted environment (and well,
+    // because requirements on compeltion' quality in web-demo are lower)
+    private inner class VisibilityFilter(
+            private val inDescriptor: DeclarationDescriptor,
+            private val bindingContext: BindingContext,
+            private val element: KtElement,
+            private val resolutionFacade: KotlinResolutionFacade
+    ) : (DeclarationDescriptor) -> Boolean {
+        override fun invoke(descriptor: DeclarationDescriptor): Boolean {
+            if (descriptor is TypeParameterDescriptor && !isTypeParameterVisible(descriptor)) return false
+
+            if (descriptor is DeclarationDescriptorWithVisibility) {
+                return descriptor.isVisible(element, null, bindingContext, resolutionFacade)
+            }
+
+            if (descriptor.isInternalImplementationDetail()) return false
+
+            return true
+        }
+
+        private fun isTypeParameterVisible(typeParameter: TypeParameterDescriptor): Boolean {
+            val owner = typeParameter.containingDeclaration
+            var parent: DeclarationDescriptor? = inDescriptor
+            while (parent != null) {
+                if (parent == owner) return true
+                if (parent is ClassDescriptor && !parent.isInner) return false
+                parent = parent.containingDeclaration
+            }
+            return true
+        }
+
+        private fun DeclarationDescriptor.isInternalImplementationDetail(): Boolean =
+                importableFqName?.asString() in excludedFromCompletion
+    }
+
     companion object {
         /**
          * This list allows to configure behavior of webdemo compiler. Its effect is equivalent
@@ -287,6 +364,15 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
                 "-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
                 "-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
                 "-XXLanguage:+InlineClasses"
+        )
+
+        private val excludedFromCompletion: List<String> = listOf(
+                "kotlin.jvm.internal",
+                "kotlin.coroutines.experimental.intrinsics",
+                "kotlin.coroutines.intrinsics",
+                "kotlin.coroutines.experimental.jvm.internal",
+                "kotlin.coroutines.jvm.internal",
+                "kotlin.reflect.jvm.internal"
         )
 
         fun with(classpath: List<File>): KotlinEnvironment {
