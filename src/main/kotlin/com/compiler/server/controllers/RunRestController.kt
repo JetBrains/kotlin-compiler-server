@@ -18,15 +18,12 @@ import java.nio.file.Paths
 import java.util.*
 
 @RestController
-class RunRestController {
+class RunRestController(private val environment: KotlinEnvironment) {
 
     data class OutputDir(val path: Path, val subPaths: List<Path>)
 
     @PostMapping("/foo")
     fun foo(@RequestBody project: Project): JavaExecutionResult {
-        val environment = KotlinEnvironment
-                .with(classpath = listOfNotNull(File("lib"))
-                        .flatMap { it.listFiles().toList() })
         val files = project.files.map {
             KotlinFile.from(environment.kotlinEnvironment.project, it.name, it.text)
         }

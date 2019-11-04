@@ -51,7 +51,7 @@ import java.io.File
 import java.util.UUID
 import kotlin.Comparator
 
-data class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: KotlinCoreEnvironment) {
+class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: KotlinCoreEnvironment) {
 
     private data class DescriptorInfo(
             val isTipsManagerCompletion: Boolean,
