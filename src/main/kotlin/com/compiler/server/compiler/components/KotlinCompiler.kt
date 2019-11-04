@@ -1,8 +1,7 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.model.ExceptionDescriptor
-import com.compiler.server.compiler.model.JavaExecutionResult
-import com.compiler.server.compiler.model.OutputDirectory
+import com.compiler.server.compiler.KotlinFile
+import com.compiler.server.compiler.model.*
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -25,7 +24,20 @@ class KotlinCompiler(
 
     class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
-    fun compile(files: List<KtFile>): Compiled {
+    fun run(project: Project): JavaExecutionResult {
+        val files = project.files.map {
+            KotlinFile.from(environment.kotlinEnvironment.project, it.name, it.text)
+        }
+        val errors = environment.errorsFrom(files.map { it.kotlinFile })
+        return if (errors.any { it.value.any { error -> error.severity == Severity.ERROR } })
+            JavaExecutionResult("", errors = errors)
+        else {
+            val compilation = compile(files.map { it.kotlinFile })
+            return execute(compilation)
+        }
+    }
+
+    private fun compile(files: List<KtFile>): Compiled {
         val generationState = generationStateFor(files)
         KotlinCodegenFacade.compileCorrectFiles(generationState) { error, _ -> error.printStackTrace() }
         return Compiled(
@@ -34,7 +46,7 @@ class KotlinCompiler(
         )
     }
 
-    fun execute(compiled: Compiled): JavaExecutionResult {
+    private fun execute(compiled: Compiled): JavaExecutionResult {
         if (compiled.files.isEmpty())
             return JavaExecutionResult(
                     text = "",
