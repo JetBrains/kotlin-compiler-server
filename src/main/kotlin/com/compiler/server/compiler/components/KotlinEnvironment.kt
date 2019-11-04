@@ -57,6 +57,9 @@ import kotlin.Comparator
 
 class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: KotlinCoreEnvironment) {
 
+    private val NUMBER_OF_CHAR_IN_TAIL = 60
+    private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
+
     private data class DescriptorInfo(
             val isTipsManagerCompletion: Boolean,
             val descriptors: List<DeclarationDescriptor>
@@ -87,7 +90,7 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
 
     private fun completionVariantFor(prefix: String, descriptor: DeclarationDescriptor): Completion? {
         val (name, tail) = descriptor.presentableName()
-        val fullName: String = formatName(name, 40)
+        val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
         var completionText = fullName
         var position = completionText.indexOf('(')
         if (position != -1) {
@@ -98,7 +101,12 @@ class KotlinEnvironment(val classpath: List<File>, val kotlinEnvironment: Kotlin
         position = completionText.indexOf(":")
         if (position != -1) completionText = completionText.substring(0, position - 1)
         return if (prefix.isEmpty() || fullName.startsWith(prefix)) {
-            Completion(completionText, fullName, tail, iconFrom(descriptor))
+            Completion(
+                    text = completionText,
+                    displayText = fullName,
+                    tail = formatName(fullName, NUMBER_OF_CHAR_IN_TAIL),
+                    icon = iconFrom(descriptor)
+            )
         } else null
     }
 
