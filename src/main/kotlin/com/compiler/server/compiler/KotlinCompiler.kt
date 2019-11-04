@@ -30,6 +30,7 @@ class KotlinCompiler(val environment: KotlinEnvironment) {
                 mainClass = mainClassFrom(generationState.bindingContext, files)
         )
     }
+
     fun execute(compiled: Compiled): JavaExecutionResult {
         if (compiled.files.isEmpty())
             return JavaExecutionResult(
@@ -73,13 +74,18 @@ class KotlinCompiler(val environment: KotlinEnvironment) {
             mainClass: String,
             outputDirectory: OutputDirectory,
             environment: KotlinEnvironment
-    ) = listOfNotNull(
-            "java",
-            "-Djava.security.manager",
-            "-Djava.security.policy=${outputDirectory.path.resolve("executor.policy").toAbsolutePath()}",
-            "-classpath"
-    ) + (environment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString()).joinToString(":") +
-            mainClass
+    ): List<String> {
+        val classPaths = (environment.classpath.map { it.absolutePath }
+                + outputDirectory.path.toAbsolutePath().toString())
+                .joinToString(":")
+        val policy = "-Djava.security.policy=${outputDirectory.path.resolve("executor.policy").toAbsolutePath()}"
+        return listOfNotNull(
+                "java",
+                "-Djava.security.manager",
+                policy,
+                "-classpath"
+        ) + classPaths + mainClass
+    }
 
 
     private fun mainClassFrom(bindingContext: BindingContext, files: List<KtFile>): String? {

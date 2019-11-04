@@ -9,13 +9,16 @@ import java.util.*
 
 object JavaExecutor {
 
-    data class ProgramOutput(val standardOutput: String, val errorOutput: String, val exception: Exception? = null) {
+    data class ProgramOutput(
+            val standardOutput: String,
+            val errorOutput: String,
+            val exception: Exception? = null
+    ) {
         fun asExecutionResult(): JavaExecutionResult {
             return JavaExecutionResult(
                     text = "<outStream>$standardOutput\n</outStream>",
                     exception = exception?.let {
-                        ExceptionDescriptor(it.message
-                                ?: "no message", it::class.java.toString())
+                        ExceptionDescriptor(it.message ?: "no message", it::class.java.toString())
                     })
         }
     }
