@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class KotlinProjectExecutor(
         private val kotlinCompiler: KotlinCompiler,
+        private val completionProvider: CompletionProvider,
         private val kotlinEnvironment: KotlinEnvironment
 ) {
 
@@ -23,7 +24,7 @@ class KotlinProjectExecutor(
     fun complete(project: Project, line: Int, character: Int): List<Completion> {
         val file = getFilesFrom(project).first()
         return try {
-            kotlinEnvironment.complete(file, line, character)
+            completionProvider.complete(file, line, character)
         } catch (e: Exception) {
             log.warn("Exception in getting completions", e)
             emptyList()
@@ -31,6 +32,6 @@ class KotlinProjectExecutor(
     }
 
     private fun getFilesFrom(project: Project) = project.files.map {
-        KotlinFile.from(kotlinEnvironment.kotlinEnvironment.project, it.name, it.text)
+        KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)
     }
 }

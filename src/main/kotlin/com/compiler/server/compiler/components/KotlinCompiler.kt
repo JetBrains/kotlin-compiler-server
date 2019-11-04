@@ -81,7 +81,7 @@ class KotlinCompiler(
                 analysis.analysisResult.moduleDescriptor,
                 analysis.analysisResult.bindingContext,
                 files,
-                environment.kotlinEnvironment.configuration
+                environment.coreEnvironment.configuration
         ).build()
     }
 
