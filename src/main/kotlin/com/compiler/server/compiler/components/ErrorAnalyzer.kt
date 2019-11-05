@@ -36,13 +36,16 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
   fun analysisOf(files: List<KtFile>): Analysis = CliBindingTrace().let { trace ->
     val project = files.first().project
     val componentProvider = TopDownAnalyzerFacadeForJVM.createContainer(
-      project,
-      files,
-      trace,
-      kotlinEnvironment.coreEnvironment.configuration,
-      { globalSearchScope -> kotlinEnvironment.coreEnvironment.createPackagePartProvider(globalSearchScope) },
-      { storageManager, ktFiles -> FileBasedDeclarationProviderFactory(storageManager, ktFiles) },
-      TopDownAnalyzerFacadeForJVM.newModuleSearchScope(project, files)
+      project = project,
+      files = files,
+      trace = trace,
+      configuration = kotlinEnvironment.coreEnvironment.configuration,
+      packagePartProvider = { globalSearchScope ->
+        kotlinEnvironment.coreEnvironment.createPackagePartProvider(globalSearchScope)
+      },
+      declarationProviderFactory = { storageManager, ktFiles ->
+        FileBasedDeclarationProviderFactory(storageManager, ktFiles)
+      }
     )
     componentProvider.getService(LazyTopDownAnalyzer::class.java)
       .analyzeDeclarations(TopDownAnalysisMode.TopLevelDeclarations, files, DataFlowInfo.EMPTY)

@@ -36,6 +36,8 @@ class KotlinEnvironment(val classpath: List<File>, val coreEnvironment: KotlinCo
      * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
      */
     private val additionalCompilerArguments: List<String> = listOf(
+      "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+      "-Xuse-experimental=kotlin.time.ExperimentalTime",
       "-Xuse-experimental=kotlin.Experimental",
       "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
       "-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
@@ -52,13 +54,12 @@ class KotlinEnvironment(val classpath: List<File>, val coreEnvironment: KotlinCo
         initialConfiguration = CompilerConfiguration().apply {
           addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
           put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-          put(JVMConfigurationKeys.ADD_BUILT_INS_FROM_COMPILER_TO_DEPENDENCIES, true)
           put(CommonConfigurationKeys.MODULE_NAME, UUID.randomUUID().toString())
           with(K2JVMCompilerArguments()) {
             put(JVMConfigurationKeys.DISABLE_PARAM_ASSERTIONS, noParamAssertions)
             put(JVMConfigurationKeys.DISABLE_CALL_ASSERTIONS, noCallAssertions)
           }
-          languageVersionSettings = arguments.configureLanguageVersionSettings(this[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]!!)
+          languageVersionSettings = arguments.toLanguageVersionSettings(this[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]!!)
         }
       ))
     }

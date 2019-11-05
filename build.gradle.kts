@@ -6,14 +6,12 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 object BuildProps {
-    val kotlinBuildType = "Kotlin_1320_CompilerAllPlugins"
-    val kotlinBuild = "1.3.20-release-116"
-    val pluginBuild = "1.3.20-release-IJ2018.3-1"
-    val stdlibVersion = "1.3.20"
-    val version = "1.3.20"
-    val kotlinId = "1907319"
+    val kotlinBuildType = "Kotlin_1350_Aggregate"
+    val kotlinBuild = "1.3.50-release-112"
+    val pluginBuild = "1.3.50-release-IJ2019.2-1"
+    val version = "1.3.50"
+    val kotlinId = "2491366"
     val kotlinPluginLocation = "$kotlinBuildType/$kotlinId:id/kotlin-plugin-$pluginBuild.zip!/Kotlin/lib/kotlin-plugin.jar"
-   // https://teamcity.jetbrains.com/repository/download/Kotlin_1320_CompilerAllPlugins/1907319:id/kotlin-plugin-1.3.20-release-IJ2018.3-1.zip!/Kotlin/lib/kotlin-plugin.jar
 }
 
 val kotlinDependency by configurations.creating
@@ -26,7 +24,7 @@ val copyDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.3.50"
     kotlin("plugin.spring") version "1.3.50"
 }
 
@@ -52,14 +50,14 @@ dependencies {
         compile("org.jetbrains.intellij.deps:trove4j:1.0.20181211")
         compile("org.jetbrains.kotlin:kotlin-reflect:$version")
         compile("org.jetbrains.kotlin:kotlin-stdlib:$version")
-        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$stdlibVersion")
-        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$stdlibVersion")
+        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$version")
+        compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
         compile("org.jetbrains.kotlin:kotlin-test:$version")
         compile("org.jetbrains.kotlin:kotlin-compiler:$version")
         compile("org.jetbrains.kotlin:kotlin-script-runtime:$version")
         compile(dependencyFrom("https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
                 artifact = "kotlin-plugin",
-                version = "1.3.20")
+                version = version)
         )
     }
 }
