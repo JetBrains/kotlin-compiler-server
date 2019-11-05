@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.nio.file.Path
 import java.util.*
 
 @Component
@@ -93,5 +94,22 @@ class JavaExecutor {
         e.printStackTrace()
       }
     }
+  }
+}
+
+class JavaArgumentsBuilder(
+  val classPaths: String,
+  val mainClass: String,
+  val policy: Path,
+  val memoryLimit: Int
+) {
+  fun toArguments(): List<String> {
+    return listOf(
+      "java",
+      "-Djava.security.manager",
+      "-Xmx" + memoryLimit + "M",
+      "-Djava.security.policy=$policy",
+      "-classpath"
+    ) + classPaths + mainClass
   }
 }

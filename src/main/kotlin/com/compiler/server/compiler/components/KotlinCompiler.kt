@@ -91,16 +91,15 @@ class KotlinCompiler(
     outputDirectory: OutputDirectory,
     environment: KotlinEnvironment
   ): List<String> {
-    val classPaths = (environment.classpath.map { it.absolutePath }
-                      + outputDirectory.path.toAbsolutePath().toString())
+    val classPaths = (environment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
-    val policy = "-Djava.security.policy=${outputDirectory.path.resolve("executor.policy").toAbsolutePath()}"
-    return listOfNotNull(
-      "java",
-      "-Djava.security.manager",
-      policy,
-      "-classpath"
-    ) + classPaths + mainClass
+    val policy = outputDirectory.path.resolve("executor.policy").toAbsolutePath()
+    return JavaArgumentsBuilder(
+      classPaths = classPaths,
+      mainClass = mainClass,
+      policy = policy,
+      memoryLimit = 32
+    ).toArguments()
   }
 
 
