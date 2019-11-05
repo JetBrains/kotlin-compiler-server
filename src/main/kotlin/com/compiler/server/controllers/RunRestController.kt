@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
-    @PostMapping("/api/compiler/run")
-    fun executeKotlinProjectEndpoint(@RequestBody project: Project): JavaExecutionResult = kotlinProjectExecutor.run(project)
+  @PostMapping("/api/compiler/run")
+  fun executeKotlinProjectEndpoint(@RequestBody project: Project): JavaExecutionResult = kotlinProjectExecutor.run(project)
 
-    @PostMapping("/api/compiler/complete")
-    fun getKotlinCompleteEndpoint(
-            @RequestBody project: Project,
-            @RequestParam line: Int,
-            @RequestParam ch: Int
-    ) = kotlinProjectExecutor.complete(project, line, ch)
+  @PostMapping("/api/compiler/complete")
+  fun getKotlinCompleteEndpoint(
+    @RequestBody project: Project,
+    @RequestParam line: Int,
+    @RequestParam ch: Int
+  ) = kotlinProjectExecutor.complete(project, line, ch)
 }

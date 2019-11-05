@@ -9,29 +9,30 @@ import org.springframework.stereotype.Component
 
 @Component
 class KotlinProjectExecutor(
-        private val kotlinCompiler: KotlinCompiler,
-        private val completionProvider: CompletionProvider,
-        private val kotlinEnvironment: KotlinEnvironment
+  private val kotlinCompiler: KotlinCompiler,
+  private val completionProvider: CompletionProvider,
+  private val kotlinEnvironment: KotlinEnvironment
 ) {
 
-    private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
+  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
 
-    fun run(project: Project): JavaExecutionResult {
-        val files = getFilesFrom(project)
-        return kotlinCompiler.run(files)
-    }
+  fun run(project: Project): JavaExecutionResult {
+    val files = getFilesFrom(project)
+    return kotlinCompiler.run(files)
+  }
 
-    fun complete(project: Project, line: Int, character: Int): List<Completion> {
-        val file = getFilesFrom(project).first()
-        return try {
-            completionProvider.complete(file, line, character)
-        } catch (e: Exception) {
-            log.warn("Exception in getting completions", e)
-            emptyList()
-        }
+  fun complete(project: Project, line: Int, character: Int): List<Completion> {
+    val file = getFilesFrom(project).first()
+    return try {
+      completionProvider.complete(file, line, character)
     }
+    catch (e: Exception) {
+      log.warn("Exception in getting completions", e)
+      emptyList()
+    }
+  }
 
-    private fun getFilesFrom(project: Project) = project.files.map {
-        KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)
-    }
+  private fun getFilesFrom(project: Project) = project.files.map {
+    KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)
+  }
 }

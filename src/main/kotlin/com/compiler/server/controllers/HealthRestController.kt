@@ -5,6 +5,6 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class HealthRestController {
-    @GetMapping("/health")
-    fun healthEndpoint() = "OK"
+  @GetMapping("/health")
+  fun healthEndpoint() = "OK"
 }

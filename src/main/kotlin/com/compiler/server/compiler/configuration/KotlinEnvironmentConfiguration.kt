@@ -8,8 +8,8 @@ import java.io.File
 @Configuration
 class KotlinEnvironmentConfiguration {
 
-    @Bean
-    fun kotlinEnvironment() = KotlinEnvironment
-            .with(classpath = listOfNotNull(File("lib"))
-                    .flatMap { it.listFiles().toList() })
+  @Bean
+  fun kotlinEnvironment() = KotlinEnvironment
+    .with(classpath = listOfNotNull(File("lib"))
+      .flatMap { it.listFiles().toList() })
 }
