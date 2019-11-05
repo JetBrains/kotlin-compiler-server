@@ -29,7 +29,10 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class CompletionProvider(private val kotlinEnvironment: KotlinEnvironment) {
+class CompletionProvider(
+  private val kotlinEnvironment: KotlinEnvironment,
+  private val errorAnalyzer: ErrorAnalyzer
+) {
 
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",

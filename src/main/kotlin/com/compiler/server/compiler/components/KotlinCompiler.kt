@@ -21,14 +21,15 @@ import java.util.*
 
 @Component
 class KotlinCompiler(
-  val environment: KotlinEnvironment,
-  val javaExecutor: JavaExecutor
+  private val errorAnalyzer: ErrorAnalyzer,
+  private val kotlinEnvironment: KotlinEnvironment,
+  private val javaExecutor: JavaExecutor
 ) {
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
   fun run(files: List<KotlinFile>): JavaExecutionResult {
-    val errors = environment.errorsFrom(files.map { it.kotlinFile })
+    val errors = errorAnalyzer.errorsFrom(files.map { it.kotlinFile })
     return if (errors.any { it.value.any { error -> error.severity == Severity.ERROR } })
       JavaExecutionResult("", errors = errors)
     else {
@@ -53,7 +54,7 @@ class KotlinCompiler(
         exception = ExceptionDescriptor("Something went wrong", "Exception")
       )
     val output = write(compiled)
-    return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, environment))
+    return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, kotlinEnvironment))
       .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
   }
 
@@ -74,14 +75,14 @@ class KotlinCompiler(
   }
 
   private fun generationStateFor(files: List<KtFile>): GenerationState {
-    val analysis = environment.analysisOf(files)
+    val analysis = errorAnalyzer.analysisOf(files)
     return GenerationState.Builder(
       files.first().project,
       ClassBuilderFactories.BINARIES,
       analysis.analysisResult.moduleDescriptor,
       analysis.analysisResult.bindingContext,
       files,
-      environment.coreEnvironment.configuration
+      kotlinEnvironment.coreEnvironment.configuration
     ).build()
   }
 
