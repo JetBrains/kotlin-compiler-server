@@ -1,6 +1,7 @@
 package com.compiler.server.controllers
 
 import com.compiler.server.compiler.components.KotlinProjectExecutor
+import com.compiler.server.compiler.model.ErrorDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
 import com.compiler.server.compiler.model.Project
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,4 +20,8 @@ class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor
     @RequestParam line: Int,
     @RequestParam ch: Int
   ) = kotlinProjectExecutor.complete(project, line, ch)
+
+  @PostMapping("/api/compiler/highlight")
+  fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
+
 }
