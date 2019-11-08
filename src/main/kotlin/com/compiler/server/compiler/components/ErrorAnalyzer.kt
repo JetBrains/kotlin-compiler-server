@@ -58,7 +58,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     )
   }
 
-  private fun errorsFrom(
+  fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
     errors: Map<String, List<ErrorDescriptor>>
   ): Map<String, List<ErrorDescriptor>> {
@@ -72,6 +72,8 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
       })
     }.toMap()
   }
+
+  fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) = errors.none { it.value.none { error -> error.severity == Severity.ERROR } }
 
   private fun anylizeErrorsFrom(file: PsiFile): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {

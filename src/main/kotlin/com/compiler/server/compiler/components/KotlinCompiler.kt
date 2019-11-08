@@ -2,9 +2,9 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.model.ExceptionDescriptor
+import com.compiler.server.compiler.model.ExecutionResult
 import com.compiler.server.compiler.model.JavaExecutionResult
 import com.compiler.server.compiler.model.OutputDirectory
-import com.compiler.server.compiler.model.Severity
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -28,13 +28,14 @@ class KotlinCompiler(
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
-  fun run(files: List<KotlinFile>): JavaExecutionResult {
+  fun run(files: List<KotlinFile>): ExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files.map { it.kotlinFile })
-    return if (errors.any { it.value.any { error -> error.severity == Severity.ERROR } })
-      JavaExecutionResult("", errors = errors)
-    else {
+    return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files.map { it.kotlinFile })
-      return execute(compilation)
+      execute(compilation)
+    }
+    else {
+      ExecutionResult(errors = errors)
     }
   }
 

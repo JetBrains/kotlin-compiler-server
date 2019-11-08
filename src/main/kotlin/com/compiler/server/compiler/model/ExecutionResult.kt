@@ -7,3 +7,8 @@ data class JavaExecutionResult(
         val exception: ExceptionDescriptor? = null,
         override val errors: Map<String, List<ErrorDescriptor>> = emptyMap()
 ) : ExecutionResult(errors)
+
+data class TranslationJSResult(
+  val jsCode: String? = null,
+  override val errors: Map<String, List<ErrorDescriptor>> = emptyMap()
+): ExecutionResult(errors)

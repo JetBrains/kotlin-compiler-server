@@ -15,10 +15,15 @@ object BuildProps {
 }
 
 val kotlinDependency by configurations.creating
+val kotlinJsDependency by configurations.creating
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
     into("lib")
+}
+val copyJSDependencies by tasks.creating(Copy::class) {
+    from(files(Callable { kotlinJsDependency.map {zipTree(it)} }))
+    into("js")
 }
 
 plugins {
@@ -37,6 +42,7 @@ dependencies {
 
     kotlinDependency(kotlin("stdlib-jdk8"))
     kotlinDependency(kotlin("reflect"))
+    kotlinJsDependency(kotlin("stdlib-js"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -45,7 +51,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    // compile
     with(BuildProps) {
         compile("org.jetbrains.intellij.deps:trove4j:1.0.20181211")
         compile("org.jetbrains.kotlin:kotlin-reflect:$version")
@@ -55,6 +60,7 @@ dependencies {
         compile("org.jetbrains.kotlin:kotlin-test:$version")
         compile("org.jetbrains.kotlin:kotlin-compiler:$version")
         compile("org.jetbrains.kotlin:kotlin-script-runtime:$version")
+        compile("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
         compile(dependencyFrom("https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
                 artifact = "kotlin-plugin",
                 version = version)
@@ -64,7 +70,8 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-    finalizedBy(copyDependencies)
+    dependsOn(copyDependencies)
+    dependsOn(copyJSDependencies)
 }
 
 tasks.withType<Test> {

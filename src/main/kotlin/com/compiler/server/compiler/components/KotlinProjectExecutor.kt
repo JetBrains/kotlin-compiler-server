@@ -3,7 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.model.Completion
 import com.compiler.server.compiler.model.ErrorDescriptor
-import com.compiler.server.compiler.model.JavaExecutionResult
+import com.compiler.server.compiler.model.ExecutionResult
 import com.compiler.server.compiler.model.Project
 import org.apache.commons.logging.LogFactory
 import org.springframework.stereotype.Component
@@ -13,14 +13,20 @@ class KotlinProjectExecutor(
   private val kotlinCompiler: KotlinCompiler,
   private val completionProvider: CompletionProvider,
   private val errorAnalyzer: ErrorAnalyzer,
+  private val kotlinToJSTranslator: KotlinToJSTranslator,
   private val kotlinEnvironment: KotlinEnvironment
 ) {
 
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
 
-  fun run(project: Project): JavaExecutionResult {
+  fun run(project: Project): ExecutionResult {
     val files = getFilesFrom(project)
     return kotlinCompiler.run(files)
+  }
+
+  fun convertToJs(project: Project): ExecutionResult {
+    val files = getFilesFrom(project).map { it.kotlinFile }
+    return kotlinToJSTranslator.translate(files, project.args.split(" "))
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
