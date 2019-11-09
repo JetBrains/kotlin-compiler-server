@@ -23,6 +23,7 @@ import org.jetbrains.kotlin.renderer.ParameterNameRenderingPolicy
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
+import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 import org.springframework.stereotype.Component
@@ -104,7 +105,7 @@ class CompletionProvider(
     element: PsiElement
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
-    val (name, tail) = descriptor.presentableName(isCallableReference)
+    val (name, _) = descriptor.presentableName(isCallableReference)
     val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
     var completionText = fullName
     var position = completionText.indexOf('(')
@@ -176,13 +177,12 @@ class CompletionProvider(
               analysisResult.bindingContext.get(BindingContext.EXPRESSION_TYPE_INFO,
                                                 parent.receiverExpression)?.type?.let { expressionType ->
                 analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, parent.receiverExpression)?.let {
-                  expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL,
-                                                                       org.jetbrains.kotlin.resolve.scopes.MemberScope.ALL_NAME_FILTER)
+                  expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
                 }
               }?.toList() ?: emptyList()
             }
             else -> analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, element as KtExpression)
-                      ?.getContributedDescriptors(DescriptorKindFilter.ALL, org.jetbrains.kotlin.resolve.scopes.MemberScope.ALL_NAME_FILTER)
+                      ?.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
                       ?.toList() ?: emptyList()
           }
         )
