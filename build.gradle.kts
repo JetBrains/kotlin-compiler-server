@@ -61,21 +61,14 @@ dependencies {
         compile("org.jetbrains.kotlin:kotlin-compiler:$version")
         compile("org.jetbrains.kotlin:kotlin-script-runtime:$version")
         compile("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
-        compile(dependencyFrom("https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
+        compile(
+          dependencyFrom(
+                url = "https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
                 artifact = "kotlin-plugin",
-                version = version)
+                version = version
+          )
         )
     }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-    dependsOn(copyDependencies)
-    dependsOn(copyJSDependencies)
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
 
 tasks.withType<KotlinCompile> {
@@ -83,6 +76,12 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict", "-Xskip-metadata-version-check")
         jvmTarget = "1.8"
     }
+    dependsOn(copyDependencies)
+    dependsOn(copyJSDependencies)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 fun dependencyFrom(
