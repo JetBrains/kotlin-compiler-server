@@ -20,6 +20,9 @@ class KotlinToJSTranslator(
   private val errorAnalyzer: ErrorAnalyzer
 ) {
 
+  private val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
+  private val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
+
   private val jsConfiguration = kotlinEnvironment.coreEnvironment.configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
     put(JSConfigurationKeys.LIBRARIES, listOf(File("js").absolutePath))
@@ -58,7 +61,7 @@ class KotlinToJSTranslator(
       mainCallParameters = MainCallParameters.mainWithArguments(arguments)
     )
     return if (result is TranslationResult.Success) {
-      TranslationJSResult("kotlin.kotlin.io.output.flush();\n" + result.getCode() + "\nkotlin.kotlin.io.output.buffer;\n")
+      TranslationJSResult(JS_CODE_FLUSH + result.getCode() + JS_CODE_BUFFER)
     }
     else {
       val errors = HashMap<String, List<ErrorDescriptor>>()
