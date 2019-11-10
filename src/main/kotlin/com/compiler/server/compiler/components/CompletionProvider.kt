@@ -45,13 +45,12 @@ class CompletionProvider(
   )
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
+  private val NAME_FILTER = { name: Name -> !name.isSpecial }
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
     val descriptors: List<DeclarationDescriptor>
   )
-
-  private val NAME_FILTER = { name: Name -> !name.isSpecial }
 
   fun complete(
     file: KotlinFile,
@@ -154,9 +153,9 @@ class CompletionProvider(
         moduleDescriptor = analysisResult.moduleDescriptor,
         visibilityFilter = VisibilityFilter(inDescriptor, bindingContext, element, resolutionFacade)
       ).getReferenceVariants(
-        element,
-        DescriptorKindFilter.ALL,
-        NAME_FILTER,
+        expression = element,
+        kindFilter = DescriptorKindFilter.ALL,
+        nameFilter = NAME_FILTER,
         filterOutJavaGettersAndSetters = true,
         filterOutShadowed = true,
         excludeNonInitializedVariable = true,
@@ -174,8 +173,8 @@ class CompletionProvider(
           isTipsManagerCompletion = false,
           descriptors = when (parent) {
             is KtQualifiedExpression -> {
-              analysisResult.bindingContext.get(BindingContext.EXPRESSION_TYPE_INFO,
-                                                parent.receiverExpression)?.type?.let { expressionType ->
+              analysisResult.bindingContext.get(BindingContext.EXPRESSION_TYPE_INFO, parent.receiverExpression)
+                ?.type?.let { expressionType ->
                 analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, parent.receiverExpression)?.let {
                   expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
                 }

@@ -48,10 +48,21 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
       }
     )
     componentProvider.getService(LazyTopDownAnalyzer::class.java)
-      .analyzeDeclarations(TopDownAnalysisMode.TopLevelDeclarations, files, DataFlowInfo.EMPTY)
+      .analyzeDeclarations(
+        topDownAnalysisMode = TopDownAnalysisMode.TopLevelDeclarations,
+        declarations = files,
+        outerDataFlowInfo = DataFlowInfo.EMPTY
+      )
     val moduleDescriptor = componentProvider.getService(ModuleDescriptor::class.java)
     AnalysisHandlerExtension.getInstances(project)
-      .find { it.analysisCompleted(project, moduleDescriptor, trace, files) != null }
+      .find {
+        it.analysisCompleted(
+          project = project,
+          module = moduleDescriptor,
+          bindingTrace = trace,
+          files = files
+        ) != null
+      }
     Analysis(
       componentProvider = componentProvider,
       analysisResult = AnalysisResult.success(trace.bindingContext, moduleDescriptor)
@@ -89,9 +100,9 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     return Visitor().apply { visitFile(file) }.errors.map {
       ErrorDescriptor(
         TextInterval.from(
-          it.textRange.startOffset,
-          it.textRange.endOffset,
-          file.viewProvider.document!!
+          start = it.textRange.startOffset,
+          end = it.textRange.endOffset,
+          currentDocument = file.viewProvider.document!!
         ), it.errorDescription, Severity.ERROR, "red_wavy_line"
       )
     }
