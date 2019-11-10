@@ -2,12 +2,13 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.model.Analysis
 import com.compiler.server.compiler.model.ErrorDescriptor
-import com.compiler.server.compiler.model.Severity
+import com.compiler.server.compiler.model.ProjectSeveriry
 import com.compiler.server.compiler.model.TextInterval
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
+import org.jetbrains.kotlin.diagnostics.Severity
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
@@ -84,7 +85,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     }.toMap()
   }
 
-  fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) = errors.none { it.value.any { error -> error.severity == Severity.ERROR } }
+  fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) = errors.none { it.value.any { error -> error.severity == ProjectSeveriry.ERROR } }
 
   private fun anylizeErrorsFrom(file: PsiFile): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {
@@ -103,7 +104,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
           start = it.textRange.startOffset,
           end = it.textRange.endOffset,
           currentDocument = file.viewProvider.document!!
-        ), it.errorDescription, Severity.ERROR, "red_wavy_line"
+        ), it.errorDescription, ProjectSeveriry.ERROR, "red_wavy_line"
       )
     }
   }
@@ -112,16 +113,16 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     diagnostic.psiFile.virtualFile?.let {
       val render = DefaultErrorMessages.render(diagnostic)
       if (!render.contains("This cast can never succeed")) {
-        if (diagnostic.severity != org.jetbrains.kotlin.diagnostics.Severity.INFO) {
+        if (diagnostic.severity != Severity.INFO) {
           val textRanges = diagnostic.textRanges.iterator()
           if (textRanges.hasNext()) {
             var className = diagnostic.severity.name
-            if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == org.jetbrains.kotlin.diagnostics.Severity.ERROR) {
+            if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == Severity.ERROR) {
               className = "red_wavy_line"
             }
             val firstRange = textRanges.next()
             val interval = TextInterval.from(firstRange.startOffset, firstRange.endOffset, diagnostic.psiFile.viewProvider.document!!)
-            diagnostic.psiFile.name to ErrorDescriptor(interval, render, Severity.from(diagnostic.severity), className)
+            diagnostic.psiFile.name to ErrorDescriptor(interval, render, ProjectSeveriry.from(diagnostic.severity), className)
           }
           else null
         }
