@@ -9,7 +9,6 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
 import java.util.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class JavaExecutor {
@@ -31,7 +30,6 @@ class JavaExecutor {
   fun execute(args: List<String>): JavaExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
-      val atom = AtomicBoolean(false)
       val standardOut = InputStreamReader(this.inputStream).buffered()
       val standardError = InputStreamReader(this.errorStream).buffered()
       val errorText = StringBuilder()
