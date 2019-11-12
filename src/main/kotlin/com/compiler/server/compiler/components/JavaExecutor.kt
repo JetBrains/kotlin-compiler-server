@@ -2,12 +2,14 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult
+import com.compiler.server.utils.escapeString
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Component
 class JavaExecutor {
@@ -29,6 +31,7 @@ class JavaExecutor {
   fun execute(args: List<String>): JavaExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
+      val atom = AtomicBoolean(false)
       val standardOut = InputStreamReader(this.inputStream).buffered()
       val standardError = InputStreamReader(this.errorStream).buffered()
       val errorText = StringBuilder()
@@ -86,7 +89,7 @@ class JavaExecutor {
       while (true) {
         val line = from.readLine()
         if (Thread.interrupted() || line == null) break
-        string.appendln(line)
+        string.appendln(escapeString(line))
       }
     }
     catch (e: Throwable) {
