@@ -51,6 +51,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2")
     with(BuildProps) {
         compile("org.jetbrains.intellij.deps:trove4j:1.0.20181211")
         compile("org.jetbrains.kotlin:kotlin-reflect:$version")
