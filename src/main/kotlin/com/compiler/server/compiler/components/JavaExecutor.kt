@@ -58,7 +58,6 @@ class JavaExecutor {
         }
       }
       val exception = if (errorText.toString().isNotEmpty()) {
-        println(errorText.toString())
         Exception(errorText.toString())
       }
       else null
@@ -102,7 +101,8 @@ class JavaArgumentsBuilder(
   val classPaths: String,
   val mainClass: String,
   val policy: Path,
-  val memoryLimit: Int
+  val memoryLimit: Int,
+  val args: String
 ) {
   fun toArguments(): List<String> {
     return listOf(
@@ -111,6 +111,6 @@ class JavaArgumentsBuilder(
       "-Xmx" + memoryLimit + "M",
       "-Djava.security.policy=$policy",
       "-classpath"
-    ) + classPaths + mainClass
+    ) + classPaths + mainClass + args.split(" ")
   }
 }

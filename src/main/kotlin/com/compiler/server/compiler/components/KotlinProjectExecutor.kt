@@ -21,7 +21,7 @@ class KotlinProjectExecutor(
 
   fun run(project: Project): ExecutionResult {
     val files = getFilesFrom(project)
-    return kotlinCompiler.run(files)
+    return kotlinCompiler.run(files, project.args)
   }
 
   fun convertToJs(project: Project): ExecutionResult {

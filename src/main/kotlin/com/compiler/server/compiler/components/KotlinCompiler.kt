@@ -28,11 +28,11 @@ class KotlinCompiler(
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
-  fun run(files: List<KotlinFile>): ExecutionResult {
+  fun run(files: List<KotlinFile>, args: String): ExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files.map { it.kotlinFile })
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files.map { it.kotlinFile })
-      execute(compilation)
+      execute(compilation, args)
     }
     else {
       ExecutionResult(errors = errors)
@@ -48,14 +48,14 @@ class KotlinCompiler(
     )
   }
 
-  private fun execute(compiled: Compiled): JavaExecutionResult {
+  private fun execute(compiled: Compiled, args: String): JavaExecutionResult {
     if (compiled.files.isEmpty())
       return JavaExecutionResult(
         text = "",
         exception = ExceptionDescriptor("Something went wrong", "Exception")
       )
     val output = write(compiled)
-    return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, kotlinEnvironment))
+    return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, kotlinEnvironment, args))
       .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
   }
 
@@ -90,7 +90,8 @@ class KotlinCompiler(
   private fun argsFrom(
     mainClass: String,
     outputDirectory: OutputDirectory,
-    environment: KotlinEnvironment
+    environment: KotlinEnvironment,
+    args: String
   ): List<String> {
     val classPaths = (environment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
@@ -99,7 +100,8 @@ class KotlinCompiler(
       classPaths = classPaths,
       mainClass = mainClass,
       policy = policy,
-      memoryLimit = 32
+      memoryLimit = 32,
+      args = args
     ).toArguments()
   }
 
