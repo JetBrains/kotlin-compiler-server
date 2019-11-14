@@ -19,6 +19,15 @@ class BaseRunnerTest {
   )
 
   @Test
+  fun `base execute test JVM multi`() = testRunner.multiRun(
+    code = listOf(
+      "import cat.Cat\n\nfun main(args: Array<String>) {\nval cat = Cat(\"Kitty\")\nprintln(cat.name)\n}",
+      "package cat\n    class Cat(val name: String)"
+    ),
+    contains = "Kitty"
+  )
+
+  @Test
   fun `base execute test JS`() = testRunner.runJs(
     code = "fun main() {\n println(\"Hello, world!!!\")\n}",
     contains = "println('Hello, world!!!');"

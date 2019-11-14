@@ -19,6 +19,19 @@ fun generateSingleProject(text: String, args: String = ""): Project {
   )
 }
 
+fun generateMultiProject(vararg files: String, args: String = ""): Project{
+  val projectFiles = files.mapIndexed { i, text ->
+    ProjectFile(
+      text = text,
+      name = "File$i.kt"
+    )
+  }
+  return Project(
+    args = args,
+    files = projectFiles
+  )
+}
+
 fun runManyTest(times: Int = 100, test: () -> Unit) {
   runBlocking {
     GlobalScope.launch(Dispatchers.IO) {

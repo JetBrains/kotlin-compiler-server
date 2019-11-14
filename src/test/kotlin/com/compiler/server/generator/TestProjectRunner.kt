@@ -17,6 +17,13 @@ class TestProjectRunner {
     Assertions.assertTrue(result.text.contains(contains))
   }
 
+  fun multiRun(code: List<String>, contains: String){
+    val project = generateMultiProject(*code.toTypedArray())
+    val result = kotlinProjectExecutor.run(project)
+    Assertions.assertNotNull(result)
+    Assertions.assertTrue(result.text.contains(contains))
+  }
+
   fun runJs(code: String, contains: String) {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.convertToJs(project)
