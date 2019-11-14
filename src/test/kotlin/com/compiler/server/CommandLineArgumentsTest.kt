@@ -34,6 +34,27 @@ class CommandLineArgumentsTest {
     Assertions.assertNotNull(result)
     Assertions.assertTrue(result.text.contains("alex1\nalex2\n"))
   }
+  @Test
+  fun `command line arguments js test`() {
+    val project = generateSingleProject(
+      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "0 1"
+    )
+    val result = kotlinProjectExecutor.convertToJs(project)
+    Assertions.assertNotNull(result)
+    Assertions.assertTrue(result.jsCode!!.contains("main(['0', '1']);"))
+  }
+
+  @Test
+  fun `command line string arguments js test`() {
+    val project = generateSingleProject(
+      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "alex1 alex2"
+    )
+    val result = kotlinProjectExecutor.convertToJs(project)
+    Assertions.assertNotNull(result)
+    Assertions.assertTrue(result.jsCode!!.contains("main(['alex1', 'alex2']);"))
+  }
 
   @Test
   fun `command line index of bound jvm`(){
