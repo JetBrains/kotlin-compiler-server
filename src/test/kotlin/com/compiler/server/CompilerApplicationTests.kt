@@ -48,9 +48,9 @@ class CompilerApplicationTests {
             }  
           """.trimIndent()
     )
-    val result = kotlinProjectExecutor.run(project) as? JavaExecutionResult
+    val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result)
-    Assertions.assertTrue(result!!.text.contains("Hello, world!!!"))
+    Assertions.assertTrue(result.text.contains("Hello, world!!!"))
   }
 
   private fun baseHelloWordTranslateTest() {

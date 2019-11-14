@@ -1,10 +1,7 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
-import com.compiler.server.compiler.model.Completion
-import com.compiler.server.compiler.model.ErrorDescriptor
-import com.compiler.server.compiler.model.ExecutionResult
-import com.compiler.server.compiler.model.Project
+import com.compiler.server.compiler.model.*
 import org.apache.commons.logging.LogFactory
 import org.springframework.stereotype.Component
 
@@ -19,7 +16,7 @@ class KotlinProjectExecutor(
 
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
 
-  fun run(project: Project): ExecutionResult {
+  fun run(project: Project): JavaExecutionResult {
     val files = getFilesFrom(project)
     return kotlinCompiler.run(files, project.args)
   }

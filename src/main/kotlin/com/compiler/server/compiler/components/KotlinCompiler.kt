@@ -28,14 +28,14 @@ class KotlinCompiler(
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
-  fun run(files: List<KotlinFile>, args: String): ExecutionResult {
+  fun run(files: List<KotlinFile>, args: String): JavaExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files.map { it.kotlinFile })
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files.map { it.kotlinFile })
       execute(compilation, args)
     }
     else {
-      ExecutionResult(errors = errors)
+      JavaExecutionResult(errors = errors)
     }
   }
 
