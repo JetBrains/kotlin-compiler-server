@@ -2,10 +2,6 @@ package com.compiler.server.generator
 
 import com.compiler.server.compiler.model.Project
 import com.compiler.server.compiler.model.ProjectFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 fun generateSingleProject(text: String, args: String = ""): Project {
@@ -19,7 +15,7 @@ fun generateSingleProject(text: String, args: String = ""): Project {
   )
 }
 
-fun generateMultiProject(vararg files: String, args: String = ""): Project{
+fun generateMultiProject(vararg files: String, args: String = ""): Project {
   val projectFiles = files.mapIndexed { i, text ->
     ProjectFile(
       text = text,
@@ -30,16 +26,4 @@ fun generateMultiProject(vararg files: String, args: String = ""): Project{
     args = args,
     files = projectFiles
   )
-}
-
-fun runManyTest(times: Int = 100, test: () -> Unit) {
-  runBlocking {
-    GlobalScope.launch(Dispatchers.IO) {
-      for (i in 0 until times) {
-        launch {
-          test()
-        }
-      }
-    }.join()
-  }
 }
