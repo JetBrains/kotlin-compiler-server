@@ -54,7 +54,7 @@ class CommandLineArgumentsTest {
   }
 
   @Test
-  fun `command line index of bound jvm`(){
+  fun `command line index of bound jvm`() {
     val project = generateSingleProject(
       text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[2])\n}",
       args = "0 1"
