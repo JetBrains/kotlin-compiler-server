@@ -11,8 +11,8 @@ class TestProjectRunner {
   @Autowired
   private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
-  fun run(code: String, contains: String) {
-    val project = generateSingleProject(text = code)
+  fun run(code: String, contains: String, args: String = "") {
+    val project = generateSingleProject(text = code, args = args)
     runAndTest(project, contains)
   }
 
@@ -21,14 +21,24 @@ class TestProjectRunner {
     runAndTest(project, contains)
   }
 
-  fun runJs(code: String, contains: String) {
-    val project = generateSingleProject(text = code)
+  fun runJs(code: String, contains: String, args: String = "") {
+    val project = generateSingleProject(text = code, args = args)
     convertAndTest(project, contains)
   }
 
   fun multiRunJs(code: List<String>, contains: String) {
     val project = generateMultiProject(*code.toTypedArray())
     convertAndTest(project, contains)
+  }
+
+  fun complete(code: String, line: Int, character: Int, completions: List<String>) {
+    val project = generateSingleProject(text = code)
+    val result = kotlinProjectExecutor.complete(project, line, character)
+      .map { it.displayText }
+    Assertions.assertTrue(result.isNotEmpty())
+    completions.forEach { suggest ->
+      Assertions.assertTrue(result.contains(suggest))
+    }
   }
 
   private fun runAndTest(project: Project, contains: String) {

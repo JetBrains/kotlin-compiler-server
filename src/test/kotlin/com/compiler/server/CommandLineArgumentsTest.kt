@@ -1,6 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.compiler.components.KotlinProjectExecutor
+import com.compiler.server.generator.TestProjectRunner
 import com.compiler.server.generator.generateSingleProject
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,47 +14,43 @@ class CommandLineArgumentsTest {
   @Autowired
   private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
+  @Autowired
+  private lateinit var testRunner: TestProjectRunner
+
   @Test
   fun `command line arguments jvm test`() {
-    val project = generateSingleProject(
-      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
-      args = "0 1"
+    testRunner.run(
+      code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "0 1",
+      contains = "0\n1\n"
     )
-    val result = kotlinProjectExecutor.run(project)
-    Assertions.assertNotNull(result)
-    Assertions.assertTrue(result.text.contains("0\n1\n"))
   }
 
   @Test
   fun `command line string arguments jvm test`() {
-    val project = generateSingleProject(
-      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
-      args = "alex1 alex2"
+    testRunner.run(
+      code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "alex1 alex2",
+      contains = "alex1\nalex2\n"
     )
-    val result = kotlinProjectExecutor.run(project)
-    Assertions.assertNotNull(result)
-    Assertions.assertTrue(result.text.contains("alex1\nalex2\n"))
   }
+
   @Test
   fun `command line arguments js test`() {
-    val project = generateSingleProject(
-      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
-      args = "0 1"
+    testRunner.runJs(
+      code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "0 1",
+      contains = "main(['0', '1']);"
     )
-    val result = kotlinProjectExecutor.convertToJs(project)
-    Assertions.assertNotNull(result)
-    Assertions.assertTrue(result.jsCode!!.contains("main(['0', '1']);"))
   }
 
   @Test
   fun `command line string arguments js test`() {
-    val project = generateSingleProject(
-      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
-      args = "alex1 alex2"
+    testRunner.runJs(
+      code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
+      args = "alex1 alex2",
+      contains = "main(['alex1', 'alex2']);"
     )
-    val result = kotlinProjectExecutor.convertToJs(project)
-    Assertions.assertNotNull(result)
-    Assertions.assertTrue(result.jsCode!!.contains("main(['alex1', 'alex2']);"))
   }
 
   @Test
