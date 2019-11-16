@@ -148,7 +148,7 @@ class CompletionProvider(
     val inDescriptor: DeclarationDescriptor = elementKt.getResolutionScope(bindingContext, resolutionFacade).ownerDescriptor
     return when (element) {
       is KtSimpleNameExpression -> ReferenceVariantsHelper(
-        analysisResult.bindingContext,
+        bindingContext = analysisResult.bindingContext,
         resolutionFacade = resolutionFacade,
         moduleDescriptor = analysisResult.moduleDescriptor,
         visibilityFilter = VisibilityFilter(inDescriptor, bindingContext, element, resolutionFacade)
