@@ -1,4 +1,4 @@
-package com.compiler.server.compiler.components
+package com.compiler.server.executor
 
 import com.compiler.server.compiler.model.ExceptionDescriptor
 import com.compiler.server.compiler.model.JavaExecutionResult

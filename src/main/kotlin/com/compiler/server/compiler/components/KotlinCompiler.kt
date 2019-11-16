@@ -2,9 +2,10 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.model.ExceptionDescriptor
-import com.compiler.server.compiler.model.ExecutionResult
 import com.compiler.server.compiler.model.JavaExecutionResult
 import com.compiler.server.compiler.model.OutputDirectory
+import com.compiler.server.executor.JavaArgumentsBuilder
+import com.compiler.server.executor.JavaExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
