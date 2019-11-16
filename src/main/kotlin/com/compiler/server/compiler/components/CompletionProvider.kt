@@ -82,7 +82,7 @@ class CompletionProvider(
       is FunctionDescriptor -> {
         if (!isCallableReferenceCompletion)
           presentableText += renderer.renderFunctionParameters(this)
-        presentableText + renderer.renderFunctionParameters(this) to when {
+        presentableText to when {
           returnType != null -> renderer.renderType(returnType!!)
           else -> (extensionReceiverParameter?.let { param ->
             " for ${renderer.renderType(param.type)} in ${DescriptorUtils.getFqName(containingDeclaration)}"
