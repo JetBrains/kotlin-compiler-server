@@ -31,7 +31,7 @@ class TestProjectRunner {
     convertAndTest(project, contains)
   }
 
-  fun complete(code: String, line: Int, character: Int, completions: List<String>) {
+  fun complete(code: String, line: Int, character: Int, completions: List<String>, isJs: Boolean = false) {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
