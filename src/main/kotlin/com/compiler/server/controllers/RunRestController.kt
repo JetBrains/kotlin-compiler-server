@@ -17,10 +17,9 @@ class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor
   @PostMapping("/complete")
   fun getKotlinCompleteEndpoint(
     @RequestBody project: Project,
-    @RequestParam(defaultValue = "java") runConf: String,
     @RequestParam line: Int,
     @RequestParam ch: Int
-  ) = kotlinProjectExecutor.complete(project, line, ch, isJs = runConf == "js")
+  ) = kotlinProjectExecutor.complete(project, line, ch)
 
   @PostMapping("/highlight")
   fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)

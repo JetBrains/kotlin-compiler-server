@@ -2,6 +2,7 @@ package com.compiler.server.controllers
 
 import com.compiler.server.compiler.components.KotlinProjectExecutor
 import com.compiler.server.model.Project
+import com.compiler.server.model.ProjectType
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -26,22 +27,21 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     @RequestParam type: String,
     @RequestParam(required = false) line: Int?,
     @RequestParam(required = false) ch: Int?,
-    @RequestParam(required = false, defaultValue = "java") runConf: String,
+    @RequestParam runConf: ProjectType,
     @RequestParam project: Project
   ): ResponseEntity<*> {
     val result = when (type) {
       "run" -> {
         when (runConf) {
-          "java" -> kotlinProjectExecutor.run(project)
-          "js" -> kotlinProjectExecutor.convertToJs(project)
-          "canvas" -> kotlinProjectExecutor.convertToJs(project)
+          ProjectType.JAVA -> kotlinProjectExecutor.run(project)
+          ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
           else -> error("Unknown 'runCong' $runConf")
         }
       }
       "highlight" -> kotlinProjectExecutor.highlight(project)
       "complete" -> {
         if (line != null && ch != null) {
-          kotlinProjectExecutor.complete(project, line, ch, isJs = runConf == "js")
+          kotlinProjectExecutor.complete(project, line, ch)
         }
         else throw error("No parameters 'line' or 'ch'")
       }

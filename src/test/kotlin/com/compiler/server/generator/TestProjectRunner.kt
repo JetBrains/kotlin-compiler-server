@@ -22,17 +22,17 @@ class TestProjectRunner {
   }
 
   fun runJs(code: String, contains: String, args: String = "") {
-    val project = generateSingleProject(text = code, args = args)
+    val project = generateSingleProject(text = code, args = args, isJs = true)
     convertAndTest(project, contains)
   }
 
   fun multiRunJs(code: List<String>, contains: String) {
-    val project = generateMultiProject(*code.toTypedArray())
+    val project = generateMultiProject(*code.toTypedArray(), isJs = true)
     convertAndTest(project, contains)
   }
 
   fun complete(code: String, line: Int, character: Int, completions: List<String>, isJs: Boolean = false) {
-    val project = generateSingleProject(text = code)
+    val project = generateSingleProject(text = code, isJs = isJs)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
     Assertions.assertTrue(result.isNotEmpty())

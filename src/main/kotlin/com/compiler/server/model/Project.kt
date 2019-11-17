@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 data class Project(
   val args: String = "",
   val files: List<ProjectFile> = listOf(),
-  val confType: String = "java",
+  val confType: ProjectType = ProjectType.JAVA,
   val readOnlyFileNames: List<String> = emptyList()
 )
 
@@ -20,4 +20,11 @@ data class ProjectFile(
 enum class Type {
   KOTLIN_FILE,
   KOTLIN_TEST_FILE
+}
+
+enum class ProjectType {
+  JAVA,
+  JUNIT,
+  CANVAS,
+  JS
 }
