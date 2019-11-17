@@ -6,7 +6,7 @@ import com.compiler.server.model.ProjectType
 
 
 fun generateSingleProject(text: String, args: String = "", isJs: Boolean = false): Project {
-  val confType = if (isJs) ProjectType.JS else ProjectType.JAVA
+  val confType = if (isJs) ProjectType.JS else ProjectType.java
   val file = ProjectFile(
     text = text,
     name = "File.kt"
@@ -19,7 +19,7 @@ fun generateSingleProject(text: String, args: String = "", isJs: Boolean = false
 }
 
 fun generateMultiProject(vararg files: String, args: String = "", isJs: Boolean = false): Project {
-  val confType = if (isJs) ProjectType.JS else ProjectType.JAVA
+  val confType = if (isJs) ProjectType.JS else ProjectType.java
   val projectFiles = files.mapIndexed { i, text ->
     ProjectFile(
       text = text,
