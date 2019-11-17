@@ -26,10 +26,10 @@ class KotlinProjectExecutor(
     return kotlinToJSTranslator.translate(files, project.args.split(" "))
   }
 
-  fun complete(project: Project, line: Int, character: Int): List<Completion> {
+  fun complete(project: Project, line: Int, character: Int, isJs: Boolean = false): List<Completion> {
     val file = getFilesFrom(project).first()
     return try {
-      completionProvider.complete(file, line, character)
+      completionProvider.complete(file, line, character, isJs)
     }
     catch (e: Exception) {
       log.warn("Exception in getting completions", e)

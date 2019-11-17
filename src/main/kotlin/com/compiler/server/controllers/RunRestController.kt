@@ -21,9 +21,10 @@ class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor
   @PostMapping("/api/compiler/complete")
   fun getKotlinCompleteEndpoint(
     @RequestBody project: Project,
+    @RequestParam(defaultValue = "java") runConf: String,
     @RequestParam line: Int,
     @RequestParam ch: Int
-  ) = kotlinProjectExecutor.complete(project, line, ch)
+  ) = kotlinProjectExecutor.complete(project, line, ch, isJs = runConf == "js")
 
   @PostMapping("/api/compiler/highlight")
   fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
@@ -50,16 +51,16 @@ class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor
     val result = when (type) {
       "run" -> {
         when (runConf) {
-          "java" -> executeKotlinProjectEndpoint(project)
-          "js" -> translateKotlinProjectEndpoint(project)
-          "canvas" -> translateKotlinProjectEndpoint(project)
+          "java" -> kotlinProjectExecutor.run(project)
+          "js" -> kotlinProjectExecutor.convertToJs(project)
+          "canvas" -> kotlinProjectExecutor.convertToJs(project)
           else -> error("Unknown 'runCong' $runConf")
         }
       }
-      "highlight" -> highlightEndpoint(project)
+      "highlight" -> kotlinProjectExecutor.highlight(project)
       "complete" -> {
         if (line != null && ch != null) {
-          getKotlinCompleteEndpoint(project, line, ch)
+          kotlinProjectExecutor.complete(project, line, ch, isJs = runConf == "js")
         }
         else throw error("No parameters 'line' or 'ch'")
       }

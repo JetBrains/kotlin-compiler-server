@@ -55,10 +55,11 @@ class CompletionProvider(
   fun complete(
     file: KotlinFile,
     line: Int,
-    character: Int
+    character: Int,
+    isJs: Boolean
   ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
     elementAt(line, character)?.let { element ->
-      val descriptorInfo = descriptorsFrom(this, element)
+      val descriptorInfo = descriptorsFrom(this, element, isJs)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
       descriptorInfo.descriptors.toMutableList().apply {
@@ -164,8 +165,10 @@ class CompletionProvider(
     }
   }
 
-  private fun descriptorsFrom(file: KotlinFile, element: PsiElement): DescriptorInfo =
-    with(errorAnalyzer.analysisOf(listOf(file.kotlinFile))) {
+  private fun descriptorsFrom(file: KotlinFile, element: PsiElement, isJs: Boolean): DescriptorInfo {
+    val files = listOf(file.kotlinFile)
+    val analysis = if (isJs.not()) errorAnalyzer.analysisOf(files) else errorAnalyzer.analyzeFileForJs(files)
+    return with(analysis) {
       (referenceVariantsFrom(element) ?: referenceVariantsFrom(element.parent))?.let { descriptors ->
         DescriptorInfo(true, descriptors)
       } ?: element.parent.let { parent ->
@@ -187,6 +190,7 @@ class CompletionProvider(
         )
       }
     }
+  }
 
 
   private fun formatName(
