@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Disabled
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -15,6 +16,7 @@ class ConcurrencyRunnerTest {
   private lateinit var testRunner: TestProjectRunner
 
   @Test
+  @Disabled
   fun `a lot of hello word test JVM`() {
     runManyTest {
       testRunner.run(
@@ -25,6 +27,7 @@ class ConcurrencyRunnerTest {
   }
 
   @Test
+  @Disabled
   fun `a lot of hello word test JS`() {
     runManyTest {
       testRunner.runJs(
