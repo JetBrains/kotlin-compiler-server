@@ -1,7 +1,7 @@
 package com.compiler.server.generator
 
 import com.compiler.server.compiler.components.KotlinProjectExecutor
-import com.compiler.server.compiler.model.Project
+import com.compiler.server.model.Project
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component

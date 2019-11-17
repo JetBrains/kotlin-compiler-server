@@ -1,6 +1,6 @@
 package com.compiler.server.configuration
 
-import com.compiler.server.compiler.model.Project
+import com.compiler.server.model.Project
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.core.convert.converter.Converter
 

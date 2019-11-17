@@ -1,4 +1,4 @@
-package com.compiler.server.compiler.model
+package com.compiler.server.model
 
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.container.ComponentProvider

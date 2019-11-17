@@ -1,7 +1,7 @@
 package com.compiler.server.generator
 
-import com.compiler.server.compiler.model.Project
-import com.compiler.server.compiler.model.ProjectFile
+import com.compiler.server.model.Project
+import com.compiler.server.model.ProjectFile
 
 
 fun generateSingleProject(text: String, args: String = ""): Project {

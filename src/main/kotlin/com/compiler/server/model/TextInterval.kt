@@ -1,4 +1,4 @@
-package com.compiler.server.compiler.model
+package com.compiler.server.model
 
 import com.intellij.openapi.editor.Document
 

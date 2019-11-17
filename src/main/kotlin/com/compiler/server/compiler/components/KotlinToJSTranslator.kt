@@ -1,7 +1,7 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.model.ErrorDescriptor
-import com.compiler.server.compiler.model.TranslationJSResult
+import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.TranslationJSResult
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters

@@ -1,7 +1,7 @@
 package com.compiler.server.controllers
 
 import com.compiler.server.compiler.components.KotlinProjectExecutor
-import com.compiler.server.compiler.model.Project
+import com.compiler.server.model.Project
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

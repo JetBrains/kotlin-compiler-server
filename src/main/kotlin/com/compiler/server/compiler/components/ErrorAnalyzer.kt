@@ -1,9 +1,9 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.model.Analysis
-import com.compiler.server.compiler.model.ErrorDescriptor
-import com.compiler.server.compiler.model.ProjectSeveriry
-import com.compiler.server.compiler.model.TextInterval
+import com.compiler.server.model.Analysis
+import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.model.TextInterval
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor

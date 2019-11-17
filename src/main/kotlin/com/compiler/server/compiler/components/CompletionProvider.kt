@@ -2,8 +2,8 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
-import com.compiler.server.compiler.model.Analysis
-import com.compiler.server.compiler.model.Completion
+import com.compiler.server.model.Analysis
+import com.compiler.server.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.descriptors.*

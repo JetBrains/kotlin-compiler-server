@@ -1,7 +1,7 @@
 package com.compiler.server.executor
 
-import com.compiler.server.compiler.model.ExceptionDescriptor
-import com.compiler.server.compiler.model.JavaExecutionResult
+import com.compiler.server.model.ExceptionDescriptor
+import com.compiler.server.model.JavaExecutionResult
 import com.compiler.server.utils.escapeString
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
