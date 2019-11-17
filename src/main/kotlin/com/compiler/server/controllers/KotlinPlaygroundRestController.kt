@@ -1,8 +1,8 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.compiler.components.KotlinProjectExecutor
 import com.compiler.server.model.Project
 import com.compiler.server.model.ProjectType
+import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinProjectExecutor){
+class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
 
   /**
    * Endpoint for support requests from kotlin playground client.
@@ -27,15 +27,14 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     @RequestParam type: String,
     @RequestParam(required = false) line: Int?,
     @RequestParam(required = false) ch: Int?,
-    @RequestParam runConf: ProjectType,
     @RequestParam project: Project
   ): ResponseEntity<*> {
     val result = when (type) {
       "run" -> {
-        when (runConf) {
+        when (project.confType) {
           ProjectType.JAVA -> kotlinProjectExecutor.run(project)
           ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
-          else -> error("Unknown 'runCong' $runConf")
+          else -> error("Unknown 'runCong' ${project.confType}")
         }
       }
       "highlight" -> kotlinProjectExecutor.highlight(project)

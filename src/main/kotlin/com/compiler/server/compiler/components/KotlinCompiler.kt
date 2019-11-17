@@ -1,11 +1,10 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.KotlinFile
+import com.compiler.server.executor.JavaArgumentsBuilder
+import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExceptionDescriptor
 import com.compiler.server.model.JavaExecutionResult
 import com.compiler.server.model.OutputDirectory
-import com.compiler.server.executor.JavaArgumentsBuilder
-import com.compiler.server.executor.JavaExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -29,10 +28,10 @@ class KotlinCompiler(
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
-  fun run(files: List<KotlinFile>, args: String): JavaExecutionResult {
-    val errors = errorAnalyzer.errorsFrom(files.map { it.kotlinFile })
+  fun run(files: List<KtFile>, args: String): JavaExecutionResult {
+    val errors = errorAnalyzer.errorsFrom(files)
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
-      val compilation = compile(files.map { it.kotlinFile })
+      val compilation = compile(files)
       execute(compilation, args)
     }
     else {

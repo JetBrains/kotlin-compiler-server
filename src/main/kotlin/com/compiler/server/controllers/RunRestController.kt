@@ -1,8 +1,8 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.compiler.components.KotlinProjectExecutor
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.Project
+import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.web.bind.annotation.*
 
 @RestController

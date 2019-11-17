@@ -1,8 +1,8 @@
 package com.compiler.server
 
-import com.compiler.server.compiler.components.KotlinProjectExecutor
 import com.compiler.server.generator.TestProjectRunner
 import com.compiler.server.generator.generateSingleProject
+import com.compiler.server.service.KotlinProjectExecutor
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
