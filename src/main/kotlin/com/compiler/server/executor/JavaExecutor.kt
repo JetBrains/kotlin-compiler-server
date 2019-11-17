@@ -13,6 +13,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
+const val MAX_OUTPUT_SIZE = 100 * 1024
+const val EXECUTION_TIMEOUT = 10000L
+
 @Component
 class JavaExecutor {
 
@@ -45,18 +48,17 @@ class JavaExecutor {
 
       val interruptMsg = Executors.newSingleThreadExecutor().submit(
         interruptAfter(
-          delay = 10000,
+          delay = EXECUTION_TIMEOUT,
           process = this,
           threads = listOf(standardThread, errorThread),
           interruptCondition = interruptCondition
         )
       )
-
-      var message: String
+      val interruptType: ConditionType
       try {
         waitFor()
         interruptCondition.exitNow()
-        message = interruptMsg.get()
+        interruptType = interruptMsg.get()
         standardThread.join(10000)
         errorThread.join(10000)
       }
@@ -73,10 +75,23 @@ class JavaExecutor {
         Exception(errorText.toString())
       }
       else null
-      if (message.isEmpty()) {
-        ProgramOutput(standardText.toString(), errorText.toString(), exception).asExecutionResult()
+      when (interruptType) {
+        ConditionType.NORMAL -> ProgramOutput(
+          standardText.toString(),
+          errorText.toString(),
+          exception
+        ).asExecutionResult()
+        ConditionType.LOG_SIZE -> ProgramOutput(
+          ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE,
+          errorText.toString(),
+          exception
+        ).asExecutionResult()
+        ConditionType.TIMEOUT -> ProgramOutput(
+          ExecutorMessages.TIMEOUT_MESSAGE,
+          errorText.toString(),
+          exception
+        ).asExecutionResult()
       }
-      else ProgramOutput(message, errorText.toString(), exception).asExecutionResult()
     }
   }
 
@@ -92,12 +107,8 @@ class JavaExecutor {
     process: Process,
     threads: List<Thread>,
     interruptCondition: ProcessInterruptCondition
-  ): Callable<String> = Callable {
-    val result = when (interruptCondition.waitForCondition(delay)) {
-      ProcessInterruptCondition.ConditionType.LOG_SIZE -> "evaluation stopped while log size exceeded max size"
-      ProcessInterruptCondition.ConditionType.TIMEOUT -> "evaluation stopped while it's taking too long"
-      else -> ""
-    }
+  ): Callable<ConditionType> = Callable {
+    val result = interruptCondition.waitForCondition(delay)
     threads.forEach { it.interrupt() }
     process.destroy()
     result
@@ -130,12 +141,6 @@ class ProcessInterruptCondition {
   private val lock = ReentrantLock()
   private val condition = lock.newCondition()
 
-  enum class ConditionType {
-    TIMEOUT,
-    LOG_SIZE,
-    NORMAL
-  }
-
   fun waitForCondition(delay: Long): ConditionType = withLock {
     if (!condition.await(delay, TimeUnit.MILLISECONDS))
       return@withLock ConditionType.TIMEOUT
@@ -144,7 +149,7 @@ class ProcessInterruptCondition {
 
   fun appendCharacterCounter(length: Int) = withLock {
     this.totalCharactersOutput += length
-    if (totalCharactersOutput > 10) {
+    if (totalCharactersOutput > MAX_OUTPUT_SIZE) {
       this.conditionBreak = ConditionType.LOG_SIZE
       condition.signal()
     }
@@ -164,6 +169,12 @@ class ProcessInterruptCondition {
       lock.unlock()
     }
   }
+}
+
+enum class ConditionType {
+  TIMEOUT,
+  LOG_SIZE,
+  NORMAL
 }
 
 class JavaArgumentsBuilder(
