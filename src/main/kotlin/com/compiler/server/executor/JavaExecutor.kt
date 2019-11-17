@@ -48,7 +48,6 @@ class JavaExecutor {
 
       val interruptMsg = Executors.newSingleThreadExecutor().submit(
         interruptAfter(
-          delay = EXECUTION_TIMEOUT,
           process = this,
           threads = listOf(standardThread, errorThread),
           interruptCondition = interruptCondition
@@ -103,12 +102,11 @@ class JavaExecutor {
   }
 
   private fun interruptAfter(
-    delay: Long,
     process: Process,
     threads: List<Thread>,
     interruptCondition: ProcessInterruptCondition
   ): Callable<ConditionType> = Callable {
-    val result = interruptCondition.waitForCondition(delay)
+    val result = interruptCondition.waitForCondition(EXECUTION_TIMEOUT)
     threads.forEach { it.interrupt() }
     process.destroy()
     result
@@ -121,7 +119,7 @@ class JavaExecutor {
   ) = Thread {
     try {
       while (true) {
-        val line = from.readLine() as String?
+        val line = from.readLine()
         if (Thread.interrupted() || line == null) break
         interruptCondition.appendCharacterCounter(line.length)
         string.appendln(escapeString(line))
