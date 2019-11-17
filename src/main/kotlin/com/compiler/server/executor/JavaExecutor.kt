@@ -39,7 +39,7 @@ class JavaExecutor {
       val errorThread = appendTo(errorText, standardError)
       errorThread.start()
       interruptAfter(
-        delay = 60000,
+        delay = 10000,
         process = this,
         threads = listOf(standardThread, errorThread)
       )
