@@ -16,56 +16,6 @@ import java.util.concurrent.locks.ReentrantLock
 @Component
 class JavaExecutor {
 
-  class ProcessInterruptCondition {
-    enum class ConditionType {
-      TIMEOUT,
-      LOGSIZE,
-      NORMAL
-    }
-
-    fun waitForCondition(delay: Long): ConditionType {
-      lock.lock()
-      try {
-        if (!condition.await(delay, TimeUnit.MILLISECONDS))
-          return ConditionType.TIMEOUT
-        return conditionBreak
-      }
-      finally {
-        lock.unlock()
-      }
-    }
-
-    fun appendCharacterCounter(length: Int) {
-      lock.lock()
-      try {
-        this.totalCharactersOutput += length
-        if (totalCharactersOutput > 10) {
-          this.conditionBreak = ConditionType.LOGSIZE
-          condition.signal()
-        }
-      }
-      finally {
-        lock.unlock()
-      }
-    }
-
-    fun exitNow() {
-      lock.lock()
-      try {
-        this.conditionBreak = ConditionType.NORMAL
-        condition.signal()
-      }
-      finally {
-        lock.unlock()
-      }
-    }
-
-    private lateinit var conditionBreak: ConditionType
-    private var totalCharactersOutput: Int = 0
-    private val lock = ReentrantLock()
-    private val condition = lock.newCondition()
-  }
-
   data class ProgramOutput(
     val standardOutput: String,
     val errorOutput: String,
@@ -144,7 +94,7 @@ class JavaExecutor {
     interruptCondition: ProcessInterruptCondition
   ): Callable<String> = Callable {
     val result = when (interruptCondition.waitForCondition(delay)) {
-      ProcessInterruptCondition.ConditionType.LOGSIZE -> "evaluation stopped while log size exceeded max size"
+      ProcessInterruptCondition.ConditionType.LOG_SIZE -> "evaluation stopped while log size exceeded max size"
       ProcessInterruptCondition.ConditionType.TIMEOUT -> "evaluation stopped while it's taking too long"
       else -> ""
     }
@@ -170,6 +120,48 @@ class JavaExecutor {
       if (!Thread.interrupted()) {
         e.printStackTrace()
       }
+    }
+  }
+}
+
+class ProcessInterruptCondition {
+  private lateinit var conditionBreak: ConditionType
+  private var totalCharactersOutput: Int = 0
+  private val lock = ReentrantLock()
+  private val condition = lock.newCondition()
+
+  enum class ConditionType {
+    TIMEOUT,
+    LOG_SIZE,
+    NORMAL
+  }
+
+  fun waitForCondition(delay: Long): ConditionType = withLock {
+    if (!condition.await(delay, TimeUnit.MILLISECONDS))
+      return@withLock ConditionType.TIMEOUT
+    return@withLock conditionBreak
+  }
+
+  fun appendCharacterCounter(length: Int) = withLock {
+    this.totalCharactersOutput += length
+    if (totalCharactersOutput > 10) {
+      this.conditionBreak = ConditionType.LOG_SIZE
+      condition.signal()
+    }
+  }
+
+  fun exitNow() = withLock {
+    this.conditionBreak = ConditionType.NORMAL
+    condition.signal()
+  }
+
+  private fun <T> withLock(block: () -> T): T {
+    lock.lock()
+    try {
+      return block()
+    }
+    finally {
+      lock.unlock()
     }
   }
 }
