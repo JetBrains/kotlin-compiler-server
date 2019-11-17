@@ -8,10 +8,63 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
-import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 @Component
 class JavaExecutor {
+
+  class ProcessInterruptCondition {
+    enum class ConditionType {
+      TIMEOUT,
+      LOGSIZE,
+      NORMAL
+    }
+
+    fun waitForCondition(delay: Long): ConditionType {
+      lock.lock()
+      try {
+        if (!condition.await(delay, TimeUnit.MILLISECONDS))
+          return ConditionType.TIMEOUT
+        return conditionBreak
+      }
+      finally {
+        lock.unlock()
+      }
+    }
+
+    fun appendCharacterCounter(length: Int) {
+      lock.lock()
+      try {
+        this.totalCharactersOutput += length
+        if (totalCharactersOutput > 10) {
+          this.conditionBreak = ConditionType.LOGSIZE
+          condition.signal()
+        }
+      }
+      finally {
+        lock.unlock()
+      }
+    }
+
+    fun exitNow() {
+      lock.lock()
+      try {
+        this.conditionBreak = ConditionType.NORMAL
+        condition.signal()
+      }
+      finally {
+        lock.unlock()
+      }
+    }
+
+    private lateinit var conditionBreak: ConditionType
+    private var totalCharactersOutput: Int = 0
+    private val lock = ReentrantLock()
+    private val condition = lock.newCondition()
+  }
 
   data class ProgramOutput(
     val standardOutput: String,
@@ -30,21 +83,30 @@ class JavaExecutor {
   fun execute(args: List<String>): JavaExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
+      val interruptCondition = ProcessInterruptCondition()
       val standardOut = InputStreamReader(this.inputStream).buffered()
       val standardError = InputStreamReader(this.errorStream).buffered()
       val errorText = StringBuilder()
       val standardText = StringBuilder()
-      val standardThread = appendTo(standardText, standardOut)
+      val standardThread = appendTo(standardText, standardOut, interruptCondition)
       standardThread.start()
-      val errorThread = appendTo(errorText, standardError)
+      val errorThread = appendTo(errorText, standardError, interruptCondition)
       errorThread.start()
-      interruptAfter(
-        delay = 10000,
-        process = this,
-        threads = listOf(standardThread, errorThread)
+
+      val interruptMsg = Executors.newSingleThreadExecutor().submit(
+        interruptAfter(
+          delay = 10000,
+          process = this,
+          threads = listOf(standardThread, errorThread),
+          interruptCondition = interruptCondition
+        )
       )
+
+      var message: String
       try {
         waitFor()
+        interruptCondition.exitNow()
+        message = interruptMsg.get()
         standardThread.join(10000)
         errorThread.join(10000)
       }
@@ -61,7 +123,10 @@ class JavaExecutor {
         Exception(errorText.toString())
       }
       else null
-      ProgramOutput(standardText.toString(), errorText.toString(), exception).asExecutionResult()
+      if (message.isEmpty()) {
+        ProgramOutput(standardText.toString(), errorText.toString(), exception).asExecutionResult()
+      }
+      else ProgramOutput(message, errorText.toString(), exception).asExecutionResult()
     }
   }
 
@@ -72,20 +137,32 @@ class JavaExecutor {
     destroy()
   }
 
-  private fun interruptAfter(delay: Long, process: Process, threads: List<Thread>) {
-    Timer(true).schedule(object : TimerTask() {
-      override fun run() {
-        threads.forEach { it.interrupt() }
-        process.destroy()
-      }
-    }, delay)
+  private fun interruptAfter(
+    delay: Long,
+    process: Process,
+    threads: List<Thread>,
+    interruptCondition: ProcessInterruptCondition
+  ): Callable<String> = Callable {
+    val result = when (interruptCondition.waitForCondition(delay)) {
+      ProcessInterruptCondition.ConditionType.LOGSIZE -> "evaluation stopped while log size exceeded max size"
+      ProcessInterruptCondition.ConditionType.TIMEOUT -> "evaluation stopped while it's taking too long"
+      else -> ""
+    }
+    threads.forEach { it.interrupt() }
+    process.destroy()
+    result
   }
 
-  private fun appendTo(string: StringBuilder, from: BufferedReader) = Thread {
+  private fun appendTo(
+    string: StringBuilder,
+    from: BufferedReader,
+    interruptCondition: ProcessInterruptCondition
+  ) = Thread {
     try {
       while (true) {
-        val line = from.readLine()
+        val line = from.readLine() as String?
         if (Thread.interrupted() || line == null) break
+        interruptCondition.appendCharacterCounter(line.length)
         string.appendln(escapeString(line))
       }
     }
