@@ -99,18 +99,18 @@ class JavaExecutor {
 
 class JavaArgumentsBuilder(
   val classPaths: String,
-  val mainClass: String,
+  val mainClass: String?,
   val policy: Path,
   val memoryLimit: Int,
   val args: String
 ) {
   fun toArguments(): List<String> {
-    return listOf(
+    return (listOf(
       "java",
       "-Djava.security.manager",
       "-Xmx" + memoryLimit + "M",
       "-Djava.security.policy=$policy",
       "-classpath"
-    ) + classPaths + mainClass + args.split(" ")
+    ) + classPaths + mainClass + args.split(" ")).filterNotNull()
   }
 }

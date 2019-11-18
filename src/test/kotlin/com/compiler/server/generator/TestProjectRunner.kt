@@ -31,6 +31,13 @@ class TestProjectRunner {
     convertAndTest(project, contains)
   }
 
+  fun runWithException(code: String, contains: String) {
+    val project = generateSingleProject(text = code)
+    val result = kotlinProjectExecutor.run(project)
+    Assertions.assertNotNull(result.exception)
+    Assertions.assertTrue(result.exception?.message?.contains(contains) == true)
+  }
+
   fun complete(code: String, line: Int, character: Int, completions: List<String>, isJs: Boolean = false) {
     val project = generateSingleProject(text = code, isJs = isJs)
     val result = kotlinProjectExecutor.complete(project, line, character)
