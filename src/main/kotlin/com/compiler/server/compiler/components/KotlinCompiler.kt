@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.compiler.CompilerMessages
 import com.compiler.server.executor.JavaArgumentsBuilder
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExceptionDescriptor
@@ -55,7 +56,8 @@ class KotlinCompiler(
         exception = ExceptionDescriptor("Something went wrong", "Exception")
       )
     val output = write(compiled)
-    return javaExecutor.execute(argsFrom(compiled.mainClass!!, output, kotlinEnvironment, args))
+    if (compiled.mainClass == null) return JavaExecutionResult(CompilerMessages.NO_MAIN_METHOD)
+    return javaExecutor.execute(argsFrom(compiled.mainClass, output, kotlinEnvironment, args))
       .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
   }
 
