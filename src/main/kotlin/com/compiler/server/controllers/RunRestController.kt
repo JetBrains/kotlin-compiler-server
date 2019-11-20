@@ -15,6 +15,9 @@ class RunRestController(
   @PostMapping("/run")
   fun executeKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.run(project)
 
+  @PostMapping("/test")
+  fun testKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.run(project)
+
   @PostMapping("/translate")
   fun translateKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.convertToJs(project)
 
