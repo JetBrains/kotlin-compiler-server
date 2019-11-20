@@ -16,4 +16,10 @@ class ExceptionInProgramTest{
     contains = "Error: Could not find or load main class"
   )
 
+  @Test
+  fun `command line index of bound jvm`()  = testRunner.runWithException(
+    code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[2])\n}",
+    contains = "java.lang.ArrayIndexOutOfBoundsException"
+  )
+
 }

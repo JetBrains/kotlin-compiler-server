@@ -1,9 +1,6 @@
 package com.compiler.server
 
 import com.compiler.server.generator.TestProjectRunner
-import com.compiler.server.generator.generateSingleProject
-import com.compiler.server.service.KotlinProjectExecutor
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -11,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 class CommandLineArgumentsTest {
-  @Autowired
-  private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
   @Autowired
   private lateinit var testRunner: TestProjectRunner
@@ -51,17 +46,6 @@ class CommandLineArgumentsTest {
       args = "alex1 alex2",
       contains = "main(['alex1', 'alex2']);"
     )
-  }
-
-  @Test
-  fun `command line index of bound jvm`() {
-    val project = generateSingleProject(
-      text = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[2])\n}",
-      args = "0 1"
-    )
-    val result = kotlinProjectExecutor.run(project)
-    Assertions.assertNotNull(result.exception)
-    Assertions.assertTrue(result.exception!!.message.contains("java.lang.ArrayIndexOutOfBoundsException"))
   }
 
 }
