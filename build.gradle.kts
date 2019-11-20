@@ -40,6 +40,8 @@ repositories {
 
 dependencies {
 
+    kotlinDependency(kotlin("junit:junit:4.12"))
+    kotlinDependency(kotlin("org.hamcres:hamcrest-core:1.3"))
     kotlinDependency(kotlin("stdlib-jdk8"))
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
