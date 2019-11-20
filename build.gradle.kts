@@ -44,6 +44,11 @@ dependencies {
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
 
+    File("src/main/resources/application.properties").apply{
+        parentFile.mkdirs()
+        writeText("kotlin.version=${BuildProps.version}")
+    }
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

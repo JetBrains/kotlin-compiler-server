@@ -12,5 +12,5 @@ Tasks:
 8) Support JUNIT
 9) Documentation
 10) Test for compiler errors
-12) Endpoint for versions
+12) Endpoint for versions (+)
 13) Readonly files (+)
