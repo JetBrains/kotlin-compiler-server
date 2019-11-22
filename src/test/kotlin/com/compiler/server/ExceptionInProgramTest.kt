@@ -22,4 +22,10 @@ class ExceptionInProgramTest{
     contains = "java.lang.ArrayIndexOutOfBoundsException"
   )
 
+  @Test
+  fun `security read file`()  = testRunner.runWithException(
+    code = "import java.io.*\n\nfun main() {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
+    contains = "java.security.AccessControlException: access denied"
+  )
+
 }
