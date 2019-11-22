@@ -1,18 +1,17 @@
 package com.compiler.server.executor
 
+import com.compiler.server.model.JavaExecutionResult
 import com.compiler.server.utils.escapeString
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.nio.file.Path
 import java.util.*
 
 @Component
 class JUnitExecutor {
 
-
-  fun execute(args: List<String>) {
+  fun execute(args: List<String>): JavaExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
       val standardOut = InputStreamReader(this.inputStream).buffered()
@@ -46,7 +45,7 @@ class JUnitExecutor {
         Exception(errorText.toString())
       }
       else null
-      // return null
+      JavaExecutor.ProgramOutput(standardText.toString(), errorText.toString(), exception).asExecutionResult()
     }
   }
 
@@ -79,23 +78,5 @@ class JUnitExecutor {
         e.printStackTrace()
       }
     }
-  }
-}
-
-class JUnitArgumentsBuilder(
-  val classPaths: String,
-  val mainClass: String?,
-  val policy: Path,
-  val memoryLimit: Int,
-  val args: String
-) {
-  fun toArguments(): List<String> {
-    return (listOf(
-      "java",
-      "-Djava.security.manager",
-      "-Xmx" + memoryLimit + "M",
-      "-Djava.security.policy=$policy",
-      "-classpath"
-    ) + classPaths + "org.junit.runner.JUnitCore" + args.split(" ")).filterNotNull()
   }
 }

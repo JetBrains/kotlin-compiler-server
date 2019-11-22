@@ -1,6 +1,7 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.executor.JavaArgumentsBuilder
+import com.compiler.server.executor.JUnitExecutor
+import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExceptionDescriptor
 import com.compiler.server.model.JavaExecutionResult
@@ -13,8 +14,10 @@ import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.junit.Test
 import org.springframework.stereotype.Component
 import java.io.File
+import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -23,19 +26,24 @@ import java.util.*
 class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
-  private val javaExecutor: JavaExecutor
+  private val javaExecutor: JavaExecutor,
+  private val jUnitExecutor: JUnitExecutor
 ) {
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
   fun run(files: List<KtFile>, args: String): JavaExecutionResult {
-    val errors = errorAnalyzer.errorsFrom(files)
-    return if (errorAnalyzer.isOnlyWarnings(errors)) {
-      val compilation = compile(files)
-      execute(compilation, args)
+    return execute(files) {  output, compiled ->
+      val arguments = args.split(" ")
+      javaExecutor.execute(argsFrom(compiled.mainClass, output, arguments))
     }
-    else {
-      JavaExecutionResult(errors = errors)
+  }
+
+  fun test(files: List<KtFile>): JavaExecutionResult {
+    return execute(files) { output, _ ->
+      val testClasses = loadTestClasses(output)
+      val mainClass = "org.junit.runner.JUnitCore"
+      jUnitExecutor.execute(argsFrom(mainClass, output, testClasses))
     }
   }
 
@@ -48,15 +56,19 @@ class KotlinCompiler(
     )
   }
 
-  private fun execute(compiled: Compiled, args: String): JavaExecutionResult {
-    if (compiled.files.isEmpty())
-      return JavaExecutionResult(
-        text = "",
-        exception = ExceptionDescriptor("Something went wrong", "Exception")
-      )
-    val output = write(compiled)
-    return javaExecutor.execute(argsFrom(compiled.mainClass, output, kotlinEnvironment, args))
-      .also { output.path.toAbsolutePath().toFile().deleteRecursively() }
+  private fun execute(files: List<KtFile>, block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult): JavaExecutionResult {
+    val errors = errorAnalyzer.errorsFrom(files)
+    return if (errorAnalyzer.isOnlyWarnings(errors)) {
+      val compilation = compile(files)
+      if (compilation.files.isEmpty())
+        return JavaExecutionResult(
+          text = "",
+          exception = ExceptionDescriptor("Something went wrong", "Exception")
+        )
+      val output = write(compilation)
+      block(output, compilation).also { output.path.toAbsolutePath().toFile().deleteRecursively() }
+    }
+    else JavaExecutionResult(errors = errors)
   }
 
   private fun write(compiled: Compiled): OutputDirectory {
@@ -90,19 +102,18 @@ class KotlinCompiler(
   private fun argsFrom(
     mainClass: String?,
     outputDirectory: OutputDirectory,
-    environment: KotlinEnvironment,
-    args: String
+    args: List<String>
   ): List<String> {
-    val classPaths = (environment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
+    val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
     val policy = outputDirectory.path.resolve("executor.policy").toAbsolutePath()
-    return JavaArgumentsBuilder(
+    return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
       policy = policy,
       memoryLimit = 32,
-      args = args
-    ).toArguments()
+      arguments = args
+    ).toList()
   }
 
 
@@ -111,5 +122,21 @@ class KotlinCompiler(
     return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
       PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
     }
+  }
+
+  private fun loadTestClasses(output: OutputDirectory): List<String> {
+    val urls = listOf(output.path.toUri().toURL()).toTypedArray()
+    val loader = URLClassLoader(urls)
+    val names = output.path.toFile().listFiles().orEmpty()
+      .filter { it.name.endsWith(".class") }
+      .map { it.name.removeSuffix(".class") }
+    return names.mapNotNull {
+      try {
+        loader.loadClass(it)
+      }
+      catch (_: Exception) {
+        null
+      }
+    }.filter { it -> it.methods.any { it.isAnnotationPresent(Test::class.java) } }.map { it.name }
   }
 }

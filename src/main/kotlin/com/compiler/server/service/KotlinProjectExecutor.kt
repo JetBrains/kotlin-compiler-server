@@ -22,6 +22,11 @@ class KotlinProjectExecutor(
     return kotlinCompiler.run(files, project.args)
   }
 
+  fun test(project: Project): JavaExecutionResult {
+    val files = getFilesFrom(project).map { it.kotlinFile }
+    return kotlinCompiler.test(files)
+  }
+
   fun convertToJs(project: Project): TranslationJSResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
     return kotlinToJSTranslator.translate(files, project.args.split(" "))

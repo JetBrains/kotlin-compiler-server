@@ -97,20 +97,20 @@ class JavaExecutor {
   }
 }
 
-class JavaArgumentsBuilder(
+class CommandLineArgument(
   val classPaths: String,
   val mainClass: String?,
   val policy: Path,
   val memoryLimit: Int,
-  val args: String
+  val arguments: List<String>
 ) {
-  fun toArguments(): List<String> {
+  fun toList(): List<String> {
     return (listOf(
       "java",
-      "-Djava.security.manager",
       "-Xmx" + memoryLimit + "M",
+      "-Djava.security.manager",
       "-Djava.security.policy=$policy",
       "-classpath"
-    ) + classPaths + mainClass + args.split(" ")).filterNotNull()
+    ) + classPaths + mainClass + arguments).filterNotNull()
   }
 }

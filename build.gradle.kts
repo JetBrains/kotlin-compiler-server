@@ -40,8 +40,8 @@ repositories {
 
 dependencies {
 
-    kotlinDependency(kotlin("junit:junit:4.12"))
-    kotlinDependency(kotlin("org.hamcres:hamcrest-core:1.3"))
+    kotlinDependency("junit:junit:4.12")
+    kotlinDependency("org.hamcrest:hamcrest-core:1.3")
     kotlinDependency(kotlin("stdlib-jdk8"))
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
@@ -55,6 +55,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
