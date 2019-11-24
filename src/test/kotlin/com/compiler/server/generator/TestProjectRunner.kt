@@ -48,6 +48,8 @@ class TestProjectRunner {
     }
   }
 
+  fun getVersion() = kotlinProjectExecutor.getVersion().version
+
   private fun runAndTest(project: Project, contains: String) {
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result)
