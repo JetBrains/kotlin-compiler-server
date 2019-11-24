@@ -11,6 +11,7 @@ class KotlinProjectExecutor(
   private val kotlinCompiler: KotlinCompiler,
   private val completionProvider: CompletionProvider,
   private val errorAnalyzer: ErrorAnalyzer,
+  private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
   private val kotlinEnvironment: KotlinEnvironment
 ) {
@@ -54,6 +55,8 @@ class KotlinProjectExecutor(
       emptyMap()
     }
   }
+
+  fun getVersion() = version
 
   private fun getFilesFrom(project: Project) = project.files.map {
     KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)

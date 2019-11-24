@@ -26,4 +26,10 @@ class JvmRunnerTest {
     contains = "Kitty"
   )
 
+  @Test
+  fun `correct kotlin version test jvm`() = testRunner.run(
+    code = "fun main() {\n    println(KotlinVersion?.CURRENT)\n}",
+    contains = testRunner.getVersion()
+  )
+
 }

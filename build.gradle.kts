@@ -1,18 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URL
 
-group = "com.compiler.server"
-version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
-
 object BuildProps {
-    val kotlinBuildType = "Kotlin_1350_Aggregate"
-    val kotlinBuild = "1.3.50-release-112"
-    val pluginBuild = "1.3.50-release-IJ2019.2-1"
-    val version = "1.3.50"
-    val kotlinId = "2491366"
-    val kotlinPluginLocation = "$kotlinBuildType/$kotlinId:id/kotlin-plugin-$pluginBuild.zip!/Kotlin/lib/kotlin-plugin.jar"
+    private const val kotlinBuildType = "Kotlin_KotlinRelease_1360_Aggregate"
+    private const val pluginBuild = "1.3.60-release-IJ2019.3-1"
+    private const val kotlinId = "58008784"
+    const val version = "1.3.60"
+    const val kotlinPluginLocation = "$kotlinBuildType/$kotlinId:id/kotlin-plugin-$pluginBuild.zip!/Kotlin/lib/kotlin-plugin.jar"
 }
+
+group = "com.compiler.server"
+version = "${BuildProps.version}-SNAPSHOT"
+java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val kotlinDependency by configurations.creating
 val kotlinJsDependency by configurations.creating
@@ -29,7 +28,7 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.60"
     kotlin("plugin.spring") version "1.3.50"
 }
 
@@ -72,7 +71,7 @@ dependencies {
         compile("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
         compile(
           dependencyFrom(
-                url = "https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
+                url = "https://buildserver.labs.intellij.net/guestAuth/repository/download/$kotlinPluginLocation",
                 artifact = "kotlin-plugin",
                 version = version
           )

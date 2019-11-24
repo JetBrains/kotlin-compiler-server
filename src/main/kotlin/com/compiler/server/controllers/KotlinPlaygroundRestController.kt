@@ -2,7 +2,6 @@ package com.compiler.server.controllers
 
 import com.compiler.server.model.Project
 import com.compiler.server.model.ProjectType
-import com.compiler.server.model.VersionInfo
 import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -12,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class KotlinPlaygroundRestController(
-  private val kotlinProjectExecutor: KotlinProjectExecutor,
-  private val version: VersionInfo
-) {
+class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
 
   /**
    * Endpoint for support requests from kotlin playground client.
@@ -50,7 +46,7 @@ class KotlinPlaygroundRestController(
         }
         else throw error("No parameters 'line' or 'ch'")
       }
-      "getKotlinVersions" -> listOf(version)
+      "getKotlinVersions" -> listOf(kotlinProjectExecutor.getVersion())
       else -> throw error("No parameter 'type' found")
     }
     return ResponseEntity.ok(result)
