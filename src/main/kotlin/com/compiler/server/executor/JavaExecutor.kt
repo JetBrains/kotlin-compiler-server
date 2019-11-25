@@ -21,12 +21,10 @@ class JavaExecutor {
   }
 
   data class ProgramOutput(
-    val standardOutput: String,
-    val errorOutput: String,
+    val standardOutput: String = "",
+    val errorOutput: String = "",
     val exception: Exception? = null
   ) {
-    constructor(exception: Exception) : this("", "", exception)
-
     fun asExecutionResult(): JavaExecutionResult {
       return JavaExecutionResult(
         text = "<outStream>$standardOutput\n</outStream><errStream>$errorOutput</errStream>",
@@ -38,7 +36,6 @@ class JavaExecutor {
 
   fun execute(args: List<String>): JavaExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
-      // why?
       outputStream.close()
 
       val standardOut = InputStreamReader(this.inputStream).buffered()
@@ -89,7 +86,7 @@ class JavaExecutor {
       } catch (any: Exception) {
         // all sort of things may happen, so we better be aware
         any.printStackTrace()
-        ProgramOutput(any).asExecutionResult()
+        ProgramOutput(exception = any).asExecutionResult()
       }
       finally {
         try {
