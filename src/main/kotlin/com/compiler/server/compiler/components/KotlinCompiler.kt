@@ -1,7 +1,7 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.executor.JUnitExecutor
 import com.compiler.server.executor.CommandLineArgument
+import com.compiler.server.executor.JUnitExecutor
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExceptionDescriptor
 import com.compiler.server.model.JavaExecutionResult
@@ -33,7 +33,7 @@ class KotlinCompiler(
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
   fun run(files: List<KtFile>, args: String): JavaExecutionResult {
-    return execute(files) {  output, compiled ->
+    return execute(files) { output, compiled ->
       val arguments = args.split(" ")
       javaExecutor.execute(argsFrom(compiled.mainClass, output, arguments))
     }
@@ -56,7 +56,8 @@ class KotlinCompiler(
     )
   }
 
-  private fun execute(files: List<KtFile>, block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult): JavaExecutionResult {
+  private fun execute(files: List<KtFile>,
+                      block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult): JavaExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files)
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files)

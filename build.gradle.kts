@@ -32,9 +32,17 @@ plugins {
     kotlin("plugin.spring") version "1.3.50"
 }
 
-repositories {
-    mavenCentral()
-    maven("https://dl.bintray.com/kotlin/kotlin-dev")
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://dl.bintray.com/kotlin/kotlin-dev")
+    }
+}
+
+rootDir.resolve("src/main/resources/application.properties").apply{
+    println(absolutePath)
+    parentFile.mkdirs()
+    writeText("kotlin.version=${BuildProps.version}")
 }
 
 dependencies {
@@ -45,10 +53,7 @@ dependencies {
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
 
-    File("src/main/resources/application.properties").apply{
-        parentFile.mkdirs()
-        writeText("kotlin.version=${BuildProps.version}")
-    }
+
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -77,6 +82,7 @@ dependencies {
           )
         )
     }
+    compile(project(":executors"))
 }
 
 tasks.withType<KotlinCompile> {
