@@ -6,6 +6,7 @@ import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExceptionDescriptor
 import com.compiler.server.model.JavaExecutionResult
 import com.compiler.server.model.OutputDirectory
+import executors.JUnitExecutors
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -42,8 +43,12 @@ class KotlinCompiler(
   fun test(files: List<KtFile>): JavaExecutionResult {
     return execute(files) { output, _ ->
       val testClasses = loadTestClasses(output)
-      val mainClass = "org.junit.runner.JUnitCore"
-      jUnitExecutor.execute(argsFrom(mainClass, output, testClasses))
+      val mainClass = JUnitExecutors::class.java.name
+      jUnitExecutor.execute(argsFrom(
+        mainClass = mainClass,
+        outputDirectory = output,
+        args = listOf(output.path.toString())
+      ))
     }
   }
 
@@ -56,8 +61,10 @@ class KotlinCompiler(
     )
   }
 
-  private fun execute(files: List<KtFile>,
-                      block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult): JavaExecutionResult {
+  private fun execute(
+    files: List<KtFile>,
+    block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult
+  ): JavaExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files)
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files)
