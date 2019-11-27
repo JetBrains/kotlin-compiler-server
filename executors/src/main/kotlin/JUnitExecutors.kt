@@ -20,7 +20,6 @@ class JUnitExecutors {
         jUnitCore.addListener(TestListener())
         val cl = loadTestClasses(args[0])
         cl.forEach {
-          print(it.name)
           val request = Request.aClass(it)
           jUnitCore.run(request)
         }
