@@ -23,7 +23,7 @@ class KotlinProjectExecutor(
     return kotlinCompiler.run(files, project.args)
   }
 
-  fun test(project: Project): JavaExecutionResult {
+  fun test(project: Project): JunitExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
     return kotlinCompiler.test(files)
   }

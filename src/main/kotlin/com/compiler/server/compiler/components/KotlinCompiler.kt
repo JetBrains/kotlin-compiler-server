@@ -3,8 +3,9 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JUnitExecutor
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.model.ExceptionDescriptor
+import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.JavaExecutionResult
+import com.compiler.server.model.JunitExecutionResult
 import com.compiler.server.model.OutputDirectory
 import executors.JUnitExecutors
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
@@ -24,7 +25,7 @@ import java.nio.file.Paths
 import java.util.*
 
 @Component
-class KotlinCompiler(
+class   KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
@@ -37,10 +38,10 @@ class KotlinCompiler(
     return execute(files) { output, compiled ->
       val arguments = args.split(" ")
       javaExecutor.execute(argsFrom(compiled.mainClass, output, arguments))
-    }
+    } as JavaExecutionResult
   }
 
-  fun test(files: List<KtFile>): JavaExecutionResult {
+  fun test(files: List<KtFile>): JunitExecutionResult {
     return execute(files) { output, _ ->
       val testClasses = loadTestClasses(output)
       val mainClass = JUnitExecutors::class.java.name
@@ -49,7 +50,7 @@ class KotlinCompiler(
         outputDirectory = output,
         args = listOf(output.path.toString())
       ))
-    }
+    } as JunitExecutionResult
   }
 
   private fun compile(files: List<KtFile>): Compiled {
@@ -63,20 +64,17 @@ class KotlinCompiler(
 
   private fun execute(
     files: List<KtFile>,
-    block: (output: OutputDirectory, compilation: Compiled) -> JavaExecutionResult
-  ): JavaExecutionResult {
+    block: (output: OutputDirectory, compilation: Compiled) -> ExecutionResult
+  ): ExecutionResult {
     val errors = errorAnalyzer.errorsFrom(files)
     return if (errorAnalyzer.isOnlyWarnings(errors)) {
       val compilation = compile(files)
       if (compilation.files.isEmpty())
-        return JavaExecutionResult(
-          text = "",
-          exception = ExceptionDescriptor("Something went wrong", "Exception")
-        )
+        return ExecutionResult(mapOf("No compilation files found!" to emptyList()))
       val output = write(compilation)
       block(output, compilation).also { output.path.toAbsolutePath().toFile().deleteRecursively() }
     }
-    else JavaExecutionResult(errors = errors)
+    else ExecutionResult(errors)
   }
 
   private fun write(compiled: Compiled): OutputDirectory {
