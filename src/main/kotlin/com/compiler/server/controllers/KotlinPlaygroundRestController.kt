@@ -36,7 +36,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
         when (project.confType) {
           ProjectType.JAVA -> kotlinProjectExecutor.run(project)
           ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
-          else -> error("Unknown 'runCong' ${project.confType}")
+          ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
         }
       }
       "highlight" -> kotlinProjectExecutor.highlight(project)
