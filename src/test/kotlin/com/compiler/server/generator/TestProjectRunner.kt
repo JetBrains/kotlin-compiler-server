@@ -1,5 +1,6 @@
 package com.compiler.server.generator
 
+import com.compiler.server.model.JavaExecutionResult
 import com.compiler.server.model.Project
 import com.compiler.server.service.KotlinProjectExecutor
 import org.junit.jupiter.api.Assertions
@@ -33,7 +34,7 @@ class TestProjectRunner {
 
   fun runWithException(code: String, contains: String) {
     val project = generateSingleProject(text = code)
-    val result = kotlinProjectExecutor.run(project)
+    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult
     Assertions.assertNotNull(result.exception)
     Assertions.assertTrue(result.exception?.message?.contains(contains) == true)
   }
@@ -51,7 +52,7 @@ class TestProjectRunner {
   fun getVersion() = kotlinProjectExecutor.getVersion().version
 
   private fun runAndTest(project: Project, contains: String) {
-    val result = kotlinProjectExecutor.run(project)
+    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult
     Assertions.assertNotNull(result)
     Assertions.assertTrue(result.text.contains(contains))
   }
