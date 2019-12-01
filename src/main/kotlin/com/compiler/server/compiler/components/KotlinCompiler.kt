@@ -78,7 +78,7 @@ class KotlinCompiler(
   }
 
   private fun write(compiled: Compiled): OutputDirectory {
-    val dir = System.getProperty("user.dir") + "/lib"
+    val dir = System.getProperty("user.dir")
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "generated", sessionId)
     val policy = File("executor.policy").readText()
