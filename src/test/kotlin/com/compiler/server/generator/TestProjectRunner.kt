@@ -45,8 +45,15 @@ class TestProjectRunner {
     return result?.testResults?.values?.flatten() ?: emptyList()
   }
 
-  fun complete(code: String, line: Int, character: Int, completions: List<String>, isJs: Boolean = false) {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+  fun complete(
+    code: String,
+    line: Int,
+    character: Int,
+    completions: List<String>,
+    isJs: Boolean = false
+  ) {
+    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
     Assertions.assertTrue(result.isNotEmpty())
@@ -58,9 +65,9 @@ class TestProjectRunner {
   fun getVersion() = kotlinProjectExecutor.getVersion().version
 
   private fun runAndTest(project: Project, contains: String) {
-    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult
+    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult?
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.text.contains(contains))
+    Assertions.assertTrue(result?.text?.contains(contains) == true)
   }
 
   private fun convertAndTest(project: Project, contains: String) {
