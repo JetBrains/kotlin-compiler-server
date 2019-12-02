@@ -15,3 +15,6 @@ Tasks:
 12) Endpoint for versions (+)
 13) Readonly files (+)
 14) move `lib` to  config props
+15) add coroutines 
+16) add coroutines test
+17) test junit exception in executor
