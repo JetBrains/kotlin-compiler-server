@@ -49,7 +49,7 @@ dependencies {
 
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest-core:1.3")
-    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+")
+    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
     kotlinDependency(kotlin("stdlib-jdk8"))
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
