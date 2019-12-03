@@ -19,3 +19,4 @@ Tasks:
 16) add coroutines test
 17) test junit exception in executor
 18) js env from ErrAnalyzer to EnvManager
+19) Get kotlin plugin form marketplace
