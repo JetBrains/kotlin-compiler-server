@@ -24,7 +24,9 @@ class KotlinToJSTranslator(
     val errors = errorAnalyzer.errorsFrom(files, isJs = true)
     return try {
       if (errorAnalyzer.isOnlyWarnings(errors)) {
-        doTranslate(files, arguments)
+        doTranslate(files, arguments).also {
+          it.addWarnings(errors)
+        }
       }
       else {
         TranslationJSResult(errors = errors)

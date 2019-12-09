@@ -68,7 +68,9 @@ class KotlinCompiler(
         return ExecutionResult(mapOf("No compilation files found!" to emptyList()))
       val output = write(compilation)
       try {
-        block(output, compilation)
+        block(output, compilation).also {
+          it.addWarnings(errors)
+        }
       }
       finally {
         output.path.toAbsolutePath().toFile().deleteRecursively()

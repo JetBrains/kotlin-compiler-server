@@ -2,7 +2,7 @@
 
 Tasks:
 
-1) Tests on highlight
+1) Tests on highlight + warnings
 2) Tests on complete (+)
 3) Support old API (+)
 4) Add executor policy (+)
