@@ -42,9 +42,10 @@ class JUnitExecutors {
         print(mapper.writeValueAsString(groupedTestResults))
       }
       catch (e: Exception) {
-        print(e)
         System.setOut(standardOutput)
+        print("[\"")
         e.printStackTrace()
+        print("\"]")
       }
     }
 
