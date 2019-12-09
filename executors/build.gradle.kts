@@ -4,8 +4,6 @@ plugins {
 
 dependencies {
   implementation("junit:junit:4.12")
-  implementation(kotlin("stdlib"))
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
 }
 
 tasks.withType<Jar>().getByName("jar") {

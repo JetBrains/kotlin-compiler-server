@@ -37,6 +37,11 @@ allprojects {
         mavenCentral()
         maven("https://dl.bintray.com/kotlin/kotlin-dev")
     }
+    afterEvaluate {
+        dependencies {
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+        }
+    }
 }
 
 rootDir.resolve("src/main/resources/application.properties").apply{
@@ -54,8 +59,7 @@ dependencies {
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
 
-
-
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -93,6 +97,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
+    dependsOn(":executors:jar")
 }
 
 tasks.withType<Test> {
