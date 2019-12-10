@@ -1,7 +1,7 @@
 package com.compiler.server.executor
 
-import com.compiler.server.model.ExceptionDescriptor
-import com.compiler.server.model.JavaExecutionResult
+import com.compiler.server.model.ProgramOutput
+import com.compiler.server.utils.escapeString
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
@@ -14,27 +14,12 @@ import java.util.concurrent.TimeUnit
 @Component
 class JavaExecutor {
 
-  // TODO:: move them into application properties
   companion object {
     const val MAX_OUTPUT_SIZE = 100 * 1024
     const val EXECUTION_TIMEOUT = 10000L
   }
 
-  data class ProgramOutput(
-    val standardOutput: String = "",
-    val errorOutput: String = "",
-    val exception: Exception? = null
-  ) {
-    fun asExecutionResult(): JavaExecutionResult {
-      return JavaExecutionResult(
-        text = "<outStream>$standardOutput\n</outStream><errStream>$errorOutput</errStream>",
-        exception = exception?.let {
-          ExceptionDescriptor(it.message ?: "no message", it::class.java.toString())
-        })
-    }
-  }
-
-  fun execute(args: List<String>): JavaExecutionResult {
+  fun execute(args: List<String>): ProgramOutput {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
 
@@ -46,14 +31,15 @@ class JavaExecutor {
 
       try {
         val futuresList = Executors.newFixedThreadPool(2) // one thread per output
-                .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
+          .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
         // we do not wait for process to end, while either time-limit or output-limit triggered
         // program itself will be destroyed right after we'll leave this method
 
         val outputResults = futuresList.map {
           try {
             it.get()
-          } catch (_: Exception) {
+          }
+          catch (_: Exception) {
             ""
           }
         }
@@ -62,31 +48,32 @@ class JavaExecutor {
         val exception = if (errorText.isNotEmpty()) Exception(errorText) else null
 
         when {
-            futuresList.any { !it.isDone } -> {
-              // execution timeout. Both Future objects must be in 'done' state, to say that process finished
-              ProgramOutput(
-                      ExecutorMessages.TIMEOUT_MESSAGE,
-                      errorText,
-                      exception
-              ).asExecutionResult()
-            }
-            outputResults.any {it.length >= MAX_OUTPUT_SIZE} -> {
-              // log-limit exceeded
-              ProgramOutput(
-                      ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE,
-                      errorText,
-                      exception
-              ).asExecutionResult()
-            }
-            else -> {
-              // normal exit
-              ProgramOutput(standardText, errorText, exception).asExecutionResult()
-            }
+          futuresList.any { !it.isDone } -> {
+            // execution timeout. Both Future objects must be in 'done' state, to say that process finished
+            ProgramOutput(
+              ExecutorMessages.TIMEOUT_MESSAGE,
+              errorText,
+              exception
+            )
+          }
+          outputResults.any { it.length >= MAX_OUTPUT_SIZE } -> {
+            // log-limit exceeded
+            ProgramOutput(
+              ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE,
+              errorText,
+              exception
+            )
+          }
+          else -> {
+            // normal exit
+            ProgramOutput(standardText, errorText, exception)
+          }
         }
-      } catch (any: Exception) {
+      }
+      catch (any: Exception) {
         // all sort of things may happen, so we better be aware
         any.printStackTrace()
-        ProgramOutput(exception = any).asExecutionResult()
+        ProgramOutput(exception = any)
       }
       finally {
         try {
@@ -104,11 +91,11 @@ class JavaExecutor {
     val output = StringBuilder()
     try {
       while (output.length < limit) {
-        val line = standardOut.readLine()
-        if (line == null) break
-        else output.append(line)
+        val line = standardOut.readLine() ?: break
+        output.appendln(escapeString(line))
       }
-    } catch (_: Exception) {
+    }
+    catch (_: Exception) {
       // something happened with the stream. Just return what we've collected so far
     }
 

@@ -2,7 +2,6 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.configuration.LibrariesFolderProperties
 import com.compiler.server.executor.CommandLineArgument
-import com.compiler.server.executor.JUnitExecutor
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
@@ -27,8 +26,7 @@ class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
-  private val librariesFolderProperties: LibrariesFolderProperties,
-  private val jUnitExecutor: JUnitExecutor
+  private val librariesFolderProperties: LibrariesFolderProperties
 ) {
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
@@ -37,17 +35,18 @@ class KotlinCompiler(
     return execute(files) { output, compiled ->
       val arguments = args.split(" ")
       javaExecutor.execute(argsFrom(compiled.mainClass, output, arguments))
+        .asExecutionResult()
     }
   }
 
   fun test(files: List<KtFile>): ExecutionResult {
     return execute(files) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
-      jUnitExecutor.execute(argsFrom(
+      javaExecutor.execute(argsFrom(
         mainClass = mainClass,
         outputDirectory = output,
         args = listOf(output.path.toString())
-      ))
+      )).asJUnitExecutionResult()
     }
   }
 
