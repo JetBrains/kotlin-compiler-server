@@ -15,14 +15,16 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val kotlinDependency by configurations.creating
 val kotlinJsDependency by configurations.creating
+val libJVMFolder: String by System.getProperties()
+val libJSFolder: String by System.getProperties()
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
-    into("lib")
+    into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(files(Callable { kotlinJsDependency.map {zipTree(it)} }))
-    into("js")
+    into(libJSFolder)
 }
 
 plugins {
@@ -32,24 +34,38 @@ plugins {
     kotlin("plugin.spring") version "1.3.50"
 }
 
-repositories {
-    mavenCentral()
-    maven("https://dl.bintray.com/kotlin/kotlin-dev")
+allprojects {
+    repositories {
+        mavenCentral()
+        maven("https://dl.bintray.com/kotlin/kotlin-dev")
+    }
+    afterEvaluate {
+        dependencies {
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+        }
+    }
+}
+
+rootDir.resolve("src/main/resources/application.properties").apply{
+    println(absolutePath)
+    parentFile.mkdirs()
+    writeText("""
+        kotlin.version=${BuildProps.version}
+        libraries.folder.jvm=${libJVMFolder}
+        libraries.folder.js=${libJSFolder}
+    """.trimIndent())
 }
 
 dependencies {
 
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest-core:1.3")
+    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
     kotlinDependency(kotlin("stdlib-jdk8"))
     kotlinDependency(kotlin("reflect"))
     kotlinJsDependency(kotlin("stdlib-js"))
 
-    File("src/main/resources/application.properties").apply{
-        parentFile.mkdirs()
-        writeText("kotlin.version=${BuildProps.version}")
-    }
-
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -77,6 +93,7 @@ dependencies {
           )
         )
     }
+    compile(project(":executors"))
 }
 
 tasks.withType<KotlinCompile> {
@@ -86,6 +103,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
+    dependsOn(":executors:jar")
 }
 
 tasks.withType<Test> {

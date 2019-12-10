@@ -1,8 +1,12 @@
 package com.compiler.server.model
 
-data class ExceptionDescriptor(
-        val message: String,
-        val fullName: String,
-        val stackTrace: List<StackTraceElement> = emptyList(),
-        val cause: ExceptionDescriptor? = null
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+open class ExceptionDescriptor(
+  val message: String? = null,
+  val fullName: String? = null,
+  val stackTrace: List<StackTraceElement> = emptyList(),
+  val cause: ExceptionDescriptor? = null,
+  val localizedMessage: String? = null
 )

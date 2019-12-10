@@ -1,7 +1,10 @@
 package com.compiler.server.executor
 
-import com.compiler.server.model.JavaExecutionResult
+import com.compiler.server.model.JunitExecutionResult
+import com.compiler.server.model.TestDescription
 import com.compiler.server.utils.escapeString
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
@@ -11,7 +14,7 @@ import java.util.*
 @Component
 class JUnitExecutor {
 
-  fun execute(args: List<String>): JavaExecutionResult {
+  fun execute(args: List<String>): JunitExecutionResult {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
       outputStream.close()
       val standardOut = InputStreamReader(this.inputStream).buffered()
@@ -41,11 +44,11 @@ class JUnitExecutor {
           e.printStackTrace()
         }
       }
-      val exception = if (errorText.toString().isNotEmpty()) {
-        Exception(errorText.toString())
-      }
-      else null
-      JavaExecutor.ProgramOutput(standardText.toString(), errorText.toString(), exception).asExecutionResult()
+      val result = jacksonObjectMapper().readValue(
+        standardText.toString(),
+        object : TypeReference<Map<String, List<TestDescription>>>() {}
+      )
+      JunitExecutionResult(result)
     }
   }
 

@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.configuration.LibrariesFolderProperties
 import com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
@@ -19,14 +20,21 @@ import java.io.File
 import java.util.*
 
 @Configuration
-class KotlinEnvironmentConfiguration {
+class KotlinEnvironmentConfiguration(val librariesFolderProperties: LibrariesFolderProperties) {
   @Bean
   fun kotlinEnvironment() = KotlinEnvironment
-    .with(classpath = listOfNotNull(File("lib"))
-      .flatMap { it.listFiles().toList() })
+    .with(
+      classpath = listOfNotNull(File(librariesFolderProperties.jvm))
+        .flatMap { it.listFiles().toList() },
+      classpathJs = listOfNotNull(File(librariesFolderProperties.js))
+    )
 }
 
-class KotlinEnvironment(val classpath: List<File>, val coreEnvironment: KotlinCoreEnvironment) {
+class KotlinEnvironment(
+  val classpath: List<File>,
+  val coreEnvironment: KotlinCoreEnvironment,
+  val jsEnvironment: CompilerConfiguration
+) {
 
   companion object {
     /**
@@ -46,10 +54,10 @@ class KotlinEnvironment(val classpath: List<File>, val coreEnvironment: KotlinCo
       "-XXLanguage:+InlineClasses"
     )
 
-    fun with(classpath: List<File>): KotlinEnvironment {
+    fun with(classpath: List<File>, classpathJs: List<File>): KotlinEnvironment {
       val arguments = K2JVMCompilerArguments()
       parseCommandLineArguments(additionalCompilerArguments, arguments)
-      return KotlinEnvironment(classpath, KotlinCoreEnvironment.createForTests(
+      val coreEnvironment = KotlinCoreEnvironment.createForTests(
         parentDisposable = Disposable {},
         extensionConfigs = EnvironmentConfigFiles.JVM_CONFIG_FILES,
         initialConfiguration = CompilerConfiguration().apply {
@@ -63,7 +71,12 @@ class KotlinEnvironment(val classpath: List<File>, val coreEnvironment: KotlinCo
           }
           languageVersionSettings = arguments.toLanguageVersionSettings(this[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]!!)
         }
-      ))
+      )
+      val jsEnvironment = coreEnvironment.configuration.copy().apply {
+        put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+        put(JSConfigurationKeys.LIBRARIES, classpathJs.map { it.absolutePath })
+      }
+      return KotlinEnvironment(classpath, coreEnvironment, jsEnvironment)
     }
   }
 }

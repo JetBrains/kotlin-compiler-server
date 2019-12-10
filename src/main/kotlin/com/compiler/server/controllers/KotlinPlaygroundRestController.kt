@@ -21,7 +21,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
   @RequestMapping(
     value = ["/kotlinServer"],
     method = [RequestMethod.GET, RequestMethod.POST],
-    consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE],
+    consumes = [MediaType.ALL_VALUE],
     produces = [MediaType.APPLICATION_JSON_VALUE]
   )
   @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -29,25 +29,30 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     @RequestParam type: String,
     @RequestParam(required = false) line: Int?,
     @RequestParam(required = false) ch: Int?,
-    @RequestParam project: Project
+    @RequestParam(required = false) project: Project?
   ): ResponseEntity<*> {
     val result = when (type) {
-      "run" -> {
-        when (project.confType) {
-          ProjectType.JAVA -> kotlinProjectExecutor.run(project)
-          ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
-          else -> error("Unknown 'runCong' ${project.confType}")
-        }
-      }
-      "highlight" -> kotlinProjectExecutor.highlight(project)
-      "complete" -> {
-        if (line != null && ch != null) {
-          kotlinProjectExecutor.complete(project, line, ch)
-        }
-        else throw error("No parameters 'line' or 'ch'")
-      }
       "getKotlinVersions" -> listOf(kotlinProjectExecutor.getVersion())
-      else -> throw error("No parameter 'type' found")
+      else -> {
+        if (project == null) throw error("No parameter 'project' found")
+        when (type) {
+          "run" -> {
+            when (project.confType) {
+              ProjectType.JAVA -> kotlinProjectExecutor.run(project)
+              ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
+              ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
+            }
+          }
+          "highlight" -> kotlinProjectExecutor.highlight(project)
+          "complete" -> {
+            if (line != null && ch != null) {
+              kotlinProjectExecutor.complete(project, line, ch)
+            }
+            else throw error("No parameters 'line' or 'ch'")
+          }
+          else -> throw error("No parameter 'type' found")
+        }
+      }
     }
     return ResponseEntity.ok(result)
   }

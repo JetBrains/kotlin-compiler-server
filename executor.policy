@@ -1,5 +1,34 @@
+grant codeBase "file:%%LIB_DIR%%/jackson-annotations-2.10.0.jar"{
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "setIO";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
+
+grant codeBase "file:%%LIB_DIR%%/jackson-core-2.10.0.jar"{
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "setIO";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
+
+grant codeBase "file:%%LIB_DIR%%/jackson-databind-2.10.0.jar"{
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "setIO";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
+
 grant {
   permission java.io.FilePermission "%%GENERATED%%", "read";
+  permission java.io.FilePermission "%%GENERATED%%/*", "read";
+  permission java.util.PropertyPermission "com.fasterxml.jackson.core.util.BufferRecyclers.trackReusableBuffers", "read";
+};
+
+grant codeBase "file:%%LIB_DIR%%/executors.jar"{
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "setIO";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
   permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
 

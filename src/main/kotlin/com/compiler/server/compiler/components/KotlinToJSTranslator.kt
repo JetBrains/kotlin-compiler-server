@@ -24,7 +24,9 @@ class KotlinToJSTranslator(
     val errors = errorAnalyzer.errorsFrom(files, isJs = true)
     return try {
       if (errorAnalyzer.isOnlyWarnings(errors)) {
-        doTranslate(files, arguments)
+        doTranslate(files, arguments).also {
+          it.addWarnings(errors)
+        }
       }
       else {
         TranslationJSResult(errors = errors)
@@ -41,7 +43,7 @@ class KotlinToJSTranslator(
     arguments: List<String>
   ): TranslationJSResult {
     val currentProject = kotlinEnvironment.coreEnvironment.project
-    val configuration = JsConfig(currentProject, errorAnalyzer.jsConfiguration)
+    val configuration = JsConfig(currentProject, kotlinEnvironment.jsEnvironment)
     val reporter = object : JsConfig.Reporter() {
       override fun error(message: String) {}
       override fun warning(message: String) {}

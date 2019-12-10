@@ -50,11 +50,6 @@ import kotlin.Comparator
 @Component
 class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
-  val jsConfiguration: CompilerConfiguration = kotlinEnvironment.coreEnvironment.configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
-    put(JSConfigurationKeys.LIBRARIES, listOf(File("js").absolutePath))
-  }
-
   fun errorsFrom(files: List<KtFile>, isJs: Boolean = false): Map<String, List<ErrorDescriptor>> {
     val analysis = if (isJs.not()) analysisOf(files) else analyzeFileForJs(files)
     return errorsFrom(
@@ -101,7 +96,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
   fun analyzeFileForJs(files: List<KtFile>): Analysis {
     val project = kotlinEnvironment.coreEnvironment.project
-    val configuration = JsConfig(project, jsConfiguration)
+    val configuration = JsConfig(project, kotlinEnvironment.jsEnvironment)
     val module = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
       moduleName = Name.special("<" + configuration.moduleId + ">"),

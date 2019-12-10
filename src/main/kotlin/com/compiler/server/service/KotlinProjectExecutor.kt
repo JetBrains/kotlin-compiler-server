@@ -18,12 +18,12 @@ class KotlinProjectExecutor(
 
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
 
-  fun run(project: Project): JavaExecutionResult {
+  fun run(project: Project): ExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
     return kotlinCompiler.run(files, project.args)
   }
 
-  fun test(project: Project): JavaExecutionResult {
+  fun test(project: Project): ExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
     return kotlinCompiler.test(files)
   }
