@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.configuration.LibrariesFolderProperties
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JUnitExecutor
 import com.compiler.server.executor.JavaExecutor
@@ -14,6 +15,7 @@ import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.util.prefixIfNot
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Files
@@ -25,6 +27,7 @@ class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
+  private val librariesFolderProperties: LibrariesFolderProperties,
   private val jUnitExecutor: JUnitExecutor
 ) {
 
@@ -81,11 +84,13 @@ class KotlinCompiler(
 
   private fun write(compiled: Compiled): OutputDirectory {
     val dir = System.getProperty("user.dir")
+    val libDir = librariesFolderProperties.jvm
+    val dirPrefix = if (libDir.isEmpty()) libDir else libDir.prefixIfNot("/")
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "generated", sessionId)
     val policy = File("executor.policy").readText()
       .replace("%%GENERATED%%", outputDir.toString())
-      .replace("%%LIB_DIR%%", dir)
+      .replace("%%LIB_DIR%%", dir + dirPrefix)
     outputDir.resolve("executor.policy").apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
