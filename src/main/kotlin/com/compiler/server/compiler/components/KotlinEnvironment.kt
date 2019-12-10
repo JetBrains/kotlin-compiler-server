@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.configuration.LibrariesFolderProperties
 import com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
@@ -19,13 +20,13 @@ import java.io.File
 import java.util.*
 
 @Configuration
-class KotlinEnvironmentConfiguration {
+class KotlinEnvironmentConfiguration(val librariesFolderProperties: LibrariesFolderProperties) {
   @Bean
   fun kotlinEnvironment() = KotlinEnvironment
     .with(
-      classpath = listOfNotNull(File("lib"))
+      classpath = listOfNotNull(File(librariesFolderProperties.jvm))
         .flatMap { it.listFiles().toList() },
-      classpathJs = listOfNotNull(File("js"))
+      classpathJs = listOfNotNull(File(librariesFolderProperties.js))
     )
 }
 

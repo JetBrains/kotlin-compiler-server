@@ -15,14 +15,16 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val kotlinDependency by configurations.creating
 val kotlinJsDependency by configurations.creating
+val libJVMFolder: String by System.getProperties()
+val libJSFolder: String by System.getProperties()
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
-    into("lib")
+    into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(files(Callable { kotlinJsDependency.map {zipTree(it)} }))
-    into("js")
+    into(libJSFolder)
 }
 
 plugins {
@@ -47,7 +49,11 @@ allprojects {
 rootDir.resolve("src/main/resources/application.properties").apply{
     println(absolutePath)
     parentFile.mkdirs()
-    writeText("kotlin.version=${BuildProps.version}")
+    writeText("""
+        kotlin.version=${BuildProps.version}
+        libraries.folder.jvm=${libJVMFolder}
+        libraries.folder.js=${libJSFolder}
+    """.trimIndent())
 }
 
 dependencies {
