@@ -11,9 +11,9 @@ class TestProjectRunner {
   @Autowired
   private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
-  fun run(code: String, contains: String, args: String = "") {
+  fun run(code: String, contains: String, args: String = ""): JavaExecutionResult {
     val project = generateSingleProject(text = code, args = args)
-    runAndTest(project, contains)
+    return runAndTest(project, contains)
   }
 
   fun multiRun(code: List<String>, contains: String) {
@@ -74,10 +74,11 @@ class TestProjectRunner {
 
   fun getVersion() = kotlinProjectExecutor.getVersion().version
 
-  private fun runAndTest(project: Project, contains: String) {
+  private fun runAndTest(project: Project, contains: String): JavaExecutionResult {
     val result = kotlinProjectExecutor.run(project) as JavaExecutionResult?
     Assertions.assertNotNull(result, "Test result should no be a null")
     Assertions.assertTrue(result?.text?.contains(contains) == true, "Actual: ${result?.text}. Expected: $contains")
+    return result!!
   }
 
   private fun convertAndTest(project: Project, contains: String) {

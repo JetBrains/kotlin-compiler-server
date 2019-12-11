@@ -64,7 +64,8 @@ dependencies {
         kotlinDependency("org.hamcrest:hamcrest-core:1.3")
         kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
         kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
-        kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$version") {
+        kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$version")
+        kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2") {
             exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
         }
         kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
