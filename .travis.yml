@@ -1,3 +1,4 @@
 language: java
 script:
+  - ./gradlew compileKotlin
   - ./gradlew test
