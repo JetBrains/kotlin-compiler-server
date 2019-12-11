@@ -1,5 +1,8 @@
 language: java
+install: true
+
+os: linux
+dist: trusty
 jdk: oraclejdk8
 script:
-  - ./gradlew compileKotlin
-  - ./gradlew test
+  - ./gradlew build --scan -s
