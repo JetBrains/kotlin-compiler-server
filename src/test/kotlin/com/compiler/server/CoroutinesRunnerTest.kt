@@ -2,6 +2,7 @@ package com.compiler.server
 
 import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -108,6 +109,7 @@ class CoroutinesRunnerTest {
   }
 
   @Test
+  @Disabled
   fun `base coroutines test 13`() {
     val expectedExMessage = "Timed out waiting for 1300 ms"
     val expectedEx = "kotlinx.coroutines.TimeoutCancellationException"
