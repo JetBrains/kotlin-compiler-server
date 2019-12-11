@@ -35,7 +35,10 @@ class TestProjectRunner {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.run(project) as JavaExecutionResult
     Assertions.assertNotNull(result.exception, "Test result should no be a null")
-    Assertions.assertTrue(result.exception?.message?.contains(contains) == true)
+    Assertions.assertTrue(
+      result.exception?.fullName?.contains(contains) == true,
+      "Actual: ${result.exception?.message}, Expected: $contains"
+    )
   }
 
   fun test(vararg test: String): List<TestDescription> {

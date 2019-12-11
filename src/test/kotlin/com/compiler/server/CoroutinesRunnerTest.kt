@@ -109,7 +109,6 @@ class CoroutinesRunnerTest {
   }
 
   @Test
-  @Disabled
   fun `base coroutines test 13`() {
     val expectedExMessage = "Timed out waiting for 1300 ms"
     val expectedEx = "kotlinx.coroutines.TimeoutCancellationException"

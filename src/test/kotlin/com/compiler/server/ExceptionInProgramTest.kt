@@ -11,12 +11,6 @@ class ExceptionInProgramTest {
   private lateinit var testRunner: TestProjectRunner
 
   @Test
-  fun `no main class jvm test`() = testRunner.runWithException(
-    code = "fun main1() {\n    println(\"sdf\")\n}",
-    contains = "Error: Could not find or load main class"
-  )
-
-  @Test
   fun `command line index of bound jvm`() = testRunner.runWithException(
     code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[2])\n}",
     contains = "java.lang.ArrayIndexOutOfBoundsException"
@@ -25,7 +19,7 @@ class ExceptionInProgramTest {
   @Test
   fun `security read file`() = testRunner.runWithException(
     code = "import java.io.*\n\nfun main() {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
-    contains = "java.security.AccessControlException: access denied"
+    contains = "java.security.AccessControlException"
   )
 
 }

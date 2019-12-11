@@ -6,6 +6,7 @@ import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
 import executors.JUnitExecutors
+import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -33,8 +34,9 @@ class KotlinCompiler(
 
   fun run(files: List<KtFile>, args: String): ExecutionResult {
     return execute(files) { output, compiled ->
-      val arguments = args.split(" ")
-      javaExecutor.execute(argsFrom(compiled.mainClass, output, arguments))
+      val mainClass = JavaRunnerExecutor::class.java.name
+      val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
+      javaExecutor.execute(argsFrom(mainClass, output, arguments))
         .asExecutionResult()
     }
   }

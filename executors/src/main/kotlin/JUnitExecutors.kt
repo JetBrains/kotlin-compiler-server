@@ -1,8 +1,5 @@
 package executors
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.module.SimpleModule
-import junit.framework.ComparisonFailure
 import org.junit.Test
 import org.junit.runner.JUnitCore
 import org.junit.runner.Request
@@ -13,13 +10,6 @@ class JUnitExecutors {
   companion object {
     var output: MutableList<TestRunInfo> = ArrayList()
     private val standardOutput = System.out
-    private val mapper = ObjectMapper().apply {
-      registerModule(SimpleModule().apply {
-        addSerializer(Throwable::class.java, ThrowableSerializer())
-        addSerializer(ComparisonFailure::class.java, JunitFrameworkComparisonFailureSerializer())
-        addSerializer(org.junit.ComparisonFailure::class.java, OrgJunitComparisonFailureSerializer())
-      })
-    }
 
     @JvmStatic
     fun main(args: Array<String>) {

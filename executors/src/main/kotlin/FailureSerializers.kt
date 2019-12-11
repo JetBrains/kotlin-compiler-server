@@ -2,9 +2,19 @@ package executors
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.module.SimpleModule
 import junit.framework.ComparisonFailure
 import java.io.IOException
+
+val mapper = ObjectMapper().apply {
+  registerModule(SimpleModule().apply {
+    addSerializer(Throwable::class.java, ThrowableSerializer())
+    addSerializer(ComparisonFailure::class.java, JunitFrameworkComparisonFailureSerializer())
+    addSerializer(org.junit.ComparisonFailure::class.java, OrgJunitComparisonFailureSerializer())
+  })
+}
 
 class JunitFrameworkComparisonFailureSerializer : JsonSerializer<ComparisonFailure?>() {
   @Throws(IOException::class)
