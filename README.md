@@ -1,4 +1,4 @@
-# Kotlin compiler server
+# Kotlin compiler server [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
 
 Tasks:
 
