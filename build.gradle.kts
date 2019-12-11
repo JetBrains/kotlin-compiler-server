@@ -1,12 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.net.URL
 
 object BuildProps {
-    private const val kotlinBuildType = "Kotlin_KotlinRelease_1360_Aggregate"
-    private const val pluginBuild = "1.3.60-release-IJ2019.3-1"
-    private const val kotlinId = "58008784"
-    const val version = "1.3.60"
-    const val kotlinPluginLocation = "$kotlinBuildType/$kotlinId:id/kotlin-plugin-$pluginBuild.zip!/Kotlin/lib/kotlin-plugin.jar"
+    const val version = "1.3.60-release-155"
 }
 
 group = "com.compiler.server"
@@ -37,7 +32,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://dl.bintray.com/kotlin/kotlin-dev")
+        maven("https://kotlin.bintray.com/kotlin-plugin")
     }
     afterEvaluate {
         dependencies {
@@ -58,24 +53,22 @@ rootDir.resolve("src/main/resources/application.properties").apply{
 
 dependencies {
 
-    kotlinDependency("junit:junit:4.12")
-    kotlinDependency("org.hamcrest:hamcrest-core:1.3")
-    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
-    kotlinDependency(kotlin("stdlib-jdk8"))
-    kotlinDependency(kotlin("reflect"))
-    kotlinJsDependency(kotlin("stdlib-js"))
-
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("junit:junit:4.12")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2")
     with(BuildProps) {
+        kotlinDependency("junit:junit:4.12")
+        kotlinDependency("org.hamcrest:hamcrest-core:1.3")
+        kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+        kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version")
+        kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$version") {
+            exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
+        }
+        kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
+
         compile("org.jetbrains.intellij.deps:trove4j:1.0.20181211")
         compile("org.jetbrains.kotlin:kotlin-reflect:$version")
         compile("org.jetbrains.kotlin:kotlin-stdlib:$version")
@@ -85,13 +78,9 @@ dependencies {
         compile("org.jetbrains.kotlin:kotlin-compiler:$version")
         compile("org.jetbrains.kotlin:kotlin-script-runtime:$version")
         compile("org.jetbrains.kotlin:kotlin-stdlib-js:$version")
-        compile(
-          dependencyFrom(
-                url = "https://buildserver.labs.intellij.net/guestAuth/repository/download/$kotlinPluginLocation",
-                artifact = "kotlin-plugin",
-                version = version
-          )
-        )
+        compile("org.jetbrains.kotlin:kotlin-plugin-ij193:$version") {
+            isTransitive = false
+        }
     }
     compile(project(":executors"))
 }
@@ -108,14 +97,4 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-fun dependencyFrom(
-        url: String,
-        artifact: String,
-        version: String
-) = File("$buildDir/download/$artifact-$version.jar").let { file ->
-    file.parentFile.mkdirs()
-    file.writeBytes(URL(url).readBytes())
-    files(file.absolutePath)
 }
