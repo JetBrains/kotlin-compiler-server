@@ -51,11 +51,11 @@ class JavaExecutor {
         when {
           futuresList.any { it.isCancelled } -> {
             // execution timeout. Both Future objects must be in 'done' state, to say that process finished
-            ProgramOutput(ExecutorMessages.TIMEOUT_MESSAGE)
+            ProgramOutput(restriction = ExecutorMessages.TIMEOUT_MESSAGE)
           }
           outputResults.any { it.length >= MAX_OUTPUT_SIZE } -> {
             // log-limit exceeded
-            ProgramOutput(ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE)
+            ProgramOutput(restriction = ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE)
           }
           else -> {
             // normal exit

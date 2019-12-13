@@ -47,6 +47,7 @@ class TestProjectRunner {
     Assertions.assertNotNull(result?.testResults, "Test result should no be a null")
     return result?.testResults?.values?.flatten() ?: emptyList()
   }
+  fun testRaw(vararg test: String): JunitExecutionResult? = executeTest(*test)
 
   fun complete(
     code: String,
@@ -76,6 +77,11 @@ class TestProjectRunner {
   }
 
   fun getVersion() = kotlinProjectExecutor.getVersion().version
+
+  private fun executeTest(vararg test: String): JunitExecutionResult? {
+    val project = generateMultiProject(*test, projectType = ProjectType.JUNIT)
+    return kotlinProjectExecutor.test(project) as? JunitExecutionResult
+  }
 
   private fun runAndTest(project: Project, contains: String): JavaExecutionResult {
     val result = kotlinProjectExecutor.run(project) as JavaExecutionResult?
