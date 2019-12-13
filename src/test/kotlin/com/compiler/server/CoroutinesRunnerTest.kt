@@ -16,7 +16,7 @@ class CoroutinesRunnerTest {
   fun `base coroutines test 1`() {
     testRunner.run(
       code = "import kotlinx.coroutines.*\n\nfun main() {\n    GlobalScope.launch { // launch a new coroutine in background and continue\n        delay(1000L) // non-blocking delay for 1 second (default time unit is ms)\n        println(\"World!\") // print after delay\n    }\n    println(\"Hello,\") // main thread continues while coroutine is delayed\n    Thread.sleep(2000L) // block main thread for 2 seconds to keep JVM alive\n}",
-      contains = "Hello,\nWorld!\n\n"
+      contains = "Hello,\nWorld!\n"
     )
   }
 
@@ -40,7 +40,7 @@ class CoroutinesRunnerTest {
   fun `base coroutines test 4`() {
     testRunner.run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking { // this: CoroutineScope\n    launch { // launch a new coroutine in the scope of runBlocking\n        delay(1000L)\n        println(\"World!\")\n    }\n    println(\"Hello,\")\n}",
-      contains = "Hello,\nWorld!\n\n"
+      contains = "Hello,\nWorld!\n"
     )
   }
 
