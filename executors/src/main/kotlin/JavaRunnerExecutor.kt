@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.lang.reflect.InvocationTargetException
 
+const val NO_MAIN_METHOD = "No main method found in project."
+
 class JavaRunnerExecutor {
   companion object {
     private val outputStream = ByteArrayOutputStream()
@@ -28,14 +30,14 @@ class JavaRunnerExecutor {
             outputObj.exception = e.cause
           }
           catch (e: NoSuchMethodException) {
-            System.err.println("No main method found in project.")
+            System.err.println(NO_MAIN_METHOD)
           }
           catch (e: ClassNotFoundException) {
-            System.err.println("No main method found in project.")
+            System.err.println(NO_MAIN_METHOD)
           }
         }
         else {
-          System.err.println("No main method found in project.")
+          System.err.println(NO_MAIN_METHOD)
         }
         System.out.flush()
         System.err.flush()
