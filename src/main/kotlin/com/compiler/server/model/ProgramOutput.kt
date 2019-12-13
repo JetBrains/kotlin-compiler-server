@@ -12,7 +12,16 @@ data class ProgramOutput(
   fun asExecutionResult(): JavaExecutionResult {
     return when {
       restriction != null -> JavaExecutionResult().apply { text = restriction }
-      else -> jacksonObjectMapper().readValue(standardOutput, JavaExecutionResult::class.java)
+      else -> {
+        // coroutines can produced incorrect output. see example in `base coroutines test 7`
+        if (standardOutput.startsWith("{")) jacksonObjectMapper().readValue(standardOutput, JavaExecutionResult::class.java)
+        else {
+          val result = jacksonObjectMapper().readValue( "{" + standardOutput.substringAfter("{"), JavaExecutionResult::class.java)
+          result.apply {
+            text = standardOutput.substringBefore("{") + text
+          }
+        }
+      }
     }
   }
 
