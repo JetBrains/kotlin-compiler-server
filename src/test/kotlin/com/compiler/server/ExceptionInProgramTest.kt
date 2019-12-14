@@ -1,6 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.generator.TestProjectRunner
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,6 +21,18 @@ class ExceptionInProgramTest {
   fun `security read file`() = testRunner.runWithException(
     code = "import java.io.*\n\nfun main() {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
     contains = "java.security.AccessControlException"
+  )
+
+  @Test
+  @Language("kotlin")
+  fun `kotlin npe`() = testRunner.runWithException(
+    code = """
+      fun main() {
+        val s: String? = null
+        print(s!!)
+        }
+    """.trimIndent(),
+    contains = "kotlin.KotlinNullPointerException"
   )
 
 }
