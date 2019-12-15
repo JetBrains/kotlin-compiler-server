@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 open class ExecutionResult(
   open var errors: Map<String, List<ErrorDescriptor>> = emptyMap(),
-  open val exception: ExceptionDescriptor? = null
+  open var exception: ExceptionDescriptor? = null
 ) {
   var text: String = ""
     set(value) {
@@ -17,14 +17,14 @@ open class ExecutionResult(
 
 data class TranslationJSResult(
   val jsCode: String? = null,
-  override val exception: ExceptionDescriptor? = null,
+  override var exception: ExceptionDescriptor? = null,
   override var errors: Map<String, List<ErrorDescriptor>> = emptyMap()
 ) : ExecutionResult(errors, exception)
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 class JunitExecutionResult(
   val testResults: Map<String, List<TestDescription>> = emptyMap(),
-  override val exception: ExceptionDescriptor? = null,
+  override var exception: ExceptionDescriptor? = null,
   override var errors: Map<String, List<ErrorDescriptor>> = emptyMap()
 ) : ExecutionResult(errors, exception)
 

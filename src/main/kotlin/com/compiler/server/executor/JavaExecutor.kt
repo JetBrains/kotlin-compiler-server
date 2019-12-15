@@ -32,7 +32,7 @@ class JavaExecutor {
       try {
         val currTime = System.currentTimeMillis()
         val futuresList = Executors.newFixedThreadPool(2) // one thread per output
-                .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
+          .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
         // we do not wait for process to end, while either time-limit or output-limit triggered
         // program itself will be destroyed right after we'll leave this method
         println("Script execution time in millis: " + (System.currentTimeMillis() - currTime))
@@ -65,8 +65,7 @@ class JavaExecutor {
       }
       catch (any: Exception) {
         // all sort of things may happen, so we better be aware
-        any.printStackTrace()
-        ProgramOutput(exception = any) // TODO: validate
+        ProgramOutput(exception = any)
       }
       finally {
         try {

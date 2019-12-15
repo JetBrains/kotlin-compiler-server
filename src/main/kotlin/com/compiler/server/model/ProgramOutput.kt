@@ -19,6 +19,7 @@ data class ProgramOutput(
   fun asExecutionResult(): ExecutionResult {
     return when {
       restriction != null -> ExecutionResult().apply { text = buildRestriction(restriction) }
+      exception != null -> ExecutionResult().also { it.exception = exception.toExceptionDescriptor() }
       else -> {
         // coroutines can produced incorrect output. see example in `base coroutines test 7`
         if (standardOutput.startsWith("{")) outputMapper.readValue(standardOutput, ExecutionResult::class.java)
@@ -35,6 +36,7 @@ data class ProgramOutput(
   fun asJUnitExecutionResult(): JunitExecutionResult {
     return when {
       restriction != null -> JunitExecutionResult().apply { text = buildRestriction(restriction) }
+      exception != null -> JunitExecutionResult().also { it.exception = exception.toExceptionDescriptor() }
       else -> {
         val result = outputMapper.readValue(
           standardOutput,
