@@ -11,7 +11,7 @@ class TestProjectRunner {
   @Autowired
   private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
-  fun run(code: String, contains: String, args: String = ""): JavaExecutionResult {
+  fun run(code: String, contains: String, args: String = ""): ExecutionResult {
     val project = generateSingleProject(text = code, args = args)
     return runAndTest(project, contains)
   }
@@ -31,14 +31,15 @@ class TestProjectRunner {
     convertAndTest(project, contains)
   }
 
-  fun runWithException(code: String, contains: String) {
+  fun runWithException(code: String, contains: String): ExecutionResult {
     val project = generateSingleProject(text = code)
-    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult
+    val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result.exception, "Test result should no be a null")
     Assertions.assertTrue(
       result.exception?.fullName?.contains(contains) == true,
       "Actual: ${result.exception?.message}, Expected: $contains"
     )
+    return result
   }
 
   fun test(vararg test: String): List<TestDescription> {
@@ -47,6 +48,7 @@ class TestProjectRunner {
     Assertions.assertNotNull(result?.testResults, "Test result should no be a null")
     return result?.testResults?.values?.flatten() ?: emptyList()
   }
+
   fun testRaw(vararg test: String): JunitExecutionResult? = executeTest(*test)
 
   fun complete(
@@ -83,11 +85,11 @@ class TestProjectRunner {
     return kotlinProjectExecutor.test(project) as? JunitExecutionResult
   }
 
-  private fun runAndTest(project: Project, contains: String): JavaExecutionResult {
-    val result = kotlinProjectExecutor.run(project) as JavaExecutionResult?
+  private fun runAndTest(project: Project, contains: String): ExecutionResult {
+    val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result?.text?.contains(contains) == true, "Actual: ${result?.text}. Expected: $contains")
-    return result!!
+    Assertions.assertTrue(result.text.contains(contains) == true, "Actual: ${result.text}. Expected: $contains")
+    return result
   }
 
   private fun convertAndTest(project: Project, contains: String) {

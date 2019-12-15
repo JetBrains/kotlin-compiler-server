@@ -2,9 +2,12 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.configuration.LibrariesFolderProperties
 import com.compiler.server.executor.CommandLineArgument
+import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProgramOutput
+import com.compiler.server.model.toExceptionDescriptor
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
@@ -65,22 +68,27 @@ class KotlinCompiler(
     files: List<KtFile>,
     block: (output: OutputDirectory, compilation: Compiled) -> ExecutionResult
   ): ExecutionResult {
-    val errors = errorAnalyzer.errorsFrom(files)
-    return if (errorAnalyzer.isOnlyWarnings(errors)) {
-      val compilation = compile(files)
-      if (compilation.files.isEmpty())
-        return ExecutionResult(mapOf("No compilation files found!" to emptyList()))
-      val output = write(compilation)
-      try {
-        block(output, compilation).also {
-          it.addWarnings(errors)
+    return try {
+      val errors = errorAnalyzer.errorsFrom(files)
+      return if (errorAnalyzer.isOnlyWarnings(errors)) {
+        val compilation = compile(files)
+        if (compilation.files.isEmpty())
+          return ProgramOutput(restriction = ExecutorMessages.NO_COMPILERS_FILE_FOUND).asExecutionResult()
+        val output = write(compilation)
+        try {
+          block(output, compilation).also {
+            it.addWarnings(errors)
+          }
+        }
+        finally {
+          output.path.toAbsolutePath().toFile().deleteRecursively()
         }
       }
-      finally {
-        output.path.toAbsolutePath().toFile().deleteRecursively()
-      }
+      else ExecutionResult(errors)
     }
-    else ExecutionResult(errors)
+    catch (e: Exception) {
+      ExecutionResult(exception = e.toExceptionDescriptor())
+    }
   }
 
   private fun write(compiled: Compiled): OutputDirectory {
