@@ -2,6 +2,7 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.TranslationJSResult
+import com.compiler.server.model.toExceptionDescriptor
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -32,8 +33,8 @@ class KotlinToJSTranslator(
         TranslationJSResult(errors = errors)
       }
     }
-    catch (e: Throwable) {
-      throw Exception(e)
+    catch (e: Exception) {
+      TranslationJSResult(exception = e.toExceptionDescriptor())
     }
   }
 

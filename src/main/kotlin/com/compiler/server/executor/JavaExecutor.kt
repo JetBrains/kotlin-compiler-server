@@ -32,7 +32,7 @@ class JavaExecutor {
       try {
         val currTime = System.currentTimeMillis()
         val futuresList = Executors.newFixedThreadPool(2) // one thread per output
-                .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
+          .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
         // we do not wait for process to end, while either time-limit or output-limit triggered
         // program itself will be destroyed right after we'll leave this method
         println("Script execution time in millis: " + (System.currentTimeMillis() - currTime))
@@ -46,35 +46,25 @@ class JavaExecutor {
           }
         }
 
-        val (standardText, errorText) = outputResults
-        val exception = if (errorText.isNotEmpty()) Exception(errorText) else null
+        val (standardText, _) = outputResults
 
         when {
           futuresList.any { it.isCancelled } -> {
             // execution timeout. Both Future objects must be in 'done' state, to say that process finished
-            ProgramOutput(
-                    ExecutorMessages.TIMEOUT_MESSAGE,
-                    errorText,
-                    exception
-            )
+            ProgramOutput(restriction = ExecutorMessages.TIMEOUT_MESSAGE)
           }
           outputResults.any { it.length >= MAX_OUTPUT_SIZE } -> {
             // log-limit exceeded
-            ProgramOutput(
-              ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE,
-              errorText,
-              exception
-            )
+            ProgramOutput(restriction = ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE)
           }
           else -> {
             // normal exit
-            ProgramOutput(standardText, errorText, exception)
+            ProgramOutput(standardText)
           }
         }
       }
       catch (any: Exception) {
         // all sort of things may happen, so we better be aware
-        any.printStackTrace()
         ProgramOutput(exception = any)
       }
       finally {

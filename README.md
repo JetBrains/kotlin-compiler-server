@@ -17,9 +17,10 @@ Tasks:
 14) move `lib` to  config props (+)
 15) add coroutines (+)
 16) add coroutines test (+)
-17) test junit exception in executor
+17) test junit exception in executor (+)
 18) js env from ErrAnalyzer to EnvManager (+)
 19) Get kotlin plugin form marketplace (+)
-20) Bug with exception in executor. See coroutines test 13
-21) Fix InterruptExecutionTest
-22) Tests on exeptions
+20) Bug with exception in executor. See coroutines test 13 (+)
+21) Fix InterruptExecutionTest (+)
+22) Tests on exception (+)
+23) Validate compiler exceptions (+)
