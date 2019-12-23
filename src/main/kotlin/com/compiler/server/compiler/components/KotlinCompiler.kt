@@ -47,11 +47,8 @@ class KotlinCompiler(
   fun test(files: List<KtFile>): ExecutionResult {
     return execute(files) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
-      javaExecutor.execute(argsFrom(
-        mainClass = mainClass,
-        outputDirectory = output,
-        args = listOf(output.path.toString())
-      )).asJUnitExecutionResult()
+      javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
+        .asJUnitExecutionResult()
     }
   }
 
