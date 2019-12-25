@@ -2,7 +2,6 @@ package com.compiler.server
 
 import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -128,6 +127,56 @@ class CoroutinesRunnerTest {
       contains = "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\nResult is null\n"
     )
   }
+
+
+  @Test
+  fun `base coroutines test 15 Composing Suspending Functions`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\nimport kotlin.system.*\n\nfun main() = runBlocking<Unit> {\nval time = measureTimeMillis {\n    val one = doSomethingUsefulOne()\n    val two = doSomethingUsefulTwo()\n    println(\"The answer is \${one + two}\")\n}\nprintln(\"Completed in \$time ms\")    \n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L) // pretend we are doing something useful here\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L) // pretend we are doing something useful here, too\n    return 29\n}",
+      contains = "The answer is 42\nCompleted in"
+    )
+  }
+
+  @Test
+  fun `base coroutines test 16`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\nimport kotlin.system.*\n\nfun main() = runBlocking<Unit> {\nval time = measureTimeMillis {\n    val one = async { doSomethingUsefulOne() }\n    val two = async { doSomethingUsefulTwo() }\n    println(\"The answer is \${one.await() + two.await()}\")\n}\nprintln(\"Completed in \$time ms\")    \n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L) // pretend we are doing something useful here\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L) // pretend we are doing something useful here, too\n    return 29\n}",
+      contains = "The answer is 42\nCompleted in"
+    )
+  }
+
+  @Test
+  fun `base coroutines test 17`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\nimport kotlin.system.*\n\nfun main() = runBlocking<Unit> {\nval time = measureTimeMillis {\n    val one = async(start = CoroutineStart.LAZY) { doSomethingUsefulOne() }\n    val two = async(start = CoroutineStart.LAZY) { doSomethingUsefulTwo() }\n    // some computation\n    one.start() // start the first one\n    two.start() // start the second one\n    println(\"The answer is \${one.await() + two.await()}\")\n}\nprintln(\"Completed in \$time ms\")    \n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L) // pretend we are doing something useful here\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L) // pretend we are doing something useful here, too\n    return 29\n}",
+      contains = "The answer is 42\nCompleted in"
+    )
+  }
+
+  @Test
+  fun `base coroutines test 18`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\nimport kotlin.system.*\n\n// note that we don't have `runBlocking` to the right of `main` in this example\nfun main() {\n    val time = measureTimeMillis {\n        // we can initiate async actions outside of a coroutine\n        val one = somethingUsefulOneAsync()\n        val two = somethingUsefulTwoAsync()\n        // but waiting for a result must involve either suspending or blocking.\n        // here we use `runBlocking { ... }` to block the main thread while waiting for the result\n        runBlocking {\n            println(\"The answer is \${one.await() + two.await()}\")\n        }\n    }\n    println(\"Completed in \$time ms\")\n}\n\nfun somethingUsefulOneAsync() = GlobalScope.async {\n    doSomethingUsefulOne()\n}\n\nfun somethingUsefulTwoAsync() = GlobalScope.async {\n    doSomethingUsefulTwo()\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L) // pretend we are doing something useful here\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L) // pretend we are doing something useful here, too\n    return 29\n}",
+      contains = "The answer is 42\nCompleted in"
+    )
+  }
+
+  @Test
+  fun `base coroutines test 19`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\nimport kotlin.system.*\n\nfun main() = runBlocking<Unit> {\nval time = measureTimeMillis {\n    println(\"The answer is \${concurrentSum()}\")\n}\nprintln(\"Completed in \$time ms\")    \n}\n\nsuspend fun concurrentSum(): Int = coroutineScope {\n    val one = async { doSomethingUsefulOne() }\n    val two = async { doSomethingUsefulTwo() }\n    one.await() + two.await()\n}\n\nsuspend fun doSomethingUsefulOne(): Int {\n    delay(1000L) // pretend we are doing something useful here\n    return 13\n}\n\nsuspend fun doSomethingUsefulTwo(): Int {\n    delay(1000L) // pretend we are doing something useful here, too\n    return 29\n}",
+      contains = "The answer is 42\nCompleted in"
+    )
+  }
+
+  @Test
+  fun `base coroutines test 20`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    try {\n        failedConcurrentSum()\n    } catch(e: ArithmeticException) {\n        println(\"Computation failed with ArithmeticException\")\n    }\n}\n\nsuspend fun failedConcurrentSum(): Int = coroutineScope {\n    val one = async<Int> { \n        try {\n            delay(Long.MAX_VALUE) // Emulates very long computation\n            42\n        } finally {\n            println(\"First child was cancelled\")\n        }\n    }\n    val two = async<Int> { \n        println(\"Second child throws an exception\")\n        throw ArithmeticException()\n    }\n    one.await() + two.await()\n}",
+      contains = "Second child throws an exception\nFirst child was cancelled\nComputation failed with ArithmeticException\n"
+    )
+  }
+
 
   @Test
   fun `base coroutines test `() {
