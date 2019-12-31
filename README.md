@@ -1,5 +1,54 @@
 # Kotlin compiler server [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
 
+REST API for compile Kotlin code.
+Server also provides API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
+
+## How to start
+
+```bash
+$ ./gradlew bootJar
+```
+
+TODO: add Docker configuration
+
+## How to develop
+
+Download Kotlin dependencies and build executor before starting the server:
+
+```bash
+$ ./gradlew build
+```
+
+Start Spring Boot project.
+
+## How to add your dependencies to kotlin compiler :books:
+
+Just put whatever you need as dependencies to [build.gradle.kts](https://github.com/AlexanderPrednota/kotlin-compiler-server/blob/master/build.gradle.kts) via a task called `kotlinDependency`:
+
+```
+ kotlinDependency "your dependency"
+```
+
+NOTE: If the library you're adding uses reflection, accesses the file system, or performs any other type of security-sensitive operations, don't forget to
+configure the [executors.policy](https://github.com/AlexanderPrednota/kotlin-compiler-server/blob/master/executors.policy). [Click here](https://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html) for more information about *Java Security Policy*.
+
+**How to set Java Security Policy in `executors.policy`**
+
+If you want to configure a custom dependency, use the marker `@LIB_DIR@`:
+
+```
+grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  permission java.lang.RuntimePermission "setIO";
+  permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+};
+```
+
+## Documentation
+
+TODO: Describe API
+
 Tasks:
 
 1) Tests on highlight + warnings (+)
