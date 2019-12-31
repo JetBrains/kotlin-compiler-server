@@ -11,16 +11,7 @@ data class Project(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ProjectFile(
-  val text: String = "",
-  val name: String = "",
-  val type: Type = Type.KOTLIN_FILE
-)
-
-enum class Type {
-  KOTLIN_FILE,
-  KOTLIN_TEST_FILE
-}
+data class ProjectFile(val text: String = "", val name: String = "")
 
 enum class ProjectType(@JsonValue val id: String) {
   JAVA("java"),
