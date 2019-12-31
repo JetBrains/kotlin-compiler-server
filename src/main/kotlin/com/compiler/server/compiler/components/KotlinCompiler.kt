@@ -19,6 +19,7 @@ import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.util.prefixIfNot
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Files
@@ -30,7 +31,8 @@ class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
-  private val librariesFolderProperties: LibrariesFolderProperties
+  private val librariesFolderProperties: LibrariesFolderProperties,
+  @Value("\${policy.file}") private val policyFileName: String
 ) {
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
@@ -94,10 +96,10 @@ class KotlinCompiler(
     val dirPrefix = if (libDir.isEmpty()) libDir else libDir.prefixIfNot("/")
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "generated", sessionId)
-    val policy = File("executor.policy").readText()
+    val policy = File(policyFileName).readText()
       .replace("%%GENERATED%%", outputDir.toString())
       .replace("%%LIB_DIR%%", dir + dirPrefix)
-    outputDir.resolve("executor.policy").apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
+    outputDir.resolve(policyFileName).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
         path.parent.toFile().mkdirs()
@@ -125,7 +127,7 @@ class KotlinCompiler(
   ): List<String> {
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
-    val policy = outputDirectory.path.resolve("executor.policy").toAbsolutePath()
+    val policy = outputDirectory.path.resolve(policyFileName).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
