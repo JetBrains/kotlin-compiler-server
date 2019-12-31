@@ -1,3 +1,5 @@
+val kotlinVersion: String by System.getProperties()
+
 plugins {
   kotlin("jvm")
 }
@@ -7,5 +9,5 @@ dependencies {
 }
 
 tasks.withType<Jar>().getByName("jar") {
-  destinationDirectory.set(File("../lib"))
+  destinationDirectory.set(File("../$kotlinVersion"))
 }
