@@ -1,6 +1,5 @@
 package com.compiler.server
 
-import com.compiler.server.base.BaseJUnitTest
 import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.generator.TestProjectRunner
 import com.compiler.server.model.TestStatus
@@ -23,8 +22,7 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
       koansUtilsFile
     )
     val message = test?.text
-    Assertions.assertTrue(message?.contains(ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE) == true,
-                          "Actual: $message, Excepted: ${ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE} ")
+    Assertions.assertTrue(message?.contains(ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE) == true, "Actual: $message, Excepted: ${ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE} ")
 
   }
 

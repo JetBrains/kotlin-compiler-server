@@ -1,10 +1,10 @@
-package com.compiler.server.base
+package com.compiler.server
 
 import com.compiler.server.model.TestDescription
 import com.compiler.server.model.TestStatus
 import org.junit.jupiter.api.Assertions
 
-class BaseJUnitTest : BaseTestClass() {
+open class BaseJUnitTest {
   fun successTestCheck(testResults: List<TestDescription>) {
     testResults
       .map { it.status }

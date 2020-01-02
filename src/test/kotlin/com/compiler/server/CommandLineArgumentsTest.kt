@@ -1,11 +1,13 @@
 package com.compiler.server
 
-import com.compiler.server.base.BaseTestClass
 import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
-class CommandLineArgumentsTest : BaseTestClass() {
+
+@SpringBootTest
+class CommandLineArgumentsTest {
 
   @Autowired
   private lateinit var testRunner: TestProjectRunner

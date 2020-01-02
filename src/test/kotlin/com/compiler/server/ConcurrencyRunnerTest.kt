@@ -1,6 +1,5 @@
 package com.compiler.server
 
-import com.compiler.server.base.BaseTestClass
 import com.compiler.server.generator.TestProjectRunner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -9,8 +8,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
-class ConcurrencyRunnerTest : BaseTestClass() {
+@SpringBootTest
+class ConcurrencyRunnerTest {
   @Autowired
   private lateinit var testRunner: TestProjectRunner
 

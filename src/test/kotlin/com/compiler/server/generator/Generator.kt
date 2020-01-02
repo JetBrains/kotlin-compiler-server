@@ -4,6 +4,7 @@ import com.compiler.server.model.Project
 import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.ProjectType
 
+
 fun generateSingleProject(text: String, args: String = "", projectType: ProjectType = ProjectType.JAVA): Project {
   val file = ProjectFile(
     text = text,
