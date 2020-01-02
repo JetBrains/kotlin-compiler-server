@@ -32,7 +32,7 @@ class KotlinCompiler(
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
   private val librariesFolderProperties: LibrariesFolderProperties,
-  @Value("\${policy.file}") private val policyFileName: String
+  private val policyFile: File
 ) {
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
@@ -96,10 +96,10 @@ class KotlinCompiler(
     val dirPrefix = if (libDir.isEmpty()) libDir else libDir.prefixIfNot("/")
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "generated", sessionId)
-    val policy = File(policyFileName).readText()
+    val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString())
       .replace("%%LIB_DIR%%", dir + dirPrefix)
-    outputDir.resolve(policyFileName).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
+    outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
         path.parent.toFile().mkdirs()
@@ -127,7 +127,7 @@ class KotlinCompiler(
   ): List<String> {
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
-    val policy = outputDirectory.path.resolve(policyFileName).toAbsolutePath()
+    val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
