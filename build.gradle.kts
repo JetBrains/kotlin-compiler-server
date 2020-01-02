@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by System.getProperties()
-val policyFile: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "compiler-server-$kotlinVersion-SNAPSHOT"
@@ -39,11 +38,10 @@ allprojects {
     }
 }
 
-rootDir.resolve("src/main/resources/application.properties").apply{
+rootDir.resolve("src/main/resources/libraries.properties").apply{
     println(absolutePath)
     parentFile.mkdirs()
     writeText("""
-        policy.file=${policyFile}
         kotlin.version=${kotlinVersion}
         libraries.folder.jvm=${kotlinVersion}
         libraries.folder.js=${libJSFolder}

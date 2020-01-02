@@ -1,5 +1,6 @@
 package com.compiler.server
 
+import com.compiler.server.base.BaseJUnitTest
 import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

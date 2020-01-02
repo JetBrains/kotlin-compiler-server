@@ -1,15 +1,14 @@
 package com.compiler.server
 
+import com.compiler.server.base.BaseTestClass
 import com.compiler.server.generator.TestProjectRunner
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-class HighlightTest {
+class HighlightTest : BaseTestClass() {
   @Autowired
   private lateinit var testRunner: TestProjectRunner
 
