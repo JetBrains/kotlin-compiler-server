@@ -26,7 +26,7 @@ class ApplicationConfiguration(
 }
 
 @Configuration
-@PropertySource(value = ["libraries.properties"], ignoreResourceNotFound = true)
+@PropertySource(value = ["libraries.properties"])
 @EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
 class KotlinLibrariesConfiguration(@Value("\${kotlin.version}") private val version: String) {
   @Bean
