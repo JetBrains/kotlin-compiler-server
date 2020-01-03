@@ -138,9 +138,16 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 };
 ```
 
-## Documentation
+## Kotlin release guide
 
-TODO: Describe API
+1) Update kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
+2) Just make sure everything is going well via task: 
+
+```shell script
+$ ./gradlew build
+```
+
+3) Update kotlin version badge in [README.md](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/README.md) 🙂
 
 Tasks:
 
