@@ -1,17 +1,17 @@
 # Kotlin compiler server [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server) [ ![Kotlin](https://img.shields.io/badge/Kotlin-1.3.60-orange.svg) ](https://kotlinlang.org/) [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
-REST API for compile Kotlin code.
-Server provides API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
+REST API for compiling and executing Kotlin code.
+Server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
 
 ## How to start
 
-Download Kotlin dependencies and build executor before starting the server:
+Download Kotlin dependencies and build an executor before starting the server:
 
 ```shell script
 $ ./gradlew build -x test 
 ```
 
-Start Spring Boot project.
+Start the Spring Boot project.
 
 ## API Documentation
 
@@ -105,14 +105,14 @@ curl -X POST \
 }'
 ```
 
-**Get Kotlin version**
+**Get the current Kotlin version**
 
 ```shell script
 curl -X GET http://localhost:8080/api/compiler/version
 ```
 
 
-Also server supports [API](https://github.com/JetBrains/kotlin-playground) for Kotlin Playground library. 
+Server also supports an [API](https://github.com/JetBrains/kotlin-playground) for the Kotlin Playground library. 
 
 ## How to add your dependencies to kotlin compiler :books:
 
@@ -141,13 +141,13 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 ## Kotlin release guide
 
 1) Update kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
-2) Just make sure everything is going well via task: 
+2) Just make sure everything is going well via the task: 
 
 ```shell script
 $ ./gradlew build
 ```
 
-3) Update kotlin version badge in [README.md](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/README.md) 🙂
+3) Update the kotlin version badge in [README.md](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/README.md) 🙂
 
 Tasks:
 
