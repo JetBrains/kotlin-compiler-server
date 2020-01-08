@@ -147,8 +147,6 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 $ ./gradlew build
 ```
 
-3) Update the kotlin version badge in [README.md](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/README.md) 🙂
-
 Tasks:
 
 1) Tests on highlight + warnings (+)
