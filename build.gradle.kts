@@ -29,7 +29,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://kotlin.bintray.com/kotlin-plugin")
+        maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
     }
     afterEvaluate {
         dependencies {
