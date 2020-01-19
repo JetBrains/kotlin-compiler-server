@@ -104,7 +104,7 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks.withType<BootJar> {
-    //https://discuss.kotlinlang.org/t/kotlin-script-engine-with-spring-boot-self-running-war/14096
+    //https://stackoverflow.com/questions/57727150/kotlin-script-engine-with-spring-boot-self-running-war
     requiresUnpack("**/kotlin-*.jar")
     requiresUnpack("**/kotlinx-*.jar")
 }
