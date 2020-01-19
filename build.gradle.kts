@@ -5,7 +5,7 @@ val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
 
 group = "com.compiler.server"
-version = "compiler-server-$kotlinVersion-SNAPSHOT"
+version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 val kotlinDependency: Configuration by configurations.creating
