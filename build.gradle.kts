@@ -51,7 +51,7 @@ rootDir.resolve("src/main/resources/libraries.properties").apply{
 
 dependencies {
 
-    kotlinDependency("junit:junit:4.12")
+    kotlinDependency("junit:junit:4.13")
     kotlinDependency("org.hamcrest:hamcrest-core:1.3")
     kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
