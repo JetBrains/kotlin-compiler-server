@@ -1,7 +1,7 @@
 # Kotlin compiler server [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server) [ ![Kotlin](https://img.shields.io/badge/Kotlin-1.3.60-orange.svg) ](https://kotlinlang.org/) [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
-REST API for compiling and executing Kotlin code.
-Server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
+A REST server for compiling and executing Kotlin code.
+The server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
 
 ## How to start
 
@@ -15,7 +15,7 @@ Start the Spring Boot project.
 
 ## API Documentation
 
-**Run code JVM**
+### Execute Kotlin code on JVM
 
 ```shell script
 curl -X POST \
@@ -32,7 +32,7 @@ curl -X POST \
 }'
 ```
 
-**Translate Kotlin code to JavaScript code**
+### Translate Kotlin code to JavaScript code
 
 ```shell script
 curl -X POST \
@@ -49,7 +49,7 @@ curl -X POST \
 }'
 ```
 
-**Run tests**
+### Run Kotlin tests
 
 ```shell script
 curl -X POST \
@@ -73,7 +73,7 @@ curl -X POST \
 }'
 ```
 
-**Code completions**
+### Get code completions for a specified place in code 
 
 ```shell script
 curl -X POST \
@@ -89,7 +89,7 @@ curl -X POST \
 }'
 ```
 
-**Code analytics**
+### Get code analysis results
 
 ```shell script
 curl -X POST \
@@ -105,14 +105,14 @@ curl -X POST \
 }'
 ```
 
-**Get the current Kotlin version**
+### Get the current Kotlin version
 
 ```shell script
 curl -X GET http://localhost:8080/api/compiler/version
 ```
 
 
-Server also supports an [API](https://github.com/JetBrains/kotlin-playground) for the Kotlin Playground library. 
+The server also supports an [API](https://github.com/JetBrains/kotlin-playground) for the Kotlin Playground library. 
 
 ## How to add your dependencies to kotlin compiler :books:
 
@@ -140,8 +140,8 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 
 ## Kotlin release guide
 
-1) Update kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
-2) Just make sure everything is going well via the task: 
+1) Update the kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
+2) Make sure everything is going well via the task: 
 
 ```shell script
 $ ./gradlew build
