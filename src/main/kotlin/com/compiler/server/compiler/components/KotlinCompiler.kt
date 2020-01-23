@@ -1,12 +1,12 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.configuration.LibrariesFolderProperties
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProgramOutput
+import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
@@ -18,8 +18,6 @@ import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.util.prefixIfNot
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Files
@@ -31,7 +29,7 @@ class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
-  private val librariesFolderProperties: LibrariesFolderProperties,
+  private val librariesFile: LibrariesFile,
   private val policyFile: File
 ) {
 
@@ -92,13 +90,12 @@ class KotlinCompiler(
 
   private fun write(compiled: Compiled): OutputDirectory {
     val dir = System.getProperty("user.dir")
-    val libDir = librariesFolderProperties.jvm
-    val dirPrefix = if (libDir.isEmpty()) libDir else libDir.prefixIfNot("/")
+    val libDir = librariesFile.jvm.absolutePath
     val sessionId = UUID.randomUUID().toString().replace("-", "")
-    val outputDir = Paths.get(dir, "generated", sessionId)
+    val outputDir = Paths.get(dir, "tmp", sessionId)
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString())
-      .replace("%%LIB_DIR%%", dir + dirPrefix)
+      .replace("%%LIB_DIR%%", libDir)
     outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->

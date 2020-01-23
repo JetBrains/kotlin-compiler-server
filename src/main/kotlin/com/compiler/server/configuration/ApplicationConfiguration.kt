@@ -1,36 +1,38 @@
 package com.compiler.server.configuration
 
-import com.compiler.server.model.VersionInfo
+import com.compiler.server.model.bean.LibrariesFile
+import com.compiler.server.model.bean.VersionInfo
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.PropertySource
-import org.springframework.core.io.ResourceLoader
 import org.springframework.format.FormatterRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.io.File
 
 @Configuration
+@EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
 class ApplicationConfiguration(
   @Value("\${policy.file}") private val policyFileName: String,
-  private val resourceLoader: ResourceLoader
+  @Value("\${kotlin.version}") private val version: String,
+  private val librariesFolderProperties: LibrariesFolderProperties
 ) : WebMvcConfigurer {
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ProjectConverter())
   }
 
   @Bean
-  fun policyFile(): File = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + policyFileName).file
-}
-
-@Configuration
-@PropertySource(value = [ResourceLoader.CLASSPATH_URL_PREFIX + "libraries.properties"])
-@EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
-class KotlinLibrariesConfiguration(@Value("\${kotlin.version}") private val version: String) {
-  @Bean
   fun versionInfo() = VersionInfo(version = version, stdlibVersion = version)
+
+  @Bean
+  fun policyFile(): File = File(policyFileName)
+
+  @Bean
+  fun librariesFiles() = LibrariesFile(
+    File(librariesFolderProperties.jvm),
+    File(librariesFolderProperties.js)
+  )
 }
 
 @ConfigurationProperties(prefix = "libraries.folder")

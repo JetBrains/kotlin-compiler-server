@@ -1,6 +1,6 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.configuration.LibrariesFolderProperties
+import com.compiler.server.model.bean.LibrariesFile
 import com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
@@ -20,13 +20,13 @@ import java.io.File
 import java.util.*
 
 @Configuration
-class KotlinEnvironmentConfiguration(val librariesFolderProperties: LibrariesFolderProperties) {
+class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
   @Bean
   fun kotlinEnvironment() = KotlinEnvironment
     .with(
-      classpath = listOfNotNull(File(librariesFolderProperties.jvm))
-        .flatMap { it.listFiles().toList() },
-      classpathJs = listOfNotNull(File(librariesFolderProperties.js))
+      classpath = listOfNotNull(librariesFile.jvm)
+        .flatMap { it.listFiles()?.toList() ?: throw error("No kotlin libraries found in: ${librariesFile.jvm.absolutePath}") },
+      classpathJs = listOfNotNull(librariesFile.js)
     )
 }
 

@@ -3,6 +3,7 @@ package com.compiler.server.service
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
+import com.compiler.server.model.bean.VersionInfo
 import org.apache.commons.logging.LogFactory
 import org.springframework.stereotype.Component
 
