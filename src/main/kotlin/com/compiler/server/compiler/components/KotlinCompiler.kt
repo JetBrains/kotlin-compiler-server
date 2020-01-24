@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.nio.file.Files
@@ -30,8 +31,10 @@ class KotlinCompiler(
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
   private val librariesFile: LibrariesFile,
-  private val policyFile: File
+  @Value("\${policy.file}") private val policyFileName: String
 ) {
+
+  private val policyFile = File(policyFileName)
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
@@ -96,7 +99,7 @@ class KotlinCompiler(
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString())
       .replace("%%LIB_DIR%%", libDir)
-    outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
+    outputDir.resolve(policyFileName).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
         path.parent.toFile().mkdirs()
@@ -124,7 +127,7 @@ class KotlinCompiler(
   ): List<String> {
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
-    val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
+    val policy = outputDirectory.path.resolve(policyFileName).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
