@@ -37,7 +37,7 @@ allprojects {
     }
     afterEvaluate {
         dependencies {
-            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2")
         }
     }
 }
