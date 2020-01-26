@@ -1,3 +1,4 @@
+import com.google.cloud.tools.jib.api.ImageFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -19,13 +20,14 @@ val copyDependencies by tasks.creating(Copy::class) {
     into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinJsDependency.map { zipTree(it)} }))
+    from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
 }
 
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
+    id("com.google.cloud.tools.jib") version "1.8.0"
     kotlin("jvm") version "1.3.61"
     kotlin("plugin.spring") version "1.3.61"
 }
@@ -54,6 +56,8 @@ dependencies {
     }
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
+    annotationProcessor("org.springframework:spring-context-indexer")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("junit:junit:4.12")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
@@ -77,7 +81,7 @@ dependencies {
 }
 
 fun buildPropertyFile() {
-    rootDir.resolve("src/main/resources/${propertyFile}").apply{
+    rootDir.resolve("src/main/resources/${propertyFile}").apply {
         println("Generate properties into $absolutePath")
         parentFile.mkdirs()
         writeText(generateProperties())
@@ -111,4 +115,50 @@ tasks.withType<BootJar> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+/**
+ * Configuration for google jib plugin.
+ * Usually we run jibDockerBuild task for creating local image.
+ *
+ * NOTE: jib-folder used as temporary folder\
+ *  while this is the only option to move a bunch of files and folders
+ *  correctly (preserving original folder name)
+ *
+ * useful commands:
+ *  check the image files:  > docker run --rm -it --entrypoint=/bin/sh kotlin-compiler-server
+ *  run image:              > docker run kotlin-compiler-server
+ */
+val jibFolder = "src/main/jib"
+
+jib {
+    from {
+        image = "openjdk:alpine"
+    }
+    to {
+        image = project.name
+        tags = setOf(kotlinVersion, "latest")
+    }
+    container {
+        jvmFlags = listOf("-Xms512m")
+        mainClass = "com.compiler.server.CompilerApplicationKt"
+        ports = listOf("8080")
+        format = ImageFormat.OCI
+    }
+}
+
+val jibFolderClean by tasks.creating(Delete::class) {
+    delete(jibFolder)
+}
+
+val jibFolderCopy by tasks.creating(Copy::class) {
+    from(libJSFolder) { into(libJSFolder) }
+    from(libJVMFolder) { into(libJVMFolder) }
+    from(policy)
+    into(jibFolder)
+}
+
+tasks.getByName("jibDockerBuild") {
+    dependsOn(jibFolderCopy)
+    finalizedBy(jibFolderClean)
 }
