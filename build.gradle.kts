@@ -57,7 +57,6 @@ dependencies {
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("junit:junit:4.12")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
