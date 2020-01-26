@@ -14,7 +14,6 @@ import java.io.File
 @Configuration
 @EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
 class ApplicationConfiguration(
-  @Value("\${policy.file}") private val policyFileName: String,
   @Value("\${kotlin.version}") private val version: String,
   private val librariesFolderProperties: LibrariesFolderProperties
 ) : WebMvcConfigurer {
@@ -24,9 +23,6 @@ class ApplicationConfiguration(
 
   @Bean
   fun versionInfo() = VersionInfo(version = version, stdlibVersion = version)
-
-  @Bean
-  fun policyFile(): File = File(policyFileName)
 
   @Bean
   fun librariesFiles() = LibrariesFile(
