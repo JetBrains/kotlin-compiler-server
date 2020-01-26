@@ -23,7 +23,10 @@ class ApplicationConfiguration(
   }
 
   @Bean
-  fun versionInfo() = VersionInfo(version = version, stdlibVersion = version)
+  fun versionInfo() = VersionInfo(
+    version = version.substringBefore("-"),
+    stdlibVersion = version
+  )
 
   @Bean
   fun policyFile(): File = File(policyFileName)
