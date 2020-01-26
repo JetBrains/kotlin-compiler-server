@@ -110,7 +110,7 @@ tasks.withType<BootJar> {
     requiresUnpack("**/kotlinx-*.jar")
 }
 
-val zipClassesForLambda by tasks.creating(Zip::class) {
+val buildLambda by tasks.creating(Zip::class) {
     val lambdaWorkDirectoryPath = "/var/task/"
     from(tasks.compileKotlin)
     from(tasks.processResources) {
