@@ -126,14 +126,17 @@ tasks.withType<Test> {
  *  correctly (preserving original folder name)
  *
  * useful commands:
- *  check the image files:  > docker run --rm -it --entrypoint=/bin/sh kotlin-compiler-server
- *  run image:              > docker run kotlin-compiler-server
+ *  check the image files(alpine only):
+ *      > docker run --rm -it --entrypoint=/bin/sh kotlin-compiler-server
+ *  run image:
+ *      > docker run kotlin-compiler-server
  */
 val jibFolder = "src/main/jib"
 
 jib {
     from {
-        image = "openjdk:alpine"
+        //image = "openjdk:alpine"
+        image = "gcr.io/distroless/java:11"
     }
     to {
         image = project.name
