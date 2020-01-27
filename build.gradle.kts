@@ -19,7 +19,7 @@ val copyDependencies by tasks.creating(Copy::class) {
     into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinJsDependency.map { zipTree(it)} }))
+    from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
 }
 
@@ -77,7 +77,7 @@ dependencies {
 }
 
 fun buildPropertyFile() {
-    rootDir.resolve("src/main/resources/${propertyFile}").apply{
+    rootDir.resolve("src/main/resources/${propertyFile}").apply {
         println("Generate properties into $absolutePath")
         parentFile.mkdirs()
         writeText(generateProperties())
@@ -92,6 +92,77 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.js=${prefix + libJSFolder}
 """.trimIndent()
 
+fun generateWebpackExecutorEnv() {
+    val result = exec {
+        executable = "bash"
+        args("-l", "-c", "yarn -v")
+        isIgnoreExitValue = true
+    }
+    if (result.exitValue != 0) {
+        println("Yarn not found. Skipping webpack integration in JS executor environment.")
+    } else {
+        val jsDeps = kotlinJsDependency.resolvedConfiguration.resolvedArtifacts.mapNotNull { artifact ->
+            val version = artifact.moduleVersion.id.version
+            zipTree(artifact.file).matching {
+                this.include {
+                    !it.path.contains('/')
+                }
+            }.find { it.extension == "js" && !it.nameWithoutExtension.endsWith("meta") }?.nameWithoutExtension?.let {
+                copy {
+                    from(zipTree(artifact.file))
+                    into("$libJSFolder/META-INF/packages_imported/$it/$version")
+                }
+                val file = file("$libJSFolder/META-INF/packages_imported/$it/$version/package.json")
+                if (!file.exists()) {
+                    file.run {
+                        writeText(
+                            """
+                            {
+                              "main": "$it.js",
+                              "devDependencies": {},
+                              "dependencies": {},
+                              "peerDependencies": {},
+                              "optionalDependencies": {},
+                              "bundledDependencies": [],
+                              "name": "$it",
+                              "version":  "$version"
+                            }
+                        """.trimIndent()
+                        )
+                    }
+                }
+                it to version
+            }
+        }
+        file("$libJSFolder/META-INF/package.json").run {
+            writeText(
+                """
+                {
+                  "private": true,
+                  "workspaces": [
+                  ${jsDeps.map {
+                    "\"packages_imported/${it.first}/${it.second}\""
+                }.joinToString(",\n")}
+                  ],
+                  "devDependencies": {},
+                  "dependencies": {},
+                  "peerDependencies": {},
+                  "optionalDependencies": {},
+                  "bundledDependencies": [],
+                  "name": "executor",
+                  "version": "1.0.0"
+                }
+                """.trimIndent()
+            )
+        }
+        exec {
+            executable = "yarn"
+            args("install")
+            workingDir = file("$libJSFolder/META-INF")
+        }
+    }
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict", "-Xskip-metadata-version-check")
@@ -101,6 +172,9 @@ tasks.withType<KotlinCompile> {
     dependsOn(copyJSDependencies)
     dependsOn(":executors:jar")
     buildPropertyFile()
+    doLast {
+        generateWebpackExecutorEnv()
+    }
 }
 
 tasks.withType<BootJar> {

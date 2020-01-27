@@ -31,7 +31,7 @@ class KotlinProjectExecutor(
 
   fun convertToJs(project: Project): TranslationJSResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinToJSTranslator.translate(files, project.args.split(" "))
+    return kotlinToJSTranslator.translate(files, project.args.split(" "), project.bundleType)
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {

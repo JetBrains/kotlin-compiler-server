@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonValue
 data class Project(
   val args: String = "",
   val files: List<ProjectFile> = listOf(),
-  val confType: ProjectType = ProjectType.JAVA
+  val confType: ProjectType = ProjectType.JAVA,
+  val bundleType: BundleType = BundleType.NONE
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,4 +19,10 @@ enum class ProjectType(@JsonValue val id: String) {
   JUNIT("junit"),
   CANVAS("canvas"),
   JS("js")
+}
+
+enum class BundleType(@JsonValue val id: String) {
+  NONE("none"),
+  PLAIN("plain"),
+  MINIMIZED("minimized")
 }
