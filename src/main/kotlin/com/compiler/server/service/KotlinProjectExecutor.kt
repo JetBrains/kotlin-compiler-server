@@ -41,7 +41,7 @@ class KotlinProjectExecutor(
       completionProvider.complete(file, line, character, isJs)
     }
     catch (e: Exception) {
-      log.warn("Exception in getting completions", e)
+      log.warn("Exception in getting completions. Project: $project", e)
       emptyList()
     }
   }
@@ -52,7 +52,7 @@ class KotlinProjectExecutor(
       errorAnalyzer.errorsFrom(files)
     }
     catch (e: Exception) {
-      log.warn("Exception in getting highlight", e)
+      log.warn("Exception in getting highlight. Project: $project", e)
       emptyMap()
     }
   }
