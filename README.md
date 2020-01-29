@@ -5,6 +5,8 @@ The server provides the API for [Kotlin Playground](https://github.com/JetBrains
 
 ## How to start
 
+### Simple Spring Boot application
+
 Download Kotlin dependencies and build an executor before starting the server:
 
 ```shell script
@@ -12,6 +14,26 @@ $ ./gradlew build -x test
 ```
 
 Start the Spring Boot project.
+
+### From Docker Hub
+
+Coming soon...
+
+### From Amazon lambda
+
+Based on [aws-serverless-container](https://github.com/awslabs/aws-serverless-java-container).
+
+```shell script
+$ ./gradlew buildLambda
+```
+
+Getting `.zip` file from `build/distributions`
+Lambda handler: `com.compiler.server.lambdas.StreamLambdaHandler::handleRequest`
+Publish your Lambda function: you can follow the instructions in [AWS Lambda's documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-java-how-to-create-deployment-package.html) on how to package your function for deployment.
+
+### From Kotless
+
+Coming soon...
 
 ## API Documentation
 
