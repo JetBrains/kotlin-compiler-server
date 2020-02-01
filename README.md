@@ -27,8 +27,10 @@ Based on [aws-serverless-container](https://github.com/awslabs/aws-serverless-ja
 $ ./gradlew buildLambda
 ```
 
-Getting `.zip` file from `build/distributions`
-Lambda handler: `com.compiler.server.lambdas.StreamLambdaHandler::handleRequest`
+Getting `.zip` file from `build/distributions`.
+
+Lambda handler: `com.compiler.server.lambdas.StreamLambdaHandler::handleRequest`.
+
 Publish your Lambda function: you can follow the instructions in [AWS Lambda's documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-java-how-to-create-deployment-package.html) on how to package your function for deployment.
 
 ### From Kotless
