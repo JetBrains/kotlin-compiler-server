@@ -55,6 +55,7 @@ dependencies {
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.4")
     implementation("junit:junit:4.12")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
@@ -108,6 +109,23 @@ tasks.withType<BootJar> {
     requiresUnpack("**/kotlin-*.jar")
     requiresUnpack("**/kotlinx-*.jar")
 }
+
+val buildLambda by tasks.creating(Zip::class) {
+    val lambdaWorkDirectoryPath = "/var/task/"
+    from(tasks.compileKotlin)
+    from(tasks.processResources) {
+        eachFile {
+            if (name == propertyFile) { file.writeText(generateProperties(lambdaWorkDirectoryPath)) }
+        }
+    }
+    from(policy)
+    from(libJSFolder) { into(libJSFolder) }
+    from(libJVMFolder) { into(libJVMFolder) }
+    into("lib") {
+        from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
+    }
+}
+
 
 tasks.withType<Test> {
     useJUnitPlatform()
