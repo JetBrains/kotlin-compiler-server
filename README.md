@@ -17,7 +17,11 @@ Start the Spring Boot project.
 
 ### From Docker Hub
 
-Coming soon...
+View images on (Docker Hub)[https://hub.docker.com/r/prendota/kotlin-compiler-server].
+
+```docker
+docker pull prendota/kotlin-compiler-server
+```
 
 ### From Amazon lambda
 
