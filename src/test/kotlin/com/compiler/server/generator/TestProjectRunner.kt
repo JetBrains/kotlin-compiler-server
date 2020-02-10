@@ -88,13 +88,13 @@ class TestProjectRunner {
   private fun runAndTest(project: Project, contains: String): ExecutionResult {
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.text.contains(contains) == true, "Actual: ${result.text}. Expected: $contains")
+    Assertions.assertTrue(result.text.contains(contains) == true, "Actual: ${result.text}. \n Expected: $contains")
     return result
   }
 
   private fun convertAndTest(project: Project, contains: String) {
     val result = kotlinProjectExecutor.convertToJs(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. Expected: $contains")
+    Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
   }
 }
