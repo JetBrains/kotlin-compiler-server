@@ -116,7 +116,7 @@ class CoroutinesRunnerTest {
       contains = "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\n"
     )
     Assertions.assertTrue(result.exception?.message == expectedExMessage,
-                          "Actual: ${result.exception?.message}. Expected: $expectedExMessage")
+      "Actual: ${result.exception?.message}. Expected: $expectedExMessage")
     Assertions.assertTrue(result.exception?.fullName == expectedEx, "Actual: ${result.exception?.fullName}. Expected: $expectedEx")
   }
 
@@ -174,6 +174,80 @@ class CoroutinesRunnerTest {
     testRunner.run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    try {\n        failedConcurrentSum()\n    } catch(e: ArithmeticException) {\n        println(\"Computation failed with ArithmeticException\")\n    }\n}\n\nsuspend fun failedConcurrentSum(): Int = coroutineScope {\n    val one = async<Int> { \n        try {\n            delay(Long.MAX_VALUE) // Emulates very long computation\n            42\n        } finally {\n            println(\"First child was cancelled\")\n        }\n    }\n    val two = async<Int> { \n        println(\"Second child throws an exception\")\n        throw ArithmeticException()\n    }\n    one.await() + two.await()\n}",
       contains = "Second child throws an exception\nFirst child was cancelled\nComputation failed with ArithmeticException\n"
+    )
+  }
+
+
+  @Test
+  fun `coroutines dispatchers & threads `() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    launch { // context of the parent, main runBlocking coroutine\n        println(\"main runBlocking      : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread\n        println(\"Unconfined            : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(Dispatchers.Default) { // will get dispatched to DefaultDispatcher \n        println(\"Default               : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(newSingleThreadContext(\"MyOwnThread\")) { // will get its own new thread\n        println(\"newSingleThreadContext: I'm working in thread \${Thread.currentThread().name}\")\n    }    \n}",
+      contains = """
+        Unconfined            : I'm working in thread main
+        Default               : I'm working in thread DefaultDispatcher-worker-1
+        newSingleThreadContext: I'm working in thread MyOwnThread
+        main runBlocking      : I'm working in thread main
+      """.trimIndent()
+    )
+  }
+
+
+  @Test
+  fun `base coroutines Unconfined vs confined dispatcher `() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread\n        println(\"Unconfined      : I'm working in thread \${Thread.currentThread().name}\")\n        delay(500)\n        println(\"Unconfined      : After delay in thread \${Thread.currentThread().name}\")\n    }\n    launch { // context of the parent, main runBlocking coroutine\n        println(\"main runBlocking: I'm working in thread \${Thread.currentThread().name}\")\n        delay(1000)\n        println(\"main runBlocking: After delay in thread \${Thread.currentThread().name}\")\n    }    \n}",
+      contains = "Unconfined      : I'm working in thread main\nmain runBlocking: I'm working in thread main\nUnconfined      : After delay in thread kotlinx.coroutines.DefaultExecutor\nmain runBlocking: After delay in thread main"
+    )
+  }
+
+  @Test
+  fun `base coroutines Debugging coroutines and threads `() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun log(msg: String) = println(\"[\${Thread.currentThread().name}] \$msg\")\n\nfun main() = runBlocking<Unit> {\nval a = async {\n    log(\"I'm computing a piece of the answer\")\n    6\n}\nval b = async {\n    log(\"I'm computing another piece of the answer\")\n    7\n}\nlog(\"The answer is \${a.await() * b.await()}\")    \n}",
+      contains = "[main] I'm computing a piece of the answer\n[main] I'm computing another piece of the answer\n[main] The answer is 42"
+    )
+  }
+
+  @Test
+  fun `base coroutines test Jumping between threads`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun log(msg: String) = println(\"[\${Thread.currentThread().name}] \$msg\")\n\nfun main() {\nnewSingleThreadContext(\"Ctx1\").use { ctx1 ->\n    newSingleThreadContext(\"Ctx2\").use { ctx2 ->\n        runBlocking(ctx1) {\n            log(\"Started in ctx1\")\n            withContext(ctx2) {\n                log(\"Working in ctx2\")\n            }\n            log(\"Back to ctx1\")\n        }\n    }\n}    \n}",
+      contains = "[Ctx1] Started in ctx1\n[Ctx2] Working in ctx2\n[Ctx1] Back to ctx1"
+    )
+  }
+
+  @Test
+  fun `base coroutines test Job in the context`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\nprintln(\"My job is \${coroutineContext[Job]}\")    \n}",
+      contains = "My job is BlockingCoroutine{Active}"
+    )
+  }
+
+  @Test
+  fun `base coroutines test Children of a coroutine`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n// launch a coroutine to process some kind of incoming request\nval request = launch {\n    // it spawns two other jobs, one with GlobalScope\n    GlobalScope.launch {\n        println(\"job1: I run in GlobalScope and execute independently!\")\n        delay(1000)\n        println(\"job1: I am not affected by cancellation of the request\")\n    }\n    // and the other inherits the parent context\n    launch {\n        delay(100)\n        println(\"job2: I am a child of the request coroutine\")\n        delay(1000)\n        println(\"job2: I will not execute this line if my parent request is cancelled\")\n    }\n}\ndelay(500)\nrequest.cancel() // cancel processing of the request\ndelay(1000) // delay a second to see what happens\nprintln(\"main: Who has survived request cancellation?\")\n}",
+      contains = """
+        job1: I run in GlobalScope and execute independently!
+        job2: I am a child of the request coroutine
+        job1: I am not affected by cancellation of the request
+        main: Who has survived request cancellation?
+      """.trimIndent()
+    )
+  }
+
+  @Test
+  fun `base coroutines test Parental responsibilities`() {
+    testRunner.run(
+      code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n// launch a coroutine to process some kind of incoming request\nval request = launch {\n    repeat(3) { i -> // launch a few children jobs\n        launch  {\n            delay((i + 1) * 200L) // variable delay 200ms, 400ms, 600ms\n            println(\"Coroutine \$i is done\")\n        }\n    }\n    println(\"request: I'm done and I don't explicitly join my children that are still active\")\n}\nrequest.join() // wait for completion of the request, including all its children\nprintln(\"Now processing of the request is complete\")\n}",
+      contains = """
+        request: I'm done and I don't explicitly join my children that are still active
+        Coroutine 0 is done
+        Coroutine 1 is done
+        Coroutine 2 is done
+        Now processing of the request is complete
+      """.trimIndent()
     )
   }
 
