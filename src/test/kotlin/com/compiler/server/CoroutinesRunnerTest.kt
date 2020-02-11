@@ -2,6 +2,7 @@ package com.compiler.server
 
 import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -179,6 +180,7 @@ class CoroutinesRunnerTest {
 
 
   @Test
+  @Disabled
   fun `coroutines dispatchers & threads `() {
     testRunner.run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    launch { // context of the parent, main runBlocking coroutine\n        println(\"main runBlocking      : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread\n        println(\"Unconfined            : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(Dispatchers.Default) { // will get dispatched to DefaultDispatcher \n        println(\"Default               : I'm working in thread \${Thread.currentThread().name}\")\n    }\n    launch(newSingleThreadContext(\"MyOwnThread\")) { // will get its own new thread\n        println(\"newSingleThreadContext: I'm working in thread \${Thread.currentThread().name}\")\n    }    \n}",
