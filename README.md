@@ -166,11 +166,16 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 };
 ```
 
-## Kotlin release guide
+## Kotlin release guide :rocket:
 
 1) Update the kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
-2) Make sure everything is going well via the task: 
+2) Update the kotlin version in [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/1a12996f40a5d3391bc06d2ddd719cbfe2578802/build.gradle.kts#L29) 
+3) Update the kotlin version in [Dockerfile](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/Dockerfile)
+4) Make sure everything is going well via the task: 
 
 ```shell script
 $ ./gradlew build
 ```
+
+5) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
+6) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
