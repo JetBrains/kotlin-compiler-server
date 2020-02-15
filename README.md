@@ -3,7 +3,7 @@
 A REST server for compiling and executing Kotlin code.
 The server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
 
-## How to start
+## How to start :checkered_flag:
 
 ### Simple Spring Boot application
 
@@ -41,7 +41,7 @@ Publish your Lambda function: you can follow the instructions in [AWS Lambda's d
 
 Coming soon...
 
-## API Documentation
+## API Documentation :page_with_curl:
 
 ### Execute Kotlin code on JVM
 
