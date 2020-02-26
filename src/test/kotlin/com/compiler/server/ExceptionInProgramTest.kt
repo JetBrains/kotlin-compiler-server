@@ -28,6 +28,14 @@ class ExceptionInProgramTest {
   }
 
   @Test
+  fun `security connection exception`() {
+    testRunner.runWithException(
+      code = "import java.net.*\n\nfun main() {\n    val connection = URL(\"http://www.android.com/\").openConnection() as HttpURLConnection\n\tval d = connection.inputStream.bufferedReader().readText()\n\tprint(d)\n}",
+      contains = "java.security.AccessControlException"
+    )
+  }
+
+  @Test
   fun `kotlin npe`() {
     testRunner.runWithException(
       code = """
