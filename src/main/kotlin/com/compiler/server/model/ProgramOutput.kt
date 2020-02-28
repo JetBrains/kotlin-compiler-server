@@ -19,15 +19,20 @@ data class ProgramOutput(
   fun asExecutionResult(): ExecutionResult {
     return when {
       restriction != null -> ExecutionResult().apply { text = buildRestriction(restriction) }
-      exception != null -> ExecutionResult().also { it.exception = exception.toExceptionDescriptor() }
+      exception != null -> ExecutionResult(exception = exception.toExceptionDescriptor())
+      standardOutput.isBlank() -> ExecutionResult()
       else -> {
-        // coroutines can produced incorrect output. see example in `base coroutines test 7`
-        if (standardOutput.startsWith("{")) outputMapper.readValue(standardOutput, ExecutionResult::class.java)
-        else {
-          val result = outputMapper.readValue("{" + standardOutput.substringAfter("{"), ExecutionResult::class.java)
-          result.apply {
-            text = standardOutput.substringBefore("{") + text
+        try {
+          // coroutines can produced incorrect output. see example in `base coroutines test 7`
+          if (standardOutput.startsWith("{")) outputMapper.readValue(standardOutput, ExecutionResult::class.java)
+          else {
+            val result = outputMapper.readValue("{" + standardOutput.substringAfter("{"), ExecutionResult::class.java)
+            result.apply {
+              text = standardOutput.substringBefore("{") + text
+            }
           }
+        } catch (e: Exception) {
+          ExecutionResult(exception = e.toExceptionDescriptor())
         }
       }
     }
