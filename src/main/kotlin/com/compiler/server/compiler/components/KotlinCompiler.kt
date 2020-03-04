@@ -57,7 +57,7 @@ class KotlinCompiler(
 
   private fun compile(files: List<KtFile>): Compiled {
     val generationState = generationStateFor(files)
-    KotlinCodegenFacade.compileCorrectFiles(generationState) { error, _ -> error.printStackTrace() }
+    KotlinCodegenFacade.compileCorrectFiles(generationState)
     return Compiled(
       files = generationState.factory.asList().map { it.relativePath to it.asByteArray() }.toMap(),
       mainClass = mainClassFrom(generationState.bindingContext, files)
