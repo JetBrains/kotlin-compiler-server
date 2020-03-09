@@ -79,14 +79,11 @@ class KotlinCompiler(
           block(output, compilation).also {
             it.addWarnings(errors)
           }
-        }
-        finally {
+        } finally {
           output.path.toAbsolutePath().toFile().deleteRecursively()
         }
-      }
-      else ExecutionResult(errors)
-    }
-    catch (e: Exception) {
+      } else ExecutionResult(errors)
+    } catch (e: Exception) {
       ExecutionResult(exception = e.toExceptionDescriptor())
     }
   }
@@ -99,7 +96,7 @@ class KotlinCompiler(
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString())
       .replace("%%LIB_DIR%%", libDir)
-    outputDir.resolve(policyFileName).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
+    outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
         path.parent.toFile().mkdirs()
@@ -127,7 +124,7 @@ class KotlinCompiler(
   ): List<String> {
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
       .joinToString(":")
-    val policy = outputDirectory.path.resolve(policyFileName).toAbsolutePath()
+    val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
