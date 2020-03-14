@@ -1,25 +1,19 @@
 package com.compiler.server
 
-import com.compiler.server.generator.TestProjectRunner
+import com.compiler.server.base.BaseExecutorTest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-class ConcurrencyRunnerTest {
-  @Autowired
-  private lateinit var testRunner: TestProjectRunner
-
+class ConcurrencyRunnerTest : BaseExecutorTest() {
   @Test
   @Disabled
   fun `a lot of hello word test JVM`() {
     runManyTest {
-      testRunner.run(
+      run(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "Hello, world!!!"
       )
@@ -30,7 +24,7 @@ class ConcurrencyRunnerTest {
   @Disabled
   fun `a lot of hello word test JS`() {
     runManyTest {
-      testRunner.runJs(
+      runJs(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "println('Hello, world!!!');"
       )

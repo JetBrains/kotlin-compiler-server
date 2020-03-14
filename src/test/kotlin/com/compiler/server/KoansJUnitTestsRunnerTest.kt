@@ -1,14 +1,9 @@
 package com.compiler.server
 
-import com.compiler.server.generator.TestProjectRunner
+import com.compiler.server.base.BaseJUnitTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
 class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
-  @Autowired
-  private lateinit var testRunner: TestProjectRunner
 
   @Test
   fun `base junit test`() {
@@ -367,14 +362,6 @@ class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
       "import java.util.*\n\nfun <T, C: MutableCollection<T>> Collection<T>.partitionTo(first: C, second: C, predicate: (T) -> Boolean): Pair<C, C> {\n    for (element in this) {\n        if (predicate(element)) {\n            first.add(element)\n        } else {\n            second.add(element)\n        }\n    }\n    return Pair(first, second)\n}\n\nfun partitionWordsAndLines() {\n    val (words, lines) = listOf(\"a\", \"a b\", \"c\", \"d e\").\n            partitionTo(ArrayList<String>(), ArrayList()) { s -> !s.contains(\" \") }\n    words == listOf(\"a\", \"c\")\n    lines == listOf(\"a b\", \"d e\")\n}\n\nfun partitionLettersAndOtherSymbols() {\n    val (letters, other) = setOf('a', '%', 'r', '}').\n            partitionTo(HashSet<Char>(), HashSet()) { c -> c in 'a'..'z' || c in 'A'..'Z'}\n    letters == setOf('a', 'r')\n    other == setOf('%', '}')\n}",
       "import org.junit.Assert\nimport org.junit.Test\nimport java.util.*\nimport koans.util.toMessageInEquals\n\nclass TestGenericFunctions {\n    @Test fun testPartitionWordsAndLines() {\n        partitionWordsAndLines()\n\n        val (words, lines) = listOf(\"a\", \"a b\", \"c\", \"d e\").\n                partitionTo(ArrayList<String>(), ArrayList()) { s -> !s.contains(\" \") }\n        Assert.assertEquals(\"partitionTo\".toMessageInEquals(), listOf(\"a\", \"c\"), words)\n        Assert.assertEquals(\"partitionTo\".toMessageInEquals(), listOf(\"a b\", \"d e\"), lines)\n    }\n\n    @Test fun testPartitionLettersAndOtherSymbols() {\n        partitionLettersAndOtherSymbols()\n\n        val (letters, other) = setOf('a', '%', 'r', '}').\n                partitionTo(HashSet<Char>(), HashSet()) { c -> c in 'a'..'z' || c in 'A'..'Z'}\n        Assert.assertEquals(\"partitionTo\".toMessageInEquals(), setOf('a', 'r'), letters)\n        Assert.assertEquals(\"partitionTo\".toMessageInEquals(), setOf('%', '}'), other)\n    }\n}"
     )
-  }
-
-  private fun runKoanTest(vararg testFile: String) {
-    val test = testRunner.test(
-      *testFile,
-      koansUtilsFile
-    )
-    successTestCheck(test)
   }
 
 }
