@@ -1,20 +1,13 @@
 package com.compiler.server
 
-import com.compiler.server.generator.TestProjectRunner
+import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-
-@SpringBootTest
-class CommandLineArgumentsTest {
-
-  @Autowired
-  private lateinit var testRunner: TestProjectRunner
+class CommandLineArgumentsTest : BaseExecutorTest() {
 
   @Test
   fun `command line arguments jvm test`() {
-    testRunner.run(
+    run(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "0 1",
       contains = "0\n1\n"
@@ -23,7 +16,7 @@ class CommandLineArgumentsTest {
 
   @Test
   fun `command line string arguments jvm test`() {
-    testRunner.run(
+    run(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "alex1 alex2",
       contains = "alex1\nalex2\n"
@@ -32,7 +25,7 @@ class CommandLineArgumentsTest {
 
   @Test
   fun `command line arguments js test`() {
-    testRunner.runJs(
+    runJs(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "0 1",
       contains = "main(['0', '1']);"
@@ -41,7 +34,7 @@ class CommandLineArgumentsTest {
 
   @Test
   fun `command line string arguments js test`() {
-    testRunner.runJs(
+    runJs(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "alex1 alex2",
       contains = "main(['alex1', 'alex2']);"
