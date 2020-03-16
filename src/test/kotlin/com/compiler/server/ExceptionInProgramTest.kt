@@ -38,7 +38,7 @@ class ExceptionInProgramTest : BaseExecutorTest() {
           print(s!!)
           }
       """.trimIndent(),
-      contains = "kotlin.KotlinNullPointerException"
+      contains = "java.lang.NullPointerException"
     )
   }
 
