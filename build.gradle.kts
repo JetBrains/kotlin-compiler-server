@@ -25,9 +25,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
-    id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.70"
-    kotlin("plugin.spring") version "1.3.70"
+    kotlin("jvm") version "1.4-M1-eap-93"
+    kotlin("plugin.spring") version "1.4-M1-eap-93"
 }
 
 allprojects {
@@ -54,8 +53,8 @@ dependencies {
     }
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
-    annotationProcessor("org.springframework:spring-context-indexer")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    annotationProcessor("org.springframework:spring-context-indexer:5.2.0.RELEASE")
+    implementation("org.springframework.boot:spring-boot-starter-web:2.2.0.RELEASE")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.4")
     implementation("junit:junit:4.12")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
@@ -73,7 +72,7 @@ dependencies {
     }
     implementation(project(":executors"))
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test:2.2.0.RELEASE") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.4")
