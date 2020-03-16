@@ -10,9 +10,16 @@ open class ExecutionResult(
     set(value) {
       field = unEscapeOutput(value)
     }
+
   fun addWarnings(warnings: Map<String, List<ErrorDescriptor>>) {
     errors = warnings
   }
+
+  val hasErrors: Boolean
+    get() = errors.asSequence()
+            .flatMap { it.value.asSequence() }
+            .any { it.severity == ProjectSeveriry.ERROR }
+
 }
 
 data class TranslationJSResult(

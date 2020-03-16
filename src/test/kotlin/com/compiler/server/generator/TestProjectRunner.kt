@@ -95,6 +95,21 @@ class TestProjectRunner {
   private fun convertAndTest(project: Project, contains: String) {
     val result = kotlinProjectExecutor.convertToJs(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
+    Assertions.assertFalse(result.hasErrors) {
+      "Test contains errors!\n" +
+              "\n" +
+              "${renderErrors(result.errors)}"
+    }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
+  }
+
+  private fun renderErrors(errors: Map<String, List<ErrorDescriptor>>): String {
+    return buildString {
+      for (error in errors.values.flatten()) {
+        if (error.severity != ProjectSeveriry.ERROR) continue
+
+        appendln("(${error.interval.start.line}, ${error.interval.end.line}): ${error.message}")
+      }
+    }
   }
 }
