@@ -73,15 +73,4 @@ class HighlightTest : BaseExecutorTest() {
     errorContains(highlights, "No value passed for parameter 'that'")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
-
-  private fun errorContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
-    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })
-  }
-
-  private fun warningContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
-    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.values.flatten().map { it.className }.any { it == "WARNING" })
-    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.WARNING })
-  }
 }

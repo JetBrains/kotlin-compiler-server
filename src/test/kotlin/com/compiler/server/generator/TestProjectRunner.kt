@@ -98,18 +98,8 @@ class TestProjectRunner {
     Assertions.assertFalse(result.hasErrors) {
       "Test contains errors!\n" +
               "\n" +
-              "${renderErrors(result.errors)}"
+              renderErrorDescriptors(result.errors.filterOnlyErrors)
     }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
-  }
-
-  private fun renderErrors(errors: Map<String, List<ErrorDescriptor>>): String {
-    return buildString {
-      for (error in errors.values.flatten()) {
-        if (error.severity != ProjectSeveriry.ERROR) continue
-
-        appendln("(${error.interval.start.line}, ${error.interval.end.line}): ${error.message}")
-      }
-    }
   }
 }
