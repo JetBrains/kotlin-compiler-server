@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.tasks.bundling.BootJar
+import java.net.URL
 
 val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
@@ -23,17 +23,20 @@ val copyJSDependencies by tasks.creating(Copy::class) {
     into(libJSFolder)
 }
 
+val kotlinPluginLocation = "Kotlin_1270_CompilerAllPlugins/1626094:id/kotlin-plugin-1.2.71-release-IJ2018.3-1.zip!/Kotlin/lib/kotlin-plugin.jar"
+    // https://teamcity.jetbrains.com/repository/download/Kotlin_1320_CompilerAllPlugins/1907319:id/kotlin-plugin-1.3.20-release-IJ2018.3-1.zip!/Kotlin/lib/kotlin-plugin.jar
+
+
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.70"
-    kotlin("plugin.spring") version "1.3.70"
+    kotlin("jvm") version "1.2.71"
+    kotlin("plugin.spring") version "1.2.71"
 }
 
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
     }
     afterEvaluate {
         dependencies {
@@ -47,9 +50,9 @@ dependencies {
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest-core:2.2")
     kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4") {
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.71")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:1.2.71")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1") {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
     }
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
@@ -58,25 +61,23 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.4")
     implementation("junit:junit:4.12")
-    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
-        isTransitive = false
-    }
+    implementation(dependencyFrom("https://teamcity.jetbrains.com/guestAuth/repository/download/$kotlinPluginLocation",
+      artifact = "kotlin-plugin",
+      version = "1.2.71")
+    )
     implementation(project(":executors"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.4")
 }
 
 fun buildPropertyFile() {
@@ -106,11 +107,6 @@ tasks.withType<KotlinCompile> {
     buildPropertyFile()
 }
 
-tasks.withType<BootJar> {
-    //https://stackoverflow.com/questions/57727150/kotlin-script-engine-with-spring-boot-self-running-war
-    requiresUnpack("**/kotlin-*.jar")
-    requiresUnpack("**/kotlinx-*.jar")
-}
 
 val buildLambda by tasks.creating(Zip::class) {
     val lambdaWorkDirectoryPath = "/var/task/"
@@ -131,4 +127,14 @@ val buildLambda by tasks.creating(Zip::class) {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+fun dependencyFrom(
+  url: String,
+  artifact: String,
+  version: String
+) = File("$buildDir/download/$artifact-$version.jar").let { file ->
+    file.parentFile.mkdirs()
+    file.writeBytes(URL(url).readBytes())
+    files(file.absolutePath)
 }

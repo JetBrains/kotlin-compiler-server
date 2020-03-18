@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
-import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
+import org.jetbrains.kotlin.config.TargetPlatformVersion
 import org.jetbrains.kotlin.container.*
 import org.jetbrains.kotlin.context.ContextForNewModule
 import org.jetbrains.kotlin.context.ModuleContext
@@ -27,9 +27,8 @@ import org.jetbrains.kotlin.frontend.di.configureModule
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.js.analyze.TopDownAnalyzerFacadeForJS
 import org.jetbrains.kotlin.js.config.JsConfig
-import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
+import org.jetbrains.kotlin.js.resolve.JsPlatform
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.platform.js.JsPlatforms
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.*
 import org.jetbrains.kotlin.resolve.calls.smartcasts.DataFlowInfo
@@ -94,9 +93,10 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     val project = kotlinEnvironment.coreEnvironment.project
     val configuration = JsConfig(project, kotlinEnvironment.jsEnvironment)
     val module = ContextForNewModule(
-      projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
+      projectContext = ProjectContext(project),
       moduleName = Name.special("<" + configuration.moduleId + ">"),
-      builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
+      builtIns =  JsPlatform.builtIns,
+      multiTargetPlatform = null
     )
     module.setDependencies(computeDependencies(module.module, configuration))
     val trace = CliBindingTrace()
@@ -151,7 +151,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     val allDependencies = ArrayList<ModuleDescriptorImpl>()
     allDependencies.add(module)
     config.moduleDescriptors.mapTo(allDependencies) { it }
-    allDependencies.add(JsPlatformAnalyzerServices.builtIns.builtInsModule)
+    allDependencies.add(JsPlatform.builtIns.builtInsModule)
     return allDependencies
   }
 
@@ -162,14 +162,13 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
   ): Pair<LazyTopDownAnalyzer, ComponentProvider> {
     val container = composeContainer(
       "TopDownAnalyzerForJs",
-      JsPlatformAnalyzerServices.platformConfigurator.platformSpecificContainer
+      JsPlatform.platformConfigurator.platformSpecificContainer
     ) {
       configureModule(
         moduleContext = moduleContext,
-        platform = JsPlatforms.defaultJsPlatform,
-        analyzerServices = JsPlatformAnalyzerServices,
+        platform = JsPlatform,
         trace = bindingTrace,
-        languageVersionSettings = LanguageVersionSettingsImpl.DEFAULT
+        platformVersion = TargetPlatformVersion.NoVersion
       )
       useInstance(declarationProviderFactory)
       registerSingleton(AnnotationResolverImpl::class.java)

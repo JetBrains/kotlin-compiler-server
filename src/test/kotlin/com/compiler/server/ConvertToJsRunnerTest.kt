@@ -7,7 +7,7 @@ class ConvertToJsRunnerTest : BaseExecutorTest() {
   @Test
   fun `base execute test`() {
     runJs(
-      code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+      code = "main(args: Array<String>) {\n println(\"Hello, world!!!\")\n}",
       contains = "println('Hello, world!!!');"
     )
   }

@@ -51,9 +51,9 @@ class KotlinToJSTranslator(
     }
     val translator = K2JSTranslator(configuration)
     val result = translator.translate(
-      reporter = reporter,
-      files = files,
-      mainCallParameters = MainCallParameters.mainWithArguments(arguments)
+      reporter,
+      files,
+      MainCallParameters.mainWithArguments(arguments)
     )
     return if (result is TranslationResult.Success) {
       TranslationJSResult(JS_CODE_FLUSH + result.getCode() + JS_CODE_BUFFER)

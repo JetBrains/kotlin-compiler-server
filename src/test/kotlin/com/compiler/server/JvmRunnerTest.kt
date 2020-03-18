@@ -8,7 +8,7 @@ class JvmRunnerTest : BaseExecutorTest() {
   @Test
   fun `base execute test JVM`() {
     run(
-      code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+      code = "main(args: Array<String>) {\n println(\"Hello, world!!!\")\n}",
       contains = "Hello, world!!!"
     )
   }
@@ -35,7 +35,7 @@ class JvmRunnerTest : BaseExecutorTest() {
   @Test
   fun `correct kotlin version test jvm`() {
     run(
-      code = "fun main() {\n    println(KotlinVersion?.CURRENT)\n}",
+      code = "main(args: Array<String>) {\n    println(KotlinVersion?.CURRENT)\n}",
       contains = version().substringBefore("-")
     )
   }

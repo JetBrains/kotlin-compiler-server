@@ -14,7 +14,7 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   fun `a lot of hello word test JVM`() {
     runManyTest {
       run(
-        code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+        code = "main(args: Array<String>) {\n println(\"Hello, world!!!\")\n}",
         contains = "Hello, world!!!"
       )
     }
@@ -25,7 +25,7 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   fun `a lot of hello word test JS`() {
     runManyTest {
       runJs(
-        code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+        code = "main(args: Array<String>) {\n println(\"Hello, world!!!\")\n}",
         contains = "println('Hello, world!!!');"
       )
     }

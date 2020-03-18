@@ -13,7 +13,6 @@ import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
-import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
@@ -57,7 +56,7 @@ class KotlinCompiler(
 
   private fun compile(files: List<KtFile>): Compiled {
     val generationState = generationStateFor(files)
-    KotlinCodegenFacade.compileCorrectFiles(generationState)
+    KotlinCodegenFacade.compileCorrectFiles(generationState) { throwable, _ -> error(throwable) }
     return Compiled(
       files = generationState.factory.asList().map { it.relativePath to it.asByteArray() }.toMap(),
       mainClass = mainClassFrom(generationState.bindingContext, files)
@@ -136,7 +135,7 @@ class KotlinCompiler(
 
 
   private fun mainClassFrom(bindingContext: BindingContext, files: List<KtFile>): String? {
-    val mainFunctionDetector = MainFunctionDetector(bindingContext, LanguageVersionSettingsImpl.DEFAULT)
+    val mainFunctionDetector = MainFunctionDetector(bindingContext)
     return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
       PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
     }

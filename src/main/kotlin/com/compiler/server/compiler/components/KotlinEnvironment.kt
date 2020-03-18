@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
-import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -69,7 +68,6 @@ class KotlinEnvironment(
             put(JVMConfigurationKeys.DISABLE_CALL_ASSERTIONS, noCallAssertions)
             put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
           }
-          languageVersionSettings = arguments.toLanguageVersionSettings(this[CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY]!!)
         }
       )
       val jsEnvironment = coreEnvironment.configuration.copy().apply {
