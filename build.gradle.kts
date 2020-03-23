@@ -76,7 +76,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.5-native-mt-1.3.71-release-429")
 }
 
 fun buildPropertyFile() {
