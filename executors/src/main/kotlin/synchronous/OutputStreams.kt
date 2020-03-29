@@ -1,4 +1,4 @@
-package executors
+package executors.synchronous
 
 import java.io.IOException
 import java.io.OutputStream

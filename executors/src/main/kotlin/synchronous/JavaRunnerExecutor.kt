@@ -1,5 +1,6 @@
-package executors
+package executors.synchronous
 
+import executors.mapper
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.lang.reflect.InvocationTargetException

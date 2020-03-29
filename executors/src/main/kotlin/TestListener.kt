@@ -1,5 +1,7 @@
 package executors
 
+import executors.synchronous.ErrorStream
+import executors.synchronous.OutStream
 import org.junit.runner.Description
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunListener
@@ -8,7 +10,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.io.PrintStream
 
-internal class TestListener : RunListener() {
+internal class TestListener(private val testResultCallback: (TestRunInfo) -> Unit) : RunListener() {
   private var startTime: Long = 0
   private val ignoreStream = PrintStream(object : OutputStream() {
     @Throws(IOException::class)
@@ -25,7 +27,6 @@ internal class TestListener : RunListener() {
       className = description.className,
       methodName = description.methodName
     )
-    currentTestRunInfo?.let { JUnitExecutors.output.add(it) }
     testOutputStream = ByteArrayOutputStream().also {
       errorStream = ErrorStream(it)
       outStream = OutStream(it)
@@ -51,11 +52,12 @@ internal class TestListener : RunListener() {
   override fun testFinished(description: Description?) {
     System.out.flush()
     System.err.flush()
-    JUnitExecutors.output[JUnitExecutors.output.size - 1].apply {
+    currentTestRunInfo?.apply {
       executionTime = System.currentTimeMillis() - startTime
       output = testOutputStream?.toString().orEmpty()
         .replace("</errStream><errStream>".toRegex(), "")
         .replace("</outStream><outStream>".toRegex(), "")
+      testResultCallback(this)
     }
     System.setOut(ignoreStream)
   }
