@@ -4,6 +4,7 @@
   ],
   "ignoreDeps": [
     "org.jetbrains.kotlin:kotlin-compiler",
+    "org.jetbrains.kotlin:kotlin-reflect",
     "org.jetbrains.kotlin:kotlin-stdlib-js",
     "org.jetbrains.kotlin:kotlin-stdlib",
     "org.jetbrains.kotlin:kotlin-script-runtime",
