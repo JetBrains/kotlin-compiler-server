@@ -3,13 +3,17 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.executor.JavaStreamingExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProgramOutput
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
-import executors.JUnitExecutors
-import executors.JavaRunnerExecutor
+import com.compiler.server.streaming.StreamingOutputMapperComponent
+import executors.streaming.JUnitStreamingExecutor
+import executors.synchronous.JUnitExecutor
+import executors.streaming.JavaStreamingRunnerExecutor
+import executors.synchronous.JavaRunnerExecutor
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -21,6 +25,7 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -30,6 +35,8 @@ class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
+  private val javaStreamingExecutor: JavaStreamingExecutor,
+  private val streamingOutputMapper: StreamingOutputMapperComponent,
   private val librariesFile: LibrariesFile,
   @Value("\${policy.file}") private val policyFileName: String
 ) {
@@ -47,11 +54,29 @@ class KotlinCompiler(
     }
   }
 
+  fun runStreaming(files: List<KtFile>, args: String, output: OutputStream) {
+    executeStreaming(files, output) { outputFilesDir, compiled, outputStream ->
+      val mainClass = JavaStreamingRunnerExecutor::class.java.name
+      val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
+      javaStreamingExecutor.execute(argsFrom(mainClass, outputFilesDir, arguments), outputStream)
+    }
+  }
+
   fun test(files: List<KtFile>): ExecutionResult {
     return execute(files) { output, _ ->
-      val mainClass = JUnitExecutors::class.java.name
+      val mainClass = JUnitExecutor::class.java.name
       javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
         .asJUnitExecutionResult()
+    }
+  }
+
+  fun testStreaming(files: List<KtFile>, args: String, output: OutputStream) {
+    executeStreaming(files, output) { outputFilesDir, _, outputStream ->
+      val mainClass = JUnitStreamingExecutor::class.java.name
+      javaStreamingExecutor.execute(
+        argsFrom(mainClass, outputFilesDir, listOf(outputFilesDir.path.toString())),
+        outputStream
+      )
     }
   }
 
@@ -85,6 +110,34 @@ class KotlinCompiler(
       } else ExecutionResult(errors)
     } catch (e: Exception) {
       ExecutionResult(exception = e.toExceptionDescriptor())
+    }
+  }
+
+  private fun executeStreaming(
+    files: List<KtFile>,
+    output: OutputStream,
+    block: (outputFilesDir: OutputDirectory, compilation: Compiled, output: OutputStream) -> Unit
+  ) {
+    try {
+      val errors = errorAnalyzer.errorsFrom(files)
+      if (errorAnalyzer.isOnlyWarnings(errors)) {
+        val compilation = compile(files)
+        if (compilation.files.isEmpty()) {
+          output.write(streamingOutputMapper.writeStderrAsBytes(ExecutorMessages.NO_COMPILERS_FILE_FOUND))
+          return
+        }
+        val outputFilesDir = write(compilation)
+        try {
+          output.write(streamingOutputMapper.writeErrorsAsBytes(errors))
+          block(outputFilesDir, compilation, output)
+        } finally {
+          outputFilesDir.path.toAbsolutePath().toFile().deleteRecursively()
+        }
+      } else {
+        output.write(streamingOutputMapper.writeErrorsAsBytes(errors))
+      }
+    } catch (e: Exception) {
+        output.write(streamingOutputMapper.writeThrowableAsBytes(e))
     }
   }
 

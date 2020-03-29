@@ -6,6 +6,7 @@ import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
 import org.apache.commons.logging.LogFactory
 import org.springframework.stereotype.Component
+import java.io.OutputStream
 
 @Component
 class KotlinProjectExecutor(
@@ -24,9 +25,19 @@ class KotlinProjectExecutor(
     return kotlinCompiler.run(files, project.args)
   }
 
+  fun runStreaming(project: Project, output: OutputStream) {
+    val files = getFilesFrom(project).map { it.kotlinFile }
+    kotlinCompiler.runStreaming(files, project.args, output)
+  }
+
   fun test(project: Project): ExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
     return kotlinCompiler.test(files)
+  }
+
+  fun testStreaming(project: Project, output: OutputStream) {
+    val files = getFilesFrom(project).map { it.kotlinFile }
+    kotlinCompiler.testStreaming(files, project.args, output)
   }
 
   fun convertToJs(project: Project): TranslationJSResult {

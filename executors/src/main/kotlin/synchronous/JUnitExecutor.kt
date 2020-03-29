@@ -1,21 +1,25 @@
-package executors
+package executors.synchronous
 
-import org.junit.Test
+import executors.JUnitExecutorsUtil.loadTestClasses
+import executors.TestListener
+import executors.TestRunInfo
+import executors.mapper
 import org.junit.runner.JUnitCore
 import org.junit.runner.Request
-import java.io.File
 import java.util.*
 
-class JUnitExecutors {
+class JUnitExecutor {
   companion object {
-    var output: MutableList<TestRunInfo> = ArrayList()
+    private val output: MutableList<TestRunInfo> = ArrayList()
     private val standardOutput = System.out
 
     @JvmStatic
     fun main(args: Array<String>) {
       try {
         val jUnitCore = JUnitCore()
-        jUnitCore.addListener(TestListener())
+        jUnitCore.addListener(TestListener {
+          output.add(it)
+        })
         val cl = loadTestClasses(args[0])
         cl.forEach {
           val request = Request.aClass(it)
@@ -37,21 +41,6 @@ class JUnitExecutors {
         e.printStackTrace()
         print("\"]")
       }
-    }
-
-    private fun loadTestClasses(path: String): List<Class<out Any>> {
-      val files = File(path).listFiles().orEmpty()
-      val names = files
-        .filter { it.name.endsWith(".class") }
-        .map { it.name.removeSuffix(".class") }
-      return names.mapNotNull {
-        try {
-          Class.forName(it)
-        }
-        catch (_: Exception) {
-          null
-        }
-      }.filter { it -> it.methods.any { it.isAnnotationPresent(Test::class.java) } }
     }
   }
 }
