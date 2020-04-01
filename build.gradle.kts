@@ -58,7 +58,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.4")
     implementation("junit:junit:4.12")
-    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
+    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20200330")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
