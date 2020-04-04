@@ -1,19 +1,13 @@
 package com.compiler.server
 
-import com.compiler.server.generator.TestProjectRunner
+import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-class JvmRunnerTest {
-
-  @Autowired
-  private lateinit var testRunner: TestProjectRunner
+class JvmRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `base execute test JVM`() {
-    testRunner.run(
+    run(
       code = "fun main() {\n println(\"Hello, world!!!\")\n}",
       contains = "Hello, world!!!"
     )
@@ -21,7 +15,7 @@ class JvmRunnerTest {
 
   @Test
   fun `no main class jvm test`() {
-    testRunner.run(
+    run(
       code = "fun main1() {\n    println(\"sdf\")\n}",
       contains = "No main method found in project"
     )
@@ -29,7 +23,7 @@ class JvmRunnerTest {
 
   @Test
   fun `base execute test JVM multi`() {
-    testRunner.multiRun(
+    run(
       code = listOf(
         "import cat.Cat\n\nfun main(args: Array<String>) {\nval cat = Cat(\"Kitty\")\nprintln(cat.name)\n}",
         "package cat\n    class Cat(val name: String)"
@@ -40,9 +34,9 @@ class JvmRunnerTest {
 
   @Test
   fun `correct kotlin version test jvm`() {
-    testRunner.run(
+    run(
       code = "fun main() {\n    println(KotlinVersion?.CURRENT)\n}",
-      contains = testRunner.getVersion().substringBefore("-")
+      contains = version().substringBefore("-")
     )
   }
 

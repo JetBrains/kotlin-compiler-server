@@ -26,8 +26,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.70"
-    kotlin("plugin.spring") version "1.3.70"
+    kotlin("jvm") version "1.3.71"
+    kotlin("plugin.spring") version "1.3.71"
 }
 
 allprojects {
@@ -49,7 +49,7 @@ dependencies {
     kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4") {
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5") {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
     }
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
@@ -76,7 +76,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.4")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.5")
 }
 
 fun buildPropertyFile() {

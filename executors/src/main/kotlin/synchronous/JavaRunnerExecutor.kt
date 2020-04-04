@@ -50,9 +50,7 @@ class JavaRunnerExecutor {
       }
       catch (e: Throwable) {
         System.setOut(defaultOutputStream)
-        println("{\"text\":\"<errStream>" + e.javaClass.name + ": " + e.message)
-        e.printStackTrace()
-        print("</errStream>\"}")
+        System.out.println(mapper.writeValueAsString(RunOutput(exception = e)))
       }
     }
   }
