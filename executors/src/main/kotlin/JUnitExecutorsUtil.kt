@@ -3,7 +3,7 @@ package executors
 import org.junit.Test
 import java.io.File
 
-object JUnitExecutorsUtil {
+internal object JUnitExecutorsUtil {
   fun loadTestClasses(path: String): List<Class<out Any>> {
     val files = File(path).listFiles().orEmpty()
     val names = files

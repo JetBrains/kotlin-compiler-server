@@ -2,7 +2,7 @@ package com.compiler.server.executor
 
 import com.compiler.server.executor.JavaStreamingExecutor.Companion.PipeResult.LIMIT_EXCEEDED
 import com.compiler.server.executor.JavaStreamingExecutor.Companion.PipeResult.NORMAL
-import com.compiler.server.streaming.StreamingOutputMapperComponent
+import com.compiler.server.streaming.ServerStreamingOutputMapper
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.io.InputStream
@@ -14,15 +14,16 @@ import java.util.concurrent.TimeUnit
 
 
 @Component
-class JavaStreamingExecutor(
-  private val streamingOutputMapper: StreamingOutputMapperComponent
-) {
+class JavaStreamingExecutor {
+
+  private val streamingOutputMapper = ServerStreamingOutputMapper()
 
   companion object {
-    const val MAX_OUTPUT_SIZE = 100 * 1024
-    const val EXECUTION_TIMEOUT = 20000L
+    private const val MAX_OUTPUT_SIZE = 100 * 1024
+    private const val EXECUTION_TIMEOUT = 20000L
+    private const val STREAMING_PIPE_BUFFER_SIZE = 1024
 
-    enum class PipeResult {
+    private enum class PipeResult {
       NORMAL,
       LIMIT_EXCEEDED
     }
@@ -37,9 +38,8 @@ class JavaStreamingExecutor(
         val currTime = System.currentTimeMillis()
         val futuresList = Executors.newSingleThreadExecutor()
           .invokeAll(listOf(standardOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
-        println("Script execution time in millis: " + (System.currentTimeMillis() - currTime))
 
-        val outputFuture = futuresList[0]
+        val outputFuture = futuresList.first()
 
         when {
           outputFuture.isCancelled -> {
@@ -68,7 +68,7 @@ class JavaStreamingExecutor(
     var limitExceeded = false
     try {
       var bytesCopied = 0
-      val buffer = ByteArray(1024)
+      val buffer = ByteArray(STREAMING_PIPE_BUFFER_SIZE)
       var bytes = input.read(buffer)
       while (bytes >= 0 && bytesCopied < limit) {
         val bytesToCopy = min(bytes, limit - bytesCopied)

@@ -32,15 +32,21 @@ internal abstract class BaseStreamingWrapper : OutputStream() {
   abstract fun writeToStream(b: ByteArray)
 }
 
-internal class ErrorStreamStreaming(private val outputStream: OutputStream,
-                                    private val outputMapper: StreamingOutputMapper) : BaseStreamingWrapper() {
+internal class ErrorStreamStreaming(
+  private val outputStream: OutputStream,
+  private val outputMapper: StreamingOutputMapper
+) : BaseStreamingWrapper() {
+
   override fun writeToStream(b: ByteArray) {
     outputStream.write(outputMapper.writeStderrAsBytes(b))
   }
 }
 
-internal class OutStreamStreaming(private val outputStream: OutputStream,
-                                  private val outputMapper: StreamingOutputMapper) : BaseStreamingWrapper() {
+internal class OutStreamStreaming(
+  private val outputStream: OutputStream,
+  private val outputMapper: StreamingOutputMapper
+) : BaseStreamingWrapper() {
+
   override fun writeToStream(b: ByteArray) {
     outputStream.write(outputMapper.writeStdoutAsBytes(b))
   }

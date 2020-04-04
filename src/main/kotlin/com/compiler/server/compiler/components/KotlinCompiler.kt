@@ -9,7 +9,7 @@ import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProgramOutput
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
-import com.compiler.server.streaming.StreamingOutputMapperComponent
+import com.compiler.server.streaming.ServerStreamingOutputMapper
 import executors.streaming.JUnitStreamingExecutor
 import executors.synchronous.JUnitExecutor
 import executors.streaming.JavaStreamingRunnerExecutor
@@ -36,11 +36,11 @@ class KotlinCompiler(
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
   private val javaStreamingExecutor: JavaStreamingExecutor,
-  private val streamingOutputMapper: StreamingOutputMapperComponent,
   private val librariesFile: LibrariesFile,
   @Value("\${policy.file}") private val policyFileName: String
 ) {
 
+  private val streamingOutputMapper = ServerStreamingOutputMapper()
   private val policyFile = File(policyFileName)
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
