@@ -1,23 +1,26 @@
 package com.compiler.server.executor
 
 import com.compiler.server.model.ProgramOutput
+import com.compiler.server.streaming.ServerStreamingOutputMapper
 import com.compiler.server.utils.escapeString
-import org.springframework.stereotype.Component
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
+import java.io.*
 import java.nio.file.Path
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-@Component
-class JavaExecutor {
+object JavaExecutor {
 
-  companion object {
-    const val MAX_OUTPUT_SIZE = 100 * 1024
-    const val EXECUTION_TIMEOUT = 10000L
+  private const val MAX_OUTPUT_SIZE = 100 * 1024
+  private const val EXECUTION_TIMEOUT = 10000L
+  private const val STREAMING_BUFFER_SIZE = 1024
+
+  private enum class StreamingPipeResult {
+    NORMAL,
+    LIMIT_EXCEEDED
   }
+
+  private val streamingOutputMapper = ServerStreamingOutputMapper()
 
   fun execute(args: List<String>): ProgramOutput {
     return Runtime.getRuntime().exec(args.toTypedArray()).use {
@@ -81,6 +84,41 @@ class JavaExecutor {
     }
   }
 
+  fun executeStreaming(args: List<String>, output: OutputStream) {
+    Runtime.getRuntime().exec(args.toTypedArray()).apply {
+      try {
+        outputStream.close()
+        val standardOutput = streamingPipe(inputStream, output, MAX_OUTPUT_SIZE)
+
+        val currTime = System.currentTimeMillis()
+        val futuresList = Executors.newSingleThreadExecutor()
+          .invokeAll(listOf(standardOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
+
+        val outputFuture = futuresList.first()
+
+        when {
+          outputFuture.isCancelled -> {
+            output.write(streamingOutputMapper.writeStderrAsBytes(ExecutorMessages.TIMEOUT_MESSAGE))
+          }
+          outputFuture.get(0, TimeUnit.MILLISECONDS) == StreamingPipeResult.LIMIT_EXCEEDED -> {
+            output.write(streamingOutputMapper.writeStderrAsBytes(ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE))
+          }
+        }
+      } catch (any: Exception) {
+        output.write(streamingOutputMapper.writeThrowableAsBytes(any))
+      } finally {
+        try {
+          // don't need this process any more. It will not allow to close IO handlers if not destroyed or finished
+          this.destroy()
+          inputStream.close()
+          errorStream.close()
+        } catch (_: IOException) {
+          // don't care
+        }
+      }
+    }
+  }
+
   private fun asyncBufferedOutput(standardOut: BufferedReader, limit: Int): Callable<String> = Callable {
     val output = StringBuilder()
     try {
@@ -96,6 +134,29 @@ class JavaExecutor {
     output.toString()
   }
 
+  private fun streamingPipe(input: InputStream, output: OutputStream, limit: Int): Callable<StreamingPipeResult> =
+    Callable {
+      var limitExceeded = false
+      try {
+        var bytesCopied = 0
+        val buffer = ByteArray(STREAMING_BUFFER_SIZE)
+        var bytes = input.read(buffer)
+        while (bytes >= 0 && bytesCopied < limit) {
+          val bytesToCopy = Integer.min(bytes, limit - bytesCopied)
+          if (bytesToCopy < bytes) {
+            limitExceeded = true
+          }
+          output.write(buffer, 0, bytesToCopy)
+          output.flush()
+          bytesCopied += bytesToCopy
+          bytes = input.read(buffer)
+        }
+      }
+      catch (_: Exception) {
+        // something happened with the stream. Just return what we've collected so far
+      }
+      if (limitExceeded) StreamingPipeResult.LIMIT_EXCEEDED else StreamingPipeResult.NORMAL
+    }
 
   private fun <T> Process.use(body: Process.() -> T) = try {
     body()
@@ -103,7 +164,6 @@ class JavaExecutor {
   finally {
     destroy()
   }
-
 }
 
 class CommandLineArgument(
