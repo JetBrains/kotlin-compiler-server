@@ -13,12 +13,19 @@ class BaseJUnitTest {
   @Autowired
   private lateinit var testRunner: TestProjectRunner
 
-  fun test(vararg test: String) = testRunner.test(*test)
+  fun test(mode: ExecutorMode, vararg test: String) = when(mode) {
+    ExecutorMode.SYNCHRONOUS -> testRunner.test(*test)
+    ExecutorMode.STREAMING -> testRunner.testStreaming(*test)
+  }
 
-  fun testRaw(vararg test: String) = testRunner.testRaw(*test)
+  fun testRaw(mode: ExecutorMode, vararg test: String): RawExecutionResult = when(mode) {
+    ExecutorMode.SYNCHRONOUS -> SynchronousResult(testRunner.testRaw(*test))
+    ExecutorMode.STREAMING -> StreamingResult(testRunner.testRawStreaming(*test))
+  }
 
-  fun runKoanTest(vararg testFile: String) {
+  fun runKoanTest(mode: ExecutorMode, vararg testFile: String) {
     val test = test(
+      mode,
       *testFile,
       koansUtilsFile
     )

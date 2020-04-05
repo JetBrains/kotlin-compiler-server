@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class BaseExecutorTest {
   @Autowired
-  private lateinit var testRunner: TestProjectRunner
+  lateinit var testRunner: TestProjectRunner
 
   fun complete(
     code: String,
@@ -21,15 +21,24 @@ class BaseExecutorTest {
 
   fun highlightJS(code: String) = testRunner.highlightJS(code)
 
-  fun run(code: String, contains: String, args: String = "") = testRunner.run(code, contains, args)
+  fun run(code: String, contains: String, args: String = "", mode: ExecutorMode): RawExecutionResult = when (mode) {
+    ExecutorMode.SYNCHRONOUS -> SynchronousResult(testRunner.run(code, contains, args))
+    ExecutorMode.STREAMING -> StreamingResult(testRunner.runStreaming(code, contains, args))
+  }
 
-  fun run(code: List<String>, contains: String) = testRunner.multiRun(code, contains)
+  fun run(code: List<String>, contains: String, mode: ExecutorMode) = when (mode) {
+    ExecutorMode.SYNCHRONOUS -> testRunner.multiRun(code, contains)
+    ExecutorMode.STREAMING -> testRunner.multiRunStreaming(code, contains)
+  }
 
   fun runJs(code: String, contains: String, args: String = "") =  testRunner.runJs(code, contains, args)
 
   fun runJs(code: List<String>, contains: String) =  testRunner.multiRunJs(code, contains)
 
-  fun runWithException(code: String, contains: String) = testRunner.runWithException(code, contains)
+  fun runWithException(code: String, contains: String, mode: ExecutorMode): RawExecutionResult = when (mode) {
+    ExecutorMode.SYNCHRONOUS -> SynchronousResult(testRunner.runWithException(code, contains))
+    ExecutorMode.STREAMING -> StreamingResult(testRunner.runWithExceptionStreaming(code, contains))
+  }
 
   fun version() = testRunner.getVersion()
 }

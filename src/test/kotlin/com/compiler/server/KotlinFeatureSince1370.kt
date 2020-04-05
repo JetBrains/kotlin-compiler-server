@@ -1,16 +1,17 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.generator.TestProjectRunner
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import com.compiler.server.base.ExecutorMode
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class KotlinFeatureSince1370 : BaseExecutorTest() {
 
-  @Test
-  fun `kotlin blog post 1370 feature 1`() {
+  @ParameterizedTest
+  @EnumSource(ExecutorMode::class)
+  fun `kotlin blog post 1370 feature 1`(mode: ExecutorMode) {
     run(
+      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -29,9 +30,11 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @Test
-  fun `kotlin blog post 1370 feature 2`() {
+  @ParameterizedTest
+  @EnumSource(ExecutorMode::class)
+  fun `kotlin blog post 1370 feature 2`(mode: ExecutorMode) {
     run(
+      mode = mode,
       code = """
         import kotlin.reflect.cast
         
@@ -50,9 +53,11 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @Test
-  fun `kotlin blog post 1370 feature 3`() {
+  @ParameterizedTest
+  @EnumSource(ExecutorMode::class)
+  fun `kotlin blog post 1370 feature 3`(mode: ExecutorMode) {
     run(
+      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -74,9 +79,11 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @Test
-  fun `kotlin blog post 1370 feature 4`() {
+  @ParameterizedTest
+  @EnumSource(ExecutorMode::class)
+  fun `kotlin blog post 1370 feature 4`(mode: ExecutorMode) {
     run(
+      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -93,9 +100,11 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @Test
-  fun `kotlin blog post 1370 feature 5`() {
+  @ParameterizedTest
+  @EnumSource(ExecutorMode::class)
+  fun `kotlin blog post 1370 feature 5`(mode: ExecutorMode) {
     run(
+      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
