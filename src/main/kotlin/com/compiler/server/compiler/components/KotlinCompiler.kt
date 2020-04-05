@@ -3,7 +3,6 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.executor.JavaStreamingExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProgramOutput
@@ -34,8 +33,6 @@ import java.util.*
 class KotlinCompiler(
   private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
-  private val javaExecutor: JavaExecutor,
-  private val javaStreamingExecutor: JavaStreamingExecutor,
   private val librariesFile: LibrariesFile,
   @Value("\${policy.file}") private val policyFileName: String
 ) {
@@ -49,7 +46,7 @@ class KotlinCompiler(
     return execute(files) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
       val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
-      javaExecutor.execute(argsFrom(mainClass, output, arguments))
+      JavaExecutor.execute(argsFrom(mainClass, output, arguments))
         .asExecutionResult()
     }
   }
@@ -58,14 +55,14 @@ class KotlinCompiler(
     executeStreaming(files, output) { outputFilesDir, compiled, outputStream ->
       val mainClass = JavaStreamingRunnerExecutor::class.java.name
       val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
-      javaStreamingExecutor.execute(argsFrom(mainClass, outputFilesDir, arguments), outputStream)
+      JavaExecutor.executeStreaming(argsFrom(mainClass, outputFilesDir, arguments), outputStream)
     }
   }
 
   fun test(files: List<KtFile>): ExecutionResult {
     return execute(files) { output, _ ->
       val mainClass = JUnitExecutor::class.java.name
-      javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
+      JavaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
         .asJUnitExecutionResult()
     }
   }
@@ -73,7 +70,7 @@ class KotlinCompiler(
   fun testStreaming(files: List<KtFile>, args: String, output: OutputStream) {
     executeStreaming(files, output) { outputFilesDir, _, outputStream ->
       val mainClass = JUnitStreamingExecutor::class.java.name
-      javaStreamingExecutor.execute(
+      JavaExecutor.executeStreaming(
         argsFrom(mainClass, outputFilesDir, listOf(outputFilesDir.path.toString())),
         outputStream
       )
