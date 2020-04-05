@@ -19,8 +19,8 @@ class JavaStreamingRunnerExecutor {
     @JvmStatic
     fun main(args: Array<String>) {
       try {
-        System.setOut(PrintStream(outStream))
-        System.setErr(PrintStream(errStream))
+        System.setOut(PrintStream(outStream, true))
+        System.setErr(PrintStream(errStream, true))
 
         val className: String
         if (args.isNotEmpty()) {

@@ -141,7 +141,7 @@ object JavaExecutor {
         var bytesCopied = 0
         val buffer = ByteArray(STREAMING_BUFFER_SIZE)
         var bytes = input.read(buffer)
-        while (bytes >= 0 && bytesCopied < limit) {
+        while (bytes >= 0 && !limitExceeded) {
           val bytesToCopy = Integer.min(bytes, limit - bytesCopied)
           if (bytesToCopy < bytes) {
             limitExceeded = true
