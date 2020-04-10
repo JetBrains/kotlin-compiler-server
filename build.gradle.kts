@@ -71,7 +71,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
         isTransitive = false
     }
-    implementation(project(":executors"))
+    implementation(project(":executors", configuration = "default"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
