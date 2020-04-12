@@ -79,7 +79,7 @@ dependencies {
       artifact = "kotlin-plugin",
       version = "1.2.71")
     )
-    implementation(project(":executors"))
+    implementation(project(":executors", configuration = "default"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
