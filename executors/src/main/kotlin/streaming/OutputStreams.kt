@@ -9,19 +9,25 @@ internal abstract class BaseStreamingWrapper : OutputStream() {
   @Throws(IOException::class)
   @Synchronized
   final override fun write(b: Int) {
-    writeToStream(byteArrayOf(b.toByte()))
+    if (isOpen) {
+      writeToStream(byteArrayOf(b.toByte()))
+    }
   }
 
   @Throws(IOException::class)
   @Synchronized
   final override fun write(b: ByteArray) {
-    writeToStream(b)
+    if (isOpen) {
+      writeToStream(b)
+    }
   }
 
   @Throws(IOException::class)
   @Synchronized
   final override fun write(b: ByteArray, offset: Int, length: Int) {
-    writeToStream(b.copyOfRange(offset, offset + length))
+    if (isOpen) {
+      writeToStream(b.copyOfRange(offset, offset + length))
+    }
   }
 
   @Synchronized
