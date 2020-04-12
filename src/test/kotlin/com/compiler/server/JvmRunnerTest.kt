@@ -1,37 +1,29 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.base.ExecutorMode
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
+import com.compiler.server.base.TestCompiler
 
 class JvmRunnerTest : BaseExecutorTest() {
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `base execute test JVM`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `base execute test JVM`() {
     run(
-      mode = mode,
       code = "fun main() {\n println(\"Hello, world!!!\")\n}",
       contains = "Hello, world!!!"
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `no main class jvm test`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `no main class jvm test`() {
     run(
-      mode = mode,
       code = "fun main1() {\n    println(\"sdf\")\n}",
       contains = "No main method found in project"
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `base execute test JVM multi`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `base execute test JVM multi`() {
     run(
-      mode = mode,
       code = listOf(
         "import cat.Cat\n\nfun main(args: Array<String>) {\nval cat = Cat(\"Kitty\")\nprintln(cat.name)\n}",
         "package cat\n    class Cat(val name: String)"
@@ -40,11 +32,9 @@ class JvmRunnerTest : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `correct kotlin version test jvm`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `correct kotlin version test jvm`() {
     run(
-      mode = mode,
       code = "fun main() {\n    println(KotlinVersion?.CURRENT)\n}",
       contains = version().substringBefore("-")
     )
