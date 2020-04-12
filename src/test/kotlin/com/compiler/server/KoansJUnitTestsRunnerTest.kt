@@ -1,11 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseJUnitTest
-import com.compiler.server.base.ExecutorMode
 import com.compiler.server.base.TestCompiler
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 
 class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
 
