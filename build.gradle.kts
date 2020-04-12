@@ -8,7 +8,9 @@ group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-val kotlinDependency: Configuration by configurations.creating
+val kotlinDependency: Configuration by configurations.creating {
+    isTransitive = false
+}
 val kotlinJsDependency: Configuration by configurations.creating
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
@@ -30,8 +32,8 @@ val kotlinPluginLocation = "Kotlin_1270_CompilerAllPlugins/1626094:id/kotlin-plu
 plugins {
     id("org.springframework.boot") version "2.2.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.2.71"
-    kotlin("plugin.spring") version "1.2.71"
+    kotlin("jvm") version "1.3.71"
+    kotlin("plugin.spring") version "1.3.71"
 }
 
 allprojects {
@@ -49,12 +51,16 @@ dependencies {
 
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest-core:2.2")
-    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.10.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.10.0")
+    // Kotlin libraries
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:1.2.71")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-common:1.2.71")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.71")
     kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:1.2.71")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1") {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
-    }
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:0.26.1")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
