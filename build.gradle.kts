@@ -8,7 +8,9 @@ group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-val kotlinDependency: Configuration by configurations.creating
+val kotlinDependency: Configuration by configurations.creating {
+    isTransitive = false
+}
 val kotlinJsDependency: Configuration by configurations.creating
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
