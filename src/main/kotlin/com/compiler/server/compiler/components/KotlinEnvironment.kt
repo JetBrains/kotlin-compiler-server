@@ -4,7 +4,6 @@ import com.compiler.server.model.bean.LibrariesFile
 import com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
-import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -36,26 +35,8 @@ class KotlinEnvironment(
 ) {
 
   companion object {
-    /**
-     * This list allows to configure behavior of webdemo compiler. Its effect is equivalent
-     * to passing this list of string to CLI compiler.
-     *
-     * See [org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments] and
-     * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
-     */
-    private val additionalCompilerArguments: List<String> = listOf(
-      "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
-      "-Xuse-experimental=kotlin.time.ExperimentalTime",
-      "-Xuse-experimental=kotlin.Experimental",
-      "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
-      "-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-      "-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
-      "-XXLanguage:+InlineClasses"
-    )
 
     fun with(classpath: List<File>, classpathJs: List<File>): KotlinEnvironment {
-      val arguments = K2JVMCompilerArguments()
-      parseCommandLineArguments(additionalCompilerArguments, arguments)
       val coreEnvironment = KotlinCoreEnvironment.createForTests(
         parentDisposable = Disposable {},
         extensionConfigs = EnvironmentConfigFiles.JVM_CONFIG_FILES,
