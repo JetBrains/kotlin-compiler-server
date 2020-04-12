@@ -45,7 +45,7 @@ class KotlinCompiler(
   fun run(files: List<KtFile>, args: String): ExecutionResult {
     return execute(files) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
-      val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
+      val arguments = listOfNotNull(compiled.mainClass) + args.split(ARGUMENTS_DELIMITER)
       JavaExecutor.execute(argsFrom(mainClass, output, arguments))
         .asExecutionResult()
     }
@@ -54,7 +54,7 @@ class KotlinCompiler(
   fun runStreaming(files: List<KtFile>, args: String, output: OutputStream) {
     executeStreaming(files, output) { outputFilesDir, compiled, outputStream ->
       val mainClass = JavaStreamingRunnerExecutor::class.java.name
-      val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
+      val arguments = listOfNotNull(compiled.mainClass) + args.split(ARGUMENTS_DELIMITER)
       JavaExecutor.executeStreaming(argsFrom(mainClass, outputFilesDir, arguments), outputStream)
     }
   }
@@ -192,4 +192,7 @@ class KotlinCompiler(
     }
   }
 
+  companion object {
+    private const val ARGUMENTS_DELIMITER = " "
+  }
 }
