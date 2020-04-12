@@ -117,8 +117,8 @@ class CommandLineArgument(
     return (listOf(
       "java",
       "-Xmx" + memoryLimit + "M",
-//      "-Djava.security.manager",
-//      "-Djava.security.policy=$policy",
+      "-Djava.security.manager",
+      "-Djava.security.policy=$policy",
       "-classpath"
     ) + classPaths + mainClass + arguments).filterNotNull()
   }
