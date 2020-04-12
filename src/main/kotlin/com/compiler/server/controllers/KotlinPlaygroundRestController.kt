@@ -66,7 +66,6 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     consumes = [MediaType.ALL_VALUE],
     headers = ["Enable-Streaming=true"]
   )
-  @Suppress("IMPLICIT_CAST_TO_ANY")
   fun tryKotlinLangObsoleteEndpointStreaming(
     @RequestParam type: String,
     @RequestParam(required = false) project: Project?
