@@ -148,7 +148,7 @@ class TestProjectRunner {
         .joinToString(separator = "")
 
     Assertions.assertTrue(stdout.contains(contains) || stdErr.contains(contains),
-        "Actual stdout: ${stdout}.\nActual stderr: {$stdErr}.\nExpected $contains")
+        "Actual stdout: ${stdout}\nActual stderr: {$stdErr}\nExpected: $contains")
     return jsonChunks
   }
 
