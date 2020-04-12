@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -128,6 +129,11 @@ val buildLambda by tasks.creating(Zip::class) {
     }
 }
 
+tasks.withType<Test> {
+  testLogging {
+    exceptionFormat = TestExceptionFormat.FULL
+  }
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()
