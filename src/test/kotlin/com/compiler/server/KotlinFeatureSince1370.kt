@@ -1,17 +1,13 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.base.ExecutorMode
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
+import com.compiler.server.base.TestCompiler
 
 class KotlinFeatureSince1370 : BaseExecutorTest() {
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin blog post 1370 feature 1`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin blog post 1370 feature 1`() {
     run(
-      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -30,11 +26,9 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin blog post 1370 feature 2`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin blog post 1370 feature 2`() {
     run(
-      mode = mode,
       code = """
         import kotlin.reflect.cast
         
@@ -53,11 +47,9 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin blog post 1370 feature 3`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin blog post 1370 feature 3`() {
     run(
-      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -79,11 +71,9 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin blog post 1370 feature 4`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin blog post 1370 feature 4`() {
     run(
-      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {
@@ -100,11 +90,9 @@ class KotlinFeatureSince1370 : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin blog post 1370 feature 5`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin blog post 1370 feature 5`() {
     run(
-      mode = mode,
       code = """
         @OptIn(ExperimentalStdlibApi::class)
         fun main() {

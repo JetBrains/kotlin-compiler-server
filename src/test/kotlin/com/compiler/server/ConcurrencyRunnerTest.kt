@@ -1,24 +1,20 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.base.ExecutorMode
+import com.compiler.server.base.TestCompiler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 
 class ConcurrencyRunnerTest : BaseExecutorTest() {
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
+  @TestCompiler
   @Disabled
-  fun `a lot of hello word test JVM`(mode: ExecutorMode) {
+  fun `a lot of hello word test JVM`() {
     runManyTest {
       run(
-        mode = mode,
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "Hello, world!!!"
       )

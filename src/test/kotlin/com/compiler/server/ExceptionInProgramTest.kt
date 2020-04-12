@@ -1,47 +1,37 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.base.ExecutorMode
+import com.compiler.server.base.TestCompiler
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 
 class ExceptionInProgramTest : BaseExecutorTest() {
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `command line index of bound jvm`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `command line index of bound jvm`() {
     runWithException(
-      mode = mode,
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[2])\n}",
       contains = "java.lang.ArrayIndexOutOfBoundsException"
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `security read file`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `security read file`() {
     runWithException(
-      mode = mode,
       code = "import java.io.*\n\nfun main() {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
       contains = "java.security.AccessControlException"
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `security connection exception`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `security connection exception`() {
     runWithException(
-      mode = mode,
       code = "import java.net.*\n\nfun main() {\n    val connection = URL(\"http://www.android.com/\").openConnection() as HttpURLConnection\n\tval d = connection.inputStream.bufferedReader().readText()\n\tprint(d)\n}",
       contains = "java.security.AccessControlException"
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin npe`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin npe`() {
     runWithException(
-      mode = mode,
       code = """
         fun main() {
           val s: String? = null
@@ -52,11 +42,9 @@ class ExceptionInProgramTest : BaseExecutorTest() {
     )
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin out of memory in executor`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin out of memory in executor`() {
     val result = runWithException(
-      mode = mode,
       code = """
         import java.io.*
         fun main() {
@@ -70,11 +58,9 @@ class ExceptionInProgramTest : BaseExecutorTest() {
     Assertions.assertTrue(result.getException()?.message == "Java heap space")
   }
 
-  @ParameterizedTest
-  @EnumSource(ExecutorMode::class)
-  fun `kotlin compiler crash`(mode: ExecutorMode) {
+  @TestCompiler
+  fun `kotlin compiler crash`() {
     val result = runWithException(
-      mode = mode,
       code = "fun main(args: Array<String>) {\n    println(\"Hello, world!\")\n    \n    fun factorial(x: Int): Int{\n        var fact = 1\n        for(i in 2..x){\n            fact*=i\n        }\n        return fact\n    }\n    \n    fun catalogue(type: String): (arg: Int) -> Int{\n        return when(type){\n            \"double\" -> {x: Int -> 2*x}\n            \"square\" -> {x: Int -> x*x}\n            \"factorial\" -> ::factorial\n            else -> {x: Int -> x}\n        }\n    }\n    \n    val x = 10\n    println(\"The double of \$x is \${catalogue(\"double\")(x)}\")\n    println(\"The square of \$x is \${catalogue(\"square\")(x)}\")\n    println(\"The factorial of \$x is \${catalogue(\"factorial\")(x)}\")\n\n}",
       contains = "org.jetbrains.kotlin.util.KotlinFrontEndException"
     )
