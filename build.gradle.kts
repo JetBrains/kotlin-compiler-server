@@ -130,11 +130,8 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.withType<Test> {
-  testLogging {
-    exceptionFormat = TestExceptionFormat.FULL
-  }
-}
-
-tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 }
