@@ -60,6 +60,28 @@ curl -X POST \
 }'
 ```
 
+### Execute Kotlin code on JVM with streaming output
+Uses chunked transfer encoding to asynchronously send output of the running code. Response body
+is a stream of JSON messages separated by "\n\n".
+
+NB: it is not guaranteed that all messages are valid JSON objects
+(if output exceeds maximum number of characters or the program exceeds time limit then some JSONs can be incomplete).
+```shell script
+curl -X POST \
+  http://localhost:8080/api/compiler/run-streaming \
+  -H 'Content-Type: application/json' \
+  --no-buffer \
+  -d '{
+    "args": "1 2 3",
+    "files": [
+        {
+            "name": "File.kt",
+            "text": "fun main(args: Array<String>) {\n for (x in 0..10) { \n println(x); Thread.sleep(500) \n}\n}"
+        }
+    ]
+}'
+```
+
 ### Translate Kotlin code to JavaScript code
 
 ```shell script
@@ -96,6 +118,25 @@ curl -X POST \
     {
       "name": "test1.kt",
       "text": "package koans.util\n\nfun String.toMessage() = \"The function '\''$this'\'' is implemented incorrectly\"\n\nfun String.toMessageInEquals() = toMessage().inEquals()\n\nfun String.inEquals() = this"
+    }
+  ]
+}'
+```
+
+### Run Kotlin tests with streaming output
+Uses chunked transfer encoding to asynchronously send test results.
+Immediately sends JSON with a test result when the test finishes. Messages are separated by "\n\n".
+
+```shell script
+curl -X POST \
+  http://localhost:8080/api/compiler/test-streaming \
+  -H 'Content-Type: application/json' \
+  --no-buffer \
+  -d '{
+  "files": [
+    {
+      "name": "test0.kt",
+      "text": "import org.junit.Assert\nimport org.junit.Test\n\nclass Test {\n @Test fun testOk() {\n Assert.assertEquals(true, true); Thread.sleep(3000)\n }\n @Test fun testFail() {\n Assert.assertEquals(false, true)\n}\n}"
     }
   ]
 }'
