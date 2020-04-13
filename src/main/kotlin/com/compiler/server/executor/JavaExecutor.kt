@@ -90,7 +90,6 @@ object JavaExecutor {
         outputStream.close()
         val standardOutput = streamingPipe(inputStream, output, MAX_OUTPUT_SIZE)
 
-        val currTime = System.currentTimeMillis()
         val futuresList = Executors.newSingleThreadExecutor()
           .invokeAll(listOf(standardOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
 
