@@ -11,7 +11,9 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false
 }
-val kotlinJsDependency: Configuration by configurations.creating
+val kotlinJsDependency: Configuration by configurations.creating {
+    isTransitive = false
+}
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
