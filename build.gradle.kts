@@ -8,7 +8,9 @@ group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
-val kotlinDependency: Configuration by configurations.creating
+val kotlinDependency: Configuration by configurations.creating {
+    isTransitive = false
+}
 val kotlinJsDependency: Configuration by configurations.creating
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
@@ -43,15 +45,18 @@ allprojects {
 }
 
 dependencies {
-
     kotlinDependency("junit:junit:4.12")
-    kotlinDependency("org.hamcrest:hamcrest-core:2.2")
-    kotlinDependency("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10")
+    kotlinDependency("org.hamcrest:hamcrest:2.2")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.10.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.10.0")
+    // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5") {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
-    }
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
