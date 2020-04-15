@@ -5,6 +5,7 @@ import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
 import org.apache.commons.logging.LogFactory
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.springframework.stereotype.Component
 
 @Component
@@ -20,46 +21,56 @@ class KotlinProjectExecutor(
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
 
   fun run(project: Project): ExecutionResult {
-    val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinCompiler.run(files, project.args)
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      kotlinCompiler.run(files, environment, project.args)
+    }
   }
 
   fun test(project: Project): ExecutionResult {
-    val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinCompiler.test(files)
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      kotlinCompiler.test(files, environment)
+    }
   }
 
   fun convertToJs(project: Project): TranslationJSResult {
-    val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinToJSTranslator.translate(files, project.args.split(" "))
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      kotlinToJSTranslator.translate(files, project.args.split(" "), environment)
+    }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
-    val file = getFilesFrom(project).first()
-    return try {
-      val isJs = project.confType == ProjectType.JS
-      completionProvider.complete(file, line, character, isJs)
-    }
-    catch (e: Exception) {
-      log.warn("Exception in getting completions. Project: $project", e)
-      emptyList()
+    return kotlinEnvironment.environment {
+      val file = getFilesFrom(project, it).first()
+      try {
+        val isJs = project.confType == ProjectType.JS
+        completionProvider.complete(file, line, character, isJs, it)
+      }
+      catch (e: Exception) {
+        log.warn("Exception in getting completions. Project: $project", e)
+        emptyList()
+      }
     }
   }
 
   fun highlight(project: Project): Map<String, List<ErrorDescriptor>> {
-    val files = getFilesFrom(project).map { it.kotlinFile }
-    return try {
-      errorAnalyzer.errorsFrom(files)
-    }
-    catch (e: Exception) {
-      log.warn("Exception in getting highlight. Project: $project", e)
-      emptyMap()
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      try {
+        errorAnalyzer.errorsFrom(files, environment).errors
+      }
+      catch (e: Exception) {
+        log.warn("Exception in getting highlight. Project: $project", e)
+        emptyMap()
+      }
     }
   }
 
   fun getVersion() = version
 
-  private fun getFilesFrom(project: Project) = project.files.map {
-    KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)
+  private fun getFilesFrom(project: Project, coreEnvironment: KotlinCoreEnvironment) = project.files.map {
+    KotlinFile.from(coreEnvironment.project, it.name, it.text)
   }
 }

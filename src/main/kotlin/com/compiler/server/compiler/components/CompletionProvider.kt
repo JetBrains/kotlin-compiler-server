@@ -6,6 +6,7 @@ import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
 import org.jetbrains.kotlin.descriptors.impl.TypeParameterDescriptorImpl
@@ -56,10 +57,11 @@ class CompletionProvider(
     file: KotlinFile,
     line: Int,
     character: Int,
-    isJs: Boolean
+    isJs: Boolean,
+    coreEnvironment: KotlinCoreEnvironment
   ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
     elementAt(line, character)?.let { element ->
-      val descriptorInfo = descriptorsFrom(this, element, isJs)
+      val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
       descriptorInfo.descriptors.toMutableList().apply {
@@ -138,11 +140,14 @@ class CompletionProvider(
   }
 
 
-  private fun Analysis.referenceVariantsFrom(element: PsiElement): List<DeclarationDescriptor>? {
+  private fun Analysis.referenceVariantsFrom(
+          element: PsiElement,
+          coreEnvironment: KotlinCoreEnvironment
+  ): List<DeclarationDescriptor>? {
     val elementKt = element as? KtElement ?: return emptyList()
     val bindingContext = analysisResult.bindingContext
     val resolutionFacade = KotlinResolutionFacade(
-      project = kotlinEnvironment.coreEnvironment.project,
+      project = coreEnvironment.project,
       componentProvider = componentProvider,
       moduleDescriptor = analysisResult.moduleDescriptor
     )
@@ -165,11 +170,19 @@ class CompletionProvider(
     }
   }
 
-  private fun descriptorsFrom(file: KotlinFile, element: PsiElement, isJs: Boolean): DescriptorInfo {
+  private fun descriptorsFrom(
+          file: KotlinFile,
+          element: PsiElement,
+          isJs: Boolean,
+          coreEnvironment: KotlinCoreEnvironment
+  ): DescriptorInfo {
     val files = listOf(file.kotlinFile)
-    val analysis = if (isJs.not()) errorAnalyzer.analysisOf(files) else errorAnalyzer.analyzeFileForJs(files)
+    val analysis = if (isJs.not())
+      errorAnalyzer.analysisOf(files, coreEnvironment)
+    else
+      errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
     return with(analysis) {
-      (referenceVariantsFrom(element) ?: referenceVariantsFrom(element.parent))?.let { descriptors ->
+      (referenceVariantsFrom(element, coreEnvironment) ?: referenceVariantsFrom(element.parent, coreEnvironment))?.let { descriptors ->
         DescriptorInfo(true, descriptors)
       } ?: element.parent.let { parent ->
         DescriptorInfo(
