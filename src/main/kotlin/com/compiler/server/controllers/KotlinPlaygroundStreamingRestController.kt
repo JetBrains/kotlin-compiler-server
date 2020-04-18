@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 
 @RestController
-@ConditionalOnProperty(name = ["enable.streaming.controller"], havingValue = "true")
+@ConditionalOnProperty(name = ["enable.streaming"], havingValue = "true")
 class KotlinPlaygroundStreamingRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
 
   /**
@@ -25,12 +25,10 @@ class KotlinPlaygroundStreamingRestController(private val kotlinProjectExecutor:
   )
   fun tryKotlinLangObsoleteEndpointStreaming(
     @RequestParam type: String,
-    @RequestParam(required = false) project: Project?
+    @RequestParam(required = false) project: Project
   ): ResponseEntity<StreamingResponseBody> {
     return when (type) {
       "run" -> {
-        if (project == null) throw error("No parameter 'project' found")
-
         // those headers are needed to prevent browsers from buffering output chunks
         val responseBuilder = ResponseEntity.ok()
           .contentType(MediaType.TEXT_HTML)
