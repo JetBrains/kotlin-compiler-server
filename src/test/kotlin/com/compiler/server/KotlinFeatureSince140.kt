@@ -41,10 +41,12 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
   fun `isInstance in 140`() {
     run(
       code = """
+        import kotlin.reflect.*
         fun main() {
           val a = String::class.isInstance("")
           val b = String::class.isInstance(42)
-          print(a)
+          println(a)
+          println(b)
         }
       """.trimIndent(),
       contains = "true\nfalse"
