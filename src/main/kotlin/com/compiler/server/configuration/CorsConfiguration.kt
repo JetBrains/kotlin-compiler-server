@@ -6,7 +6,7 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 
-val ACCESS_CONTROL_ALLOW_ORIGIN_VALUE: String = System.getProperty("ACCESS_CONTROL_ALLOW_ORIGIN_VALUE", "*")
+val ACCESS_CONTROL_ALLOW_ORIGIN_VALUE: String = System.getenv("ACCESS_CONTROL_ALLOW_ORIGIN_VALUE") ?: "*"
 
 @Configuration
 class CorsConfiguration {
