@@ -1,10 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.generator.TestProjectRunner
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
 class KotlinFeatureSince1370 : BaseExecutorTest() {
 
