@@ -13,7 +13,7 @@ RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
 
 ENV KOTLIN_LIB=1.4-M1-eap-93
-ENV KOTLIN_LIB_JS=1.4-M1-eap-93
+ENV KOTLIN_LIB_JS=1.4-M1-eap-93-js
 
 COPY --from=build /build/libs/BOOT-INF/lib /kotlin-compiler-server/lib
 COPY --from=build /build/libs/META-INF /kotlin-compiler-server/META-INF
