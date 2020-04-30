@@ -179,7 +179,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
         }
         """.trimIndent(),
       contains = ""
-    )
+    ).assertNoErrors()
   }
   @Test
   fun `blog stdlib 14M2 accept null`() {
