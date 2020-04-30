@@ -54,9 +54,9 @@ dependencies {
     kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.10.0")
     // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4") {
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-stdlib")
-    }
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
