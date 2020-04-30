@@ -88,7 +88,7 @@ class TestProjectRunner {
   private fun runAndTest(project: Project, contains: String): ExecutionResult {
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.text.contains(contains), "Actual: ${result.text}. \n Expected: $contains")
+    Assertions.assertTrue(result.text.contains(contains), "Actual: ${result.text}. \n Expected: $contains \n Result: $result")
     return result
   }
 
