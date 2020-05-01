@@ -30,7 +30,7 @@ class ResourceCompileTest : BaseExecutorTest() {
   }
 
   private fun validateErrors(errors: Map<String, List<ErrorDescriptor>>): String? {
-    if (errors.isNotEmpty()) {
+    if (errors.map { it.value }.flatten().isNotEmpty()) {
       return errors.values.flatten().joinToString("\n") { it.message }
     }
     return null
