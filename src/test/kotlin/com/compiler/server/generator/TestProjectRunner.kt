@@ -31,6 +31,11 @@ class TestProjectRunner {
     convertAndTest(project, contains)
   }
 
+  fun translateToJs(code: String): TranslationJSResult {
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+    return kotlinProjectExecutor.convertToJs(project)
+  }
+
   fun runWithException(code: String, contains: String): ExecutionResult {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.run(project)

@@ -24,6 +24,10 @@ class ResourceCompileTest : BaseExecutorTest() {
       val jvmResult = run(code, "")
       val errorsJvm = validateErrors(jvmResult.errors)
       if (errorsJvm != null) badMap[file.name + ":JVM"] = errorsJvm
+
+      val jsResult = translateToJs(code)
+      val errorsJs = validateErrors(jsResult.errors)
+      if (errorsJs != null) badMap[file.name + ":JS"] = errorsJs
     }
     if (badMap.isNotEmpty()) {
       error("Compile tests failed. \n Results: ${badMap.entries.joinToString("\n") { "File: ${it.key}. Error: ${it.value}" }}")
