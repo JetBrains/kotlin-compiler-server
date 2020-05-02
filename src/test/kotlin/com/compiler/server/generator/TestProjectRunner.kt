@@ -1,5 +1,8 @@
 package com.compiler.server.generator
 
+import com.compiler.server.base.filterOnlyErrors
+import com.compiler.server.base.hasErrors
+import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import org.junit.jupiter.api.Assertions

@@ -1,4 +1,8 @@
-package com.compiler.server.model
+package com.compiler.server.base
+
+import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ExecutionResult
+import com.compiler.server.model.ProjectSeveriry
 
 val ErrorDescriptor.isError: Boolean
     get() = severity == ProjectSeveriry.ERROR

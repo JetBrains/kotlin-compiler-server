@@ -1,6 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
+import com.compiler.server.base.assertNoErrors
 import org.junit.jupiter.api.Test
 
 class KotlinFeatureSince140 : BaseExecutorTest() {
