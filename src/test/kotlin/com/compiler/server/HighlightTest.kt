@@ -1,8 +1,8 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.base.errorContains
+import com.compiler.server.base.warningContains
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
