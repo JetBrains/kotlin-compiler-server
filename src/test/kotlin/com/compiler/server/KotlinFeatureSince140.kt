@@ -94,7 +94,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
         //sampleEnd
         }
         """.trimIndent(),
-      contains = "Hello,Kotlin 1.4-M2"
+      contains = "Hello,\nKotlin 1.4-M2"
     )
   }
   @Test
@@ -125,14 +125,14 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       code = """
          fun main() {
         //sampleStart
-            val letters = arrayOf("t", "o", "n", "i", "l", "k")
-            letters.reverse(2, 6)
-            letters.sortDescending(0, 3)
+            val letters = arrayOf("i", "o", "k", "l", "t", "n")
+            letters.reverse(0, 3)
+            letters.sortDescending(2, 5)
             println(letters.contentToString()) // [k, o, t, l, i, n]
         //sampleEnd
         }
         """.trimIndent(),
-      contains = "kotlin"
+      contains = "[k, o, t, l, i, n]"
     )
   }
   @Test
@@ -155,15 +155,15 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       code = """
         fun main() {
         //sampleStart
-            val list = mutableListOf("a", "b", "c", "d").onEachIndexed
-            { index, item -> println("Item at ${'$'}index is ${'$'}item") }
+            val list = mutableListOf("a", "b", "c").onEachIndexed
+            { index, item -> println(index + ":" + item) }
         
             val emptyList = emptyList<Int>()
             emptyList.reduceIndexedOrNull {index, a, b -> index + a + b} // null
         //sampleEnd
         }
         """.trimIndent(),
-      contains = "Item at 0 index is a"
+      contains = "0:a\n1:b\n2:c\nnull"
     )
   }
   @Test
