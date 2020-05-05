@@ -156,9 +156,9 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       code = """
         fun main() {
         //sampleStart
-            val list = mutableListOf("a", "b", "c").onEachIndexed
-            { index, item -> println(index + ":" + item) }
-        
+            val list = mutableListOf("a", "b", "c").onEachIndexed {
+                index, item -> println(index + ":" + item) }
+            }
             val emptyList = emptyList<Int>()
             emptyList.reduceIndexedOrNull {index, a, b -> index + a + b} // null
         //sampleEnd
