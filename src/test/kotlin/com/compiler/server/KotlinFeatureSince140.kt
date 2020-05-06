@@ -156,15 +156,15 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       code = """
         fun main() {
         //sampleStart
-            val list = mutableListOf("a", "b", "c").onEachIndexed
-            { index, item -> println(index + ":" + item) }
-        
+            val list = mutableListOf("a", "b", "c").onEachIndexed {
+                index, item -> println(index.toString() + ":" + item)
+            }
             val emptyList = emptyList<Int>()
             emptyList.reduceIndexedOrNull {index, a, b -> index + a + b} // null
         //sampleEnd
         }
         """.trimIndent(),
-      contains = "0:a\n1:b\n2:c\nnull"
+      contains = "0:a\n1:b\n2:c"
     )
   }
   @Test
