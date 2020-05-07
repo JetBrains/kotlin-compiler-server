@@ -172,6 +172,15 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
 };
 ```
 
+## CORS configuration
+
+Set the environment variables
+
+| ENV                | Default value        |
+| -------------------|----------------------|
+| ACCESS_CONTROL_ALLOW_ORIGIN_VALUE| *|
+| ACCESS_CONTROL_ALLOW_HEADER_VALUE| *|
+
 ## Kotlin release guide :rocket:
 
 1) Update the kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
