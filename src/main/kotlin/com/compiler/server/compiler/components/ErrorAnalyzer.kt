@@ -99,7 +99,13 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
   fun analyzeFileForJs(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
     val project = coreEnvironment.project
-    val configuration = JsConfig(project, kotlinEnvironment.createJsEnvironment(coreEnvironment))
+    val configuration = JsConfig(
+            project,
+            kotlinEnvironment.jsConfiguration,
+            kotlinEnvironment.JS_METADATA_CACHE,
+            kotlinEnvironment.JS_LIBRARIES.toSet()
+    )
+
     val module = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
       moduleName = Name.special("<" + configuration.moduleId + ">"),

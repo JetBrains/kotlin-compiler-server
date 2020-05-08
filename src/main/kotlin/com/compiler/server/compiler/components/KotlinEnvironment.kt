@@ -15,6 +15,9 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
+import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
+import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
+import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.io.File
@@ -37,7 +40,7 @@ class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
 
 class KotlinEnvironment(
         val classpath: List<File>,
-        private val additionalJsClaspath: List<File>
+        additionalJsClaspath: List<File>
 ) {
     companion object {
         /**
@@ -58,6 +61,16 @@ class KotlinEnvironment(
         )
     }
 
+    val JS_METADATA_CACHE =
+        additionalJsClaspath.flatMap {
+            KotlinJavascriptMetadataUtils.loadMetadata(it.absolutePath).map { metadata ->
+                val parts = KotlinJavascriptSerializationUtil.readModuleAsProto(metadata.body, metadata.version)
+                JsModuleDescriptor(metadata.moduleName, parts.kind, parts.importedModules, parts)
+            }
+        }
+
+    val JS_LIBRARIES = additionalJsClaspath.map { it.absolutePath }
+
     fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
         val disposable = Disposer.newDisposable()
         val coreEnvironment = createCoreEnvironment(disposable)
@@ -69,6 +82,10 @@ class KotlinEnvironment(
     }
 
     private val configuration = createConfiguration()
+    val jsConfiguration = configuration.copy().apply {
+        put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+        put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
+    }
 
     @Synchronized
     private fun createCoreEnvironment(disposable: Disposable): KotlinCoreEnvironment {
@@ -93,13 +110,6 @@ class KotlinEnvironment(
                 put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
             }
             languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
-        }
-    }
-
-    fun createJsEnvironment(coreEnvironment: KotlinCoreEnvironment): CompilerConfiguration {
-        return coreEnvironment.configuration.copy().apply {
-            put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
-            put(JSConfigurationKeys.LIBRARIES, additionalJsClaspath.map { it.absolutePath })
         }
     }
 }

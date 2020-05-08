@@ -46,7 +46,12 @@ class KotlinToJSTranslator(
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
     val currentProject = coreEnvironment.project
-    val configuration = JsConfig(currentProject, kotlinEnvironment.createJsEnvironment(coreEnvironment))
+    val configuration = JsConfig(
+            currentProject,
+            kotlinEnvironment.jsConfiguration,
+            kotlinEnvironment.JS_METADATA_CACHE,
+            kotlinEnvironment.JS_LIBRARIES.toSet()
+    )
     val reporter = object : JsConfig.Reporter() {
       override fun error(message: String) {}
       override fun warning(message: String) {}
