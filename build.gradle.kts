@@ -56,7 +56,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.6")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
