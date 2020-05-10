@@ -1,4 +1,10 @@
-# Kotlin compiler server [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server) ![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/prendota/kotlin-compiler-server) [ ![Kotlin](https://img.shields.io/badge/Kotlin-1.3.71-orange.svg) ](https://kotlinlang.org/) [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0) 
+# Kotlin compiler server
+[![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
+![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg)
+![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build) 
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.3.72-orange.svg) ](https://kotlinlang.org/) 
+[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/prendota/kotlin-compiler-server)
 
 A REST server for compiling and executing Kotlin code.
 The server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
@@ -206,6 +212,15 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
   permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
 ```
+
+## CORS configuration
+
+Set the environment variables
+
+| ENV                | Default value        |
+| -------------------|----------------------|
+| ACCESS_CONTROL_ALLOW_ORIGIN_VALUE| *|
+| ACCESS_CONTROL_ALLOW_HEADER_VALUE| *|
 
 ## Kotlin release guide :rocket:
 

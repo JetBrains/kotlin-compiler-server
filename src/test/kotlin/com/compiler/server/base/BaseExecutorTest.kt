@@ -35,6 +35,8 @@ class BaseExecutorTest : BaseTest() {
 
   fun runJs(code: List<String>, contains: String) = testRunner.multiRunJs(code, contains)
 
+  fun translateToJs(code: String) = testRunner.translateToJs(code)
+
   fun runWithException(code: String, contains: String): RawExecutionResult = when (mode) {
     ExecutorMode.SYNCHRONOUS -> SynchronousResult(testRunner.runWithException(code, contains))
     ExecutorMode.STREAMING -> StreamingResult(testRunner.runWithExceptionStreaming(code, contains))
