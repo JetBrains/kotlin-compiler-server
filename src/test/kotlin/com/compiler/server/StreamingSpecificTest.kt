@@ -26,7 +26,7 @@ class StreamingSpecificTest : BaseExecutorTest() {
     val executorThread = Thread { projectExecutor.runStreaming(project, outputStream) }
     executorThread.start()
     Thread.sleep(7000)
-    val chunks = String(outputStream.toByteArray()).split("\n\n").drop(1).map { readJsonChunk(it) }
+    val chunks = String(outputStream.toByteArray()).split("\n\n\n\n").map { readJsonChunk(it) }
     Assertions.assertEquals(3, chunks.size)
     Assertions.assertTrue(chunks[0] is ErrorsChunk, "First chunk should be ErrorsChunk")
     Assertions.assertTrue(chunks[1] is OutStreamChunk, "Second chunk should be OutStreamChunk")
@@ -67,7 +67,7 @@ class StreamingSpecificTest : BaseExecutorTest() {
     val executorThread = Thread { projectExecutor.testStreaming(project, outputStream) }
     executorThread.start()
     Thread.sleep(7000)
-    val chunks = String(outputStream.toByteArray()).split("\n\n").drop(1).map { readJsonChunk(it) }
+    val chunks = String(outputStream.toByteArray()).split("\n\n\n\n").map { readJsonChunk(it) }
     Assertions.assertEquals(3, chunks.size)
     Assertions.assertTrue(chunks[0] is ErrorsChunk, "First chunk should be ErrorsChunk")
     Assertions.assertTrue(chunks[1] is TestResultChunk, "Second chunk should be OutStreamChunk")
