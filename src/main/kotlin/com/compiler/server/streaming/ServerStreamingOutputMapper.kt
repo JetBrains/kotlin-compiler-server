@@ -2,7 +2,6 @@ package com.compiler.server.streaming
 
 import com.compiler.server.model.ErrorDescriptor
 import executors.streaming.StreamingOutputMapper
-import org.springframework.stereotype.Component
 
 class ServerStreamingOutputMapper: StreamingOutputMapper() {
   fun writeErrorsAsBytes(errors: Map<String, List<ErrorDescriptor>>): ByteArray =

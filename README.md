@@ -62,7 +62,7 @@ curl -X POST \
 
 ### Execute Kotlin code on JVM with streaming output
 Uses chunked transfer encoding to asynchronously send output of the running code. Response body
-is a stream of JSON messages separated by "\n\n".
+is a stream of JSON messages starting and ending with "\n\n".
 
 NB: it is not guaranteed that all messages are valid JSON objects
 (if output exceeds maximum number of characters or the program exceeds time limit then some JSONs can be incomplete).
@@ -125,7 +125,7 @@ curl -X POST \
 
 ### Run Kotlin tests with streaming output
 Uses chunked transfer encoding to asynchronously send test results.
-Immediately sends JSON with a test result when the test finishes. Messages are separated by "\n\n".
+Immediately sends JSON with a test result when the test finishes. Messages start and end with "\n\n".
 
 ```shell script
 curl -X POST \

@@ -27,7 +27,7 @@ open class StreamingOutputMapper {
       it.writeUTF8String(output, 0, output.size)
       it.writeEndObject()
     }
-    return DELIMITER + outputStream.toByteArray()
+    return DELIMITER + outputStream.toByteArray() + DELIMITER
   }
 
   protected fun writeCustomObjectAsBytes(obj: Any, fieldName: String): ByteArray {
@@ -38,7 +38,7 @@ open class StreamingOutputMapper {
       mapper.writeValue(it, obj)
       it.writeEndObject()
     }
-    return DELIMITER + outputStream.toByteArray()
+    return DELIMITER + outputStream.toByteArray() + DELIMITER
   }
 
   companion object {
