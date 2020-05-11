@@ -2,15 +2,12 @@ package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class ConcurrencyRunnerTest : BaseExecutorTest() {
   @Test
-  @Disabled
   fun `a lot of hello word test JVM`() {
     runManyTest {
       run(
@@ -21,7 +18,6 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   }
 
   @Test
-  @Disabled
   fun `a lot of hello word test JS`() {
     runManyTest {
       runJs(
@@ -33,11 +29,11 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
 
   private fun runManyTest(times: Int = 100, test: () -> Unit) {
     runBlocking {
-      GlobalScope.launch(Dispatchers.IO) {
+      launch(Dispatchers.IO) {
         for (i in 0 until times) {
-          launch {
-            test()
-          }
+            launch(Dispatchers.IO) {
+              test()
+            }
         }
       }.join()
     }
