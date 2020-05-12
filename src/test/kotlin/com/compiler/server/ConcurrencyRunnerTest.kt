@@ -18,6 +18,35 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   }
 
   @Test
+  fun `a lot of complete test`() {
+    runManyTest {
+      complete(
+        code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
+        line = 2,
+        character = 21,
+        completions = listOf(
+          "alex"
+        )
+      )
+    }
+  }
+
+  @Test
+  fun `a lot of complete test JS`() {
+    runManyTest {
+      complete(
+        code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
+        line = 2,
+        character = 21,
+        completions = listOf(
+          "alex"
+        ),
+        isJs = true
+      )
+    }
+  }
+
+  @Test
   fun `a lot of hello word test JS`() {
     runManyTest {
       runJs(
