@@ -10,6 +10,7 @@ open class ExecutionResult(
     set(value) {
       field = unEscapeOutput(value)
     }
+
   fun addWarnings(warnings: Map<String, List<ErrorDescriptor>>) {
     errors = warnings
   }
