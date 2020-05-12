@@ -27,11 +27,11 @@ class KotlinFile(val kotlinFile: KtFile) {
           .append(content)
           .append(kotlinFile.text.substring(caretPositionOffset)).toString()
       )
-    }
-    else this
+    } else this
   }
 
-  private fun offsetFor(line: Int, character: Int) = (kotlinFile.viewProvider.document?.getLineStartOffset(line) ?: 0) + character
+  private fun offsetFor(line: Int, character: Int) =
+    (kotlinFile.viewProvider.document?.getLineStartOffset(line) ?: 0) + character
 
   private tailrec fun expressionFor(element: PsiElement?): PsiElement? =
     if (element is KtExpression) element else expressionFor(element?.parent)
@@ -39,13 +39,13 @@ class KotlinFile(val kotlinFile: KtFile) {
   companion object {
     fun from(project: Project, name: String, content: String) =
       KotlinFile((PsiFileFactory.getInstance(project) as PsiFileFactoryImpl)
-                   .trySetupPsiForFile(
-                     LightVirtualFile(
-                       if (name.endsWith(".kt")) name else "$name.kt",
-                       KotlinLanguage.INSTANCE,
-                       content
-                     ).apply { charset = CharsetToolkit.UTF8_CHARSET },
-                     KotlinLanguage.INSTANCE, true, false
-                   ) as KtFile)
+        .trySetupPsiForFile(
+          LightVirtualFile(
+            if (name.endsWith(".kt")) name else "$name.kt",
+            KotlinLanguage.INSTANCE,
+            content
+          ).apply { charset = CharsetToolkit.UTF8_CHARSET },
+          KotlinLanguage.INSTANCE, true, false
+        ) as KtFile)
   }
 }

@@ -47,8 +47,7 @@ class KotlinProjectExecutor(
       try {
         val isJs = project.confType == ProjectType.JS
         completionProvider.complete(file, line, character, isJs, it)
-      }
-      catch (e: Exception) {
+      } catch (e: Exception) {
         log.warn("Exception in getting completions. Project: $project", e)
         emptyList()
       }
@@ -60,8 +59,7 @@ class KotlinProjectExecutor(
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
         errorAnalyzer.errorsFrom(files, environment).errors
-      }
-      catch (e: Exception) {
+      } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()
       }

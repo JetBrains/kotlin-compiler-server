@@ -105,9 +105,9 @@ class KotlinCompiler(
   }
 
   private fun generationStateFor(
-          files: List<KtFile>,
-          analysis: Analysis,
-          coreEnvironment: KotlinCoreEnvironment
+    files: List<KtFile>,
+    analysis: Analysis,
+    coreEnvironment: KotlinCoreEnvironment
   ): GenerationState {
     return GenerationState.Builder(
       files.first().project,

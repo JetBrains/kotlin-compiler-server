@@ -29,12 +29,10 @@ class KotlinToJSTranslator(
         doTranslate(files, arguments, coreEnvironment).also {
           it.addWarnings(errors)
         }
-      }
-      else {
+      } else {
         TranslationJSResult(errors = errors)
       }
-    }
-    catch (e: Exception) {
+    } catch (e: Exception) {
       TranslationJSResult(exception = e.toExceptionDescriptor())
     }
   }
@@ -47,10 +45,10 @@ class KotlinToJSTranslator(
   ): TranslationJSResult {
     val currentProject = coreEnvironment.project
     val configuration = JsConfig(
-            currentProject,
-            kotlinEnvironment.jsConfiguration,
-            kotlinEnvironment.JS_METADATA_CACHE,
-            kotlinEnvironment.JS_LIBRARIES.toSet()
+      currentProject,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_METADATA_CACHE,
+      kotlinEnvironment.JS_LIBRARIES.toSet()
     )
     val reporter = object : JsConfig.Reporter() {
       override fun error(message: String) {}
@@ -64,8 +62,7 @@ class KotlinToJSTranslator(
     )
     return if (result is TranslationResult.Success) {
       TranslationJSResult(JS_CODE_FLUSH + result.getCode() + JS_CODE_BUFFER)
-    }
-    else {
+    } else {
       val errors = HashMap<String, List<ErrorDescriptor>>()
       for (psiFile in files) {
         errors[psiFile.name] = ArrayList()

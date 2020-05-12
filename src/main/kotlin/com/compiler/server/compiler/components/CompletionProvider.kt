@@ -31,10 +31,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class CompletionProvider(
-  private val kotlinEnvironment: KotlinEnvironment,
-  private val errorAnalyzer: ErrorAnalyzer
-) {
+class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
 
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -71,7 +68,7 @@ class CompletionProvider(
           ("$a1$a2").compareTo("$b1$b2", true)
         })
       }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } + keywordsCompletionVariants(KtTokens.KEYWORDS,
-                                                                                                                    prefix) + keywordsCompletionVariants(
+        prefix) + keywordsCompletionVariants(
         KtTokens.SOFT_KEYWORDS, prefix)
     } ?: emptyList()
   }
@@ -125,8 +122,7 @@ class CompletionProvider(
         tail = formatName(fullName, NUMBER_OF_CHAR_IN_TAIL),
         icon = iconFrom(descriptor)
       )
-    }
-    else null
+    } else null
   }
 
   private val renderer = IdeDescriptorRenderers.SOURCE_CODE.withOptions {
@@ -141,8 +137,8 @@ class CompletionProvider(
 
 
   private fun Analysis.referenceVariantsFrom(
-          element: PsiElement,
-          coreEnvironment: KotlinCoreEnvironment
+    element: PsiElement,
+    coreEnvironment: KotlinCoreEnvironment
   ): List<DeclarationDescriptor>? {
     val elementKt = element as? KtElement ?: return emptyList()
     val bindingContext = analysisResult.bindingContext
@@ -171,10 +167,10 @@ class CompletionProvider(
   }
 
   private fun descriptorsFrom(
-          file: KotlinFile,
-          element: PsiElement,
-          isJs: Boolean,
-          coreEnvironment: KotlinCoreEnvironment
+    file: KotlinFile,
+    element: PsiElement,
+    isJs: Boolean,
+    coreEnvironment: KotlinCoreEnvironment
   ): DescriptorInfo {
     val files = listOf(file.kotlinFile)
     val analysis = if (isJs.not())
@@ -182,7 +178,8 @@ class CompletionProvider(
     else
       errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
     return with(analysis) {
-      (referenceVariantsFrom(element, coreEnvironment) ?: referenceVariantsFrom(element.parent, coreEnvironment))?.let { descriptors ->
+      (referenceVariantsFrom(element, coreEnvironment)
+        ?: referenceVariantsFrom(element.parent, coreEnvironment))?.let { descriptors ->
         DescriptorInfo(true, descriptors)
       } ?: element.parent.let { parent ->
         DescriptorInfo(
@@ -191,14 +188,14 @@ class CompletionProvider(
             is KtQualifiedExpression -> {
               analysisResult.bindingContext.get(BindingContext.EXPRESSION_TYPE_INFO, parent.receiverExpression)
                 ?.type?.let { expressionType ->
-                analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, parent.receiverExpression)?.let {
-                  expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-                }
-              }?.toList() ?: emptyList()
+                  analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, parent.receiverExpression)?.let {
+                    expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+                  }
+                }?.toList() ?: emptyList()
             }
             else -> analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, element as KtExpression)
-                      ?.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-                      ?.toList() ?: emptyList()
+              ?.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+              ?.toList() ?: emptyList()
           }
         )
       }

@@ -47,17 +47,17 @@ import kotlin.Comparator
 class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
   fun errorsFrom(
-          files: List<KtFile>,
-          coreEnvironment: KotlinCoreEnvironment,
-          isJs: Boolean = false
+    files: List<KtFile>,
+    coreEnvironment: KotlinCoreEnvironment,
+    isJs: Boolean = false
   ): ErrorsAndAnalysis {
     val analysis = if (isJs.not()) analysisOf(files, coreEnvironment) else analyzeFileForJs(files, coreEnvironment)
     return ErrorsAndAnalysis(
-            errorsFrom(
-                    analysis.analysisResult.bindingContext.diagnostics.all(),
-                    files.map { it.name to anylizeErrorsFrom(it) }.toMap()
-            ),
-            analysis
+      errorsFrom(
+        analysis.analysisResult.bindingContext.diagnostics.all(),
+        files.map { it.name to anylizeErrorsFrom(it) }.toMap()
+      ),
+      analysis
     )
   }
 
@@ -65,45 +65,45 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     val trace = CliBindingTrace()
     val project = files.first().project
     val componentProvider = TopDownAnalyzerFacadeForJVM.createContainer(
-            project = project,
-            files = files,
-            trace = trace,
-            configuration = coreEnvironment.configuration,
-            packagePartProvider = { globalSearchScope ->
-              coreEnvironment.createPackagePartProvider(globalSearchScope)
-            },
-            declarationProviderFactory = { storageManager, ktFiles ->
-              FileBasedDeclarationProviderFactory(storageManager, ktFiles)
-            }
+      project = project,
+      files = files,
+      trace = trace,
+      configuration = coreEnvironment.configuration,
+      packagePartProvider = { globalSearchScope ->
+        coreEnvironment.createPackagePartProvider(globalSearchScope)
+      },
+      declarationProviderFactory = { storageManager, ktFiles ->
+        FileBasedDeclarationProviderFactory(storageManager, ktFiles)
+      }
     )
     componentProvider.getService(LazyTopDownAnalyzer::class.java)
-            .analyzeDeclarations(
-                    topDownAnalysisMode = TopDownAnalysisMode.TopLevelDeclarations,
-                    declarations = files
-            )
+      .analyzeDeclarations(
+        topDownAnalysisMode = TopDownAnalysisMode.TopLevelDeclarations,
+        declarations = files
+      )
     val moduleDescriptor = componentProvider.getService(ModuleDescriptor::class.java)
     AnalysisHandlerExtension.getInstances(project)
-            .find {
-              it.analysisCompleted(
-                      project = project,
-                      module = moduleDescriptor,
-                      bindingTrace = trace,
-                      files = files
-              ) != null
-            }
+      .find {
+        it.analysisCompleted(
+          project = project,
+          module = moduleDescriptor,
+          bindingTrace = trace,
+          files = files
+        ) != null
+      }
     return Analysis(
-            componentProvider = componentProvider,
-            analysisResult = AnalysisResult.success(trace.bindingContext, moduleDescriptor)
+      componentProvider = componentProvider,
+      analysisResult = AnalysisResult.success(trace.bindingContext, moduleDescriptor)
     )
   }
 
   fun analyzeFileForJs(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
     val project = coreEnvironment.project
     val configuration = JsConfig(
-            project,
-            kotlinEnvironment.jsConfiguration,
-            kotlinEnvironment.JS_METADATA_CACHE,
-            kotlinEnvironment.JS_LIBRARIES.toSet()
+      project,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_METADATA_CACHE,
+      kotlinEnvironment.JS_LIBRARIES.toSet()
     )
 
     val module = ContextForNewModule(
@@ -212,12 +212,9 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
             val firstRange = textRanges.next()
             val interval = TextInterval.from(firstRange.startOffset, firstRange.endOffset, diagnostic.psiFile.viewProvider.document!!)
             diagnostic.psiFile.name to ErrorDescriptor(interval, render, ProjectSeveriry.from(diagnostic.severity), className)
-          }
-          else null
-        }
-        else null
-      }
-      else null
+          } else null
+        } else null
+      } else null
     }
   }.groupBy { it.first }.map { it.key to it.value.map { (_, error) -> error } }.toMap()
 
