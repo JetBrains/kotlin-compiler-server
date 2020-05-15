@@ -1,0 +1,17 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/kotlin-compile-server:git-$SHORT_SHA', '.' ]
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/kotlin-compile-server:git-$SHORT_SHA']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - 'kotlin-compile-server'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/kotlin-compile-server:git-$SHORT_SHA'
+  - '--region'
+  - '$TARGET_REGION'
+  - '--platform'
+  - 'managed'
+  - '--allow-unauthenticated'
