@@ -11,7 +11,7 @@ steps:
   - '--image'
   - 'gcr.io/$PROJECT_ID/kotlin-compile-server:git-$SHORT_SHA'
   - '--region'
-  - '$TARGET_REGION'
+  - '$_TARGET_REGION'
   - '--platform'
   - 'managed'
   - '--allow-unauthenticated'
