@@ -71,14 +71,9 @@ class KotlinEnvironment(
 
   val JS_LIBRARIES = additionalJsClaspath.map { it.absolutePath }
 
+  @Synchronized
   fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
-    val disposable = Disposer.newDisposable()
-    val coreEnvironment = createCoreEnvironment(disposable)
-    try {
-      return f(coreEnvironment)
-    } finally {
-      Disposer.dispose(disposable)
-    }
+    return f(environment)
   }
 
   private val configuration = createConfiguration()
@@ -87,14 +82,11 @@ class KotlinEnvironment(
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
   }
 
-  @Synchronized
-  private fun createCoreEnvironment(disposable: Disposable): KotlinCoreEnvironment {
-    return KotlinCoreEnvironment.createForProduction(
-      parentDisposable = disposable,
-      configuration = configuration.copy(),
-      configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
-    )
-  }
+  private val environment = KotlinCoreEnvironment.createForProduction(
+          parentDisposable = Disposer.newDisposable(),
+          configuration = configuration.copy(),
+          configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
+  )
 
   private fun createConfiguration(): CompilerConfiguration {
     val arguments = K2JVMCompilerArguments()
