@@ -43,8 +43,7 @@ object JavaExecutor {
         val outputResults = futuresList.map {
           try {
             it.get()
-          }
-          catch (_: Exception) {
+          } catch (_: Exception) {
             ""
           }
         }
@@ -65,19 +64,16 @@ object JavaExecutor {
             ProgramOutput(standardText)
           }
         }
-      }
-      catch (any: Exception) {
+      } catch (any: Exception) {
         // all sort of things may happen, so we better be aware
         ProgramOutput(exception = any)
-      }
-      finally {
+      } finally {
         try {
           // don't need this process any more. It will not allow to close IO handlers if not destroyed or finished
           this.destroy()
           standardOut.close()
           standardError.close()
-        }
-        catch (_: IOException) {
+        } catch (_: IOException) {
           // don't care
         }
       }
@@ -125,8 +121,7 @@ object JavaExecutor {
         val line = standardOut.readLine() ?: break
         output.appendln(escapeString(line))
       }
-    }
-    catch (_: Exception) {
+    } catch (_: Exception) {
       // something happened with the stream. Just return what we've collected so far
     }
 
@@ -159,8 +154,7 @@ object JavaExecutor {
 
   private fun <T> Process.use(body: Process.() -> T) = try {
     body()
-  }
-  finally {
+  } finally {
     destroy()
   }
 }

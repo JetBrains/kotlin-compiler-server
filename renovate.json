@@ -10,6 +10,7 @@
     "org.jetbrains.kotlin:kotlin-script-runtime",
     "org.jetbrains.kotlin:kotlin-plugin-ij193",
     "org.jetbrains.kotlin:kotlin-test",
+    "org.jetbrains.kotlin:ide-common-ij193",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   ]
