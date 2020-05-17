@@ -8,6 +8,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.format.FormatterRegistry
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.io.File
 
@@ -19,6 +21,14 @@ class ApplicationConfiguration(
 ) : WebMvcConfigurer {
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ProjectConverter())
+  }
+
+  override fun configureAsyncSupport(configurer: AsyncSupportConfigurer) {
+    val executor = ThreadPoolTaskExecutor().apply {
+      setQueueCapacity(0) // will create cached thread pool
+      initialize()
+    }
+    configurer.setTaskExecutor(executor)
   }
 
   @Bean
