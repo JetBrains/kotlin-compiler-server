@@ -65,4 +65,23 @@ class ExceptionInProgramTest : BaseExecutorTest() {
     Assertions.assertTrue(result.exception?.stackTrace?.size!! <= 3)
   }
 
+  @Test
+  fun `assert exception`(){
+    runWithException(
+      """
+        class Test() {
+          init {
+            assert(false)
+          }
+        }
+
+        fun main() {
+          Test()
+        }
+      """.trimIndent(),
+      contains = "java.lang.AssertionError"
+    )
+  }
+
+
 }
