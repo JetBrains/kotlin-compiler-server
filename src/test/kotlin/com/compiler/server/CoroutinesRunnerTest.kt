@@ -194,10 +194,10 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
     run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread\n        println(\"Unconfined      : I'm working in thread \${Thread.currentThread().name}\")\n        delay(500)\n        println(\"Unconfined      : After delay in thread \${Thread.currentThread().name}\")\n    }\n    launch { // context of the parent, main runBlocking coroutine\n        println(\"main runBlocking: I'm working in thread \${Thread.currentThread().name}\")\n        delay(1000)\n        println(\"main runBlocking: After delay in thread \${Thread.currentThread().name}\")\n    }    \n}",
       contains = """
-        Unconfined      : I'm working in thread main
-        main runBlocking: I'm working in thread main
-        Unconfined      : After delay in thread kotlinx.coroutines.DefaultExecutor
-        main runBlocking: After delay in thread main
+        Unconfined      : I'm working in thread main @coroutine#2
+        main runBlocking: I'm working in thread main @coroutine#3
+        Unconfined      : After delay in thread kotlinx.coroutines.DefaultExecutor @coroutine#2
+        main runBlocking: After delay in thread main @coroutine#3
       """.trimIndent()
     )
   }
