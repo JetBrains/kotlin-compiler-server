@@ -190,10 +190,15 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
 
 
   @Test
-  fun `base coroutines Unconfined vs confined dispatcher `() {
+  fun `base coroutines Unconfined vs confined dispatcher`() {
     run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\n    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread\n        println(\"Unconfined      : I'm working in thread \${Thread.currentThread().name}\")\n        delay(500)\n        println(\"Unconfined      : After delay in thread \${Thread.currentThread().name}\")\n    }\n    launch { // context of the parent, main runBlocking coroutine\n        println(\"main runBlocking: I'm working in thread \${Thread.currentThread().name}\")\n        delay(1000)\n        println(\"main runBlocking: After delay in thread \${Thread.currentThread().name}\")\n    }    \n}",
-      contains = "Unconfined      : I'm working in thread main\nmain runBlocking: I'm working in thread main\nUnconfined      : After delay in thread kotlinx.coroutines.DefaultExecutor\nmain runBlocking: After delay in thread main"
+      contains = """
+        Unconfined      : I'm working in thread main
+        main runBlocking: I'm working in thread main
+        Unconfined      : After delay in thread kotlinx.coroutines.DefaultExecutor
+        main runBlocking: After delay in thread main
+      """.trimIndent()
     )
   }
 
@@ -201,7 +206,11 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
   fun `base coroutines Debugging coroutines and threads `() {
     run(
       code = "import kotlinx.coroutines.*\n\nfun log(msg: String) = println(\"[\${Thread.currentThread().name}] \$msg\")\n\nfun main() = runBlocking<Unit> {\nval a = async {\n    log(\"I'm computing a piece of the answer\")\n    6\n}\nval b = async {\n    log(\"I'm computing another piece of the answer\")\n    7\n}\nlog(\"The answer is \${a.await() * b.await()}\")    \n}",
-      contains = "[main] I'm computing a piece of the answer\n[main] I'm computing another piece of the answer\n[main] The answer is 42"
+      contains = """
+        [main @coroutine#2] I'm computing a piece of the answer
+        [main @coroutine#3] I'm computing another piece of the answer
+        [main @coroutine#1] The answer is 42
+      """.trimIndent()
     )
   }
 
@@ -209,7 +218,11 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
   fun `base coroutines test Jumping between threads`() {
     run(
       code = "import kotlinx.coroutines.*\n\nfun log(msg: String) = println(\"[\${Thread.currentThread().name}] \$msg\")\n\nfun main() {\nnewSingleThreadContext(\"Ctx1\").use { ctx1 ->\n    newSingleThreadContext(\"Ctx2\").use { ctx2 ->\n        runBlocking(ctx1) {\n            log(\"Started in ctx1\")\n            withContext(ctx2) {\n                log(\"Working in ctx2\")\n            }\n            log(\"Back to ctx1\")\n        }\n    }\n}    \n}",
-      contains = "[Ctx1] Started in ctx1\n[Ctx2] Working in ctx2\n[Ctx1] Back to ctx1"
+      contains = """
+        [Ctx1 @coroutine#1] Started in ctx1
+        [Ctx2 @coroutine#1] Working in ctx2
+        [Ctx1 @coroutine#1] Back to ctx1
+      """.trimIndent()
     )
   }
 
@@ -217,7 +230,7 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
   fun `base coroutines test Job in the context`() {
     run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking<Unit> {\nprintln(\"My job is \${coroutineContext[Job]}\")    \n}",
-      contains = "My job is BlockingCoroutine{Active}"
+      contains = "My job is \"coroutine#1\":BlockingCoroutine{Active}"
     )
   }
 
