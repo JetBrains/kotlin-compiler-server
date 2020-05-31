@@ -113,6 +113,7 @@ class CommandLineArgument(
       "-Xmx" + memoryLimit + "M",
       "-Djava.security.manager",
       "-Djava.security.policy=$policy",
+      "-ea",
       "-classpath"
     ) + classPaths + mainClass + arguments).filterNotNull()
   }
