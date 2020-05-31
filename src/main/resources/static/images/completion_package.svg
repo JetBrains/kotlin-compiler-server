@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <title>completion_icons</title>
+  <g id="Layer_4" data-name="Layer 4">
+    <path d="M7.98462,4,6.69629,2.71143A2.79968,2.79968,0,0,0,4.979,2H1.05127A.05126.05126,0,0,0,1,2.05127V13H15V4ZM6,11A3,3,0,1,1,9,8,3.00328,3.00328,0,0,1,6,11Z" fill="#878787" opacity="0.7"/>
+    <circle cx="6" cy="8" r="2" fill="#239cd8" opacity="0.9" style="isolation: isolate"/>
+  </g>
+</svg>

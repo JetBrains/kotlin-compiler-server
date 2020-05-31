@@ -1,3 +1,5 @@
+import io.kotless.plugin.gradle.dsl.Webapp
+import io.kotless.plugin.gradle.dsl.kotless
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -28,15 +30,17 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.2.7.RELEASE"
+    id("org.springframework.boot") version "2.3.0.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
     kotlin("jvm") version "1.3.72"
     kotlin("plugin.spring") version "1.3.72"
+
+    id("io.kotless") version "0.1.4" apply true
 }
 
 allprojects {
     repositories {
-        mavenCentral()
+        jcenter()
         maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
     }
     afterEvaluate {
@@ -60,8 +64,8 @@ dependencies {
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.5")
+    implementation("io.kotless", "spring-boot-lang", "0.1.4")
+
     implementation("junit:junit:4.12")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
@@ -132,6 +136,25 @@ val buildLambda by tasks.creating(Zip::class) {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
 }
+
+kotless {
+    config {
+        bucket = "eu.play.s3.ktls.aws.intellij.net"
+        prefix = "play"
+
+        terraform {
+            profile = "kotless-jetbrains"
+            region = "eu-west-1"
+        }
+
+        setArchiveTask(buildLambda)
+    }
+
+    webapp {
+        route53 = Webapp.Route53("play", "kotless.io")
+    }
+}
+
 
 
 tasks.withType<Test> {
