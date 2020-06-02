@@ -111,12 +111,6 @@ tasks.withType<KotlinCompile> {
     buildPropertyFile()
 }
 
-tasks.withType<BootJar> {
-    //https://stackoverflow.com/questions/57727150/kotlin-script-engine-with-spring-boot-self-running-war
-    requiresUnpack("**/kotlin-*.jar")
-    requiresUnpack("**/kotlinx-*.jar")
-}
-
 val buildLambda by tasks.creating(Zip::class) {
     val lambdaWorkDirectoryPath = "/var/task/"
     from(tasks.compileKotlin)
