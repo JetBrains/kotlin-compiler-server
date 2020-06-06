@@ -47,7 +47,7 @@ class ExceptionInProgramTest : BaseExecutorTest() {
     val result = runWithException(
       code = """
         fun main() {
-          while(true) { print("alex") }
+         List(100_000) { ByteArray(1000_000_000) }
         }
       """.trimIndent(),
       contains = "java.lang.OutOfMemoryError"
