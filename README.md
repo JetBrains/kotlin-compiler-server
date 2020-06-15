@@ -142,7 +142,7 @@ curl -X POST \
 ### Get the current Kotlin version
 
 ```shell script
-curl -X GET http://localhost:8080/api/compiler/version
+curl -X GET http://localhost:8080/versions
 ```
 
 
