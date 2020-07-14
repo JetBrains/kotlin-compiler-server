@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
@@ -126,7 +125,6 @@ val buildLambda by tasks.creating(Zip::class) {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
 }
-
 
 tasks.withType<Test> {
     useJUnitPlatform()
