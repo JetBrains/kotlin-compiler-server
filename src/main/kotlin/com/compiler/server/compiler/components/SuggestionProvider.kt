@@ -53,6 +53,7 @@ class SuggestionProvider(
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
+  private val MODULE_INFO_NAME = "module-info"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -287,6 +288,8 @@ class SuggestionProvider(
       importableFqName?.asString() in excludedFromCompletion
   }
 
+
+
   private fun getClassVariantForZip(file: File): List<ImportInfo> {
     val jarFile = JarFile(file)
     val allClasses = hashSetOf<ImportInfo>()
@@ -297,48 +300,50 @@ class SuggestionProvider(
       ) {
         val name = entry.name.removeSuffix(".class")
         val fullName = name.replace("/", ".")
-        try {
-          val clazz = ClassLoader.getSystemClassLoader().loadClass(fullName)
-          if (clazz.isKotlinClass()) {
-            val kotlinClass = clazz.kotlin
-            try {
-              kotlinClass.nestedClasses.filter {
-                it.visibility == KVisibility.PUBLIC
-              }.map {
-                val canonicalName = it.qualifiedName ?: ""
-                val simpleName = it.simpleName ?: ""
-                val importInfo = ImportInfo(canonicalName, simpleName)
-                allClasses.add(importInfo)
-              }
-              if (kotlinClass.visibility == KVisibility.PUBLIC) {
-                val canonicalName = kotlinClass.qualifiedName ?: ""
-                val simpleName = kotlinClass.simpleName ?: ""
-                val importInfo = ImportInfo(canonicalName, simpleName)
-                allClasses.add(importInfo)
-              }
-            } catch (err: UnsupportedOperationException) {
-              allClasses.addAll(allClassesFromJavaClass(clazz))
-            } catch (err: AssertionError) {
+        if (fullName != MODULE_INFO_NAME) {
+          try {
+            val clazz = ClassLoader.getSystemClassLoader().loadClass(fullName)
+            if (clazz.isKotlinClass()) {
+              val kotlinClass = clazz.kotlin
+              try {
+                kotlinClass.nestedClasses.filter {
+                  it.visibility == KVisibility.PUBLIC
+                }.map {
+                  val canonicalName = it.qualifiedName ?: ""
+                  val simpleName = it.simpleName ?: ""
+                  val importInfo = ImportInfo(canonicalName, simpleName)
+                  allClasses.add(importInfo)
+                }
+                if (kotlinClass.visibility == KVisibility.PUBLIC) {
+                  val canonicalName = kotlinClass.qualifiedName ?: ""
+                  val simpleName = kotlinClass.simpleName ?: ""
+                  val importInfo = ImportInfo(canonicalName, simpleName)
+                  allClasses.add(importInfo)
+                }
+              } catch (err: UnsupportedOperationException) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
+              } catch (err: AssertionError) {
 //              println("ERROR_ASSERTION: $fullName")
-              allClasses.addAll(allClassesFromJavaClass(clazz))
-            } catch (err: IncompatibleClassChangeError) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
+              } catch (err: IncompatibleClassChangeError) {
 //              println("ERROR_INCOMPATIBLE_CLASS_CHANGE: $fullName")
-              allClasses.addAll(allClassesFromJavaClass(clazz))
-            } catch (err: InternalError) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
+              } catch (err: InternalError) {
 //              println("ERROR_INTERNAL: $fullName")
-              allClasses.addAll(allClassesFromJavaClass(clazz))
-            } catch (err: Exception) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
+              } catch (err: Exception) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
+              }
+            } else {
               allClasses.addAll(allClassesFromJavaClass(clazz))
             }
-          } else {
-            allClasses.addAll(allClassesFromJavaClass(clazz))
-          }
-        } catch (error: VerifyError) {
+          } catch (error: VerifyError) {
 //          println("ERROR_VERIFY: $fullName")
-        } catch (error: NoClassDefFoundError) {
+          } catch (error: NoClassDefFoundError) {
 //          println("ERROR_NO_CLASS_DEF_FOUND: $fullName")
-        } catch (error: ClassNotFoundException) {
-          println("NOT_FOUND: $fullName")
+          } catch (error: ClassNotFoundException) {
+            println("NOT_FOUND: $fullName")
+          }
         }
       }
     }
