@@ -4,6 +4,8 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
+import com.compiler.server.model.ImportInfo
+import com.fasterxml.jackson.module.kotlin.isKotlinClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -28,10 +30,17 @@ import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 import org.springframework.stereotype.Component
+import java.io.File
+import java.lang.reflect.Modifier
+import java.util.jar.JarFile
+import kotlin.reflect.KVisibility
 
 
 @Component
-class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
+class SuggestionProvider(
+  private val errorAnalyzer: ErrorAnalyzer,
+  private val kotlinEnvironment: KotlinEnvironment
+) {
 
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -70,6 +79,21 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
       }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } + keywordsCompletionVariants(KtTokens.KEYWORDS,
         prefix) + keywordsCompletionVariants(
         KtTokens.SOFT_KEYWORDS, prefix)
+    } ?: emptyList()
+  }
+
+  fun completeWithImport(
+    file: KotlinFile,
+    line: Int,
+    character: Int,
+    isJs: Boolean,
+    coreEnvironment: KotlinCoreEnvironment
+  ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
+    elementAt(line, character)?.let { element ->
+      val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
+      val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
+        .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
+      getClassByPrefix(prefix)
     } ?: emptyList()
   }
 
@@ -262,4 +286,98 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
     private fun DeclarationDescriptor.isInternalImplementationDetail(): Boolean =
       importableFqName?.asString() in excludedFromCompletion
   }
+
+  private fun getClassVariantForZip(file: File): List<ImportInfo> {
+    val jarFile = JarFile(file)
+    val allClasses = hashSetOf<ImportInfo>()
+    jarFile.entries().toList().map { entry ->
+      if (!entry.isDirectory
+        && entry.name.endsWith(".class")
+        && !entry.name.contains("_")
+      ) {
+        val name = entry.name.removeSuffix(".class")
+        val fullName = name.replace("/", ".")
+        try {
+          val clazz = ClassLoader.getSystemClassLoader().loadClass(fullName)
+          if (clazz.isKotlinClass()) {
+            val kotlinClass = clazz.kotlin
+            try {
+              kotlinClass.nestedClasses.filter {
+                it.visibility == KVisibility.PUBLIC
+              }.map {
+                val canonicalName = it.qualifiedName ?: ""
+                val simpleName = it.simpleName ?: ""
+                val importInfo = ImportInfo(canonicalName, simpleName)
+                allClasses.add(importInfo)
+              }
+              if (kotlinClass.visibility == KVisibility.PUBLIC) {
+                val canonicalName = kotlinClass.qualifiedName ?: ""
+                val simpleName = kotlinClass.simpleName ?: ""
+                val importInfo = ImportInfo(canonicalName, simpleName)
+                allClasses.add(importInfo)
+              }
+            } catch (err: UnsupportedOperationException) {
+              allClasses.addAll(allClassesFromJavaClass(clazz))
+            } catch (err: AssertionError) {
+//              println("ERROR_ASSERTION: $fullName")
+              allClasses.addAll(allClassesFromJavaClass(clazz))
+            } catch (err: IncompatibleClassChangeError) {
+//              println("ERROR_INCOMPATIBLE_CLASS_CHANGE: $fullName")
+              allClasses.addAll(allClassesFromJavaClass(clazz))
+            } catch (err: InternalError) {
+//              println("ERROR_INTERNAL: $fullName")
+              allClasses.addAll(allClassesFromJavaClass(clazz))
+            } catch (err: Exception) {
+              allClasses.addAll(allClassesFromJavaClass(clazz))
+            }
+          } else {
+            allClasses.addAll(allClassesFromJavaClass(clazz))
+          }
+        } catch (error: VerifyError) {
+//          println("ERROR_VERIFY: $fullName")
+        } catch (error: NoClassDefFoundError) {
+//          println("ERROR_NO_CLASS_DEF_FOUND: $fullName")
+        } catch (error: ClassNotFoundException) {
+          println("NOT_FOUND: $fullName")
+        }
+      }
+    }
+    return allClasses.toList()
+  }
+
+  private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
+    val allClasses = hashSetOf<ImportInfo>()
+    clazz.classes.filter {
+      Modifier.isPublic(it.modifiers)
+    }.map {
+      val canonicalName = it.canonicalName
+      val simpleName = it.simpleName
+      val importInfo = ImportInfo(canonicalName, simpleName)
+      allClasses.add(importInfo)
+    }
+    return allClasses
+  }
+
+  private fun getAllVariants(): List<ImportInfo> {
+    val jarFiles = kotlinEnvironment.classpath.drop(1) // executors jar???
+    val allVariants = mutableListOf<ImportInfo>()
+    jarFiles.map { file ->
+      val variants = getClassVariantForZip(file)
+      allVariants.addAll(variants)
+    }
+    return allVariants.toList()
+  }
+
+  fun getClassesByName(name: String): List<ImportInfo> {
+    return getAllVariants().filter { variant ->
+      variant.className == name
+    }
+  }
+
+  fun getClassByPrefix(prefix: String): List<ImportInfo> {
+    return getAllVariants().filter { variant ->
+      variant.className.startsWith(prefix)
+    }
+  }
+
 }

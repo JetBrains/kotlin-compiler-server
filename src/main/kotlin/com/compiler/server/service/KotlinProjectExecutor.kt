@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class KotlinProjectExecutor(
   private val kotlinCompiler: KotlinCompiler,
-  private val completionProvider: CompletionProvider,
+  private val suggestionProvider: SuggestionProvider,
   private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
@@ -46,7 +46,20 @@ class KotlinProjectExecutor(
       val file = getFilesFrom(project, it).first()
       try {
         val isJs = project.confType == ProjectType.JS
-        completionProvider.complete(file, line, character, isJs, it)
+        suggestionProvider.complete(file, line, character, isJs, it)
+      } catch (e: Exception) {
+        log.warn("Exception in getting completions. Project: $project", e)
+        emptyList()
+      }
+    }
+  }
+
+  fun completeWithImport(project: Project, line: Int, character: Int) : List<ImportInfo> {
+    return kotlinEnvironment.environment {
+      val file = getFilesFrom(project, it).first()
+      try {
+        val isJs = project.confType == ProjectType.JS
+        suggestionProvider.completeWithImport(file, line, character, isJs, it)
       } catch (e: Exception) {
         log.warn("Exception in getting completions. Project: $project", e)
         emptyList()

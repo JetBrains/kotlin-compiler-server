@@ -25,6 +25,13 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
     @RequestParam ch: Int
   ) = kotlinProjectExecutor.complete(project, line, ch)
 
+  @PostMapping("/completeWithImport")
+  fun getKotlinCompleteWithImportEndpoint(
+    @RequestBody project: Project,
+    @RequestParam line: Int,
+    @RequestParam ch: Int
+  ) = kotlinProjectExecutor.completeWithImport(project, line, ch)
+
   @PostMapping("/highlight")
   fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
 }
