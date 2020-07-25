@@ -34,7 +34,8 @@ import java.io.File
 import java.lang.reflect.Modifier
 import java.util.jar.JarFile
 import kotlin.reflect.KVisibility
-
+import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
+import kotlin.reflect.jvm.kotlinFunction
 
 @Component
 class SuggestionProvider(
@@ -54,6 +55,8 @@ class SuggestionProvider(
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val MODULE_INFO_NAME = "module-info"
+  private val EXECUTORS_JAR_NAME = "executors.jar"
+  private val ALL_INDEXES = getAllVariants()
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -288,21 +291,19 @@ class SuggestionProvider(
       importableFqName?.asString() in excludedFromCompletion
   }
 
-
-
-  private fun getClassVariantForZip(file: File): List<ImportInfo> {
+  private fun getVariantsForZip(file: File): List<ImportInfo> {
     val jarFile = JarFile(file)
     val allClasses = hashSetOf<ImportInfo>()
     jarFile.entries().toList().map { entry ->
       if (!entry.isDirectory
         && entry.name.endsWith(".class")
-        && !entry.name.contains("_")
       ) {
         val name = entry.name.removeSuffix(".class")
         val fullName = name.replace("/", ".")
         if (fullName != MODULE_INFO_NAME) {
           try {
             val clazz = ClassLoader.getSystemClassLoader().loadClass(fullName)
+            allClasses.addAll(allFunctionsFromClass(clazz))
             if (clazz.isKotlinClass()) {
               val kotlinClass = clazz.kotlin
               try {
@@ -331,6 +332,8 @@ class SuggestionProvider(
               } catch (err: InternalError) {
 //              println("ERROR_INTERNAL: $fullName")
                 allClasses.addAll(allClassesFromJavaClass(clazz))
+              } catch (err: KotlinReflectionInternalError) {
+                allClasses.addAll(allClassesFromJavaClass(clazz))
               } catch (err: Exception) {
                 allClasses.addAll(allClassesFromJavaClass(clazz))
               }
@@ -339,15 +342,52 @@ class SuggestionProvider(
             }
           } catch (error: VerifyError) {
 //          println("ERROR_VERIFY: $fullName")
-          } catch (error: NoClassDefFoundError) {
-//          println("ERROR_NO_CLASS_DEF_FOUND: $fullName")
-          } catch (error: ClassNotFoundException) {
-            println("NOT_FOUND: $fullName")
+          } catch (error: Throwable) {
+            println("ERROR: $fullName")
           }
         }
       }
     }
     return allClasses.toList()
+  }
+
+  private fun allFunctionsFromClass(clazz: Class<*>): HashSet<ImportInfo> {
+    val allClasses = hashSetOf<ImportInfo>()
+    clazz.declaredMethods.map { method ->
+      try {
+        val kotlinFunction = method.kotlinFunction
+        val importInfo: ImportInfo? =
+          if (kotlinFunction != null
+            && kotlinFunction.visibility == KVisibility.PUBLIC) {
+            importInfoByMethodAndParent(
+              kotlinFunction.name,
+              kotlinFunction.parameters.map { it.type }.joinToString(),
+              clazz)
+          } else if (kotlinFunction == null
+            && Modifier.isPublic(method.modifiers) &&
+            Modifier.isStatic(method.modifiers)) {
+            importInfoByMethodAndParent(method.name, method.parameters.map { it.type.name }.joinToString(), clazz)
+          } else {
+            null
+          }
+        if (importInfo != null) allClasses.add(importInfo)
+      } catch (err: KotlinReflectionInternalError) {
+        // do nothing
+      } catch (err: UnsupportedOperationException) {
+        // check like Java
+      } catch (err: AssertionError) {
+        // do nothing
+      }
+    }
+    return allClasses
+  }
+
+
+  private fun importInfoByMethodAndParent(methodName: String, parametersString: String, parent: Class<*>): ImportInfo {
+    val shortName = methodName.split("$").first()
+    val className = "$shortName($parametersString)"
+    val fullName = "${parent.`package`.name}.$shortName"
+    return ImportInfo(fullName, className)
   }
 
   private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
@@ -364,13 +404,16 @@ class SuggestionProvider(
   }
 
   private fun getAllVariants(): List<ImportInfo> {
-    val jarFiles = kotlinEnvironment.classpath.drop(1) // executors jar???
+    val jarFiles = kotlinEnvironment.classpath.filter { jarFile ->
+      jarFile.name.split("/").last() != EXECUTORS_JAR_NAME
+    }
+
     val allVariants = mutableListOf<ImportInfo>()
     jarFiles.map { file ->
-      val variants = getClassVariantForZip(file)
+      val variants = getVariantsForZip(file)
       allVariants.addAll(variants)
     }
-    return allVariants.toList()
+    return allVariants
   }
 
   fun getClassesByName(name: String): List<ImportInfo> {
@@ -380,9 +423,9 @@ class SuggestionProvider(
   }
 
   fun getClassByPrefix(prefix: String): List<ImportInfo> {
-    return getAllVariants().filter { variant ->
+    File("output").writeText("")
+    return ALL_INDEXES.filter { variant ->
       variant.className.startsWith(prefix)
-    }
+    }.sortedBy { it.className.length }
   }
-
 }

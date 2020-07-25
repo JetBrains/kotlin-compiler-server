@@ -50,16 +50,18 @@ class ImportTest : BaseExecutorTest() {
     )
   }
 
-/*
-  ToDo: import methods
-  example:
-  "import kotlin.math.PI\n" +
-        "\n" +
-        "fun main() {\n" +
-        "    val pi = PI\n" +
-        "    println(pi)\n" +
-        "    val alex = 1\n" +
-        "    val alex1 = 1 + a\n" +
-        "}"
- */
+  @Test
+  fun `import method`() {
+    completeWithImport(
+      code = "fun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 1,
+      character = 15,
+      completions = listOf(
+        Pair("sin(kotlin.Double)", "kotlin.math.sin"),
+        Pair("sin(kotlin.Float)", "kotlin.math.sin")
+      )
+    )
+  }
 }

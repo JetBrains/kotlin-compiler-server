@@ -84,7 +84,6 @@ class TestProjectRunner {
     val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.completeWithImport(project, line, character)
       .map { Pair(it.className, it.fullName) }
-    Assertions.assertTrue(result.size == completions.size)
     completions.forEach { suggest ->
       Assertions.assertTrue(result.contains(suggest))
     }
