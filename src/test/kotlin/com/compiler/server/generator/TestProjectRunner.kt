@@ -83,7 +83,7 @@ class TestProjectRunner {
     val type = if (isJs) ProjectType.JS else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.completeWithImport(project, line, character)
-      .map { Pair(it.className, it.fullName) }
+      .map { Pair(it.shortName, it.importName) }
     completions.forEach { suggest ->
       Assertions.assertTrue(result.contains(suggest))
     }

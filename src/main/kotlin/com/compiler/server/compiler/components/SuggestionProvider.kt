@@ -4,6 +4,7 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.isKotlinClass
 import com.intellij.psi.PsiElement
@@ -58,6 +59,7 @@ class SuggestionProvider(
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val MODULE_INFO_NAME = "module-info"
   private val EXECUTORS_JAR_NAME = "executors.jar"
+  private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val ALL_INDEXES = getAllVariants()
 
   private data class DescriptorInfo(
@@ -300,7 +302,7 @@ class SuggestionProvider(
     }.map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
-      val importInfo = ImportInfo(canonicalName, simpleName)
+      val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
       allClasses.add(importInfo)
     }
     return allClasses
@@ -315,13 +317,13 @@ class SuggestionProvider(
       }.map {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
         allClasses.add(importInfo)
       }
       if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
         allClasses.add(importInfo)
       }
     } catch (exception: UnsupportedOperationException) {
@@ -440,8 +442,8 @@ class SuggestionProvider(
   private fun importInfoByMethodAndParent(methodName: String, parametersString: String, parent: Class<*>): ImportInfo {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
-    val fullName = "${parent.`package`.name}.$shortName"
-    return ImportInfo(fullName, className)
+    val importName = "${parent.`package`.name}.$shortName"
+    return ImportInfo(importName, shortName, className)
   }
 
   private fun getAllVariants(): List<ImportInfo> {
@@ -459,13 +461,39 @@ class SuggestionProvider(
 
   fun getClassesByName(name: String): List<ImportInfo> {
     return getAllVariants().filter { variant ->
-      variant.className == name
+      variant.shortName == name
     }
   }
 
   fun getClassByPrefix(prefix: String): List<ImportInfo> {
     return ALL_INDEXES.filter { variant ->
-      variant.className.startsWith(prefix)
-    }.sortedBy { it.className.length }
+      variant.shortName.startsWith(prefix)
+    }.sortedBy { it.shortName.length }
+  }
+
+  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> {
+    return errors.mapValues { (_, errorDescriptors) ->
+      return@mapValues errorDescriptors.map { errorDescriptor ->
+        checkErrorDescriptor(errorDescriptor)
+      }
+    }
+  }
+
+  private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
+    return if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
+      val name = errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
+      val suggestions = getClassesByName(name)
+      if (suggestions.isEmpty()) {
+        return errorDescriptor
+      } else {
+        val suggestionsString = "\nSuggestions: ${suggestions.distinctBy { it.importName }.joinToString { it.importName }}"
+        ErrorDescriptor(
+          errorDescriptor.interval,
+          errorDescriptor.message + suggestionsString,
+          errorDescriptor.severity,
+          errorDescriptor.className
+        )
+      }
+    } else errorDescriptor
   }
 }

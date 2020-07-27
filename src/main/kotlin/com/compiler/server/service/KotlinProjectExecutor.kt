@@ -79,6 +79,19 @@ class KotlinProjectExecutor(
     }
   }
 
+  fun highlightWithImports(project: Project): Map<String, List<ErrorDescriptor>> {
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      try {
+        val res = errorAnalyzer.errorsFrom(files, environment).errors
+        return@environment suggestionProvider.checkUnresolvedReferences(res)
+      } catch (e: Exception) {
+        log.warn("Exception in getting highlight. Project: $project", e)
+        emptyMap()
+      }
+    }
+  }
+
   fun getVersion() = version
 
   private fun getFilesFrom(project: Project, coreEnvironment: KotlinCoreEnvironment) = project.files.map {
