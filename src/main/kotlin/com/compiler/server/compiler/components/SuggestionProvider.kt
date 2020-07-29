@@ -53,7 +53,7 @@ class SuggestionProvider(
   private val MODULE_INFO_NAME = "module-info"
   private val EXECUTORS_JAR_NAME = "executors.jar"
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
-  private val INDEXES_FILE_NAME = "output.json"
+  private val INDEXES_FILE_NAME = "indexes.json"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,

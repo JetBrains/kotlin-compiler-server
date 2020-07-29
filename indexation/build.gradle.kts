@@ -16,5 +16,5 @@ application {
 
 tasks.withType<JavaExec> {
     val rootName = project.rootProject.projectDir.toString()
-    args = listOf("$rootName/$kotlinVersion", "$rootName/output.json")
+    args = listOf("$rootName/$kotlinVersion", "$rootName/indexes.json")
 }

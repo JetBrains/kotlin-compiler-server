@@ -16,9 +16,10 @@ import kotlin.reflect.jvm.kotlinFunction
 object Main {
   private data class ImportInfo(val importName: String, val shortName: String, val fullName: String)
 
-  private var INDEXES_FILE_NAME = "output.json"
-  private val MODULE_INFO_NAME = "module-info"
-  private val EXECUTORS_JAR_NAME = "executors.jar"
+  private const val MODULE_INFO_NAME = "module-info"
+  private const val EXECUTORS_JAR_NAME = "executors.jar"
+  private const val JAR_EXTENSION = ".jar"
+  private const val LIB_FOLDER_NAME = "lib"
 
   private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
@@ -91,40 +92,27 @@ object Main {
     return allClasses
   }
 
-  private const val JAR_EXTENSION = ".jar"
-  private const val LIB_FOLDER_NAME = "lib"
-
   private fun initClasspath(taskRoot: String): List<URL> {
     val cwd = File(taskRoot)
-    val classPath = mutableListOf(File(taskRoot)) // Add top level folders
-    // Find any Top level jars or jars in the lib folder
+    val classPath = mutableListOf(cwd)
     val rootFiles =
       cwd.listFiles { _: File?, name: String -> name.endsWith(JAR_EXTENSION) || name == LIB_FOLDER_NAME }
         ?: error("No files found from $taskRoot directory")
     for (file in rootFiles) {
       if (file.name == LIB_FOLDER_NAME && file.isDirectory) {
-        // Collect all Jars in /lib directory
         val libFolderFiles =
           file.listFiles { _: File?, name: String -> name.endsWith(JAR_EXTENSION) } ?: continue
         for (jar in libFolderFiles) {
           classPath.add(jar)
         }
       } else {
-        // Add top level dirs and jar files
         classPath.add(file)
       }
     }
-    // Convert Files to URLs
     return classPath.mapNotNull { it.toURI().toURL() }
   }
 
-  private fun getHandlerClass(taskRoot: String, className: String): Class<*>? {
-    val classPathUrls = initClasspath(taskRoot)
-    val cl = URLClassLoader.newInstance(classPathUrls.toTypedArray())
-    return cl.loadClass(className)
-  }
-
-  private fun getVariantsForZip(directory: String, file: File): List<ImportInfo> {
+  private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> {
     val jarFile = JarFile(file)
     val allSuggests = hashSetOf<ImportInfo>()
     jarFile.entries().toList().map { entry ->
@@ -135,8 +123,7 @@ object Main {
         val fullName = name.replace("/", ".")
         if (fullName != MODULE_INFO_NAME) {
           try {
-//            val clazz = ClassLoader.getSystemClassLoader().loadClass(fullName)
-            val clazz = getHandlerClass(directory, fullName) ?: return emptyList()
+            val clazz = classLoader.loadClass(fullName) ?: return emptyList()
             if (clazz.isKotlinClass()) {
               allSuggests.addAll(allClassesFromKotlinClass(clazz))
             } else {
@@ -205,32 +192,33 @@ object Main {
     return ImportInfo(importName, shortName, className)
   }
 
-  private fun getAllVariants(dir:String, files: List<File>): List<ImportInfo> {
+  private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> {
     val jarFiles = files.filter { jarFile ->
       jarFile.name.split("/").last() != EXECUTORS_JAR_NAME
     }
     val allVariants = mutableListOf<ImportInfo>()
     jarFiles.map { file ->
-      val variants = getVariantsForZip(dir, file)
+      val variants = getVariantsForZip(classLoader, file)
       allVariants.addAll(variants)
     }
     return allVariants
   }
 
-  private fun createJsonWithIndexes(directoryPath: String) {
+  private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
     val file = File(directoryPath)
     val filesArr = file.listFiles()
     val files = filesArr.toList()
-    File(INDEXES_FILE_NAME).writeText("")
-    File(INDEXES_FILE_NAME).appendText(Gson().toJson(getAllVariants(directoryPath, files)))
+    File(outputPath).writeText("")
+    val classPathUrls = initClasspath(directoryPath)
+    val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
+    File(outputPath).appendText(Gson().toJson(getAllVariants(classLoader, files)))
 //    File(INDEXES_FILE_NAME).appendText(GsonBuilder().setPrettyPrinting().create().toJson(getAllVariants()))
   }
 
   @JvmStatic
   fun main(args: Array<String>) {
     val directory = args[0]
-    INDEXES_FILE_NAME = args[1]
-//    getHandlerClass(directory, "kotlin.jdk7.AutoCloseableKt")
-    createJsonWithIndexes(directory)
+    val outputPath = args[1]
+    createJsonWithIndexes(directory, outputPath)
   }
 }
