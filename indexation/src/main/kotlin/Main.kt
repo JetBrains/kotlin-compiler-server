@@ -1,7 +1,7 @@
 package indexation
 
 import com.fasterxml.jackson.module.kotlin.isKotlinClass
-import com.google.gson.Gson
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -211,8 +211,9 @@ object Main {
     File(outputPath).writeText("")
     val classPathUrls = initClasspath(directoryPath)
     val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
-    File(outputPath).appendText(Gson().toJson(getAllVariants(classLoader, files)))
-//    File(INDEXES_FILE_NAME).appendText(GsonBuilder().setPrettyPrinting().create().toJson(getAllVariants()))
+
+    val mapper = jacksonObjectMapper()
+    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
   }
 
   @JvmStatic

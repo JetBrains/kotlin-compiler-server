@@ -6,8 +6,8 @@ import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ImportInfo
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -290,8 +290,8 @@ class SuggestionProvider(
 
   private fun readIndexesFromJson(): List<ImportInfo> {
     val jsonIndexes = File(INDEXES_FILE_NAME).readText()
-    val type = object: TypeToken<List<ImportInfo>>(){}.type
-    return Gson().fromJson(jsonIndexes, type)
+    val objectMapper = jacksonObjectMapper()
+    return objectMapper.readValue(jsonIndexes)
   }
 
   fun getClassesByName(name: String): List<ImportInfo> {
