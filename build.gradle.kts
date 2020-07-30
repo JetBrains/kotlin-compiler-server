@@ -23,7 +23,7 @@ val copyDependencies by tasks.creating(Copy::class) {
     into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinJsDependency.map { zipTree(it)} }))
+    from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
 }
 
@@ -86,7 +86,7 @@ dependencies {
 }
 
 fun buildPropertyFile() {
-    rootDir.resolve("src/main/resources/${propertyFile}").apply{
+    rootDir.resolve("src/main/resources/${propertyFile}").apply {
         println("Generate properties into $absolutePath")
         parentFile.mkdirs()
         writeText(generateProperties())
@@ -109,6 +109,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
     dependsOn(":executors:jar")
+    dependsOn(":indexation:run")
     buildPropertyFile()
 }
 

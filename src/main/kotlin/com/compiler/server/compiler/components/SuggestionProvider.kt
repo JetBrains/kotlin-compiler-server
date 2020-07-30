@@ -50,8 +50,6 @@ class SuggestionProvider(
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
-  private val MODULE_INFO_NAME = "module-info"
-  private val EXECUTORS_JAR_NAME = "executors.jar"
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val INDEXES_FILE_NAME = "indexes.json"
 

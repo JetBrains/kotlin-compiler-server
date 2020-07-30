@@ -20,6 +20,7 @@ object Main {
   private const val EXECUTORS_JAR_NAME = "executors.jar"
   private const val JAR_EXTENSION = ".jar"
   private const val LIB_FOLDER_NAME = "lib"
+  private const val CLASS_EXTENSION = ".class"
 
   private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
@@ -53,38 +54,23 @@ object Main {
         allClasses.add(importInfo)
       }
     } catch (exception: UnsupportedOperationException) {
-      // throw kotlinClass.nestedClasses
-      return allClassesFromJavaClass(clazz)
-    } catch (error: AssertionError) {
-      /* In Tests:
-    1) kotlinx.coroutines.flow.internal.ChannelFlowKt$withContextUndispatched$$inlined
-      $suspendCoroutineUninterceptedOrReturn$lambda$1
-    2) kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt
-      $createCoroutineUnchecked$$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$1
-    3) kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
-      $$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$2
-    */
       return allClassesFromJavaClass(clazz)
     } catch (error: IncompatibleClassChangeError) {
-      /* In Application:
-    1) kotlinx.coroutines.CoroutineDispatcher$Key
-    2) kotlinx.coroutines.channels.ConflatedChannel$Companion
-    3) kotlinx.coroutines.ExecutorCoroutineDispatcher$Key
+      /*
+      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scan$1
+      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanReduce$1
+      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanIndexed$1
+      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanReduceIndexed$1
+      INCOMP_ERR: kotlin.jvm.internal.ClassReference$Companion
     */
       return allClassesFromJavaClass(clazz)
-    } catch (error: InternalError) {
-      /* In Application:
-    1-53) kotlinx.coroutines.flow.FlowKt__*
-    54-59) kotlinx.coroutines.channels.*
-     */
-      return allClassesFromJavaClass(clazz)
     } catch (exception: NoSuchElementException) {
-      /* In Application:
-    1) kotlinx.coroutines.flow.internal.ChannelFlowKt$withContextUndispatched$$inlined
-      $suspendCoroutineUninterceptedOrReturn$lambda$1
-    2) kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
+      /*
+    NO_SUCH_ERR: kotlinx.coroutines.flow.internal.ChannelFlowKt$withContextUndispatched$$inlined$suspendCoroutine
+      UninterceptedOrReturn$lambda$1
+    NO_SUCH_ERR: kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
       $$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$1
-    3) kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
+    NO_SUCH_ERR: kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
       $$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$2
     */
       return allClassesFromJavaClass(clazz)
@@ -117,12 +103,11 @@ object Main {
     val allSuggests = hashSetOf<ImportInfo>()
     jarFile.entries().toList().map { entry ->
       if (!entry.isDirectory
-        && entry.name.endsWith(".class")
+        && entry.name.endsWith(CLASS_EXTENSION)
       ) {
-        val name = entry.name.removeSuffix(".class")
-        val fullName = name.replace("/", ".")
+        val name = entry.name.removeSuffix(CLASS_EXTENSION)
+        val fullName = name.replace(File.separator, ".")
         if (fullName != MODULE_INFO_NAME) {
-          try {
             val clazz = classLoader.loadClass(fullName) ?: return emptyList()
             if (clazz.isKotlinClass()) {
               allSuggests.addAll(allClassesFromKotlinClass(clazz))
@@ -130,20 +115,7 @@ object Main {
               allSuggests.addAll(allClassesFromJavaClass(clazz))
             }
             allSuggests.addAll(allFunctionsFromClass(clazz))
-          } catch (error: VerifyError) {
-            /* In Application:
-            1) kotlinx.coroutines.EventLoopImplBase$DelayedTaskQueue
-            2) kotlinx.coroutines.flow.internal.FlowProduceCoroutine
-            */
-          } catch (error: NoClassDefFoundError) {
-            /* In Application:
-          1) kotlinx.coroutines.flow.FlowKt__MergeKt$flatMapLatest$1
-          2) kotlinx.coroutines.flow.FlowKt__MergeKt$mapLatest$1
-          3) kotlinx.coroutines.flow.FlowKt__MergeKt$flattenConcat$$inlined$unsafeFlow$1
-          4) kotlinx.coroutines.flow.FlowKt__MergeKt$flatMapConcat$$inlined$map$1
-          5) kotlinx.coroutines.flow.FlowKt__MergeKt$flatMapMerge$$inlined$map$1
-           */
-          }
+
         }
       }
     }
@@ -166,8 +138,6 @@ object Main {
     } catch (exception: NoSuchElementException) {
     } catch (exception: UnsupportedOperationException) {
     } catch (error: KotlinReflectionInternalError) {
-    } catch (error: AssertionError) {
-    } catch (error: InternalError) {
     } catch (error: IncompatibleClassChangeError) {
     }
     return if (kotlinFunction != null
@@ -182,7 +152,7 @@ object Main {
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
     if (Modifier.isPublic(method.modifiers) &&
       Modifier.isStatic(method.modifiers))
-      importInfoByMethodAndParent(method.name, method.parameters.map { it.type.name }.joinToString(), clazz)
+      importInfoByMethodAndParent(method.name, method.parameters.joinToString { it.type.name }, clazz)
     else null
 
   private fun importInfoByMethodAndParent(methodName: String, parametersString: String, parent: Class<*>): ImportInfo {
@@ -194,7 +164,7 @@ object Main {
 
   private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> {
     val jarFiles = files.filter { jarFile ->
-      jarFile.name.split("/").last() != EXECUTORS_JAR_NAME
+      jarFile.name.split(File.separator).last() != EXECUTORS_JAR_NAME
     }
     val allVariants = mutableListOf<ImportInfo>()
     jarFiles.map { file ->
@@ -208,15 +178,17 @@ object Main {
     val file = File(directoryPath)
     val filesArr = file.listFiles()
     val files = filesArr.toList()
-    File(outputPath).writeText("")
     val classPathUrls = initClasspath(directoryPath)
     val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
+    File(outputPath).writeText("")
 
     val mapper = jacksonObjectMapper()
     File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
   }
 
   @JvmStatic
+  // First argument is path to folder with jars
+  // Second argument is path to output file
   fun main(args: Array<String>) {
     val directory = args[0]
     val outputPath = args[1]
