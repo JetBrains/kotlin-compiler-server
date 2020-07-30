@@ -94,6 +94,11 @@ class TestProjectRunner {
     return kotlinProjectExecutor.highlight(project)
   }
 
+  fun highlightWithImport(code: String): Map<String, List<ErrorDescriptor>> {
+    val project = generateSingleProject(text = code)
+    return kotlinProjectExecutor.highlightWithImports(project)
+  }
+
   fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS)
     return kotlinProjectExecutor.highlight(project)

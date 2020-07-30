@@ -319,7 +319,7 @@ class SuggestionProvider(
       if (suggestions.isEmpty()) {
         return errorDescriptor
       } else {
-        val suggestionsString = " Suggestions: ${suggestions.distinctBy { it.importName }.joinToString { it.importName }}"
+        val suggestionsString = ". Suggestions for import: ${suggestions.distinctBy { it.importName }.joinToString { it.importName }}"
         ErrorDescriptor(
           errorDescriptor.interval,
           errorDescriptor.message + suggestionsString,

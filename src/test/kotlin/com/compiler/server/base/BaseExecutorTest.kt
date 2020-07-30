@@ -27,6 +27,8 @@ class BaseExecutorTest {
 
   fun highlight(code: String) = testRunner.highlight(code)
 
+  fun highlightWithImport(code: String) = testRunner.highlightWithImport(code)
+
   fun highlightJS(code: String) = testRunner.highlightJS(code)
 
   fun run(code: String, contains: String, args: String = "") = testRunner.run(code, contains, args)
