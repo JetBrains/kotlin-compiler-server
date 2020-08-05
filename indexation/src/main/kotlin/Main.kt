@@ -11,6 +11,7 @@ import java.util.jar.JarFile
 import kotlin.reflect.KFunction
 import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
+import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
@@ -115,7 +116,6 @@ object Main {
               allSuggests.addAll(allClassesFromJavaClass(clazz))
             }
             allSuggests.addAll(allFunctionsFromClass(clazz))
-
         }
       }
     }
@@ -144,7 +144,16 @@ object Main {
       && kotlinFunction.visibility == KVisibility.PUBLIC) {
       importInfoByMethodAndParent(
         kotlinFunction.name,
-        kotlinFunction.parameters.map { it.type }.joinToString(),
+        kotlinFunction.parameters.map {
+          var type = it.type.toString()
+          val regex = Regex("(kotlin\\.)([A-Z])")
+          var range: IntRange?
+          do {
+            range = regex.find(type)?.groups?.get(1)?.range
+            type = if (range != null) type.removeRange(range) else type
+          } while (range != null)
+          return@map type
+        }.joinToString(),
         clazz)
     } else importInfoFromJavaMethod(method, clazz)
   }
@@ -183,6 +192,8 @@ object Main {
     File(outputPath).writeText("")
 
     val mapper = jacksonObjectMapper()
+//    File(outputPath).appendText(mapper.writerWithDefaultPrettyPrinter()
+//        .writeValueAsString(getAllVariants(classLoader, files)))
     File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
   }
 
