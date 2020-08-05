@@ -120,7 +120,6 @@ class SuggestionProvider(
     }
   }
 
-
   private fun completionVariantFor(
     prefix: String,
     descriptor: DeclarationDescriptor,
