@@ -15,13 +15,18 @@ import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
-  private data class ImportInfo(val importName: String, val shortName: String, val fullName: String)
+  private data class ImportInfo(val importName: String,
+                                val shortName: String,
+                                val fullName: String,
+                                val icon: String)
 
   private const val MODULE_INFO_NAME = "module-info"
   private const val EXECUTORS_JAR_NAME = "executors.jar"
   private const val JAR_EXTENSION = ".jar"
   private const val LIB_FOLDER_NAME = "lib"
   private const val CLASS_EXTENSION = ".class"
+  private const val CLASS_ICON = "class"
+  private const val METHOD_ICON = "method"
 
   private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
@@ -30,7 +35,7 @@ object Main {
     }.map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
-      val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
+      val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
       allClasses.add(importInfo)
     }
     return allClasses
@@ -45,13 +50,13 @@ object Main {
       }.map {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
         allClasses.add(importInfo)
       }
       if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
         allClasses.add(importInfo)
       }
     } catch (exception: UnsupportedOperationException) {
@@ -168,7 +173,7 @@ object Main {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
     val importName = "${parent.`package`.name}.$shortName"
-    return ImportInfo(importName, shortName, className)
+    return ImportInfo(importName, shortName, className, METHOD_ICON)
   }
 
   private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> {

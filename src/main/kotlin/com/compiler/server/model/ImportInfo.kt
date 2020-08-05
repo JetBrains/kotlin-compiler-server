@@ -1,3 +1,6 @@
 package com.compiler.server.model
 
-data class ImportInfo (val importName: String, val shortName: String, val fullName: String)
+data class ImportInfo (val importName: String,
+                       val shortName: String,
+                       val fullName: String,
+                       val icon: String)
