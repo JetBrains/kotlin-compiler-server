@@ -33,24 +33,6 @@ class ImportTest : BaseExecutorTest() {
   }
 
   @Test
-  fun `import by prefix`() {
-    completeWithImport(
-      code = "fun main() {\n" +
-        "    val t = Thread\n" +
-        "}",
-      line = 1,
-      character = 18,
-      completions = listOf(
-        Pair("ThreadSafe", "org.junit.runner.notification.RunListener.ThreadSafe"),
-        Pair("ThreadSafeHeapNode", "kotlinx.coroutines.internal.ThreadSafeHeapNode"),
-        Pair("ThreadSafeHeap", "kotlinx.coroutines.internal.ThreadSafeHeap"),
-        Pair("ThreadContextElement", "kotlinx.coroutines.ThreadContextElement"),
-        Pair("ThreadLocal", "kotlin.native.concurrent.ThreadLocal")
-      )
-    )
-  }
-
-  @Test
   fun `import method`() {
     completeWithImport(
       code = "fun main() {\n" +

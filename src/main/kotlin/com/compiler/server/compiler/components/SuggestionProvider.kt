@@ -90,9 +90,9 @@ class SuggestionProvider(
   ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
-      val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
+      val name = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
-      getClassByPrefix(prefix)
+      getClassesByName(name)
     } ?: emptyList()
   }
 
@@ -225,7 +225,6 @@ class SuggestionProvider(
     }
   }
 
-
   private fun formatName(
     builder: String,
     symbols: Int
@@ -298,7 +297,7 @@ class SuggestionProvider(
     }
   }
 
-  fun getClassByPrefix(prefix: String): List<ImportInfo> {
+  fun getClassesByPrefix(prefix: String): List<ImportInfo> {
     return readIndexesFromJson().filter { variant ->
       variant.shortName.startsWith(prefix)
     }.sortedBy { it.shortName.length }
