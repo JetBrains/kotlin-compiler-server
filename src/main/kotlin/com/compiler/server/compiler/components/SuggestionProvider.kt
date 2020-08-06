@@ -69,30 +69,21 @@ class SuggestionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
+      val importCompletionVariants = try {
+        getClassesByName(prefix).map { it.toCompletion() }
+      } catch (e: Throwable) {
+        emptyList<Completion>()
+      }
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
           val (b1, b2) = b.presentableName()
           ("$a1$a2").compareTo("$b1$b2", true)
         })
-      }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } + keywordsCompletionVariants(KtTokens.KEYWORDS,
-        prefix) + keywordsCompletionVariants(
-        KtTokens.SOFT_KEYWORDS, prefix)
-    } ?: emptyList()
-  }
-
-  fun completeWithImport(
-    file: KotlinFile,
-    line: Int,
-    character: Int,
-    isJs: Boolean,
-    coreEnvironment: KotlinCoreEnvironment
-  ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
-    elementAt(line, character)?.let { element ->
-      val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
-      val name = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
-        .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
-      getClassesByName(name)
+      }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } +
+        keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) +
+        keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix) +
+        importCompletionVariants
     } ?: emptyList()
   }
 
@@ -126,7 +117,7 @@ class SuggestionProvider(
     element: PsiElement
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
-    val (name, _) = descriptor.presentableName(isCallableReference)
+    val (name, type) = descriptor.presentableName(isCallableReference)
     val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
     var completionText = fullName
     var position = completionText.indexOf('(')
@@ -141,7 +132,8 @@ class SuggestionProvider(
       Completion(
         text = completionText,
         displayText = fullName,
-        tail = formatName(fullName, NUMBER_OF_CHAR_IN_TAIL),
+        tail = formatName(type, NUMBER_OF_CHAR_IN_TAIL),
+        import = "",
         icon = iconFrom(descriptor)
       )
     } else null
@@ -156,7 +148,6 @@ class SuggestionProvider(
       else it
     }
   }
-
 
   private fun Analysis.referenceVariantsFrom(
     element: PsiElement,
@@ -230,7 +221,8 @@ class SuggestionProvider(
   ) = if (builder.length > symbols) builder.substring(0, symbols) + "..." else builder
 
   private fun keywordsCompletionVariants(keywords: TokenSet, prefix: String) = keywords.types.mapNotNull {
-    if (it is KtKeywordToken && it.value.startsWith(prefix)) Completion(it.value, it.value, "", "") else null
+    if (it is KtKeywordToken && it.value.startsWith(prefix))
+      Completion(it.value, it.value, "", "", "") else null
   }
 
   private fun iconFrom(descriptor: DeclarationDescriptor) = when (descriptor) {
@@ -290,17 +282,19 @@ class SuggestionProvider(
     return objectMapper.readValue(jsonIndexes)
   }
 
-  fun getClassesByName(name: String): List<ImportInfo> {
+  private fun getClassesByName(name: String): List<ImportInfo> {
     return readIndexesFromJson().filter { variant ->
       variant.shortName == name
     }
   }
 
-  fun getClassesByPrefix(prefix: String): List<ImportInfo> {
-    return readIndexesFromJson().filter { variant ->
-      variant.shortName.startsWith(prefix)
-    }.sortedBy { it.shortName.length }
-  }
+  private fun ImportInfo.toCompletion() = Completion(
+    "$fullName : $importName",
+    "$fullName : $importName",
+    returnType,
+    importName,
+    icon
+  )
 
   fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> {
     return errors.mapValues { (_, errorDescriptors) ->
@@ -313,11 +307,16 @@ class SuggestionProvider(
   private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
     return if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
       val name = errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-      val suggestions = getClassesByName(name)
+      val suggestions = try {
+        getClassesByName(name)
+      } catch (e: Throwable) {
+        emptyList<ImportInfo>()
+      }
       if (suggestions.isEmpty()) {
         return errorDescriptor
       } else {
-        val suggestionsString = ". Suggestions for import: ${suggestions.distinctBy { it.importName }.joinToString { it.importName }}"
+        val importsString = suggestions.distinctBy { it.importName }.joinToString { it.importName }
+        val suggestionsString = ". Suggestions for import: $importsString"
         ErrorDescriptor(
           errorDescriptor.interval,
           errorDescriptor.message + suggestionsString,

@@ -9,15 +9,16 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
 import kotlin.reflect.KFunction
+import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
-import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
   private data class ImportInfo(val importName: String,
                                 val shortName: String,
                                 val fullName: String,
+                                val returnType:String,
                                 val icon: String)
 
   private const val MODULE_INFO_NAME = "module-info"
@@ -35,7 +36,7 @@ object Main {
     }.map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
-      val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
+      val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
       allClasses.add(importInfo)
     }
     return allClasses
@@ -50,13 +51,13 @@ object Main {
       }.map {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
         allClasses.add(importInfo)
       }
       if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, CLASS_ICON)
+        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON)
         allClasses.add(importInfo)
       }
     } catch (exception: UnsupportedOperationException) {
@@ -114,13 +115,13 @@ object Main {
         val name = entry.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
         if (fullName != MODULE_INFO_NAME) {
-            val clazz = classLoader.loadClass(fullName) ?: return emptyList()
-            if (clazz.isKotlinClass()) {
-              allSuggests.addAll(allClassesFromKotlinClass(clazz))
-            } else {
-              allSuggests.addAll(allClassesFromJavaClass(clazz))
-            }
-            allSuggests.addAll(allFunctionsFromClass(clazz))
+          val clazz = classLoader.loadClass(fullName) ?: return emptyList()
+          if (clazz.isKotlinClass()) {
+            allSuggests.addAll(allClassesFromKotlinClass(clazz))
+          } else {
+            allSuggests.addAll(allClassesFromJavaClass(clazz))
+          }
+          allSuggests.addAll(allFunctionsFromClass(clazz))
         }
       }
     }
@@ -129,6 +130,10 @@ object Main {
 
   private fun allFunctionsFromClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
+    clazz.methods.map { method ->
+      val importInfo = importInfoFromFunction(method, clazz)
+      if (importInfo != null) allClasses.add(importInfo)
+    }
     clazz.declaredMethods.map { method ->
       val importInfo = importInfoFromFunction(method, clazz)
       if (importInfo != null) allClasses.add(importInfo)
@@ -149,31 +154,44 @@ object Main {
       && kotlinFunction.visibility == KVisibility.PUBLIC) {
       importInfoByMethodAndParent(
         kotlinFunction.name,
-        kotlinFunction.parameters.map {
-          var type = it.type.toString()
-          val regex = Regex("(kotlin\\.)([A-Z])")
-          var range: IntRange?
-          do {
-            range = regex.find(type)?.groups?.get(1)?.range
-            type = if (range != null) type.removeRange(range) else type
-          } while (range != null)
-          return@map type
-        }.joinToString(),
+        kotlinFunction.parameters.joinToString {
+          kotlinTypeToType(it.type)
+        },
+        kotlinTypeToType(kotlinFunction.returnType),
         clazz)
     } else importInfoFromJavaMethod(method, clazz)
+  }
+
+  private fun kotlinTypeToType(kotlinType: KType): String {
+    var type = kotlinType.toString()
+    val regex = Regex("(kotlin\\.)([A-Z])")
+    var range: IntRange?
+    do {
+      range = regex.find(type)?.groups?.get(1)?.range
+      type = if (range != null) type.removeRange(range) else type
+    } while (range != null)
+    return type
   }
 
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
     if (Modifier.isPublic(method.modifiers) &&
       Modifier.isStatic(method.modifiers))
-      importInfoByMethodAndParent(method.name, method.parameters.joinToString { it.type.name }, clazz)
+      importInfoByMethodAndParent(
+        method.name,
+        method.parameters.joinToString { it.type.name },
+        method.returnType.simpleName,
+        clazz
+      )
     else null
 
-  private fun importInfoByMethodAndParent(methodName: String, parametersString: String, parent: Class<*>): ImportInfo {
+  private fun importInfoByMethodAndParent(methodName: String,
+                                          parametersString: String,
+                                          returnType: String,
+                                          parent: Class<*>): ImportInfo {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
     val importName = "${parent.`package`.name}.$shortName"
-    return ImportInfo(importName, shortName, className, METHOD_ICON)
+    return ImportInfo(importName, shortName, className, returnType, METHOD_ICON)
   }
 
   private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> {
@@ -190,16 +208,15 @@ object Main {
 
   private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
     val file = File(directoryPath)
-    val filesArr = file.listFiles()
-    val files = filesArr.toList()
+    val files = file.listFiles().toList()
     val classPathUrls = initClasspath(directoryPath)
     val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
     File(outputPath).writeText("")
 
     val mapper = jacksonObjectMapper()
-//    File(outputPath).appendText(mapper.writerWithDefaultPrettyPrinter()
-//        .writeValueAsString(getAllVariants(classLoader, files)))
-    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
+    File(outputPath).appendText(mapper.writerWithDefaultPrettyPrinter()
+      .writeValueAsString(getAllVariants(classLoader, files)))
+//    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
   }
 
   @JvmStatic

@@ -73,30 +73,9 @@ class TestProjectRunner {
     }
   }
 
-  fun completeWithImport(
-    code: String,
-    line: Int,
-    character: Int,
-    completions: List<Pair<String, String>>,
-    isJs: Boolean = false
-  ) {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
-    val project = generateSingleProject(text = code, projectType = type)
-    val result = kotlinProjectExecutor.completeWithImport(project, line, character)
-      .map { Pair(it.shortName, it.importName) }
-    completions.forEach { suggest ->
-      Assertions.assertTrue(result.contains(suggest))
-    }
-  }
-
   fun highlight(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code)
     return kotlinProjectExecutor.highlight(project)
-  }
-
-  fun highlightWithImport(code: String): Map<String, List<ErrorDescriptor>> {
-    val project = generateSingleProject(text = code)
-    return kotlinProjectExecutor.highlightWithImports(project)
   }
 
   fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {

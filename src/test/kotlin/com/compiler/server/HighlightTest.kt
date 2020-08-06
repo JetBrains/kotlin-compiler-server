@@ -74,6 +74,20 @@ class HighlightTest : BaseExecutorTest() {
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
+  @Test
+  fun `highlight with imports Unresolved class reference`() {
+    val highlights = highlight("fun main() {\n   val s = Random(5)\n}")
+    errorContains(highlights,
+      "Unresolved reference: Random. Suggestions for import: kotlin.random.Random")
+  }
+
+  @Test
+  fun `highlight with import Unresolved function reference`() {
+    val highlights = highlight("fun main() {\n   val s = sin(5.0)\n}")
+    errorContains(highlights,
+      "Unresolved reference: sin. Suggestions for import: kotlin.math.sin")
+  }
+
   private fun errorContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
     Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
     Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })

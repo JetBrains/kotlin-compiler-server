@@ -6,19 +6,19 @@ import org.junit.jupiter.api.Test
 class ImportTest : BaseExecutorTest() {
   @Test
   fun `import class`() {
-    completeWithImport(
+    complete(
       code = "fun main() {\n    val rand = Random\n}",
       line = 1,
       character = 21,
       completions = listOf(
-        Pair("Random", "kotlin.random.Random")
+        "Random : kotlin.random.Random"
       )
     )
   }
 
   @Test
   fun `import class with parameters`() {
-    completeWithImport(
+    complete(
       code = """fun main() {
         |    randVal = Random(3)
         |    printn(randomVal.nextInt())
@@ -27,21 +27,22 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 20,
       completions = listOf(
-        Pair("Random", "kotlin.random.Random")
+        "Random : kotlin.random.Random"
       )
     )
   }
 
   @Test
   fun `import method`() {
-    completeWithImport(
+    complete(
       code = "fun main() {\n" +
         "    val s = sin\n" +
         "}",
       line = 1,
       character = 15,
       completions = listOf(
-        Pair("sin", "kotlin.math.sin")
+        "sin(Double) : kotlin.math.sin",
+        "sin(Float) : kotlin.math.sin"
       )
     )
   }

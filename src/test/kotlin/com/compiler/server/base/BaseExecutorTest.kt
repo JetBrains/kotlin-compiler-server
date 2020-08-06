@@ -17,17 +17,7 @@ class BaseExecutorTest {
     isJs: Boolean = false
   ) = testRunner.complete(code, line, character, completions, isJs)
 
-  fun completeWithImport(
-    code: String,
-    line: Int,
-    character: Int,
-    completions: List<Pair<String, String>>,
-    isJs: Boolean = false
-  ) = testRunner.completeWithImport(code, line, character, completions, isJs)
-
   fun highlight(code: String) = testRunner.highlight(code)
-
-  fun highlightWithImport(code: String) = testRunner.highlightWithImport(code)
 
   fun highlightJS(code: String) = testRunner.highlightJS(code)
 
