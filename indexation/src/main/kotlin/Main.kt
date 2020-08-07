@@ -15,11 +15,13 @@ import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
-  private data class ImportInfo(val importName: String,
-                                val shortName: String,
-                                val fullName: String,
-                                val returnType:String,
-                                val icon: String)
+  private data class ImportInfo(
+    val importName: String,
+    val shortName: String,
+    val fullName: String,
+    val returnType:String,
+    val icon: String
+  )
 
   private const val MODULE_INFO_NAME = "module-info"
   private const val EXECUTORS_JAR_NAME = "executors.jar"
@@ -28,6 +30,7 @@ object Main {
   private const val CLASS_EXTENSION = ".class"
   private const val CLASS_ICON = "class"
   private const val METHOD_ICON = "method"
+  private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
 
   private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
@@ -108,10 +111,8 @@ object Main {
   private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> {
     val jarFile = JarFile(file)
     val allSuggests = hashSetOf<ImportInfo>()
-    jarFile.entries().toList().map { entry ->
-      if (!entry.isDirectory
-        && entry.name.endsWith(CLASS_EXTENSION)
-      ) {
+    jarFile.entries().toList().forEach { entry ->
+      if (!entry.isDirectory && entry.name.endsWith(CLASS_EXTENSION)) {
         val name = entry.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
         if (fullName != MODULE_INFO_NAME) {
@@ -142,29 +143,24 @@ object Main {
   }
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
-    var kotlinFunction: KFunction<*>? = null
-    try {
-      kotlinFunction = method.kotlinFunction
-    } catch (exception: NoSuchElementException) {
-    } catch (exception: UnsupportedOperationException) {
-    } catch (error: KotlinReflectionInternalError) {
-    } catch (error: IncompatibleClassChangeError) {
-    }
-    return if (kotlinFunction != null
-      && kotlinFunction.visibility == KVisibility.PUBLIC) {
+    val kotlinFunction = runCatching {
+      method.kotlinFunction
+    }.getOrNull()
+    return if (kotlinFunction != null && kotlinFunction.visibility == KVisibility.PUBLIC) {
       importInfoByMethodAndParent(
-        kotlinFunction.name,
-        kotlinFunction.parameters.joinToString {
+        methodName = kotlinFunction.name,
+        parametersString = kotlinFunction.parameters.joinToString {
           kotlinTypeToType(it.type)
         },
-        kotlinTypeToType(kotlinFunction.returnType),
-        clazz)
+        returnType = kotlinTypeToType(kotlinFunction.returnType),
+        parent = clazz
+      )
     } else importInfoFromJavaMethod(method, clazz)
   }
 
   private fun kotlinTypeToType(kotlinType: KType): String {
     var type = kotlinType.toString()
-    val regex = Regex("(kotlin\\.)([A-Z])")
+    val regex = Regex(KOTLIN_TYPE_PREFIX)
     var range: IntRange?
     do {
       range = regex.find(type)?.groups?.get(1)?.range
@@ -174,20 +170,21 @@ object Main {
   }
 
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
-    if (Modifier.isPublic(method.modifiers) &&
-      Modifier.isStatic(method.modifiers))
+    if (Modifier.isPublic(method.modifiers) && Modifier.isStatic(method.modifiers))
       importInfoByMethodAndParent(
-        method.name,
-        method.parameters.joinToString { it.type.name },
-        method.returnType.simpleName,
-        clazz
+        methodName = method.name,
+        parametersString = method.parameters.joinToString { it.type.name },
+        returnType = method.returnType.simpleName,
+        parent = clazz
       )
     else null
 
-  private fun importInfoByMethodAndParent(methodName: String,
-                                          parametersString: String,
-                                          returnType: String,
-                                          parent: Class<*>): ImportInfo {
+  private fun importInfoByMethodAndParent(
+    methodName: String,
+    parametersString: String,
+    returnType: String,
+    parent: Class<*>
+  ): ImportInfo {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
     val importName = "${parent.`package`.name}.$shortName"
@@ -214,14 +211,14 @@ object Main {
     File(outputPath).writeText("")
 
     val mapper = jacksonObjectMapper()
-    File(outputPath).appendText(mapper.writerWithDefaultPrettyPrinter()
-      .writeValueAsString(getAllVariants(classLoader, files)))
-//    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
+    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
   }
 
   @JvmStatic
-  // First argument is path to folder with jars
-  // Second argument is path to output file
+  /**
+   * First argument is path to folder with jars
+   * Second argument is path to output file
+   **/
   fun main(args: Array<String>) {
     val directory = args[0]
     val outputPath = args[1]

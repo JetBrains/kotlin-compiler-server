@@ -64,16 +64,16 @@ class SuggestionProvider(
     character: Int,
     isJs: Boolean,
     coreEnvironment: KotlinCoreEnvironment
-  ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
+  ) : List<Completion> = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = try {
-        getClassesByName(prefix).map { it.toCompletion() }
-      } catch (e: Throwable) {
-        emptyList<Completion>()
-      }
+      val importCompletionVariants: List<Completion> = runCatching {
+        getClassesByName(prefix).map {
+          it.toCompletion()
+        }
+      }.getOrDefault(emptyList())
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
@@ -278,23 +278,13 @@ class SuggestionProvider(
 
   private fun readIndexesFromJson(): List<ImportInfo> {
     val jsonIndexes = File(INDEXES_FILE_NAME).readText()
-    val objectMapper = jacksonObjectMapper()
-    return objectMapper.readValue(jsonIndexes)
+    return jacksonObjectMapper().readValue(jsonIndexes)
   }
 
-  private fun getClassesByName(name: String): List<ImportInfo> {
-    return readIndexesFromJson().filter { variant ->
+  private fun getClassesByName(name: String) =
+    readIndexesFromJson().filter { variant ->
       variant.shortName == name
     }
-  }
-
-  private fun ImportInfo.toCompletion() = Completion(
-    "$fullName : $importName",
-    "$fullName : $importName",
-    returnType,
-    importName,
-    icon
-  )
 
   fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> {
     return errors.mapValues { (_, errorDescriptors) ->
@@ -305,25 +295,23 @@ class SuggestionProvider(
   }
 
   private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
-    return if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
+    if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
       val name = errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-      val suggestions = try {
+      runCatching {
         getClassesByName(name)
-      } catch (e: Throwable) {
-        emptyList<ImportInfo>()
-      }
-      if (suggestions.isEmpty()) {
-        return errorDescriptor
-      } else {
+      }.onSuccess { suggestions ->
         val importsString = suggestions.distinctBy { it.importName }.joinToString { it.importName }
-        val suggestionsString = ". Suggestions for import: $importsString"
-        ErrorDescriptor(
-          errorDescriptor.interval,
-          errorDescriptor.message + suggestionsString,
-          errorDescriptor.severity,
-          errorDescriptor.className
+        val suggestionsString = "Suggestions for import: $importsString"
+        return ErrorDescriptor(
+          interval = errorDescriptor.interval,
+          message = errorDescriptor.message + ". " + suggestionsString,
+          severity = errorDescriptor.severity,
+          className = errorDescriptor.className
         )
+      }.onFailure {
+        return errorDescriptor
       }
-    } else errorDescriptor
+    }
+    return errorDescriptor
   }
 }
