@@ -133,7 +133,6 @@ class CompletionProvider(
         text = completionText,
         displayText = fullName,
         tail = formatName(type, NUMBER_OF_CHAR_IN_TAIL),
-        import = "",
         icon = iconFrom(descriptor)
       )
     } else null
