@@ -48,7 +48,7 @@ object Main {
   private fun allClassesFromKotlinClass(clazz: Class<*>): HashSet<ImportInfo> {
     val allClasses = hashSetOf<ImportInfo>()
     val kotlinClass = clazz.kotlin
-    try {
+    runCatching {
       kotlinClass.nestedClasses.filter {
         it.visibility == KVisibility.PUBLIC
       }.map {
@@ -63,28 +63,7 @@ object Main {
         val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON)
         allClasses.add(importInfo)
       }
-    } catch (exception: UnsupportedOperationException) {
-      return allClassesFromJavaClass(clazz)
-    } catch (error: IncompatibleClassChangeError) {
-      /*
-      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scan$1
-      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanReduce$1
-      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanIndexed$1
-      INCOMP_ERR: kotlin.sequences.SequencesKt___SequencesKt$scanReduceIndexed$1
-      INCOMP_ERR: kotlin.jvm.internal.ClassReference$Companion
-    */
-      return allClassesFromJavaClass(clazz)
-    } catch (exception: NoSuchElementException) {
-      /*
-    NO_SUCH_ERR: kotlinx.coroutines.flow.internal.ChannelFlowKt$withContextUndispatched$$inlined$suspendCoroutine
-      UninterceptedOrReturn$lambda$1
-    NO_SUCH_ERR: kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
-      $$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$1
-    NO_SUCH_ERR: kotlin.coroutines.experimental.intrinsics.IntrinsicsKt__IntrinsicsJvmKt$createCoroutineUnchecked
-      $$inlined$buildContinuationByInvokeCall$IntrinsicsKt__IntrinsicsJvmKt$2
-    */
-      return allClassesFromJavaClass(clazz)
-    }
+    }.onFailure { allClasses.addAll(allClassesFromJavaClass(clazz)) }
     return allClasses
   }
 

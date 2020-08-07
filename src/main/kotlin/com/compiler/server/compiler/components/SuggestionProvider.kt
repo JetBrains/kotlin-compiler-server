@@ -222,7 +222,7 @@ class SuggestionProvider(
 
   private fun keywordsCompletionVariants(keywords: TokenSet, prefix: String) = keywords.types.mapNotNull {
     if (it is KtKeywordToken && it.value.startsWith(prefix))
-      Completion(it.value, it.value, "", "", "") else null
+      Completion(it.value, it.value) else null
   }
 
   private fun iconFrom(descriptor: DeclarationDescriptor) = when (descriptor) {
