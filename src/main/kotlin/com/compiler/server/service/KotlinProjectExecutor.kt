@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class KotlinProjectExecutor(
   private val kotlinCompiler: KotlinCompiler,
-  private val suggestionProvider: SuggestionProvider,
+  private val completionProvider: CompletionProvider,
   private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
@@ -46,7 +46,7 @@ class KotlinProjectExecutor(
       val file = getFilesFrom(project, it).first()
       try {
         val isJs = project.confType == ProjectType.JS
-        suggestionProvider.complete(file, line, character, isJs, it)
+        completionProvider.complete(file, line, character, isJs, it)
       } catch (e: Exception) {
         log.warn("Exception in getting completions. Project: $project", e)
         emptyList()
@@ -59,7 +59,7 @@ class KotlinProjectExecutor(
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
         val res = errorAnalyzer.errorsFrom(files, environment).errors
-        return@environment suggestionProvider.checkUnresolvedReferences(res)
+        return@environment completionProvider.checkUnresolvedReferences(res)
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()

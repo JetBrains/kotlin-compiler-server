@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component
 import java.io.File
 
 @Component
-class SuggestionProvider(
+class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer
 ) {
 
@@ -276,23 +276,20 @@ class SuggestionProvider(
       importableFqName?.asString() in excludedFromCompletion
   }
 
-  private fun readIndexesFromJson(): List<ImportInfo> {
-    val jsonIndexes = File(INDEXES_FILE_NAME).readText()
-    return jacksonObjectMapper().readValue(jsonIndexes)
-  }
+  private fun readIndexesFromJson(): List<ImportInfo> =
+    jacksonObjectMapper().readValue(File(INDEXES_FILE_NAME).readText())
 
   private fun getClassesByName(name: String) =
     readIndexesFromJson().filter { variant ->
       variant.shortName == name
     }
 
-  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> {
-    return errors.mapValues { (_, errorDescriptors) ->
+  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> =
+    errors.mapValues { (_, errorDescriptors) ->
       return@mapValues errorDescriptors.map { errorDescriptor ->
         checkErrorDescriptor(errorDescriptor)
       }
     }
-  }
 
   private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
     if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {

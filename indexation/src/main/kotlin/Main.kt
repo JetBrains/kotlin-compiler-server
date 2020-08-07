@@ -8,10 +8,8 @@ import java.lang.reflect.Modifier
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
-import kotlin.reflect.KFunction
 import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
-import kotlin.reflect.jvm.internal.KotlinReflectionInternalError
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
@@ -36,7 +34,7 @@ object Main {
     val allClasses = hashSetOf<ImportInfo>()
     clazz.classes.filter {
       Modifier.isPublic(it.modifiers)
-    }.map {
+    }.forEach {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
       val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
@@ -51,7 +49,7 @@ object Main {
     runCatching {
       kotlinClass.nestedClasses.filter {
         it.visibility == KVisibility.PUBLIC
-      }.map {
+      }.forEach {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
         val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
@@ -128,9 +126,7 @@ object Main {
     return if (kotlinFunction != null && kotlinFunction.visibility == KVisibility.PUBLIC) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
-        parametersString = kotlinFunction.parameters.joinToString {
-          kotlinTypeToType(it.type)
-        },
+        parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
         returnType = kotlinTypeToType(kotlinFunction.returnType),
         parent = clazz
       )
@@ -175,7 +171,7 @@ object Main {
       jarFile.name.split(File.separator).last() != EXECUTORS_JAR_NAME
     }
     val allVariants = mutableListOf<ImportInfo>()
-    jarFiles.map { file ->
+    jarFiles.forEach { file ->
       val variants = getVariantsForZip(classLoader, file)
       allVariants.addAll(variants)
     }
@@ -183,14 +179,12 @@ object Main {
   }
 
   private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
-    val file = File(directoryPath)
-    val files = file.listFiles().toList()
+    val files = File(directoryPath).listFiles().toList()
     val classPathUrls = initClasspath(directoryPath)
     val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
-    File(outputPath).writeText("")
 
-    val mapper = jacksonObjectMapper()
-    File(outputPath).appendText(mapper.writeValueAsString(getAllVariants(classLoader, files)))
+    File(outputPath).writeText("")
+    File(outputPath).appendText(jacksonObjectMapper().writeValueAsString(getAllVariants(classLoader, files)))
   }
 
   @JvmStatic
