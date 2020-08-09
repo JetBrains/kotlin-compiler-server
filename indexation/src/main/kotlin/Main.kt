@@ -30,40 +30,33 @@ object Main {
   private const val METHOD_ICON = "method"
   private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
 
-  private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> {
-    val allClasses = hashSetOf<ImportInfo>()
+  private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> =
     clazz.classes.filter {
       Modifier.isPublic(it.modifiers)
-    }.forEach {
+    }.map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
-      val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
-      allClasses.add(importInfo)
-    }
-    return allClasses
-  }
+      ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
+    }.toHashSet()
 
-  private fun allClassesFromKotlinClass(clazz: Class<*>): HashSet<ImportInfo> {
-    val allClasses = hashSetOf<ImportInfo>()
-    val kotlinClass = clazz.kotlin
+  private fun allClassesFromKotlinClass(clazz: Class<*>): HashSet<ImportInfo> =
     runCatching {
-      kotlinClass.nestedClasses.filter {
+      val kotlinClass = clazz.kotlin
+      val result = clazz.kotlin.nestedClasses.filter {
         it.visibility == KVisibility.PUBLIC
-      }.forEach {
+      }.map {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
-        allClasses.add(importInfo)
-      }
+        ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
+      }.toHashSet()
       if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
         val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON)
-        allClasses.add(importInfo)
+        result.add(importInfo)
       }
-    }.onFailure { allClasses.addAll(allClassesFromJavaClass(clazz)) }
-    return allClasses
-  }
+      return@runCatching result
+    }.getOrDefault(allClassesFromJavaClass(clazz))
 
   private fun initClasspath(taskRoot: String): List<URL> {
     val cwd = File(taskRoot)
@@ -106,18 +99,10 @@ object Main {
     return allSuggests.toList()
   }
 
-  private fun allFunctionsFromClass(clazz: Class<*>): HashSet<ImportInfo> {
-    val allClasses = hashSetOf<ImportInfo>()
-    clazz.methods.map { method ->
-      val importInfo = importInfoFromFunction(method, clazz)
-      if (importInfo != null) allClasses.add(importInfo)
-    }
-    clazz.declaredMethods.map { method ->
-      val importInfo = importInfoFromFunction(method, clazz)
-      if (importInfo != null) allClasses.add(importInfo)
-    }
-    return allClasses
-  }
+  private fun allFunctionsFromClass(clazz: Class<*>): HashSet<ImportInfo> =
+    (clazz.methods + clazz.declaredMethods).mapNotNull { method ->
+      importInfoFromFunction(method, clazz)
+    }.toHashSet()
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
     val kotlinFunction = runCatching {
@@ -166,17 +151,12 @@ object Main {
     return ImportInfo(importName, shortName, className, returnType, METHOD_ICON)
   }
 
-  private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> {
-    val jarFiles = files.filter { jarFile ->
+  private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> =
+    files.filter { jarFile ->
       jarFile.name.split(File.separator).last() != EXECUTORS_JAR_NAME
-    }
-    val allVariants = mutableListOf<ImportInfo>()
-    jarFiles.forEach { file ->
-      val variants = getVariantsForZip(classLoader, file)
-      allVariants.addAll(variants)
-    }
-    return allVariants
-  }
+    }.map { file ->
+      getVariantsForZip(classLoader, file)
+    }.flatten()
 
   private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
     val files = File(directoryPath).listFiles().toList()
