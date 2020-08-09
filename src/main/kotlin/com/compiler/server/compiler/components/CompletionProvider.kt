@@ -4,7 +4,6 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
-import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -50,7 +49,6 @@ class CompletionProvider(
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
-  private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val INDEXES_FILE_NAME = "indexes.json"
 
   private data class DescriptorInfo(
@@ -282,32 +280,4 @@ class CompletionProvider(
     readIndexesFromJson().filter { variant ->
       variant.shortName == name
     }
-
-  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> =
-    errors.mapValues { (_, errorDescriptors) ->
-      return@mapValues errorDescriptors.map { errorDescriptor ->
-        checkErrorDescriptor(errorDescriptor)
-      }
-    }
-
-  private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
-    if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
-      val name = errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-      runCatching {
-        getClassesByName(name)
-      }.onSuccess { suggestions ->
-        val importsString = suggestions.distinctBy { it.importName }.joinToString { it.importName }
-        val suggestionsString = "Suggestions for import: $importsString"
-        return ErrorDescriptor(
-          interval = errorDescriptor.interval,
-          message = errorDescriptor.message + ". " + suggestionsString,
-          severity = errorDescriptor.severity,
-          className = errorDescriptor.className
-        )
-      }.onFailure {
-        return errorDescriptor
-      }
-    }
-    return errorDescriptor
-  }
 }

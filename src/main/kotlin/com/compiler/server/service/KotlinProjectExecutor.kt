@@ -58,8 +58,7 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        val res = errorAnalyzer.errorsFrom(files, environment).errors
-        return@environment completionProvider.checkUnresolvedReferences(res)
+        errorAnalyzer.errorsFrom(files, environment).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()
