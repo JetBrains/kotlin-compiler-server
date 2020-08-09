@@ -31,6 +31,7 @@ import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
+import org.jetbrains.kotlin.utils.addIfNotNull
 import org.springframework.stereotype.Component
 import java.io.File
 
@@ -283,31 +284,23 @@ class CompletionProvider(
       variant.shortName == name
     }
 
-  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<ErrorDescriptor>> =
-    errors.mapValues { (_, errorDescriptors) ->
-      return@mapValues errorDescriptors.map { errorDescriptor ->
-        checkErrorDescriptor(errorDescriptor)
+  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<Completion>> {
+    val allUnresolvedReference = mutableSetOf<String>()
+    errors.mapNotNull { (_, errorDescriptors) ->
+      errorDescriptors.forEach { errorDescriptor ->
+        allUnresolvedReference.addIfNotNull(checkErrorDescriptor(errorDescriptor))
       }
     }
-
-  private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): ErrorDescriptor {
-    if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
-      val name = errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
+    return allUnresolvedReference.mapNotNull { name ->
       runCatching {
-        getClassesByName(name)
-      }.onSuccess { suggestions ->
-        val importsString = suggestions.distinctBy { it.importName }.joinToString { it.importName }
-        val suggestionsString = "Suggestions for import: $importsString"
-        return ErrorDescriptor(
-          interval = errorDescriptor.interval,
-          message = errorDescriptor.message + ". " + suggestionsString,
-          severity = errorDescriptor.severity,
-          className = errorDescriptor.className
-        )
-      }.onFailure {
-        return errorDescriptor
-      }
-    }
-    return errorDescriptor
+        name to getClassesByName(name).map { it.toCompletion() }
+      }.getOrNull()
+    }.toMap()
+  }
+
+  private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): String? {
+    return if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
+      errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
+    } else null
   }
 }

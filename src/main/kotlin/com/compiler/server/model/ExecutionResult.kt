@@ -10,6 +10,11 @@ open class ExecutionResult(
     set(value) {
       field = unEscapeOutput(value)
     }
+  var importsSuggestions: Map<String, List<Completion>> = emptyMap()
+
+  fun addSuggestions(suggestions: Map<String, List<Completion>>) {
+    importsSuggestions = suggestions
+  }
 
   fun addWarnings(warnings: Map<String, List<ErrorDescriptor>>) {
     errors = warnings

@@ -23,7 +23,9 @@ class KotlinProjectExecutor(
   fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinCompiler.run(files, environment, project.args)
+      val result = kotlinCompiler.run(files, environment, project.args)
+      result.addSuggestions(completionProvider.checkUnresolvedReferences(result.errors))
+      return@environment result
     }
   }
 
@@ -54,15 +56,16 @@ class KotlinProjectExecutor(
     }
   }
 
-  fun highlight(project: Project): Map<String, List<ErrorDescriptor>> {
+  fun highlight(project: Project): HighlightResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        val res = errorAnalyzer.errorsFrom(files, environment).errors
-        return@environment completionProvider.checkUnresolvedReferences(res)
+        val result = HighlightResult(errorAnalyzer.errorsFrom(files, environment).errors)
+        result.addSuggestions(completionProvider.checkUnresolvedReferences(result.errors))
+        return@environment result
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
-        emptyMap()
+        HighlightResult()
       }
     }
   }
