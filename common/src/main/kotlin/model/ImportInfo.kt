@@ -1,4 +1,4 @@
-package com.compiler.server.model
+package common.model
 
 data class ImportInfo(
   val importName: String,

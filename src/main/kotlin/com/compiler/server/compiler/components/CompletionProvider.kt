@@ -3,8 +3,8 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.Completion
-import com.compiler.server.model.ImportInfo
+import common.model.Completion
+import common.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement

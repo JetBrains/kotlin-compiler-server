@@ -6,6 +6,10 @@ plugins {
     application
 }
 
+dependencies {
+    implementation(project(":common", configuration = "default"))
+}
+
 application {
     mainClassName = "indexation.Main"
 }

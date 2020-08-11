@@ -1,5 +1,6 @@
 package indexation
 
+import common.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.isKotlinClass
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.io.File
@@ -23,14 +24,6 @@ object Main {
     val outputPath = args[1]
     createJsonWithIndexes(directory, outputPath)
   }
-
-  private data class ImportInfo(
-    val importName: String,
-    val shortName: String,
-    val fullName: String,
-    val returnType: String,
-    val icon: String
-  )
 
   private const val MODULE_INFO_NAME = "module-info"
   private const val EXECUTORS_JAR_NAME = "executors.jar"
