@@ -69,7 +69,15 @@ object Main {
       val classInfo = if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
-        listOf(ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON))
+        listOf(
+          ImportInfo(
+            importName = canonicalName,
+            shortName = simpleName,
+            fullName = simpleName,
+            returnType = simpleName,
+            icon = CLASS_ICON
+          )
+        )
       } else emptyList()
       return@runCatching result + classInfo
     }.getOrDefault(allClassesFromJavaClass(clazz))
@@ -95,27 +103,26 @@ object Main {
   }
 
   private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> =
-    JarFile(file).entries().toList().map { entry ->
+    JarFile(file).entries().toList().flatMap { entry ->
       if (!entry.isDirectory && entry.name.endsWith(CLASS_EXTENSION)) {
         val name = entry.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
-        if (fullName != MODULE_INFO_NAME) {
-          val clazz = classLoader.loadClass(fullName) ?: return@map emptyList<ImportInfo>()
-          val classes = if (clazz.isKotlinClass()) {
-            allClassesFromKotlinClass(clazz)
-          } else {
-            allClassesFromJavaClass(clazz)
-          }
-          val functions = allFunctionsFromClass(clazz)
-          return@map classes + functions
-        } else emptyList<ImportInfo>()
+        if (fullName == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
+        val clazz = classLoader.loadClass(fullName) ?: return@flatMap emptyList<ImportInfo>()
+        val classes = if (clazz.isKotlinClass()) {
+          allClassesFromKotlinClass(clazz)
+        } else {
+          allClassesFromJavaClass(clazz)
+        }
+        val functions = allFunctionsFromClass(clazz)
+        classes + functions
       } else emptyList()
-    }.flatten().distinct()
+    }.distinct()
 
   private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
     (clazz.methods + clazz.declaredMethods).distinct().mapNotNull { method ->
       importInfoFromFunction(method, clazz)
-    }.distinct()
+    }
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
     val kotlinFunction = runCatching {
@@ -143,7 +150,10 @@ object Main {
   }
 
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
-    if (Modifier.isPublic(method.modifiers) && Modifier.isStatic(method.modifiers))
+    if (Modifier.isPublic(method.modifiers) &&
+        Modifier.isStatic(method.modifiers) &&
+        !method.isSynthetic &&
+        !method.isBridge)
       importInfoByMethodAndParent(
         methodName = method.name,
         parametersString = method.parameters.joinToString { it.type.name },
