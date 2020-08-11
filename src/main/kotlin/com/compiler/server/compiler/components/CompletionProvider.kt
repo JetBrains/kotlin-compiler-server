@@ -30,12 +30,14 @@ import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 
 @Component
 class CompletionProvider(
-  private val errorAnalyzer: ErrorAnalyzer
+  private val errorAnalyzer: ErrorAnalyzer,
+  @Value("\${indexes.file}") private val indexesFileName: String
 ) {
 
   private val excludedFromCompletion: List<String> = listOf(
@@ -49,7 +51,6 @@ class CompletionProvider(
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
-  private val INDEXES_FILE_NAME = "indexes.json"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -274,7 +275,7 @@ class CompletionProvider(
   }
 
   private fun readIndexesFromJson(): List<ImportInfo> =
-    jacksonObjectMapper().readValue(File(INDEXES_FILE_NAME).readText())
+    jacksonObjectMapper().readValue(File(indexesFileName).readText())
 
   private fun getClassesByName(name: String) =
     readIndexesFromJson().filter { variant ->
