@@ -13,6 +13,17 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.kotlinFunction
 
 object Main {
+  @JvmStatic
+    /**
+     * First argument is path to folder with jars
+     * Second argument is path to output file
+     **/
+  fun main(args: Array<String>) {
+    val directory = args[0]
+    val outputPath = args[1]
+    createJsonWithIndexes(directory, outputPath)
+  }
+
   private data class ImportInfo(
     val importName: String,
     val shortName: String,
@@ -30,16 +41,22 @@ object Main {
   private const val METHOD_ICON = "method"
   private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
 
-  private fun allClassesFromJavaClass(clazz: Class<*>): HashSet<ImportInfo> =
+  private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
     clazz.classes.filter {
       Modifier.isPublic(it.modifiers)
     }.map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
-      ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
-    }.toHashSet()
+      ImportInfo(
+        importName = canonicalName,
+        shortName = simpleName,
+        fullName = simpleName,
+        returnType = simpleName,
+        icon = CLASS_ICON
+      )
+    }
 
-  private fun allClassesFromKotlinClass(clazz: Class<*>): HashSet<ImportInfo> =
+  private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
     runCatching {
       val kotlinClass = clazz.kotlin
       val result = clazz.kotlin.nestedClasses.filter {
@@ -48,12 +65,12 @@ object Main {
         val canonicalName = it.qualifiedName ?: ""
         val simpleName = it.simpleName ?: ""
         ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
-      }.toHashSet()
+      }
       if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
         val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON)
-        result.add(importInfo)
+        result.toMutableList() += importInfo
       }
       return@runCatching result
     }.getOrDefault(allClassesFromJavaClass(clazz))
@@ -78,31 +95,28 @@ object Main {
     return classPath.mapNotNull { it.toURI().toURL() }
   }
 
-  private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> {
-    val jarFile = JarFile(file)
-    val allSuggests = hashSetOf<ImportInfo>()
-    jarFile.entries().toList().forEach { entry ->
+  private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> =
+    JarFile(file).entries().toList().map { entry ->
       if (!entry.isDirectory && entry.name.endsWith(CLASS_EXTENSION)) {
         val name = entry.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
         if (fullName != MODULE_INFO_NAME) {
-          val clazz = classLoader.loadClass(fullName) ?: return emptyList()
-          if (clazz.isKotlinClass()) {
-            allSuggests.addAll(allClassesFromKotlinClass(clazz))
+          val clazz = classLoader.loadClass(fullName) ?: return@map emptyList<ImportInfo>()
+          val classes = if (clazz.isKotlinClass()) {
+            allClassesFromKotlinClass(clazz)
           } else {
-            allSuggests.addAll(allClassesFromJavaClass(clazz))
+            allClassesFromJavaClass(clazz)
           }
-          allSuggests.addAll(allFunctionsFromClass(clazz))
-        }
-      }
-    }
-    return allSuggests.toList()
-  }
+          val functions = allFunctionsFromClass(clazz)
+          return@map classes + functions
+        } else emptyList<ImportInfo>()
+      } else emptyList()
+    }.flatten().distinct()
 
-  private fun allFunctionsFromClass(clazz: Class<*>): HashSet<ImportInfo> =
-    (clazz.methods + clazz.declaredMethods).mapNotNull { method ->
+  private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
+    (clazz.methods + clazz.declaredMethods).distinct().mapNotNull { method ->
       importInfoFromFunction(method, clazz)
-    }.toHashSet()
+    }.distinct()
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
     val kotlinFunction = runCatching {
@@ -148,7 +162,13 @@ object Main {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
     val importName = "${parent.`package`.name}.$shortName"
-    return ImportInfo(importName, shortName, className, returnType, METHOD_ICON)
+    return ImportInfo(
+      importName = importName,
+      shortName = shortName,
+      fullName = className,
+      returnType = returnType,
+      icon = METHOD_ICON
+    )
   }
 
   private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> =
@@ -162,19 +182,6 @@ object Main {
     val files = File(directoryPath).listFiles().toList()
     val classPathUrls = initClasspath(directoryPath)
     val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
-
-    File(outputPath).writeText("")
-    File(outputPath).appendText(jacksonObjectMapper().writeValueAsString(getAllVariants(classLoader, files)))
-  }
-
-  @JvmStatic
-  /**
-   * First argument is path to folder with jars
-   * Second argument is path to output file
-   **/
-  fun main(args: Array<String>) {
-    val directory = args[0]
-    val outputPath = args[1]
-    createJsonWithIndexes(directory, outputPath)
+    File(outputPath).writeText(jacksonObjectMapper().writeValueAsString(getAllVariants(classLoader, files)))
   }
 }
