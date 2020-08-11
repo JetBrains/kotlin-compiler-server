@@ -28,7 +28,7 @@ object Main {
     val importName: String,
     val shortName: String,
     val fullName: String,
-    val returnType:String,
+    val returnType: String,
     val icon: String
   )
 
@@ -66,13 +66,12 @@ object Main {
         val simpleName = it.simpleName ?: ""
         ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
       }
-      if (kotlinClass.visibility == KVisibility.PUBLIC) {
+      val classInfo = if (kotlinClass.visibility == KVisibility.PUBLIC) {
         val canonicalName = kotlinClass.qualifiedName ?: ""
         val simpleName = kotlinClass.simpleName ?: ""
-        val importInfo = ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON)
-        result.toMutableList() += importInfo
-      }
-      return@runCatching result
+        listOf(ImportInfo(canonicalName, simpleName, simpleName, simpleName,CLASS_ICON))
+      } else emptyList()
+      return@runCatching result + classInfo
     }.getOrDefault(allClassesFromJavaClass(clazz))
 
   private fun initClasspath(taskRoot: String): List<URL> {

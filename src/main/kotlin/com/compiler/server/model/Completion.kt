@@ -3,7 +3,7 @@ package com.compiler.server.model
 data class Completion(
   val text: String,
   val displayText: String,
-  val tail: String = "",
+  val tail: String? = null,
   val import: String? = null,
-  val icon: String = ""
+  val icon: String? = null
 )
