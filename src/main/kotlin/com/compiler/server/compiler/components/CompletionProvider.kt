@@ -51,6 +51,7 @@ class CompletionProvider(
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
+  private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -63,15 +64,13 @@ class CompletionProvider(
     character: Int,
     isJs: Boolean,
     coreEnvironment: KotlinCoreEnvironment
-  ) : List<Completion> = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
+  ) : List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
-        .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
+        .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
       val importCompletionVariants: List<Completion> = runCatching {
-        getClassesByName(prefix).map {
-          it.toCompletion()
-        }
+        getClassesByName(prefix).map { it.toCompletion() }
       }.getOrDefault(emptyList())
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
@@ -278,7 +277,5 @@ class CompletionProvider(
     jacksonObjectMapper().readValue(File(indexesFileName).readText())
 
   private fun getClassesByName(name: String) =
-    readIndexesFromJson().filter { variant ->
-      variant.shortName == name
-    }
+    readIndexesFromJson().filter { it.shortName == name }
 }

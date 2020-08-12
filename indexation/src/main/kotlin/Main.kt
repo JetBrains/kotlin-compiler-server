@@ -54,9 +54,9 @@ object Main {
       val kotlinClass = clazz.kotlin
       val result = clazz.kotlin.nestedClasses.filter {
         it.visibility == KVisibility.PUBLIC
-      }.map {
-        val canonicalName = it.qualifiedName ?: ""
-        val simpleName = it.simpleName ?: ""
+      }.mapNotNull {
+        val canonicalName = it.qualifiedName ?: return@mapNotNull null
+        val simpleName = it.simpleName ?: return@mapNotNull null
         ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
       }
       val classInfo = if (kotlinClass.visibility == KVisibility.PUBLIC) {
@@ -96,8 +96,9 @@ object Main {
   }
 
   private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> =
-    JarFile(file).entries().toList().flatMap { entry ->
-      if (!entry.isDirectory && entry.name.endsWith(CLASS_EXTENSION)) {
+    JarFile(file).entries().toList()
+      .filter { !it.isDirectory && it.name.endsWith(CLASS_EXTENSION) }
+      .flatMap { entry ->
         val name = entry.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
         if (fullName == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
@@ -109,7 +110,6 @@ object Main {
         }
         val functions = allFunctionsFromClass(clazz)
         classes + functions
-      } else emptyList()
     }.distinct()
 
   private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
@@ -176,9 +176,7 @@ object Main {
   private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List<ImportInfo> =
     files.filter { jarFile ->
       jarFile.name.split(File.separator).last() != EXECUTORS_JAR_NAME
-    }.map { file ->
-      getVariantsForZip(classLoader, file)
-    }.flatten()
+    }.map { getVariantsForZip(classLoader, it) }.flatten()
 
   private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
     val files = File(directoryPath).listFiles().toList()
