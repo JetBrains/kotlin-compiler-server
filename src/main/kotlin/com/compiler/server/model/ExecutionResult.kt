@@ -11,9 +11,9 @@ open class ExecutionResult(
     set(value) {
       field = unEscapeOutput(value)
     }
-  var importsSuggestions: Map<String, List<Completion>> = emptyMap()
+  var importsSuggestions: Map<String, CompletionData> = emptyMap()
 
-  fun addSuggestions(suggestions: Map<String, List<Completion>>) {
+  fun addSuggestions(suggestions: Map<String, CompletionData>) {
     importsSuggestions = suggestions
   }
 

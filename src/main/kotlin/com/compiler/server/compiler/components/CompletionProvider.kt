@@ -3,6 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
+import com.compiler.server.model.CompletionData
 import com.compiler.server.model.ErrorDescriptor
 import common.model.Completion
 import common.model.ImportInfo
@@ -282,23 +283,18 @@ class CompletionProvider(
   private fun getClassesByName(name: String) =
     readIndexesFromJson().filter { it.shortName == name }
 
-  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<Completion>> {
-    val allUnresolvedReference = mutableSetOf<String>()
-    errors.mapNotNull { (_, errorDescriptors) ->
-      errorDescriptors.forEach { errorDescriptor ->
-        allUnresolvedReference.addIfNotNull(checkErrorDescriptor(errorDescriptor))
-      }
-    }
-    return allUnresolvedReference.mapNotNull { name ->
-      runCatching {
-        name to getClassesByName(name).map { it.toCompletion() }
-      }.getOrNull()
-    }.toMap()
-  }
-
-  private fun checkErrorDescriptor(errorDescriptor: ErrorDescriptor): String? {
-    return if (errorDescriptor.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) {
-      errorDescriptor.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-    } else null
-  }
+  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, CompletionData> =
+    errors.values.flatten() // List<ErrorDescriptor>
+      .filter { it.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX) } // allUnresolvedDescriptors
+      .groupBy { it.message } // Map<String, List<ErrorDescriptor>>
+      .mapNotNull { (message, descriptors) ->
+        val name = message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
+        val suggestions = getClassesByName(name).map{ it.toCompletion() }
+        if (suggestions.isEmpty()) return@mapNotNull null
+        val intervals = descriptors.map { it.interval }
+        name to CompletionData(
+          imports = suggestions,
+          intervals = intervals
+        )
+      }.toMap()
 }
