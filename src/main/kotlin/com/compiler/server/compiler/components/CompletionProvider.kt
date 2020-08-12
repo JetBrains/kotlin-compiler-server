@@ -3,7 +3,6 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.Completion
 import com.compiler.server.model.ErrorDescriptor
 import common.model.Completion
 import common.model.ImportInfo

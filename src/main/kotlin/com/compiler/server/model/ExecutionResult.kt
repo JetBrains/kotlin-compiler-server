@@ -1,6 +1,7 @@
 package com.compiler.server.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import common.model.Completion
 
 open class ExecutionResult(
   open var errors: Map<String, List<ErrorDescriptor>> = emptyMap(),
