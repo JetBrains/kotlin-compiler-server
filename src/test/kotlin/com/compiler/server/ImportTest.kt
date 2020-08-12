@@ -11,7 +11,7 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 21,
       completions = listOf(
-        "Random : kotlin.random.Random"
+        "Random  (kotlin.random.Random)"
       )
     )
   }
@@ -27,7 +27,7 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 20,
       completions = listOf(
-        "Random : kotlin.random.Random"
+        "Random  (kotlin.random.Random)"
       )
     )
   }
@@ -41,8 +41,8 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 15,
       completions = listOf(
-        "sin(Double) : kotlin.math.sin",
-        "sin(Float) : kotlin.math.sin"
+        "sin(Double)  (kotlin.math.sin)",
+        "sin(Float)  (kotlin.math.sin)"
       )
     )
   }
