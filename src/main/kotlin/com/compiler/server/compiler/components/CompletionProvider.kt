@@ -5,7 +5,8 @@ import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.Completion
 import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ImportInfo
+import common.model.Completion
+import common.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
@@ -31,13 +32,15 @@ import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
+import org.springframework.beans.factory.annotation.Value
 import org.jetbrains.kotlin.utils.addIfNotNull
 import org.springframework.stereotype.Component
 import java.io.File
 
 @Component
 class CompletionProvider(
-  private val errorAnalyzer: ErrorAnalyzer
+  private val errorAnalyzer: ErrorAnalyzer,
+  @Value("\${indexes.file}") private val indexesFileName: String
 ) {
 
   private val excludedFromCompletion: List<String> = listOf(
@@ -52,7 +55,7 @@ class CompletionProvider(
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
-  private val INDEXES_FILE_NAME = "indexes.json"
+  private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -65,15 +68,13 @@ class CompletionProvider(
     character: Int,
     isJs: Boolean,
     coreEnvironment: KotlinCoreEnvironment
-  ) : List<Completion> = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
+  ) : List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
-        .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
+        .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
       val importCompletionVariants: List<Completion> = runCatching {
-        getClassesByName(prefix).map {
-          it.toCompletion()
-        }
+        getClassesByName(prefix).map { it.toCompletion() }
       }.getOrDefault(emptyList())
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
@@ -277,12 +278,10 @@ class CompletionProvider(
   }
 
   private fun readIndexesFromJson(): List<ImportInfo> =
-    jacksonObjectMapper().readValue(File(INDEXES_FILE_NAME).readText())
+    jacksonObjectMapper().readValue(File(indexesFileName).readText())
 
   private fun getClassesByName(name: String) =
-    readIndexesFromJson().filter { variant ->
-      variant.shortName == name
-    }
+    readIndexesFromJson().filter { it.shortName == name }
 
   fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, List<Completion>> {
     val allUnresolvedReference = mutableSetOf<String>()
