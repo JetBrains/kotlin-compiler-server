@@ -12,8 +12,8 @@ FROM openjdk:8-jdk-alpine
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
 
-ENV KOTLIN_LIB=1.4.0-rc-release-221
-ENV KOTLIN_LIB_JS=1.4.0-rc-release-221
+ENV KOTLIN_LIB=1.4.0-release-329
+ENV KOTLIN_LIB_JS=1.4.0-release-329-js
 
 COPY --from=build /build/libs/BOOT-INF/lib /kotlin-compiler-server/lib
 COPY --from=build /build/libs/META-INF /kotlin-compiler-server/META-INF
