@@ -8,7 +8,7 @@ class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
   @Test
   fun `base junit test`() {
     runKoanTest(
-      "package opo.opop\nfun start(): String = \"OK\"",
+      "fun start(): String = \"OK\"",
       "import org.junit.Assert\nimport org.junit.Test\n\nclass TestStart {\n    @Test fun testOk() {\n        Assert.assertEquals(\"OK\", start())\n    }\n}"
     )
   }
