@@ -11,6 +11,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import common.NUMBER_OF_CHAR_IN_COMPLETION_NAME
+import common.NUMBER_OF_CHAR_IN_TAIL
+import common.formatName
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -51,8 +54,6 @@ class CompletionProvider(
     "kotlin.coroutines.jvm.internal",
     "kotlin.reflect.jvm.internal"
   )
-  private val NUMBER_OF_CHAR_IN_TAIL = 60
-  private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
@@ -215,11 +216,6 @@ class CompletionProvider(
       }
     }
   }
-
-  private fun formatName(
-    builder: String,
-    symbols: Int
-  ) = if (builder.length > symbols) builder.substring(0, symbols) + "..." else builder
 
   private fun keywordsCompletionVariants(keywords: TokenSet, prefix: String) = keywords.types.mapNotNull {
     if (it is KtKeywordToken && it.value.startsWith(prefix))

@@ -121,7 +121,7 @@ object Main {
     val kotlinFunction = runCatching {
       method.kotlinFunction
     }.getOrNull()
-    return if (kotlinFunction != null && kotlinFunction.visibility == KVisibility.PUBLIC) {
+    return if (clazz.isKotlinClass() && kotlinFunction != null && kotlinFunction.visibility == KVisibility.PUBLIC) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
         parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
