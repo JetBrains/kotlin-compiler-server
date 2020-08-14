@@ -1,9 +1,12 @@
 [
   {
+    "version": "1.3.72"
+  },
+  {
     "version": "1.4.0-rc"
   },
   {
-    "version": "1.3.72",
+    "version": "1.4.0",
     "latestStable": true
   }
 ]
