@@ -32,6 +32,9 @@ object Main {
   private const val CLASS_EXTENSION = ".class"
   private const val CLASS_ICON = "class"
   private const val METHOD_ICON = "method"
+  private const val TO_STRING_METHOD = "toString"
+  private const val EQUALS_METHOD = "equals"
+  private const val HASH_CODE_METHOD = "hashCode"
   private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
 
   private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
@@ -115,20 +118,26 @@ object Main {
   private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
     (clazz.methods + clazz.declaredMethods).distinct().mapNotNull { method ->
       importInfoFromFunction(method, clazz)
+    }.filter {
+      it.shortName != EQUALS_METHOD && it.shortName != HASH_CODE_METHOD && it.shortName != TO_STRING_METHOD
     }
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
     val kotlinFunction = runCatching {
       method.kotlinFunction
     }.getOrNull()
-    return if (clazz.isKotlinClass() && kotlinFunction != null && kotlinFunction.visibility == KVisibility.PUBLIC) {
+    return if (clazz.isKotlinClass() && kotlinFunction != null &&
+      kotlinFunction.visibility == KVisibility.PUBLIC &&
+      !kotlinFunction.isExternal
+    ) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
         parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
         returnType = kotlinTypeToType(kotlinFunction.returnType),
         parent = clazz
       )
-    } else importInfoFromJavaMethod(method, clazz)
+    } else if (clazz.isKotlinClass()) null
+    else importInfoFromJavaMethod(method, clazz)
   }
 
   private fun kotlinTypeToType(kotlinType: KType): String {
