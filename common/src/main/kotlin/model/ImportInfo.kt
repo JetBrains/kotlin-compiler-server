@@ -1,8 +1,7 @@
 package common.model
 
-import common.NUMBER_OF_CHAR_IN_COMPLETION_NAME
-import common.NUMBER_OF_CHAR_IN_TAIL
-import common.formatName
+import common.formatCompletionName
+import common.formatTailName
 
 data class ImportInfo(
   val importName: String,
@@ -14,8 +13,8 @@ data class ImportInfo(
   fun toCompletion() =
     Completion(
     text = "$fullName  ($importName)",
-    displayText = formatName("$fullName  ($importName)", NUMBER_OF_CHAR_IN_COMPLETION_NAME),
-    tail = formatName(returnType, NUMBER_OF_CHAR_IN_TAIL),
+    displayText = formatCompletionName("$fullName  ($importName)"),
+    tail = formatTailName(returnType),
     import = importName,
     icon = icon
     )

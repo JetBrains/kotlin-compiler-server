@@ -12,10 +12,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import common.formatCompletionName
 import org.apache.commons.logging.LogFactory
-import common.NUMBER_OF_CHAR_IN_COMPLETION_NAME
-import common.NUMBER_OF_CHAR_IN_TAIL
-import common.formatName
+import common.formatTailName
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -38,7 +37,6 @@ import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 import org.springframework.beans.factory.annotation.Value
-import org.jetbrains.kotlin.utils.addIfNotNull
 import org.springframework.stereotype.Component
 import java.io.File
 import javax.annotation.PostConstruct
@@ -132,7 +130,7 @@ class CompletionProvider(
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
     val (name, type) = descriptor.presentableName(isCallableReference)
-    val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
+    val fullName: String = formatCompletionName(name)
     var completionText = fullName
     var position = completionText.indexOf('(')
     if (position != -1) {
@@ -146,7 +144,7 @@ class CompletionProvider(
       Completion(
         text = completionText,
         displayText = fullName,
-        tail = formatName(type, NUMBER_OF_CHAR_IN_TAIL),
+        tail = formatTailName(type),
         icon = iconFrom(descriptor)
       )
     } else null
@@ -296,7 +294,7 @@ class CompletionProvider(
       .groupBy { it.message } // Map<String, List<ErrorDescriptor>>
       .mapNotNull { (message, descriptors) ->
         val name = message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-        val suggestions = getClassesByName(name).map{ it.toCompletion() }
+        val suggestions = getClassesByName(name)?.map{ it.toCompletion() } ?: emptyList()
         if (suggestions.isEmpty()) return@mapNotNull null
         val intervals = descriptors.map { it.interval }
         name to CompletionData(
