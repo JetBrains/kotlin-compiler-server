@@ -2,6 +2,7 @@ package executors
 
 import java.io.IOException
 import java.io.OutputStream
+import kotlin.jvm.Throws
 
 
 internal class ErrorStream(private val outputStream: OutputStream) : OutputStream() {

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.module.SimpleModule
 import junit.framework.ComparisonFailure
 import java.io.IOException
+import kotlin.jvm.Throws
 
 val mapper = ObjectMapper().apply {
   registerModule(SimpleModule().apply {
