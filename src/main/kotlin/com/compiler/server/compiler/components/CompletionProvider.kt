@@ -61,7 +61,7 @@ class CompletionProvider(
   private fun initIndexes() {
     ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
     if (ALL_INDEXES == null) {
-      log.warn("Exception in getting indexes. Server started without auto imports.")
+      log.warn("Server started without auto imports.")
     }
   }
 
