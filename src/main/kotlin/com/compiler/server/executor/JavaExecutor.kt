@@ -10,6 +10,7 @@ import java.nio.file.Path
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.text.appendLine
 
 @Component
 class JavaExecutor {
@@ -82,7 +83,7 @@ class JavaExecutor {
     try {
       while (output.length < limit) {
         val line = standardOut.readLine() ?: break
-        output.appendln(escapeString(line))
+        output.appendLine(escapeString(line))
       }
     } catch (_: Exception) {
       // something happened with the stream. Just return what we've collected so far

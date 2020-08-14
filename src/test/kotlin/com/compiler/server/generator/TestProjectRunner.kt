@@ -1,5 +1,8 @@
 package com.compiler.server.generator
 
+import com.compiler.server.base.filterOnlyErrors
+import com.compiler.server.base.hasErrors
+import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import org.junit.jupiter.api.Assertions
@@ -93,13 +96,20 @@ class TestProjectRunner {
   private fun runAndTest(project: Project, contains: String): ExecutionResult {
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.text.contains(contains) == true, "Actual: ${result.text}. \n Expected: $contains")
+    Assertions.assertTrue(result.text.contains(contains), """
+      Actual: ${result.text} 
+      Expected: $contains       
+      Result: ${result.errors}
+    """.trimIndent())
     return result
   }
 
   private fun convertAndTest(project: Project, contains: String) {
     val result = kotlinProjectExecutor.convertToJs(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
+    Assertions.assertFalse(result.hasErrors) {
+      "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
+    }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
   }
 }
