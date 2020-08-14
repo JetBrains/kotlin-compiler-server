@@ -3,12 +3,14 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
+import com.compiler.server.service.KotlinProjectExecutor
 import common.model.Completion
 import common.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import org.apache.commons.logging.LogFactory
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -40,12 +42,6 @@ class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
   @Value("\${indexes.file}") private val indexesFileName: String
 ) {
-
-  @PostConstruct
-  private fun postConstruct() {
-    ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
-  }
-
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
     "kotlin.coroutines.experimental.intrinsics",
@@ -54,11 +50,20 @@ class CompletionProvider(
     "kotlin.coroutines.jvm.internal",
     "kotlin.reflect.jvm.internal"
   )
+  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
   private val NUMBER_OF_CHAR_IN_TAIL = 60
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
   private var ALL_INDEXES: List<ImportInfo>? = null
+
+  @PostConstruct
+  private fun initIndexes() {
+    ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
+    if (ALL_INDEXES == null) {
+      log.warn("Exception in getting indexes. Server started without auto imports.")
+    }
+  }
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
