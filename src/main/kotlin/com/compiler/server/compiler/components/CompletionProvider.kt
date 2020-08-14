@@ -5,12 +5,14 @@ import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.CompletionData
 import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.service.KotlinProjectExecutor
 import common.model.Completion
 import common.model.ImportInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import org.apache.commons.logging.LogFactory
 import common.NUMBER_OF_CHAR_IN_COMPLETION_NAME
 import common.NUMBER_OF_CHAR_IN_TAIL
 import common.formatName
@@ -39,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.jetbrains.kotlin.utils.addIfNotNull
 import org.springframework.stereotype.Component
 import java.io.File
+import javax.annotation.PostConstruct
 
 @Component
 class CompletionProvider(
@@ -54,9 +57,19 @@ class CompletionProvider(
     "kotlin.coroutines.jvm.internal",
     "kotlin.reflect.jvm.internal"
   )
+  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
+  private var ALL_INDEXES: List<ImportInfo>? = null
+
+  @PostConstruct
+  private fun initIndexes() {
+    ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
+    if (ALL_INDEXES == null) {
+      log.warn("Exception in getting indexes. Server started without auto imports.")
+    }
+  }
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -74,9 +87,7 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants: List<Completion> = runCatching {
-        getClassesByName(prefix).map { it.toCompletion() }
-      }.getOrDefault(emptyList())
+      val importCompletionVariants = getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
@@ -277,7 +288,7 @@ class CompletionProvider(
     jacksonObjectMapper().readValue(File(indexesFileName).readText())
 
   private fun getClassesByName(name: String) =
-    readIndexesFromJson().filter { it.shortName == name }
+    ALL_INDEXES?.filter { it.shortName == name }
 
   fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, CompletionData> =
     errors.values.flatten() // List<ErrorDescriptor>

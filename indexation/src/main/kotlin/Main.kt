@@ -32,50 +32,40 @@ object Main {
   private const val CLASS_EXTENSION = ".class"
   private const val CLASS_ICON = "class"
   private const val METHOD_ICON = "method"
-  private const val TO_STRING_METHOD = "toString"
-  private const val EQUALS_METHOD = "equals"
-  private const val HASH_CODE_METHOD = "hashCode"
   private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
+  private val OBJECT_METHODS = setOf("toString", "equals", "hashCode") // standard object methods
 
   private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
-    clazz.classes.filter {
-      Modifier.isPublic(it.modifiers)
-    }.map {
-      val canonicalName = it.canonicalName
-      val simpleName = it.simpleName
-      ImportInfo(
-        importName = canonicalName,
-        shortName = simpleName,
-        fullName = simpleName,
-        returnType = simpleName,
-        icon = CLASS_ICON
-      )
-    }
+    clazz.classes
+      .filter { Modifier.isPublic(it.modifiers) }
+      .map {
+        val canonicalName = it.canonicalName
+        val simpleName = it.simpleName
+        ImportInfo(
+          importName = canonicalName,
+          shortName = simpleName,
+          fullName = simpleName,
+          returnType = simpleName,
+          icon = CLASS_ICON
+        )
+      }
 
   private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
     runCatching {
-      val kotlinClass = clazz.kotlin
-      val result = clazz.kotlin.nestedClasses.filter {
-        it.visibility == KVisibility.PUBLIC
-      }.mapNotNull {
-        val canonicalName = it.qualifiedName ?: return@mapNotNull null
-        val simpleName = it.simpleName ?: return@mapNotNull null
-        ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
+      (clazz.kotlin.nestedClasses + clazz.kotlin).filter {
+        it.visibility == KVisibility.PUBLIC &&
+        it.qualifiedName != null &&
+        it.simpleName != null
+      }.map {
+        val canonicalName = it.qualifiedName!!
+        val simpleName = it.simpleName!!
+        ImportInfo(
+          importName = canonicalName,
+          shortName = simpleName,
+          fullName = simpleName,
+          returnType = simpleName,
+          icon = CLASS_ICON)
       }
-      val classInfo = if (kotlinClass.visibility == KVisibility.PUBLIC) {
-        val canonicalName = kotlinClass.qualifiedName ?: ""
-        val simpleName = kotlinClass.simpleName ?: ""
-        listOf(
-          ImportInfo(
-            importName = canonicalName,
-            shortName = simpleName,
-            fullName = simpleName,
-            returnType = simpleName,
-            icon = CLASS_ICON
-          )
-        )
-      } else emptyList()
-      return@runCatching result + classInfo
     }.getOrDefault(allClassesFromJavaClass(clazz))
 
   private fun initClasspath(taskRoot: String): List<URL> {
@@ -101,8 +91,8 @@ object Main {
   private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<ImportInfo> =
     JarFile(file).entries().toList()
       .filter { !it.isDirectory && it.name.endsWith(CLASS_EXTENSION) }
-      .flatMap { entry ->
-        val name = entry.name.removeSuffix(CLASS_EXTENSION)
+      .flatMap {
+        val name = it.name.removeSuffix(CLASS_EXTENSION)
         val fullName = name.replace(File.separator, ".")
         if (fullName == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
         val clazz = classLoader.loadClass(fullName) ?: return@flatMap emptyList<ImportInfo>()
@@ -113,14 +103,12 @@ object Main {
         }
         val functions = allFunctionsFromClass(clazz)
         classes + functions
-    }.distinct()
+      }.distinct()
 
   private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
-    (clazz.methods + clazz.declaredMethods).distinct().mapNotNull { method ->
-      importInfoFromFunction(method, clazz)
-    }.filter {
-      it.shortName != EQUALS_METHOD && it.shortName != HASH_CODE_METHOD && it.shortName != TO_STRING_METHOD
-    }
+    (clazz.methods + clazz.declaredMethods).distinct()
+      .mapNotNull { importInfoFromFunction(it, clazz) }
+      .filter { it.shortName !in OBJECT_METHODS }
 
   private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
     val kotlinFunction = runCatching {
@@ -129,7 +117,7 @@ object Main {
     return if (clazz.isKotlinClass() && kotlinFunction != null &&
                kotlinFunction.visibility == KVisibility.PUBLIC &&
                !kotlinFunction.isExternal
-      ) {
+    ) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
         parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
