@@ -54,28 +54,20 @@ object Main {
 
   private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
     runCatching {
-      val kotlinClass = clazz.kotlin
-      val result = clazz.kotlin.nestedClasses.filter {
-        it.visibility == KVisibility.PUBLIC
-      }.mapNotNull {
-        val canonicalName = it.qualifiedName ?: return@mapNotNull null
-        val simpleName = it.simpleName ?: return@mapNotNull null
-        ImportInfo(canonicalName, simpleName, simpleName, simpleName, CLASS_ICON)
+      (clazz.kotlin.nestedClasses + clazz.kotlin).filter {
+        it.visibility == KVisibility.PUBLIC &&
+        it.qualifiedName != null &&
+        it.simpleName != null
+      }.map {
+        val canonicalName = it.qualifiedName!!
+        val simpleName = it.simpleName!!
+        ImportInfo(
+          importName = canonicalName,
+          shortName = simpleName,
+          fullName = simpleName,
+          returnType = simpleName,
+          icon = CLASS_ICON)
       }
-      val classInfo = if (kotlinClass.visibility == KVisibility.PUBLIC) {
-        val canonicalName = kotlinClass.qualifiedName ?: ""
-        val simpleName = kotlinClass.simpleName ?: ""
-        listOf(
-          ImportInfo(
-            importName = canonicalName,
-            shortName = simpleName,
-            fullName = simpleName,
-            returnType = simpleName,
-            icon = CLASS_ICON
-          )
-        )
-      } else emptyList()
-      return@runCatching result + classInfo
     }.getOrDefault(allClassesFromJavaClass(clazz))
 
   private fun initClasspath(taskRoot: String): List<URL> {
