@@ -142,7 +142,7 @@ curl -X POST \
 ### Get the current Kotlin version
 
 ```shell script
-curl -X GET http://localhost:8080/api/compiler/version
+curl -X GET http://localhost:8080/versions
 ```
 
 
@@ -171,6 +171,15 @@ grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
   permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
 ```
+
+## CORS configuration
+
+Set the environment variables
+
+| ENV                | Default value        |
+| -------------------|----------------------|
+| ACCESS_CONTROL_ALLOW_ORIGIN_VALUE| *|
+| ACCESS_CONTROL_ALLOW_HEADER_VALUE| *|
 
 ## Kotlin release guide :rocket:
 

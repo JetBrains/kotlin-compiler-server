@@ -29,6 +29,8 @@ class BaseExecutorTest {
 
   fun runJs(code: List<String>, contains: String) =  testRunner.multiRunJs(code, contains)
 
+  fun translateToJs(code: String) = testRunner.translateToJs(code)
+
   fun runWithException(code: String, contains: String) = testRunner.runWithException(code, contains)
 
   fun version() = testRunner.getVersion()

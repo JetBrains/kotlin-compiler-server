@@ -22,8 +22,9 @@ COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB} /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_JS} /kotlin-compiler-server/${KOTLIN_LIB_JS}
 COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
 
-ENTRYPOINT ["java", "-noverify", "-cp", "/kotlin-compiler-server:/kotlin-compiler-server/lib/*", "com.compiler.server.CompilerApplicationKt"]
+ENV PORT=8080
 
-HEALTHCHECK --interval=1m --timeout=3s \
-  CMD curl -f http://localhost:8080/health || exit 1
-EXPOSE 8080
+CMD ["java", "-noverify", \
+    "-Dserver.port=${PORT}", \
+    "-cp", "/kotlin-compiler-server:/kotlin-compiler-server/lib/*", \
+    "com.compiler.server.CompilerApplicationKt"]
