@@ -33,12 +33,18 @@ import org.jetbrains.kotlin.types.isFlexible
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
+import javax.annotation.PostConstruct
 
 @Component
 class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
   @Value("\${indexes.file}") private val indexesFileName: String
 ) {
+
+  @PostConstruct
+  private fun postConstruct() {
+    ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
+  }
 
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -52,6 +58,7 @@ class CompletionProvider(
   private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
+  private var ALL_INDEXES: List<ImportInfo>? = null
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -69,9 +76,7 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants: List<Completion> = runCatching {
-        getClassesByName(prefix).map { it.toCompletion() }
-      }.getOrDefault(emptyList())
+      val importCompletionVariants = getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
@@ -277,5 +282,5 @@ class CompletionProvider(
     jacksonObjectMapper().readValue(File(indexesFileName).readText())
 
   private fun getClassesByName(name: String) =
-    readIndexesFromJson().filter { it.shortName == name }
+    ALL_INDEXES?.filter { it.shortName == name }
 }
