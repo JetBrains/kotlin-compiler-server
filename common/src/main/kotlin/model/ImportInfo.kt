@@ -1,8 +1,5 @@
 package common.model
 
-import common.formatCompletionName
-import common.formatTailName
-
 data class ImportInfo(
   val importName: String,
   val shortName: String,
@@ -12,10 +9,9 @@ data class ImportInfo(
 ) {
   fun toCompletion() =
     Completion(
-    text = "$fullName  ($importName)",
-    displayText = formatCompletionName("$fullName  ($importName)"),
-    tail = formatTailName(returnType),
-    import = importName,
-    icon = icon
+      displayText = "$fullName  ($importName)",
+      tail = returnType,
+      import = importName,
+      icon = icon
     )
 }

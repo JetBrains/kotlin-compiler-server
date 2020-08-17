@@ -12,9 +12,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import common.formatCompletionName
 import org.apache.commons.logging.LogFactory
-import common.formatTailName
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -46,7 +44,6 @@ class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
   @Value("\${indexes.file}") private val indexesFileName: String
 ) {
-
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
     "kotlin.coroutines.experimental.intrinsics",
@@ -65,7 +62,7 @@ class CompletionProvider(
   private fun initIndexes() {
     ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
     if (ALL_INDEXES == null) {
-      log.warn("Exception in getting indexes. Server started without auto imports.")
+      log.warn("Server started without auto imports.")
     }
   }
 
@@ -130,7 +127,7 @@ class CompletionProvider(
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
     val (name, type) = descriptor.presentableName(isCallableReference)
-    val fullName: String = formatCompletionName(name)
+    val fullName: String = name
     var completionText = fullName
     var position = completionText.indexOf('(')
     if (position != -1) {
@@ -144,7 +141,7 @@ class CompletionProvider(
       Completion(
         text = completionText,
         displayText = fullName,
-        tail = formatTailName(type),
+        tail = type,
         icon = iconFrom(descriptor)
       )
     } else null
