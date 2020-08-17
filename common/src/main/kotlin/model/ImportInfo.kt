@@ -9,7 +9,6 @@ data class ImportInfo(
 ) {
   fun toCompletion() =
     Completion(
-      text = "$fullName  ($importName)",
       displayText = "$fullName  ($importName)",
       tail = returnType,
       import = importName,

@@ -51,8 +51,6 @@ class CompletionProvider(
     "kotlin.reflect.jvm.internal"
   )
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
-  private val NUMBER_OF_CHAR_IN_TAIL = 60
-  private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
   private var ALL_INDEXES: List<ImportInfo>? = null
@@ -126,7 +124,7 @@ class CompletionProvider(
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
     val (name, type) = descriptor.presentableName(isCallableReference)
-    val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
+    val fullName: String = name
     var completionText = fullName
     var position = completionText.indexOf('(')
     if (position != -1) {
@@ -140,7 +138,7 @@ class CompletionProvider(
       Completion(
         text = completionText,
         displayText = fullName,
-        tail = formatName(type, NUMBER_OF_CHAR_IN_TAIL),
+        tail = type,
         icon = iconFrom(descriptor)
       )
     } else null
@@ -221,11 +219,6 @@ class CompletionProvider(
       }
     }
   }
-
-  private fun formatName(
-    builder: String,
-    symbols: Int
-  ) = if (builder.length > symbols) builder.substring(0, symbols) + "..." else builder
 
   private fun keywordsCompletionVariants(keywords: TokenSet, prefix: String) = keywords.types.mapNotNull {
     if (it is KtKeywordToken && it.value.startsWith(prefix))

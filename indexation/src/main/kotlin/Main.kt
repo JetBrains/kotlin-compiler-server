@@ -122,7 +122,7 @@ object Main {
         methodName = kotlinFunction.name,
         parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
         returnType = kotlinTypeToType(kotlinFunction.returnType),
-        parent = clazz
+        importPrefix = clazz.`package`.name
       )
     } else if (clazz.isKotlinClass()) null
     else importInfoFromJavaMethod(method, clazz)
@@ -148,7 +148,7 @@ object Main {
         methodName = method.name,
         parametersString = method.parameters.joinToString { it.type.name },
         returnType = method.returnType.simpleName,
-        parent = clazz
+        importPrefix = "${clazz.`package`.name}.${clazz.simpleName}"
       )
     else null
 
@@ -156,11 +156,11 @@ object Main {
     methodName: String,
     parametersString: String,
     returnType: String,
-    parent: Class<*>
+    importPrefix: String
   ): ImportInfo {
     val shortName = methodName.split("$").first()
     val className = "$shortName($parametersString)"
-    val importName = "${parent.`package`.name}.$shortName"
+    val importName = "$importPrefix.$shortName"
     return ImportInfo(
       importName = importName,
       shortName = shortName,
