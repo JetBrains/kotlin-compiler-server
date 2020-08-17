@@ -41,8 +41,8 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 15,
       completions = listOf(
-        "sin(Double)  (kotlin.math.sin)",
-        "sin(Float)  (kotlin.math.sin)"
+        "sin(x: Double)  (kotlin.math.sin)",
+        "sin(x: Float)  (kotlin.math.sin)"
       )
     )
   }
