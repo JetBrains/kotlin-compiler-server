@@ -120,7 +120,7 @@ object Main {
     ) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
-        parametersString = kotlinFunction.parameters.joinToString { kotlinTypeToType(it.type) },
+        parametersString = kotlinFunction.parameters.joinToString { "${it.name}: ${kotlinTypeToType(it.type)}" },
         returnType = kotlinTypeToType(kotlinFunction.returnType),
         importPrefix = clazz.`package`.name
       )
@@ -146,7 +146,7 @@ object Main {
         !method.isBridge)
       importInfoByMethodAndParent(
         methodName = method.name,
-        parametersString = method.parameters.joinToString { it.type.name },
+        parametersString = method.parameters.joinToString { "${it.name}: ${it.type.simpleName}" },
         returnType = method.returnType.simpleName,
         importPrefix = "${clazz.`package`.name}.${clazz.simpleName}"
       )
