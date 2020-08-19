@@ -9,7 +9,6 @@ import java.lang.reflect.Modifier
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.jar.JarFile
-import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -32,7 +31,6 @@ object Main {
   private const val CLASS_EXTENSION = ".class"
   private const val CLASS_ICON = "class"
   private const val METHOD_ICON = "method"
-  private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
   private val OBJECT_METHODS = setOf("toString", "equals", "hashCode") // standard object methods
 
   private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
@@ -128,17 +126,6 @@ object Main {
     else importInfoFromJavaMethod(method, clazz)
   }
 
-  private fun kotlinTypeToType(kotlinType: KType): String {
-    var type = kotlinType.toString()
-    val regex = Regex(KOTLIN_TYPE_PREFIX)
-    var range: IntRange?
-    do {
-      range = regex.find(type)?.groups?.get(1)?.range
-      type = if (range != null) type.removeRange(range) else type
-    } while (range != null)
-    return type
-  }
-
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
     if (Modifier.isPublic(method.modifiers) &&
         Modifier.isStatic(method.modifiers) &&
@@ -146,8 +133,8 @@ object Main {
         !method.isBridge)
       importInfoByMethodAndParent(
         methodName = method.name,
-        parametersString = method.parameters.joinToString { "${it.name}: ${it.type.simpleName}" },
-        returnType = method.returnType.simpleName,
+        parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
+        returnType = javaTypeToKotlin(method.returnType),
         importPrefix = "${clazz.`package`.name}.${clazz.simpleName}"
       )
     else null
