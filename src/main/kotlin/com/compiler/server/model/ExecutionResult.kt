@@ -1,7 +1,6 @@
 package com.compiler.server.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import common.model.Completion
 
 open class ExecutionResult(
   open var errors: Map<String, List<ErrorDescriptor>> = emptyMap(),
@@ -11,11 +10,6 @@ open class ExecutionResult(
     set(value) {
       field = unEscapeOutput(value)
     }
-  var importsSuggestions: Map<String, CompletionData> = emptyMap()
-
-  fun addSuggestions(suggestions: Map<String, CompletionData>) {
-    importsSuggestions = suggestions
-  }
 
   fun addWarnings(warnings: Map<String, List<ErrorDescriptor>>) {
     errors = warnings

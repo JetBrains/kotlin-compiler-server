@@ -73,12 +73,12 @@ class TestProjectRunner {
     }
   }
 
-  fun highlight(code: String): HighlightResult {
+  fun highlight(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightJS(code: String): HighlightResult {
+  fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS)
     return kotlinProjectExecutor.highlight(project)
   }

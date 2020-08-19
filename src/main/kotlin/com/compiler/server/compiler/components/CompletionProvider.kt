@@ -3,7 +3,6 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.CompletionData
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.service.KotlinProjectExecutor
 import common.model.Completion
@@ -285,18 +284,20 @@ class CompletionProvider(
   private fun getClassesByName(name: String) =
     ALL_INDEXES?.filter { it.shortName == name }
 
-  fun checkUnresolvedReferences(errors: Map<String, List<ErrorDescriptor>>): Map<String, CompletionData> =
-    errors.values.flatten() // List<ErrorDescriptor>
-      .filter { it.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX) } // allUnresolvedDescriptors
-      .groupBy { it.message } // Map<String, List<ErrorDescriptor>>
-      .mapNotNull { (message, descriptors) ->
-        val name = message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-        val suggestions = getClassesByName(name)?.map{ it.toCompletion() } ?: emptyList()
-        if (suggestions.isEmpty()) return@mapNotNull null
-        val intervals = descriptors.map { it.interval }
-        name to CompletionData(
-          imports = suggestions,
-          intervals = intervals
-        )
-      }.toMap()
+  internal fun addImportsForErrorDescriptors(errors: List<ErrorDescriptor>): List<ErrorDescriptor> {
+    return if (ALL_INDEXES == null) {
+      errors
+    } else errors.map {
+      if (!it.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) return@map it
+      val name = it.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
+      val suggestions = getClassesByName(name)?.map { suggest -> suggest.toCompletion() } ?: return@map it
+      ErrorDescriptor(
+        interval = it.interval,
+        message = it.message,
+        severity = it.severity,
+        className = it.className,
+        imports = suggestions
+      )
+    }
+  }
 }

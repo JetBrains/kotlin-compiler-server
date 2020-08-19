@@ -1,7 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.model.HighlightResult
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -11,13 +11,13 @@ class HighlightTest : BaseExecutorTest() {
   @Test
   fun `base highlight ok`() {
     val highlights = highlight("\nfun main() {\n    println(\"Hello, world!!!\")\n}")
-    Assertions.assertTrue(highlights.errors.values.flatten().isEmpty())
+    Assertions.assertTrue(highlights.values.flatten().isEmpty())
   }
 
   @Test
   fun `base highlight js ok`() {
     val highlights = highlightJS("\nfun main() {\n    println(\"Hello, world!!!\")\n}")
-    Assertions.assertTrue(highlights.errors.values.flatten().isEmpty())
+    Assertions.assertTrue(highlights.values.flatten().isEmpty())
   }
 
   @Test
@@ -74,14 +74,14 @@ class HighlightTest : BaseExecutorTest() {
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
-  private fun errorContains(highlights: HighlightResult, message: String) {
-    Assertions.assertTrue(highlights.errors.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.errors.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })
+  private fun errorContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
+    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
+    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })
   }
 
-  private fun warningContains(highlights: HighlightResult, message: String) {
-    Assertions.assertTrue(highlights.errors.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.errors.values.flatten().map { it.className }.any { it == "WARNING" })
-    Assertions.assertTrue(highlights.errors.values.flatten().map { it.severity }.any { it == ProjectSeveriry.WARNING })
+  private fun warningContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
+    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
+    Assertions.assertTrue(highlights.values.flatten().map { it.className }.any { it == "WARNING" })
+    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.WARNING })
   }
 }
