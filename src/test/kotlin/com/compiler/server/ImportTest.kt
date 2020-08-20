@@ -17,6 +17,20 @@ class ImportTest : BaseExecutorTest() {
   }
 
   @Test
+  fun `import class with import`() {
+    complete(
+      code = "import kotlin.math.sin\nimport java.util.Random\nfun main() {\n" +
+        "    val rand = Random\n" +
+        "}",
+      line = 3,
+      character = 21,
+      completions = listOf(
+        "Random  (kotlin.random.Random)"
+      )
+    )
+  }
+
+  @Test
   fun `import class with parameters`() {
     complete(
       code = """fun main() {
