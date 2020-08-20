@@ -36,7 +36,8 @@ internal class TestListener : RunListener() {
   }
 
   override fun testFailure(failure: Failure) {
-    when (val failureException = failure.exception) {
+    val failureException = failure.exception
+    when (failureException) {
       is AssertionError -> currentTestRunInfo?.apply {
         status = Status.FAIL
         comparisonFailure = failureException

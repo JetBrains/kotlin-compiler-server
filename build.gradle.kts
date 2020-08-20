@@ -30,10 +30,10 @@ val kotlinPluginLocation = "Kotlin_1270_CompilerAllPlugins/1626094:id/kotlin-plu
 
 
 plugins {
-    id("org.springframework.boot") version "2.2.0.RELEASE"
+    id("org.springframework.boot") version "2.1.16.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.71"
-    kotlin("plugin.spring") version "1.3.71"
+    kotlin("jvm") version "1.2.71"
+    kotlin("plugin.spring") version "1.2.71"
 }
 
 allprojects {
