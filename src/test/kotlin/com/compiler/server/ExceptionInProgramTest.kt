@@ -16,15 +16,14 @@ class ExceptionInProgramTest : BaseExecutorTest() {
   @Test
   fun `security read file`() {
     runWithException(
-      code = "import java.io.*\n\nmain(args: Array<String>) {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
+      code = "import java.io.*\n\nfun main(args: Array<String>) {\n    val f = File(\"executor.policy\")\n    print(f.toURL())\n}",
       contains = "java.security.AccessControlException"
     )
   }
 
-  @Test
   fun `security connection exception`() {
     runWithException(
-      code = "import java.net.*\n\nmain(args: Array<String>) {\n    val connection = URL(\"http://www.android.com/\").openConnection() as HttpURLConnection\n\tval d = connection.inputStream.bufferedReader().readText()\n\tprint(d)\n}",
+      code = "import java.net.*\n\nfun main(args: Array<String>) {\n    val connection = URL(\"http://www.android.com/\").openConnection() as HttpURLConnection\n\tval d = connection.inputStream.bufferedReader().readText()\n\tprint(d)\n}",
       contains = "java.security.AccessControlException"
     )
   }
@@ -33,7 +32,7 @@ class ExceptionInProgramTest : BaseExecutorTest() {
   fun `kotlin npe`() {
     runWithException(
       code = """
-        main(args: Array<String>) {
+        fun main(args: Array<String>) {
           val s: String? = null
           print(s!!)
           }
@@ -46,7 +45,7 @@ class ExceptionInProgramTest : BaseExecutorTest() {
   fun `kotlin out of memory in executor`() {
     val result = runWithException(
       code = """
-        main(args: Array<String>) {
+        fun main(args: Array<String>) {
           while(true) { print("alex") }
         }
       """.trimIndent(),
