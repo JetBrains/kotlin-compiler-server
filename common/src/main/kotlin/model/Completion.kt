@@ -9,5 +9,5 @@ data class Completion(
   val tail: String? = null,
   val import: String? = null,
   val icon: String? = null,
-  var isOtherImport: Boolean = false
+  var hasOtherImports: Boolean? = null
 )

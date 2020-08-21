@@ -140,7 +140,7 @@ class CompletionProvider(
     if (currentErrors.isNotEmpty()) return importCompletionVariants
     val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
     val suggestions = importCompletionVariants.filter { !oldImports.contains(it.import) }
-    return suggestions.also { it.forEach { completion -> completion.isOtherImport = true } }
+    return suggestions.also { it.forEach { completion -> completion.hasOtherImports = true } }
   }
 
   private fun completionVariantFor(

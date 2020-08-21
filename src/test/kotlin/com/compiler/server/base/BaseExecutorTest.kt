@@ -17,6 +17,13 @@ class BaseExecutorTest {
     isJs: Boolean = false
   ) = testRunner.complete(code, line, character, completions, isJs)
 
+  fun getCompletions(
+    code: String,
+    line: Int,
+    character: Int,
+    isJs: Boolean = false
+  ) = testRunner.getCompletions(code, line, character, isJs)
+
   fun highlight(code: String) = testRunner.highlight(code)
 
   fun highlightJS(code: String) = testRunner.highlightJS(code)
