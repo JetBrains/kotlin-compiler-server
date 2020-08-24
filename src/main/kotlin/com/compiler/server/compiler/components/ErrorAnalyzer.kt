@@ -102,7 +102,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     module.setDependencies(computeDependencies(module.module, configuration))
     val trace = CliBindingTrace()
     val providerFactory = FileBasedDeclarationProviderFactory(module.storageManager, files)
-    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(module, trace, providerFactory) //+    //EnvironmentManager.
+    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(module, trace, providerFactory)
     return Analysis(
       componentProvider = analyzerAndProvider.second,
       analysisResult = TopDownAnalyzerFacadeForJS.analyzeFiles(files, configuration)
