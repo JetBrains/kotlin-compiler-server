@@ -9,6 +9,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
+import common.model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -44,18 +45,24 @@ import java.util.ArrayList
 import kotlin.Comparator
 
 @Component
-class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
+class ErrorAnalyzer(
+  private val kotlinEnvironment: KotlinEnvironment,
+  private val indexationProvider: IndexationProvider
+) {
+  private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
   fun errorsFrom(
     files: List<KtFile>,
     coreEnvironment: KotlinCoreEnvironment,
-    isJs: Boolean = false
+    isJs: Boolean = false,
+    withImports: Boolean = false
   ): ErrorsAndAnalysis {
     val analysis = if (isJs.not()) analysisOf(files, coreEnvironment) else analyzeFileForJs(files, coreEnvironment)
     return ErrorsAndAnalysis(
       errorsFrom(
         analysis.analysisResult.bindingContext.diagnostics.all(),
-        files.map { it.name to anylizeErrorsFrom(it) }.toMap()
+        files.map { it.name to anylizeErrorsFrom(it, withImports) }.toMap(),
+        withImports
       ),
       analysis
     )
@@ -123,9 +130,10 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
   fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
-    errors: Map<String, List<ErrorDescriptor>>
+    errors: Map<String, List<ErrorDescriptor>>,
+    withImports: Boolean = false
   ): Map<String, List<ErrorDescriptor>> {
-    return (errors and errorsFrom(diagnostics)).map { (fileName, errors) ->
+    return (errors and errorsFrom(diagnostics, withImports)).map { (fileName, errors) ->
       fileName to errors.sortedWith(Comparator { o1, o2 ->
         val line = o1.interval.start.line.compareTo(o2.interval.start.line)
         when (line) {
@@ -138,7 +146,7 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
 
   fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) = errors.none { it.value.any { error -> error.severity == ProjectSeveriry.ERROR } }
 
-  private fun anylizeErrorsFrom(file: PsiFile): List<ErrorDescriptor> {
+  private fun anylizeErrorsFrom(file: PsiFile, withImports: Boolean = false): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {
       val errors = mutableListOf<PsiErrorElement>()
       override fun visitElement(element: PsiElement) {
@@ -151,11 +159,15 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     }
     return Visitor().apply { visitFile(file) }.errors.map {
       ErrorDescriptor(
-        TextInterval.from(
+        interval = TextInterval.from(
           start = it.textRange.startOffset,
           end = it.textRange.endOffset,
           currentDocument = file.viewProvider.document!!
-        ), it.errorDescription, ProjectSeveriry.ERROR, "red_wavy_line"
+        ),
+        message = it.errorDescription,
+        severity = ProjectSeveriry.ERROR,
+        className = "red_wavy_line",
+        imports = completionsForErrorErrorMessage(it.errorDescription, withImports)
       )
     }
   }
@@ -198,7 +210,10 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
     return Pair(container.getService(LazyTopDownAnalyzer::class.java), container)
   }
 
-  private fun errorsFrom(diagnostics: Collection<Diagnostic>) = diagnostics.mapNotNull { diagnostic ->
+  private fun errorsFrom(
+    diagnostics: Collection<Diagnostic>,
+    withImports: Boolean = false
+  ) = diagnostics.mapNotNull { diagnostic ->
     diagnostic.psiFile.virtualFile?.let {
       val render = DefaultErrorMessages.render(diagnostic)
       if (!render.contains("This cast can never succeed")) {
@@ -206,12 +221,21 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
           val textRanges = diagnostic.textRanges.iterator()
           if (textRanges.hasNext()) {
             var className = diagnostic.severity.name
+            val imports = if (diagnostic.factory === Errors.UNRESOLVED_REFERENCE) {
+              completionsForErrorErrorMessage(render, withImports)
+            } else null
             if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == Severity.ERROR) {
               className = "red_wavy_line"
             }
             val firstRange = textRanges.next()
             val interval = TextInterval.from(firstRange.startOffset, firstRange.endOffset, diagnostic.psiFile.viewProvider.document!!)
-            diagnostic.psiFile.name to ErrorDescriptor(interval, render, ProjectSeveriry.from(diagnostic.severity), className)
+            diagnostic.psiFile.name to ErrorDescriptor(
+              interval = interval,
+              message = render,
+              severity = ProjectSeveriry.from(diagnostic.severity),
+              className = className,
+              imports = imports
+            )
           } else null
         } else null
       } else null
@@ -223,6 +247,15 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
       .groupBy { it.first }
       .map { it.key to it.value.fold(emptyList<ErrorDescriptor>()) { acc, (_, errors) -> acc + errors } }
       .toMap()
+
+  private fun completionsForErrorErrorMessage(message: String, withImports: Boolean): List<Completion>? {
+    if (!indexationProvider.hasIndexes() ||
+        !message.startsWith(UNRESOLVED_REFERENCE_PREFIX) ||
+        !withImports
+    ) return null
+    val name = message.removePrefix(UNRESOLVED_REFERENCE_PREFIX)
+    return indexationProvider.getClassesByName(name)?.map { suggest -> suggest.toCompletion() }
+  }
 }
 
 data class ErrorsAndAnalysis(val errors: Map<String, List<ErrorDescriptor>>, val analysis: Analysis)

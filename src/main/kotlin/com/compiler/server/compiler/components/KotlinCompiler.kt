@@ -68,7 +68,11 @@ class KotlinCompiler(
     block: (output: OutputDirectory, compilation: Compiled) -> ExecutionResult
   ): ExecutionResult {
     return try {
-      val (errors, analysis) = errorAnalyzer.errorsFrom(files, coreEnvironment)
+      val (errors, analysis) = errorAnalyzer.errorsFrom(
+        files = files,
+        coreEnvironment = coreEnvironment,
+        withImports = true
+      )
       return if (errorAnalyzer.isOnlyWarnings(errors)) {
         val compilation = compile(files, analysis, coreEnvironment)
         if (compilation.files.isEmpty())

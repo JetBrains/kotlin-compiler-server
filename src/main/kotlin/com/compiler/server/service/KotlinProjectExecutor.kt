@@ -24,11 +24,7 @@ class KotlinProjectExecutor(
   fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      val result = kotlinCompiler.run(files, environment, project.args)
-      result.errors = result.errors.mapValues { (_, value) ->
-        completionProvider.addImportsForErrorDescriptors(value)
-      }
-      return@environment result
+      kotlinCompiler.run(files, environment, project.args)
     }
   }
 
@@ -63,10 +59,11 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        val errors = errorAnalyzer.errorsFrom(files, environment).errors
-        errors.mapValues { (_, value) ->
-          completionProvider.addImportsForErrorDescriptors(value)
-        }
+        errorAnalyzer.errorsFrom(
+          files = files,
+          coreEnvironment = environment,
+          withImports = true
+        ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()

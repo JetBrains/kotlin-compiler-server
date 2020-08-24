@@ -41,7 +41,7 @@ import javax.annotation.PostConstruct
 @Component
 class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
-  @Value("\${indexes.file}") private val indexesFileName: String
+  private val indexationProvider: IndexationProvider
 ) {
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -51,20 +51,9 @@ class CompletionProvider(
     "kotlin.coroutines.jvm.internal",
     "kotlin.reflect.jvm.internal"
   )
-  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
-  private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
-  private var ALL_INDEXES: List<ImportInfo>? = null
   private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
-
-  @PostConstruct
-  private fun initIndexes() {
-    ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
-    if (ALL_INDEXES == null) {
-      log.warn("Server started without auto imports.")
-    }
-  }
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -82,7 +71,7 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (ALL_INDEXES != null && !isJs) {
+      val importCompletionVariants = if (indexationProvider.hasIndexes() && !isJs) {
         val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
         importVariants(file, prefix, errors, line, character)
       } else emptyList()
@@ -130,7 +119,7 @@ class CompletionProvider(
     line: Int,
     character: Int
   ): List<Completion> {
-    val importCompletionVariants = getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
     val currentErrors = errors[file.kotlinFile.name]?.filter {
       it.interval.start.line == line &&
         it.interval.start.ch <= character &&
@@ -301,28 +290,5 @@ class CompletionProvider(
 
     private fun DeclarationDescriptor.isInternalImplementationDetail(): Boolean =
       importableFqName?.asString() in excludedFromCompletion
-  }
-
-  private fun readIndexesFromJson(): List<ImportInfo> =
-    jacksonObjectMapper().readValue(File(indexesFileName).readText())
-
-  private fun getClassesByName(name: String) =
-    ALL_INDEXES?.filter { it.shortName == name }
-
-  internal fun addImportsForErrorDescriptors(errors: List<ErrorDescriptor>): List<ErrorDescriptor> {
-    return if (ALL_INDEXES == null) {
-      errors
-    } else errors.map {
-      if (!it.message.startsWith(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)) return@map it
-      val name = it.message.removePrefix(UNRESOLVED_REFERENCE_MESSAGE_PREFIX)
-      val suggestions = getClassesByName(name)?.map { suggest -> suggest.toCompletion() } ?: return@map it
-      ErrorDescriptor(
-        interval = it.interval,
-        message = it.message,
-        severity = it.severity,
-        className = it.className,
-        imports = suggestions
-      )
-    }
   }
 }
