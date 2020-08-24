@@ -56,6 +56,7 @@ class CompletionProvider(
   private val UNRESOLVED_REFERENCE_MESSAGE_PREFIX = "Unresolved reference: "
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
   private var ALL_INDEXES: List<ImportInfo>? = null
+  private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
   @PostConstruct
   private fun initIndexes() {
@@ -81,7 +82,10 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+      val importCompletionVariants = if (ALL_INDEXES != null && !isJs) {
+        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
+        importVariants(file, prefix, errors, line, character)
+      } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
@@ -117,6 +121,27 @@ class CompletionProvider(
         else -> renderer.render(this)
       }
     }
+  }
+
+  private fun importVariants(
+    file: KotlinFile,
+    prefix: String,
+    errors: Map<String, List<ErrorDescriptor>>,
+    line: Int,
+    character: Int
+  ): List<Completion> {
+    val importCompletionVariants = getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val currentErrors = errors[file.kotlinFile.name]?.filter {
+      it.interval.start.line == line &&
+        it.interval.start.ch <= character &&
+        it.interval.end.line == line &&
+        it.interval.end.ch >= character &&
+        it.message.startsWith(UNRESOLVED_REFERENCE_PREFIX)
+    } ?: emptyList()
+    if (currentErrors.isNotEmpty()) return importCompletionVariants
+    val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
+    val suggestions = importCompletionVariants.filter { !oldImports.contains(it.import) }
+    return suggestions.also { it.forEach { completion -> completion.hasOtherImports = true } }
   }
 
   private fun completionVariantFor(

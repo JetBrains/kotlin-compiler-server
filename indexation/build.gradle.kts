@@ -9,6 +9,9 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
+    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
+        isTransitive = false
+    }
 }
 
 application {

@@ -2,6 +2,7 @@ package com.compiler.server.generator
 
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
+import common.model.Completion
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -71,6 +72,17 @@ class TestProjectRunner {
     completions.forEach { suggest ->
       Assertions.assertTrue(result.contains(suggest))
     }
+  }
+
+  fun getCompletions(
+    code: String,
+    line: Int,
+    character: Int,
+    isJs: Boolean = false
+  ): List<Completion> {
+    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val project = generateSingleProject(text = code, projectType = type)
+    return kotlinProjectExecutor.complete(project, line, character)
   }
 
   fun highlight(code: String): Map<String, List<ErrorDescriptor>> {

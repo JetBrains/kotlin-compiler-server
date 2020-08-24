@@ -21,6 +21,7 @@ COPY --from=build /build/libs/BOOT-INF/classes /kotlin-compiler-server
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB} /kotlin-compiler-server/${KOTLIN_LIB}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_JS} /kotlin-compiler-server/${KOTLIN_LIB_JS}
 COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
+COPY --from=build /kotlin-compiler-server/indexes.json /kotlin-compiler-server/
 
 ENV PORT=8080
 
