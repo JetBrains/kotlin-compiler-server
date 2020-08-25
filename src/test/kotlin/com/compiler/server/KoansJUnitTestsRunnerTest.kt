@@ -1,7 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseJUnitTest
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
 class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
 

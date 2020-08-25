@@ -43,7 +43,7 @@ data class ProgramOutput(
       restriction != null -> JunitExecutionResult().apply { text = buildRestriction(restriction) }
       exception != null -> JunitExecutionResult().also { it.exception = exception.toExceptionDescriptor() }
       else -> {
-        val result = outputMapper.readValue(
+        val result :  Map<String, List<TestDescription>> = outputMapper.readValue(
           standardOutput,
           object : TypeReference<Map<String, List<TestDescription>>>() {}
         )

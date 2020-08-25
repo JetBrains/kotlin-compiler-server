@@ -10,13 +10,13 @@ class HighlightTest : BaseExecutorTest() {
 
   @Test
   fun `base highlight ok`() {
-    val highlights = highlight("\nmain(args: Array<String>) {\n    println(\"Hello, world!!!\")\n}")
+    val highlights = highlight("\nfun main(args: Array<String>) {\n    println(\"Hello, world!!!\")\n}")
     Assertions.assertTrue(highlights.values.flatten().isEmpty())
   }
 
   @Test
   fun `base highlight js ok`() {
-    val highlights = highlightJS("\nmain(args: Array<String>) {\n    println(\"Hello, world!!!\")\n}")
+    val highlights = highlightJS("\nfun main(args: Array<String>) {\n    println(\"Hello, world!!!\")\n}")
     Assertions.assertTrue(highlights.values.flatten().isEmpty())
   }
 

@@ -12,6 +12,7 @@ import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
+import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.config.TargetPlatformVersion
 import org.jetbrains.kotlin.container.*
 import org.jetbrains.kotlin.context.ContextForNewModule
@@ -175,7 +176,8 @@ class ErrorAnalyzer(private val kotlinEnvironment: KotlinEnvironment) {
       registerSingleton(FileScopeProviderImpl::class.java)
       CompilerEnvironment.configure(this)
       useInstance(LookupTracker.DO_NOTHING)
-      registerSingleton(ResolveSession::class.java)
+        useInstance(LanguageVersionSettingsImpl.DEFAULT)
+        registerSingleton(ResolveSession::class.java)
       registerSingleton(LazyTopDownAnalyzer::class.java)
     }
 

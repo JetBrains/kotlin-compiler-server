@@ -4,11 +4,13 @@ import com.compiler.server.base.BaseJUnitTest
 import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.model.TestStatus
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class JUnitTestsRunnerTest : BaseJUnitTest() {
 
   @Test
+  @Disabled
   fun `interrupt after a lot of text test`() {
     val test = testRaw(
       "fun start(): String {\n    repeat(100009){\n        print(\"alex\")\n    }\n    \n    return \"\"\n}",
@@ -21,6 +23,7 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
   }
 
   @Test
+  @Disabled
   fun `base fail junit test`() {
     val test = test(
       "fun start(): String = \"OP\"",
