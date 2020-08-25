@@ -59,7 +59,11 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        errorAnalyzer.errorsFrom(files, environment).errors
+        errorAnalyzer.errorsFrom(
+          files = files,
+          coreEnvironment = environment,
+          withImports = true
+        ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()

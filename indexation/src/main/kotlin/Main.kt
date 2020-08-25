@@ -113,8 +113,8 @@ object Main {
       method.kotlinFunction
     }.getOrNull()
     return if (clazz.isKotlinClass() && kotlinFunction != null &&
-      kotlinFunction.visibility == KVisibility.PUBLIC &&
-      !kotlinFunction.isExternal
+               kotlinFunction.visibility == KVisibility.PUBLIC &&
+               !kotlinFunction.isExternal
     ) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
