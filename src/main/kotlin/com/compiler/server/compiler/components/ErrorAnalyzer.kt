@@ -49,8 +49,6 @@ class ErrorAnalyzer(
   private val kotlinEnvironment: KotlinEnvironment,
   private val indexationProvider: IndexationProvider
 ) {
-  private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
-
   fun errorsFrom(
     files: List<KtFile>,
     coreEnvironment: KotlinCoreEnvironment,
@@ -250,10 +248,10 @@ class ErrorAnalyzer(
 
   private fun completionsForErrorMessage(message: String, withImports: Boolean): List<Completion>? {
     if (!indexationProvider.hasIndexes() ||
-        !message.startsWith(UNRESOLVED_REFERENCE_PREFIX) ||
+        !message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX) ||
         !withImports
     ) return null
-    val name = message.removePrefix(UNRESOLVED_REFERENCE_PREFIX)
+    val name = message.removePrefix(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
     return indexationProvider.getClassesByName(name)?.map { suggest -> suggest.toCompletion() }
   }
 }

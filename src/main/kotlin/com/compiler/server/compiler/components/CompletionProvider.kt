@@ -45,7 +45,6 @@ class CompletionProvider(
   )
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
   private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
-  private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -117,7 +116,7 @@ class CompletionProvider(
         it.interval.start.ch <= character &&
         it.interval.end.line == line &&
         it.interval.end.ch >= character &&
-        it.message.startsWith(UNRESOLVED_REFERENCE_PREFIX)
+        it.message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
     } ?: emptyList()
     if (currentErrors.isNotEmpty()) return importCompletionVariants
     val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
