@@ -12,16 +12,15 @@ import java.io.File
 import javax.annotation.PostConstruct
 
 @Component
-class IndexationProvider {
-  @Value("\${indexes.file}") private val indexesFileName: String = ""
-
+class IndexationProvider(
+  @Value("\${indexes.file}") private val indexesFileName: String
+) {
   private var ALL_INDEXES: List<ImportInfo>? = null
   private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
   private val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
   @PostConstruct
   private fun initIndexes() {
-    println("INIT")
     ALL_INDEXES = kotlin.runCatching { readIndexesFromJson() }.getOrNull()
     if (ALL_INDEXES == null) {
       log.warn("Server started without auto imports.")

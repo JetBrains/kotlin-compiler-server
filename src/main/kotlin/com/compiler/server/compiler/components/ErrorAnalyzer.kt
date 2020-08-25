@@ -167,7 +167,7 @@ class ErrorAnalyzer(
         message = it.errorDescription,
         severity = ProjectSeveriry.ERROR,
         className = "red_wavy_line",
-        imports = completionsForErrorErrorMessage(it.errorDescription, withImports)
+        imports = completionsForErrorMessage(it.errorDescription, withImports)
       )
     }
   }
@@ -222,7 +222,7 @@ class ErrorAnalyzer(
           if (textRanges.hasNext()) {
             var className = diagnostic.severity.name
             val imports = if (diagnostic.factory === Errors.UNRESOLVED_REFERENCE) {
-              completionsForErrorErrorMessage(render, withImports)
+              completionsForErrorMessage(render, withImports)
             } else null
             if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == Severity.ERROR) {
               className = "red_wavy_line"
@@ -248,7 +248,7 @@ class ErrorAnalyzer(
       .map { it.key to it.value.fold(emptyList<ErrorDescriptor>()) { acc, (_, errors) -> acc + errors } }
       .toMap()
 
-  private fun completionsForErrorErrorMessage(message: String, withImports: Boolean): List<Completion>? {
+  private fun completionsForErrorMessage(message: String, withImports: Boolean): List<Completion>? {
     if (!indexationProvider.hasIndexes() ||
         !message.startsWith(UNRESOLVED_REFERENCE_PREFIX) ||
         !withImports
