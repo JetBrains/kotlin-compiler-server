@@ -4,14 +4,9 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.service.KotlinProjectExecutor
 import common.model.Completion
-import common.model.ImportInfo
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import org.apache.commons.logging.LogFactory
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -33,10 +28,7 @@ import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.io.File
-import javax.annotation.PostConstruct
 
 @Component
 class CompletionProvider(
