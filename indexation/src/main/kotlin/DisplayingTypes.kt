@@ -5,9 +5,9 @@ import org.jetbrains.kotlin.builtins.jvm.JavaToKotlinClassMap
 import org.jetbrains.kotlin.name.FqName
 import kotlin.reflect.KType
 
-private const val KOTLIN_TYPE_PREFIX = "(kotlin\\.)([A-Z])" // prefix for simple kotlin type, like Double, Any...
+private val KOTLIN_TYPE_PREFIX_REGEX = Regex("(kotlin\\.)([A-Z])") // regex for prefix for simple kotlin type, like Double, Any...
 
-private val primitiveToPrimitiveType: Map<String, PrimitiveType> = mapOf(
+private val primitiveToPrimitiveType = mapOf(
   "int" to PrimitiveType.INT,
   "long" to PrimitiveType.LONG,
   "double" to PrimitiveType.DOUBLE,
@@ -19,25 +19,25 @@ private val primitiveToPrimitiveType: Map<String, PrimitiveType> = mapOf(
 )
 
 internal fun javaTypeToKotlin(type: Class<*>): String {
-  if (type.isPrimitive) {
-    return primitiveToPrimitiveType[type.simpleName]?.typeName?.asString() ?: type.simpleName
-  } else if (type.isArray) {
-    val componentType = type.componentType
-    return if (componentType.isPrimitive) {
-      primitiveToPrimitiveType[componentType.simpleName]?.arrayTypeName?.asString() ?: type.simpleName
-    } else {
-      return "Array<${javaTypeToKotlin(componentType)}>"
+  return when {
+    type.isPrimitive -> primitiveToPrimitiveType[type.simpleName]?.typeName?.asString() ?: type.simpleName
+    type.isArray -> {
+      val componentType = type.componentType
+      if (componentType.isPrimitive) {
+        primitiveToPrimitiveType[componentType.simpleName]?.arrayTypeName?.asString() ?: type.simpleName
+      } else {
+        return "Array<${javaTypeToKotlin(componentType)}>"
+      }
     }
+    else -> JavaToKotlinClassMap.mapJavaToKotlin(FqName(type.canonicalName))?.shortClassName?.asString() ?: type.simpleName
   }
-  return JavaToKotlinClassMap.mapJavaToKotlin(FqName(type.canonicalName))?.shortClassName?.asString() ?: type.simpleName
 }
 
 internal fun kotlinTypeToType(kotlinType: KType): String {
   var type = kotlinType.toString()
-  val regex = Regex(KOTLIN_TYPE_PREFIX)
   var range: IntRange?
   do {
-    range = regex.find(type)?.groups?.get(1)?.range
+    range = KOTLIN_TYPE_PREFIX_REGEX.find(type)?.groups?.get(1)?.range
     type = if (range != null) type.removeRange(range) else type
   } while (range != null)
   return type

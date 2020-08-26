@@ -52,8 +52,8 @@ object Main {
     runCatching {
       (clazz.kotlin.nestedClasses + clazz.kotlin).filter {
         it.visibility == KVisibility.PUBLIC &&
-        it.qualifiedName != null &&
-        it.simpleName != null
+          it.qualifiedName != null &&
+          it.simpleName != null
       }.map {
         val canonicalName = it.qualifiedName!!
         val simpleName = it.simpleName!!
@@ -113,8 +113,8 @@ object Main {
       method.kotlinFunction
     }.getOrNull()
     return if (clazz.isKotlinClass() && kotlinFunction != null &&
-               kotlinFunction.visibility == KVisibility.PUBLIC &&
-               !kotlinFunction.isExternal
+      kotlinFunction.visibility == KVisibility.PUBLIC &&
+      !kotlinFunction.isExternal
     ) {
       importInfoByMethodAndParent(
         methodName = kotlinFunction.name,
@@ -128,9 +128,9 @@ object Main {
 
   private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInfo? =
     if (Modifier.isPublic(method.modifiers) &&
-        Modifier.isStatic(method.modifiers) &&
-        !method.isSynthetic &&
-        !method.isBridge)
+      Modifier.isStatic(method.modifiers) &&
+      !method.isSynthetic &&
+      !method.isBridge)
       importInfoByMethodAndParent(
         methodName = method.name,
         parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
