@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.io.PrintStream
+import kotlin.jvm.Throws
 
 internal class TestListener : RunListener() {
   private var startTime: Long = 0

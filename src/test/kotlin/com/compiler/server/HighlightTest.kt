@@ -1,8 +1,8 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.base.errorContains
+import com.compiler.server.base.warningContains
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -60,7 +60,7 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight Type inference failed`() {
     val highlights = highlight("fun main() {\n   \"sdf\".to\n}")
     errorContains(highlights,
-      "Type inference failed: Not enough information to infer parameter B in infix fun <A, B> A.to(that: B): Pair<A, B>")
+      "Not enough information to infer type variable B")
     errorContains(highlights, "No value passed for parameter 'that'")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
@@ -69,19 +69,8 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight js Type inference failed`() {
     val highlights = highlightJS("fun main() {\n   \"sdf\".to\n}")
     errorContains(highlights,
-      "Type inference failed: Not enough information to infer parameter B in infix fun <A, B> A.to(that: B): Pair<A, B>")
+      "Not enough information to infer type variable B")
     errorContains(highlights, "No value passed for parameter 'that'")
     errorContains(highlights, "Function invocation 'to(...)' expected")
-  }
-
-  private fun errorContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
-    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })
-  }
-
-  private fun warningContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
-    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) })
-    Assertions.assertTrue(highlights.values.flatten().map { it.className }.any { it == "WARNING" })
-    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.WARNING })
   }
 }

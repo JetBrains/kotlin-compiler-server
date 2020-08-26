@@ -3,6 +3,8 @@ package com.compiler.server.compiler
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.analyzer.ModuleInfo
+import org.jetbrains.kotlin.analyzer.ResolverForProject
 import org.jetbrains.kotlin.container.ComponentProvider
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
@@ -42,6 +44,9 @@ class KotlinResolutionFacade(
   ): T = throw UnsupportedOperationException()
 
   override fun <T : Any> getIdeService(serviceClass: Class<T>): T = TODO("not implemented")
+
+  override fun getResolverForProject(): ResolverForProject<out ModuleInfo> = throw UnsupportedOperationException()
+
   override fun resolveToDescriptor(
     declaration: KtDeclaration,
     bodyResolveMode: BodyResolveMode

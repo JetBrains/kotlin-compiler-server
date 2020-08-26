@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
@@ -29,10 +28,10 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.3.1.RELEASE"
-    id("io.spring.dependency-management") version "1.0.9.RELEASE"
-    kotlin("jvm") version "1.3.72"
-    kotlin("plugin.spring") version "1.3.72"
+    id("org.springframework.boot") version "2.3.3.RELEASE"
+    id("io.spring.dependency-management") version "1.0.10.RELEASE"
+    kotlin("jvm") version "1.4.0-release-329"
+    kotlin("plugin.spring") version "1.4.0-release-329"
 }
 
 allprojects {
@@ -57,14 +56,15 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.5")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.5.1")
     implementation("junit:junit:4.12")
-    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
+    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20200330")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
@@ -84,7 +84,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.7")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.8")
 }
 
 fun buildPropertyFile() {
@@ -131,7 +131,6 @@ val buildLambda by tasks.creating(Zip::class) {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
 }
-
 
 tasks.withType<Test> {
     useJUnitPlatform()
