@@ -15,7 +15,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "indexation.Main"
+    mainClassName = "indexation.MainKt"
 }
 
 tasks.withType<JavaExec> {
