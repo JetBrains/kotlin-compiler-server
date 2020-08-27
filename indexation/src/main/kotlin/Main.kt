@@ -90,7 +90,7 @@ private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<Imp
     .flatMap {
       val name = it.name.removeSuffix(CLASS_EXTENSION)
       val fullName = name.replace(File.separator, ".")
-      if (fullName == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
+      if (fullName.split(".").last() == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
       val clazz = classLoader.loadClass(fullName) ?: return@flatMap emptyList<ImportInfo>()
       val classes = if (clazz.isKotlinClass()) {
         allClassesFromKotlinClass(clazz)
