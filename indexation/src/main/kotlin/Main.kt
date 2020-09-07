@@ -129,7 +129,7 @@ private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInf
     Modifier.isStatic(method.modifiers) &&
     !method.isSynthetic &&
     !method.isBridge &&
-    clazz.simpleName != "")
+    clazz.simpleName.isNotEmpty())
     importInfoByMethodAndParent(
       methodName = method.name,
       parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
