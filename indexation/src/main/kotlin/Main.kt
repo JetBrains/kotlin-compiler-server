@@ -128,7 +128,8 @@ private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInf
   if (Modifier.isPublic(method.modifiers) &&
     Modifier.isStatic(method.modifiers) &&
     !method.isSynthetic &&
-    !method.isBridge)
+    !method.isBridge &&
+    clazz.simpleName != "")
     importInfoByMethodAndParent(
       methodName = method.name,
       parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
@@ -164,5 +165,5 @@ private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
   val files = File(directoryPath).listFiles().toList()
   val classPathUrls = initClasspath(directoryPath)
   val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
-  File(outputPath).writeText(jacksonObjectMapper().writeValueAsString(getAllVariants(classLoader, files)))
+  File(outputPath).writeText(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getAllVariants(classLoader, files)))
 }
