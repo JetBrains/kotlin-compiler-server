@@ -98,6 +98,7 @@ class CompletionProvider(
       else -> presentableText to when (this) {
         is VariableDescriptor -> renderer.renderType(type)
         is ClassDescriptor -> " (${DescriptorUtils.getFqName(containingDeclaration)})"
+        is TypeAliasDescriptor -> renderer.renderType(expandedType)
         else -> renderer.render(this)
       }
     }
