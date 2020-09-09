@@ -111,13 +111,13 @@ curl -X POST \
 
 ```shell script
 curl -X POST \
-  'http://localhost:8080/api/compiler/complete?line=1&ch=12' \
+  'http://localhost:8080/api/compiler/complete?line=2&ch=15' \
   -H 'Content-Type: application/json' \
   -d '{
   "files": [
     {
       "name": "File.kt",
-      "text": "fun main() {\n    3.0.toIn\n}"
+      "text": "fun main() {\n    val sinusoid = "sinusoid"\n    val s = sin\n}"
     }
   ]
 }'
@@ -133,7 +133,7 @@ curl -X POST \
   "files": [
     {
       "name": "File.kt",
-      "text": "fun main() {\n    println(\"Hello, world!!!\")ass\n}"
+      "text": "fun main() {\n    println(\"Hello, world!!!\")ass\n    val random = Random\n}"
     }
   ]
 }'
