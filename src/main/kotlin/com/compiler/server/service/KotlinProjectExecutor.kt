@@ -59,10 +59,12 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
+        val isJs = (project.confType == ProjectType.JS)
         errorAnalyzer.errorsFrom(
           files = files,
           coreEnvironment = environment,
-          withImports = true
+          isJs = isJs,
+          withImports = !isJs
         ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
