@@ -3,6 +3,7 @@ package com.compiler.server.service
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
+import common.model.Completion
 import com.compiler.server.model.bean.VersionInfo
 import org.apache.commons.logging.LogFactory
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -58,7 +59,13 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        errorAnalyzer.errorsFrom(files, environment).errors
+        val isJs = (project.confType == ProjectType.JS)
+        errorAnalyzer.errorsFrom(
+          files = files,
+          coreEnvironment = environment,
+          isJs = isJs,
+          withImports = !isJs
+        ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
         emptyMap()

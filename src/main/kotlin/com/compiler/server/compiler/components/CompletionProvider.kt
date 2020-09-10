@@ -3,7 +3,8 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.Completion
+import com.compiler.server.model.ErrorDescriptor
+import common.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -29,10 +30,11 @@ import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 import org.springframework.stereotype.Component
 
-
 @Component
-class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
-
+class CompletionProvider(
+  private val errorAnalyzer: ErrorAnalyzer,
+  private val indexationProvider: IndexationProvider
+) {
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
     "kotlin.coroutines.experimental.intrinsics",
@@ -41,9 +43,8 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
     "kotlin.coroutines.jvm.internal",
     "kotlin.reflect.jvm.internal"
   )
-  private val NUMBER_OF_CHAR_IN_TAIL = 60
-  private val NUMBER_OF_CHAR_IN_COMPLETION_NAME = 40
   private val NAME_FILTER = { name: Name -> !name.isSpecial }
+  private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
@@ -56,20 +57,25 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
     character: Int,
     isJs: Boolean,
     coreEnvironment: KotlinCoreEnvironment
-  ) = with(file.insert("IntellijIdeaRulezzz ", line, character)) {
+  ) : List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
-        .substringBefore("IntellijIdeaRulezzz").let { if (it.endsWith(".")) "" else it }
+        .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
+      val importCompletionVariants = if (indexationProvider.hasIndexes() && !isJs) {
+        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
+        importVariants(file, prefix, errors, line, character)
+      } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
           val (b1, b2) = b.presentableName()
           ("$a1$a2").compareTo("$b1$b2", true)
         })
-      }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } + keywordsCompletionVariants(KtTokens.KEYWORDS,
-        prefix) + keywordsCompletionVariants(
-        KtTokens.SOFT_KEYWORDS, prefix)
+      }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } +
+        keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) +
+        keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix) +
+        importCompletionVariants
     } ?: emptyList()
   }
 
@@ -92,11 +98,32 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
       else -> presentableText to when (this) {
         is VariableDescriptor -> renderer.renderType(type)
         is ClassDescriptor -> " (${DescriptorUtils.getFqName(containingDeclaration)})"
+        is TypeAliasDescriptor -> renderer.renderType(expandedType)
         else -> renderer.render(this)
       }
     }
   }
 
+  private fun importVariants(
+    file: KotlinFile,
+    prefix: String,
+    errors: Map<String, List<ErrorDescriptor>>,
+    line: Int,
+    character: Int
+  ): List<Completion> {
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val currentErrors = errors[file.kotlinFile.name]?.filter {
+      it.interval.start.line == line &&
+        it.interval.start.ch <= character &&
+        it.interval.end.line == line &&
+        it.interval.end.ch >= character &&
+        it.message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
+    } ?: emptyList()
+    if (currentErrors.isNotEmpty()) return importCompletionVariants
+    val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
+    val suggestions = importCompletionVariants.filter { !oldImports.contains(it.import) }
+    return suggestions.also { it.forEach { completion -> completion.hasOtherImports = true } }
+  }
 
   private fun completionVariantFor(
     prefix: String,
@@ -104,8 +131,8 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
     element: PsiElement
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
-    val (name, _) = descriptor.presentableName(isCallableReference)
-    val fullName: String = formatName(name, NUMBER_OF_CHAR_IN_COMPLETION_NAME)
+    val (name, type) = descriptor.presentableName(isCallableReference)
+    val fullName: String = name
     var completionText = fullName
     var position = completionText.indexOf('(')
     if (position != -1) {
@@ -119,7 +146,7 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
       Completion(
         text = completionText,
         displayText = fullName,
-        tail = formatName(fullName, NUMBER_OF_CHAR_IN_TAIL),
+        tail = type,
         icon = iconFrom(descriptor)
       )
     } else null
@@ -134,7 +161,6 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
       else it
     }
   }
-
 
   private fun Analysis.referenceVariantsFrom(
     element: PsiElement,
@@ -202,14 +228,9 @@ class CompletionProvider(private val errorAnalyzer: ErrorAnalyzer) {
     }
   }
 
-
-  private fun formatName(
-    builder: String,
-    symbols: Int
-  ) = if (builder.length > symbols) builder.substring(0, symbols) + "..." else builder
-
   private fun keywordsCompletionVariants(keywords: TokenSet, prefix: String) = keywords.types.mapNotNull {
-    if (it is KtKeywordToken && it.value.startsWith(prefix)) Completion(it.value, it.value, "", "") else null
+    if (it is KtKeywordToken && it.value.startsWith(prefix))
+      Completion(it.value, it.value) else null
   }
 
   private fun iconFrom(descriptor: DeclarationDescriptor) = when (descriptor) {
