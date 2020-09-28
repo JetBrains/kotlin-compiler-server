@@ -33,7 +33,7 @@ private val OBJECT_METHODS = setOf("toString", "equals", "hashCode") // standard
 
 private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
   clazz.classes
-    .filter { Modifier.isPublic(it.modifiers) }
+    .filter { Modifier.isPublic(it.modifiers) && it.canonicalName != null && it.simpleName.isNotEmpty()}
     .map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
@@ -50,8 +50,8 @@ private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
   runCatching {
     (clazz.kotlin.nestedClasses + clazz.kotlin).filter {
       it.visibility == KVisibility.PUBLIC &&
-        it.qualifiedName != null &&
-        it.simpleName != null
+      it.qualifiedName != null &&
+      it.simpleName != null
     }.map {
       val canonicalName = it.qualifiedName!!
       val simpleName = it.simpleName!!
@@ -91,7 +91,7 @@ private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<Imp
       val name = it.name.removeSuffix(CLASS_EXTENSION)
       val fullName = name.replace(File.separator, ".")
       if (fullName.split(".").last() == MODULE_INFO_NAME) return@flatMap emptyList<ImportInfo>()
-      val clazz = classLoader.loadClass(fullName) ?: return@flatMap emptyList<ImportInfo>()
+      val clazz = runCatching { classLoader.loadClass(fullName) }.getOrNull() ?: return@flatMap emptyList<ImportInfo>()
       val classes = if (clazz.isKotlinClass()) {
         allClassesFromKotlinClass(clazz)
       } else {
@@ -129,7 +129,8 @@ private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInf
     Modifier.isStatic(method.modifiers) &&
     !method.isSynthetic &&
     !method.isBridge &&
-    clazz.simpleName.isNotEmpty())
+    clazz.simpleName.isNotEmpty() &&
+    method.name.isNotEmpty())
     importInfoByMethodAndParent(
       methodName = method.name,
       parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
