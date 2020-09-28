@@ -33,7 +33,7 @@ private val OBJECT_METHODS = setOf("toString", "equals", "hashCode") // standard
 
 private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
   clazz.classes
-    .filter { Modifier.isPublic(it.modifiers) && it.canonicalName != null && it.simpleName != ""}
+    .filter { Modifier.isPublic(it.modifiers) && it.canonicalName != null && it.simpleName.isNotEmpty()}
     .map {
       val canonicalName = it.canonicalName
       val simpleName = it.simpleName
@@ -50,8 +50,8 @@ private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
   runCatching {
     (clazz.kotlin.nestedClasses + clazz.kotlin).filter {
       it.visibility == KVisibility.PUBLIC &&
-        it.qualifiedName != null &&
-        it.simpleName != null
+      it.qualifiedName != null &&
+      it.simpleName != null
     }.map {
       val canonicalName = it.qualifiedName!!
       val simpleName = it.simpleName!!
@@ -130,7 +130,7 @@ private fun importInfoFromJavaMethod(method: Method, clazz: Class<*>): ImportInf
     !method.isSynthetic &&
     !method.isBridge &&
     clazz.simpleName.isNotEmpty() &&
-    method.name != "")
+    method.name.isNotEmpty())
     importInfoByMethodAndParent(
       methodName = method.name,
       parametersString = method.parameters.joinToString { "${it.name}: ${javaTypeToKotlin(it.type)}" },
