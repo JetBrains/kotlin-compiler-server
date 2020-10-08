@@ -2,12 +2,13 @@ package com.compiler.server.controllers
 
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.Project
+import com.compiler.server.model.bean.VersionInfo
 import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/compiler")
-class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
+@RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
+class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
   @PostMapping("/run")
   fun executeKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.run(project)
 
@@ -25,9 +26,11 @@ class RunRestController(private val kotlinProjectExecutor: KotlinProjectExecutor
   ) = kotlinProjectExecutor.complete(project, line, ch)
 
   @PostMapping("/highlight")
-  fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
+  fun highlightEndpoint(@RequestBody project: Project) : Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
+}
 
-  @GetMapping("/version")
-  fun getKotlinVersionEndpoint() = kotlinProjectExecutor.getVersion()
-
+@RestController
+class VersionRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
+  @GetMapping("/versions")
+  fun getKotlinVersionEndpoint(): List<VersionInfo> = listOf(kotlinProjectExecutor.getVersion())
 }
