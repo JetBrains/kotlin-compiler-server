@@ -7,6 +7,7 @@ import com.compiler.server.model.ErrorDescriptor
 import common.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import common.model.completionTextFromFullName
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -131,20 +132,10 @@ class CompletionProvider(
     element: PsiElement
   ): Completion? {
     val isCallableReference = (element as? KtElement)?.isCallableReference() ?: false
-    val (name, type) = descriptor.presentableName(isCallableReference)
-    val fullName: String = name
-    var completionText = fullName
-    var position = completionText.indexOf('(')
-    if (position != -1) {
-      if (completionText[position - 1] == ' ') position -= 2
-      if (completionText[position + 1] == ')') position++
-      completionText = completionText.substring(0, position + 1)
-    }
-    position = completionText.indexOf(":")
-    if (position != -1) completionText = completionText.substring(0, position - 1)
+    val (fullName, type) = descriptor.presentableName(isCallableReference)
     return if (prefix.isEmpty() || fullName.startsWith(prefix)) {
       Completion(
-        text = completionText,
+        text = completionTextFromFullName(fullName),
         displayText = fullName,
         tail = type,
         icon = iconFrom(descriptor)
