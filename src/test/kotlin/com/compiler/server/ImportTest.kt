@@ -84,6 +84,40 @@ class ImportTest : BaseExecutorTest() {
     )
   }
 
+  @Test
+  fun `open bracket after import completion`() {
+    val foundCompletions = getCompletions(
+      code = "fun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 1,
+      character = 15
+    ).map { it.text }
+    val completions = listOf(
+      "kotlin.math.sin("
+    )
+    completions.forEach {
+      Assertions.assertTrue(foundCompletions.contains(it))
+    }
+  }
+
+  @Test
+  fun `brackets after import completion`() {
+    val foundCompletions = getCompletions(
+      code = "fun main() {\n" +
+        "    val timeZone  = getDefaultTimeZone\n" +
+        "}",
+      line = 1,
+      character = 38
+    ).map { it.text }
+    val completions = listOf(
+      "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
+    )
+    completions.forEach {
+      Assertions.assertTrue(foundCompletions.contains(it))
+    }
+  }
+
   private fun completionContainsCheckOtherImports(
     foundCompletions: List<Completion>,
     completions: List<Pair<String, Boolean>>
