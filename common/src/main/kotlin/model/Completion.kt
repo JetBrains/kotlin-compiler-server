@@ -21,10 +21,23 @@ data class ImportInfo(
 ) {
   fun toCompletion() =
     Completion(
-      text = importName,
+      text = "${importName.substringBeforeLast('.')}.${completionTextFromFullName(fullName)}",
       displayText = "$fullName  ($importName)",
       tail = returnType,
       import = importName,
       icon = icon
     )
+}
+
+fun completionTextFromFullName(fullName: String): String {
+  var completionText = fullName
+  var position = completionText.indexOf('(')
+  if (position != -1) {
+    if (completionText[position - 1] == ' ') position -= 2
+    if (completionText[position + 1] == ')') position++
+    completionText = completionText.substring(0, position + 1)
+  }
+  position = completionText.indexOf(":")
+  if (position != -1) completionText = completionText.substring(0, position - 1)
+  return completionText
 }

@@ -49,7 +49,10 @@ class ImportTest : BaseExecutorTest() {
       "sin(x: Float)  (kotlin.math.sin)"
     )
     completions.forEach {
-      Assertions.assertFalse(foundCompletions.contains(it))
+      Assertions.assertFalse(
+        foundCompletions.contains(it),
+        "Suggests adding an import, even though it has already been added."
+      )
     }
   }
 
@@ -82,6 +85,44 @@ class ImportTest : BaseExecutorTest() {
         "sin(x: Float)  (kotlin.math.sin)"
       )
     )
+  }
+
+  @Test
+  fun `open bracket after import completion`() {
+    val foundCompletionsTexts = getCompletions(
+      code = "fun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 1,
+      character = 15
+    ).map { it.text }
+    val completions = listOf( "kotlin.math.sin(" )
+    completions.forEach {
+      Assertions.assertTrue(
+        foundCompletionsTexts.contains(it),
+        "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+      )
+    }
+  }
+
+  @Test
+  fun `brackets after import completion`() {
+    val foundCompletionsTexts = getCompletions(
+      code = "fun main() {\n" +
+        "    val timeZone  = getDefaultTimeZone\n" +
+        "}",
+      line = 1,
+      character = 38
+    ).map { it.text }
+    val completions = listOf(
+      "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
+    )
+    completions.forEach {
+      Assertions.assertTrue(
+        foundCompletionsTexts.contains(it),
+        "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+      )
+    }
   }
 
   private fun completionContainsCheckOtherImports(
