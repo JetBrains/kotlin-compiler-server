@@ -12,10 +12,22 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
         isTransitive = false
     }
+    testImplementation("junit:junit:4.12")
+//    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation("org.hamcrest:hamcrest:2.2")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:2.10.0")
+    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.10.0")
+    // Kotlin libraries
+    testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.1")
 }
 
 application {
-    mainClassName = "indexation.MainKt"
+    mainClass.set("indexation.MainKt")
 }
 
 tasks.withType<JavaExec> {

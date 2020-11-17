@@ -97,7 +97,7 @@ private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<Imp
       } else {
         allClassesFromJavaClass(clazz)
       }
-      val functions = allFunctionsFromClass(clazz)
+      val functions = if (!clazz.isInterface) allFunctionsFromClass(clazz) else emptyList()
       classes + functions
     }.distinct()
 
@@ -163,7 +163,7 @@ private fun getAllVariants(classLoader: URLClassLoader, files: List<File>): List
   }.map { getVariantsForZip(classLoader, it) }.flatten()
 
 private fun createJsonWithIndexes(directoryPath: String, outputPath: String) {
-  val files = File(directoryPath).listFiles().toList()
+  val files = File(directoryPath).listFiles()!!.toList()
   val classPathUrls = initClasspath(directoryPath)
   val classLoader = URLClassLoader.newInstance(classPathUrls.toTypedArray())
   File(outputPath).writeText(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getAllVariants(classLoader, files)))
