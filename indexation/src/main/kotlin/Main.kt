@@ -101,10 +101,13 @@ private fun getVariantsForZip(classLoader: URLClassLoader, file: File): List<Imp
       classes + functions
     }.distinct()
 
-private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> =
-  (clazz.methods + clazz.declaredMethods).distinct()
+private fun allFunctionsFromClass(clazz: Class<*>): List<ImportInfo> {
+  val allMethods = runCatching { clazz.methods }.getOrDefault(emptyArray()) +
+    runCatching { clazz.declaredMethods }.getOrDefault(emptyArray())
+  return allMethods.distinct()
     .mapNotNull { importInfoFromFunction(it, clazz) }
     .filter { it.shortName !in OBJECT_METHODS }
+}
 
 private fun importInfoFromFunction(method: Method, clazz: Class<*>): ImportInfo? {
   val kotlinFunction = runCatching {
