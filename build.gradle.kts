@@ -73,8 +73,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
+    implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
         isTransitive = false
     }
     implementation(project(":executors", configuration = "default"))
