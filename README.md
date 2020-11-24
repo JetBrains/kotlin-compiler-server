@@ -45,7 +45,7 @@ Publish your Lambda function: you can follow the instructions in [AWS Lambda's d
 
 ### From Kotless
 
-Coming soon...
+Add [Kotless](https://github.com/JetBrains/kotless) and remove [aws-serverless-container](https://github.com/awslabs/aws-serverless-java-container) =)
 
 ## API Documentation :page_with_curl:
 
