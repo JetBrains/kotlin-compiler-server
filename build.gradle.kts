@@ -30,8 +30,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.4.0"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
-    kotlin("jvm") version "1.4.10-release-411"
-    kotlin("plugin.spring") version "1.4.10-release-411"
+    kotlin("jvm") version "1.4.20-release-327"
+    kotlin("plugin.spring") version "1.4.20-release-327"
 }
 
 allprojects {
@@ -73,8 +73,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
+    implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
         isTransitive = false
     }
     implementation(project(":executors", configuration = "default"))
