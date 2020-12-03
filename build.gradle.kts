@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by System.getProperties()
@@ -14,6 +16,16 @@ val kotlinDependency: Configuration by configurations.creating {
 }
 val kotlinJsDependency: Configuration by configurations.creating {
     isTransitive = false
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.js
+        )
+        attribute(
+            KotlinJsCompilerAttribute.jsCompilerAttribute,
+            KotlinJsCompilerAttribute.legacy
+        )
+    }
 }
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
@@ -29,10 +41,10 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.3.4.RELEASE"
+    id("org.springframework.boot") version "2.4.0"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
-    kotlin("jvm") version "1.4.10-release-411"
-    kotlin("plugin.spring") version "1.4.10-release-411"
+    kotlin("jvm") version "1.4.20-release-327"
+    kotlin("plugin.spring") version "1.4.20-release-327"
 }
 
 allprojects {
@@ -42,7 +54,7 @@ allprojects {
     }
     afterEvaluate {
         dependencies {
-            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3")
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
         }
     }
 }
@@ -58,7 +70,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.1")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.2")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
@@ -74,8 +86,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
+    implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
         isTransitive = false
     }
     implementation(project(":executors", configuration = "default"))
@@ -84,7 +96,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2")
 }
 
 fun buildPropertyFile() {

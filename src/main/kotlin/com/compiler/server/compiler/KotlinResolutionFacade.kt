@@ -8,12 +8,14 @@ import org.jetbrains.kotlin.analyzer.ResolverForProject
 import org.jetbrains.kotlin.container.ComponentProvider
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
+import org.jetbrains.kotlin.idea.FrontendInternals
 import org.jetbrains.kotlin.idea.resolve.ResolutionFacade
 import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
+@OptIn(FrontendInternals::class)
 class KotlinResolutionFacade(
   override val project: Project,
   override val moduleDescriptor: ModuleDescriptor,
