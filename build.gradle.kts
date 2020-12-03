@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by System.getProperties()
@@ -13,6 +15,16 @@ val kotlinDependency: Configuration by configurations.creating {
 }
 val kotlinJsDependency: Configuration by configurations.creating {
     isTransitive = false
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.js
+        )
+        attribute(
+            KotlinJsCompilerAttribute.jsCompilerAttribute,
+            KotlinJsCompilerAttribute.legacy
+        )
+    }
 }
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
