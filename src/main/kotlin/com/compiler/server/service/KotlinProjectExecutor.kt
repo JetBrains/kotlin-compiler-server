@@ -63,8 +63,7 @@ class KotlinProjectExecutor(
         errorAnalyzer.errorsFrom(
           files = files,
           coreEnvironment = environment,
-          isJs = isJs,
-          withImports = !isJs
+          isJs = isJs
         ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)

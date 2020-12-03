@@ -125,6 +125,114 @@ class ImportTest : BaseExecutorTest() {
     }
   }
 
+  @Test
+  fun `import class js`() {
+    complete(
+      code = "fun main() {\n    val rand = Random\n}",
+      line = 1,
+      character = 21,
+      completions = listOf(
+        "Random  (kotlin.random.Random)"
+      ),
+      isJs = true
+    )
+  }
+
+  @Test
+  fun `import method with other import js`() {
+    val foundCompletions = getCompletions(
+      code = "import kotlin.math.sin\nfun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 2,
+      character = 15,
+      isJs = true
+    ).map { it.displayText }
+    val completions = listOf(
+      "sin(x: Double)  (kotlin.math.sin)",
+      "sin(x: Float)  (kotlin.math.sin)"
+    )
+    completions.forEach {
+      Assertions.assertFalse(
+        foundCompletions.contains(it),
+        "Suggests adding an import, even though it has already been added."
+      )
+    }
+  }
+
+  @Test
+  fun `import class with parameters js`() {
+    complete(
+      code = """fun main() {
+        |    randVal = Random(3)
+        |    println(randomVal.nextInt())
+        |}
+      """.trimMargin(),
+      line = 1,
+      character = 20,
+      completions = listOf(
+        "Random  (kotlin.random.Random)"
+      ),
+      isJs = true
+    )
+  }
+
+  @Test
+  fun `import method js`() {
+    complete(
+      code = "fun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 1,
+      character = 15,
+      completions = listOf(
+        "sin(x: Double)  (kotlin.math.sin)",
+        "sin(x: Float)  (kotlin.math.sin)"
+      ),
+      isJs = true
+    )
+  }
+
+  @Test
+  fun `open bracket after import completion js`() {
+    val foundCompletionsTexts = getCompletions(
+      code = "fun main() {\n" +
+        "    val s = sin\n" +
+        "}",
+      line = 1,
+      character = 15,
+      isJs = true
+    ).map { it.text }
+    val completions = listOf( "kotlin.math.sin(" )
+    completions.forEach {
+      Assertions.assertTrue(
+        foundCompletionsTexts.contains(it),
+        "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+      )
+    }
+  }
+
+  @Test
+  fun `brackets after import completion js`() {
+    val foundCompletionsTexts = getCompletions(
+      code = "fun main() {\n" +
+        "    val timeZone  = getDefaultTimeZone\n" +
+        "}",
+      line = 1,
+      character = 38,
+      isJs = true
+    ).map { it.text }
+    val completions = listOf(
+      "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
+    )
+    completions.forEach {
+      Assertions.assertTrue(
+        foundCompletionsTexts.contains(it),
+        "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+      )
+    }
+  }
+
   private fun completionContainsCheckOtherImports(
     foundCompletions: List<Completion>,
     completions: List<Pair<String, Boolean>>

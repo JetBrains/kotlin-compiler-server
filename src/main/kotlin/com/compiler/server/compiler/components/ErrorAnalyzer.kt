@@ -1,5 +1,8 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.compiler.components.indexation.IndexationJsProvider
+import com.compiler.server.compiler.components.indexation.IndexationJvmProvider
+import com.compiler.server.compiler.components.indexation.IndexationProvider
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
@@ -47,20 +50,20 @@ import kotlin.Comparator
 @Component
 class ErrorAnalyzer(
   private val kotlinEnvironment: KotlinEnvironment,
-  private val indexationProvider: IndexationProvider
+  private val indexationJvmProvider: IndexationJvmProvider,
+  private val indexationJsProvider: IndexationJsProvider
 ) {
   fun errorsFrom(
     files: List<KtFile>,
     coreEnvironment: KotlinCoreEnvironment,
-    isJs: Boolean = false,
-    withImports: Boolean = false
+    isJs: Boolean
   ): ErrorsAndAnalysis {
     val analysis = if (isJs.not()) analysisOf(files, coreEnvironment) else analyzeFileForJs(files, coreEnvironment)
     return ErrorsAndAnalysis(
       errorsFrom(
         analysis.analysisResult.bindingContext.diagnostics.all(),
-        files.map { it.name to anylizeErrorsFrom(it, withImports) }.toMap(),
-        withImports
+        files.map { it.name to anylizeErrorsFrom(it, isJs) }.toMap(),
+        isJs
       ),
       analysis
     )
@@ -129,9 +132,9 @@ class ErrorAnalyzer(
   fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
     errors: Map<String, List<ErrorDescriptor>>,
-    withImports: Boolean = false
+    isJs: Boolean
   ): Map<String, List<ErrorDescriptor>> {
-    return (errors and errorsFrom(diagnostics, withImports)).map { (fileName, errors) ->
+    return (errors and errorsFrom(diagnostics, isJs)).map { (fileName, errors) ->
       fileName to errors.sortedWith(Comparator { o1, o2 ->
         val line = o1.interval.start.line.compareTo(o2.interval.start.line)
         when (line) {
@@ -144,7 +147,7 @@ class ErrorAnalyzer(
 
   fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) = errors.none { it.value.any { error -> error.severity == ProjectSeveriry.ERROR } }
 
-  private fun anylizeErrorsFrom(file: PsiFile, withImports: Boolean = false): List<ErrorDescriptor> {
+  private fun anylizeErrorsFrom(file: PsiFile, isJs: Boolean): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {
       val errors = mutableListOf<PsiErrorElement>()
       override fun visitElement(element: PsiElement) {
@@ -165,7 +168,7 @@ class ErrorAnalyzer(
         message = it.errorDescription,
         severity = ProjectSeveriry.ERROR,
         className = "red_wavy_line",
-        imports = completionsForErrorMessage(it.errorDescription, withImports)
+        imports = completionsForErrorMessage(it.errorDescription, isJs)
       )
     }
   }
@@ -210,7 +213,7 @@ class ErrorAnalyzer(
 
   private fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
-    withImports: Boolean = false
+    isJs: Boolean
   ) = diagnostics.mapNotNull { diagnostic ->
     diagnostic.psiFile.virtualFile?.let {
       val render = DefaultErrorMessages.render(diagnostic)
@@ -220,7 +223,7 @@ class ErrorAnalyzer(
           if (textRanges.hasNext()) {
             var className = diagnostic.severity.name
             val imports = if (diagnostic.factory === Errors.UNRESOLVED_REFERENCE) {
-              completionsForErrorMessage(render, withImports)
+              completionsForErrorMessage(render, isJs)
             } else null
             if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == Severity.ERROR) {
               className = "red_wavy_line"
@@ -246,13 +249,13 @@ class ErrorAnalyzer(
       .map { it.key to it.value.fold(emptyList<ErrorDescriptor>()) { acc, (_, errors) -> acc + errors } }
       .toMap()
 
-  private fun completionsForErrorMessage(message: String, withImports: Boolean): List<Completion>? {
-    if (!indexationProvider.hasIndexes() ||
-        !message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX) ||
-        !withImports
+  private fun completionsForErrorMessage(message: String, isJs: Boolean): List<Completion>? {
+    if (!indexationJvmProvider.hasIndexes() ||
+      !message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
     ) return null
     val name = message.removePrefix(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
-    return indexationProvider.getClassesByName(name)?.map { suggest -> suggest.toCompletion() }
+    return if (!isJs) indexationJvmProvider.getClassesByName(name)?.map { suggest -> suggest.toCompletion() }
+    else indexationJsProvider.getClassesByName(name)?.map{ suggest -> suggest.toCompletion() }
   }
 }
 

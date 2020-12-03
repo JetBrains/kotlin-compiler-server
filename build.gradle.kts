@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
+val indexesJs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
@@ -99,6 +100,7 @@ fun generateProperties(prefix: String = "") = """
     kotlin.version=${kotlinVersion}
     policy.file=${prefix + policy}
     indexes.file=${prefix + indexes}
+    indexesJs.file=${prefix + indexesJs}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
 """.trimIndent()

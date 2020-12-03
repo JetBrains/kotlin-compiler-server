@@ -67,7 +67,7 @@ class KotlinToJSTranslator(
       for (psiFile in files) {
         errors[psiFile.name] = ArrayList()
       }
-      errorAnalyzer.errorsFrom(result.diagnostics.all(), errors)
+      errorAnalyzer.errorsFrom(result.diagnostics.all(), errors, isJs = true)
       TranslationJSResult(errors = errors)
     }
   }

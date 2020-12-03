@@ -2,6 +2,9 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
+import com.compiler.server.compiler.components.indexation.IndexationJsProvider
+import com.compiler.server.compiler.components.indexation.IndexationJvmProvider
+import com.compiler.server.compiler.components.indexation.IndexationProvider
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
 import common.model.Completion
@@ -34,7 +37,8 @@ import org.springframework.stereotype.Component
 @Component
 class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
-  private val indexationProvider: IndexationProvider
+  private val indexationJvmProvider: IndexationJvmProvider,
+  private val indexationJsProvider: IndexationJsProvider
 ) {
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -63,7 +67,10 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (indexationProvider.hasIndexes() && !isJs) {
+      val importCompletionVariants = if (!isJs && indexationJvmProvider.hasIndexes()) {
+        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
+        importVariants(file, prefix, errors, line, character)
+      } else if (isJs && indexationJsProvider.hasIndexes()) {
         val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
         importVariants(file, prefix, errors, line, character)
       } else emptyList()
@@ -112,7 +119,7 @@ class CompletionProvider(
     line: Int,
     character: Int
   ): List<Completion> {
-    val importCompletionVariants = indexationProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val importCompletionVariants = indexationJvmProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
     val currentErrors = errors[file.kotlinFile.name]?.filter {
       it.interval.start.line == line &&
         it.interval.start.ch <= character &&
@@ -146,7 +153,7 @@ class CompletionProvider(
   private val renderer = IdeDescriptorRenderers.SOURCE_CODE.withOptions {
     classifierNamePolicy = ClassifierNamePolicy.SHORT
     typeNormalizer = IdeDescriptorRenderers.APPROXIMATE_FLEXIBLE_TYPES
-    parameterNameRenderingPolicy = ParameterNameRenderingPolicy.NONE
+    parameterNameRenderingPolicy = ParameterNameRenderingPolicy.ONLY_NON_SYNTHESIZED
     typeNormalizer = {
       if (it.isFlexible()) it.asFlexibleType().upperBound
       else it
