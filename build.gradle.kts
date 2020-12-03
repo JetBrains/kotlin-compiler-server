@@ -113,7 +113,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
     dependsOn(":executors:jar")
-//    dependsOn(":indexation:run")
+    dependsOn(":indexation:run")
     buildPropertyFile()
 }
 
