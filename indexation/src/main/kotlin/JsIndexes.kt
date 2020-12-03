@@ -30,7 +30,6 @@ fun getAllVariants(kotlinEnvironment: KotlinEnvironment): List<ImportInfo> {
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
 
-    println(kotlinEnvironment.JS_LIBRARIES.toSet())
     configuration.moduleDescriptors.forEach { moduleDescriptor ->
       val pacs = moduleDescriptor.allPackages()
 
