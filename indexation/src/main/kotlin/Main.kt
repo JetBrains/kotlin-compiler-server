@@ -2,12 +2,13 @@ package indexation
 
 /**
  * First argument is path to folder with jars
- * Second argument is path to output file
+ * Second argument is path to output file for jvm indexes
+ * Third argument is path to output file for js indexes
  */
 fun main(args: Array<String>) {
   val directory = args[0]
-  val outputPath = args[1]
+  val outputPathJvm = args[1]
   val outputPathJs = args[2]
-  createJsonWithIndexes(directory, outputPath)
+  createJsonWithIndexes(directory, outputPathJvm)
   createJsonWithIndexesJS(directory, outputPathJs)
 }

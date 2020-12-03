@@ -31,12 +31,12 @@ fun getAllVariants(kotlinEnvironment: KotlinEnvironment): List<ImportInfo> {
     )
 
     configuration.moduleDescriptors.forEach { moduleDescriptor ->
-      val pacs = moduleDescriptor.allPackages()
-
-      pacs.forEach { fqName ->
-        val pac = moduleDescriptor.getPackage(fqName)
-        val innerDesc = pac.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-        imports.addAll(innerDesc.mapNotNull { it.toImportInfo() })
+      val packages = moduleDescriptor.allPackages()
+      packages.forEach { fqName ->
+        val packageViewDescriptor = moduleDescriptor.getPackage(fqName)
+        val descriptors = packageViewDescriptor.memberScope
+          .getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+        imports.addAll(descriptors.mapNotNull { it.toImportInfo() })
       }
     }
   }
