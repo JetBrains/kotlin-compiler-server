@@ -63,10 +63,10 @@ class CompletionTest : BaseExecutorTest() {
       character = 8,
       completions = listOf(
         "listOf()",
-        "listOf(T)",
-        "listOfNotNull(T?)",
-        "listOfNotNull(vararg T?)",
-        "listOf(vararg T)"
+        "listOf(element: T)",
+        "listOfNotNull(element: T?)",
+        "listOfNotNull(vararg elements: T?)",
+        "listOf(vararg elements: T)"
       )
     )
   }
@@ -79,10 +79,10 @@ class CompletionTest : BaseExecutorTest() {
       character = 8,
       completions = listOf(
         "listOf()",
-        "listOf(T)",
-        "listOfNotNull(T?)",
-        "listOfNotNull(vararg T?)",
-        "listOf(vararg T)"
+        "listOf(element: T)",
+        "listOfNotNull(element: T?)",
+        "listOfNotNull(vararg elements: T?)",
+        "listOf(vararg elements: T)"
       ),
       isJs = true
     )
