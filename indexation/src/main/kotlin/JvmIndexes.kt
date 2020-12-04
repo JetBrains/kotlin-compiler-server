@@ -3,6 +3,7 @@ package indexation
 import com.fasterxml.jackson.module.kotlin.isKotlinClass
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import common.model.ImportInfo
+import model.Icon
 import java.io.File
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -24,8 +25,6 @@ private const val EXECUTORS_JAR_NAME = "executors.jar"
 private const val JAR_EXTENSION = ".jar"
 private const val LIB_FOLDER_NAME = "lib"
 private const val CLASS_EXTENSION = ".class"
-private const val CLASS_ICON = "class"
-private const val METHOD_ICON = "method"
 private val OBJECT_METHODS = setOf("toString", "equals", "hashCode") // standard object methods
 
 private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
@@ -39,7 +38,7 @@ private fun allClassesFromJavaClass(clazz: Class<*>): List<ImportInfo> =
         shortName = simpleName,
         fullName = simpleName,
         returnType = simpleName,
-        icon = CLASS_ICON
+        icon = Icon.CLASS
       )
     }
 
@@ -57,7 +56,7 @@ private fun allClassesFromKotlinClass(clazz: Class<*>): List<ImportInfo> =
         shortName = simpleName,
         fullName = simpleName,
         returnType = simpleName,
-        icon = CLASS_ICON)
+        icon = Icon.CLASS)
     }
   }.getOrDefault(allClassesFromJavaClass(clazz))
 
@@ -150,7 +149,7 @@ private fun importInfoByMethodAndParent(
     shortName = shortName,
     fullName = className,
     returnType = returnType,
-    icon = METHOD_ICON
+    icon = Icon.METHOD
   )
 }
 

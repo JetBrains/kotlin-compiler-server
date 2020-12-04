@@ -1,6 +1,7 @@
 package indexation
 
 import common.model.ImportInfo
+import model.Icon
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.imports.importableFqName
 import org.jetbrains.kotlin.idea.util.IdeDescriptorRenderers
@@ -35,7 +36,7 @@ internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
         shortName = name.asString(),
         fullName = name.asString() + renderer.renderFunctionParameters(this),
         returnType = returnTypeVal,
-        icon = "method"
+        icon = Icon.METHOD
       ) } else null
     }
 
@@ -46,7 +47,7 @@ internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
           shortName = name.asString(),
           fullName = name.asString(),
           returnType = name.asString(),
-          icon = "class"
+          icon = Icon.CLASS
         )
       } else null
     }

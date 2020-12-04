@@ -11,6 +11,7 @@ import common.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import common.model.completionTextFromFullName
+import model.Icon
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -232,15 +233,15 @@ class CompletionProvider(
   }
 
   private fun iconFrom(descriptor: DeclarationDescriptor) = when (descriptor) {
-    is FunctionDescriptor -> "method"
-    is PropertyDescriptor -> "property"
-    is LocalVariableDescriptor -> "property"
-    is ClassDescriptor -> "class"
-    is PackageFragmentDescriptor -> "package"
-    is PackageViewDescriptor -> "package"
-    is ValueParameterDescriptor -> "genericValue"
-    is TypeParameterDescriptorImpl -> "class"
-    else -> ""
+    is FunctionDescriptor -> Icon.METHOD
+    is PropertyDescriptor -> Icon.PROPERTY
+    is LocalVariableDescriptor -> Icon.PROPERTY
+    is ClassDescriptor -> Icon.CLASS
+    is PackageFragmentDescriptor -> Icon.PACKAGE
+    is PackageViewDescriptor -> Icon.PACKAGE
+    is ValueParameterDescriptor -> Icon.GENERIC_VALUE
+    is TypeParameterDescriptorImpl -> Icon.CLASS
+    else -> null
   }
 
   private fun KtElement.isCallableReference() =

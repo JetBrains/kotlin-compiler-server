@@ -1,6 +1,7 @@
 package common.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import model.Icon
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Completion(
@@ -8,7 +9,7 @@ data class Completion(
   val displayText: String,
   val tail: String? = null,
   val import: String? = null,
-  val icon: String? = null,
+  val icon: Icon? = null,
   var hasOtherImports: Boolean? = null
 )
 
@@ -17,7 +18,7 @@ data class ImportInfo(
   val shortName: String,
   val fullName: String,
   val returnType: String,
-  val icon: String
+  val icon: Icon
 ) {
   fun toCompletion() =
     Completion(
