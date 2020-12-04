@@ -146,7 +146,7 @@ class CompletionProvider(
   private val renderer = IdeDescriptorRenderers.SOURCE_CODE.withOptions {
     classifierNamePolicy = ClassifierNamePolicy.SHORT
     typeNormalizer = IdeDescriptorRenderers.APPROXIMATE_FLEXIBLE_TYPES
-    parameterNameRenderingPolicy = ParameterNameRenderingPolicy.NONE
+    parameterNameRenderingPolicy = ParameterNameRenderingPolicy.ALL
     typeNormalizer = {
       if (it.isFlexible()) it.asFlexibleType().upperBound
       else it
