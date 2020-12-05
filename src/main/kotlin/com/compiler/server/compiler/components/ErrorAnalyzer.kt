@@ -1,8 +1,5 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.components.indexation.IndexationJsProvider
-import com.compiler.server.compiler.components.indexation.IndexationJvmProvider
-import com.compiler.server.compiler.components.indexation.IndexationProvider
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
@@ -50,8 +47,7 @@ import kotlin.Comparator
 @Component
 class ErrorAnalyzer(
   private val kotlinEnvironment: KotlinEnvironment,
-  private val indexationJvmProvider: IndexationJvmProvider,
-  private val indexationJsProvider: IndexationJsProvider
+  private val indexationProvider: IndexationProvider
 ) {
   fun errorsFrom(
     files: List<KtFile>,
@@ -250,12 +246,11 @@ class ErrorAnalyzer(
       .toMap()
 
   private fun completionsForErrorMessage(message: String, isJs: Boolean): List<Completion>? {
-    if (!indexationJvmProvider.hasIndexes() ||
+    if (!indexationProvider.hasIndexes(isJs) ||
       !message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
     ) return null
     val name = message.removePrefix(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
-    return if (!isJs) indexationJvmProvider.getClassesByName(name)?.map { suggest -> suggest.toCompletion() }
-    else indexationJsProvider.getClassesByName(name)?.map{ suggest -> suggest.toCompletion() }
+    return indexationProvider.getClassesByName(name, isJs)?.map { suggest -> suggest.toCompletion() }
   }
 }
 

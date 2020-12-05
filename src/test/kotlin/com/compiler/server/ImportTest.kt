@@ -213,7 +213,7 @@ class ImportTest : BaseExecutorTest() {
   }
 
   @Test
-  fun `brackets after import completion js`() {
+  fun `not jvm imports in js imports`() {
     val foundCompletionsTexts = getCompletions(
       code = "fun main() {\n" +
         "    val timeZone  = getDefaultTimeZone\n" +
@@ -226,9 +226,9 @@ class ImportTest : BaseExecutorTest() {
       "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
     )
     completions.forEach {
-      Assertions.assertTrue(
+      Assertions.assertFalse(
         foundCompletionsTexts.contains(it),
-        "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+        "Wrong completion text for import. Expected not to find $it in $foundCompletionsTexts"
       )
     }
   }

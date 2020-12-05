@@ -2,9 +2,6 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
-import com.compiler.server.compiler.components.indexation.IndexationJsProvider
-import com.compiler.server.compiler.components.indexation.IndexationJvmProvider
-import com.compiler.server.compiler.components.indexation.IndexationProvider
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
 import common.model.Completion
@@ -38,8 +35,7 @@ import org.springframework.stereotype.Component
 @Component
 class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
-  private val indexationJvmProvider: IndexationJvmProvider,
-  private val indexationJsProvider: IndexationJsProvider
+  private val indexationProvider: IndexationProvider
 ) {
   private val excludedFromCompletion: List<String> = listOf(
     "kotlin.jvm.internal",
@@ -68,12 +64,9 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (!isJs && indexationJvmProvider.hasIndexes()) {
+      val importCompletionVariants = if (indexationProvider.hasIndexes(isJs)) {
         val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
-        importVariants(file, prefix, errors, line, character)
-      } else if (isJs && indexationJsProvider.hasIndexes()) {
-        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
-        importVariants(file, prefix, errors, line, character)
+        importVariants(file, prefix, errors, line, character, isJs)
       } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
@@ -118,9 +111,11 @@ class CompletionProvider(
     prefix: String,
     errors: Map<String, List<ErrorDescriptor>>,
     line: Int,
-    character: Int
+    character: Int,
+    isJs: Boolean
   ): List<Completion> {
-    val importCompletionVariants = indexationJvmProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix, isJs)
+      ?.map { it.toCompletion() } ?: emptyList()
     val currentErrors = errors[file.kotlinFile.name]?.filter {
       it.interval.start.line == line &&
         it.interval.start.ch <= character &&
@@ -131,7 +126,7 @@ class CompletionProvider(
     if (currentErrors.isNotEmpty()) return importCompletionVariants
     val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
     val suggestions = importCompletionVariants.filter { !oldImports.contains(it.import) }
-    return suggestions.also { it.forEach { completion -> completion.hasOtherImports = true } }
+    return suggestions.onEach { completion -> completion.hasOtherImports = true }
   }
 
   private fun completionVariantFor(
