@@ -4,9 +4,10 @@ import component.KotlinEnvironment
 import java.io.File
 
 class KotlinEnvironmentConfiguration(fileName: String) {
-  private val jvmFile = File(fileName)
-  private val jsFile = File("$fileName-js")
-  fun kotlinEnvironment(): KotlinEnvironment {
+  val kotlinEnvironment: KotlinEnvironment
+  init {
+    val jvmFile = File(fileName)
+    val jsFile = File("$fileName-js")
     val classPath =
       listOfNotNull(jvmFile)
         .flatMap {
@@ -15,6 +16,6 @@ class KotlinEnvironmentConfiguration(fileName: String) {
         }
 
     val additionalJsClasspath = listOfNotNull(jsFile)
-    return KotlinEnvironment(classPath, additionalJsClasspath)
+    kotlinEnvironment = KotlinEnvironment(classPath, additionalJsClasspath)
   }
 }
