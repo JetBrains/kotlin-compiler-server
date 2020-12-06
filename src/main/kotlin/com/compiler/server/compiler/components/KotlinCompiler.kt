@@ -5,6 +5,7 @@ import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.LibrariesFile
+import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
