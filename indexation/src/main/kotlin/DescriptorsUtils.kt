@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.renderer.ClassifierNamePolicy
 import org.jetbrains.kotlin.renderer.ParameterNameRenderingPolicy
 import org.jetbrains.kotlin.resolve.DescriptorUtils
+import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
+import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.asFlexibleType
 import org.jetbrains.kotlin.types.isFlexible
 
@@ -53,6 +55,32 @@ internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
     }
     else -> null
   }
+}
+
+internal fun DeclarationDescriptor.getSubclassesAndAllStaticFunctions(): List<DeclarationDescriptor>? {
+  return when (this) {
+    is ClassDescriptor -> {
+      if (visibility.isPublicAPI) {
+        (unsubstitutedInnerClassesScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+            .mapNotNull { it.getSubclassesAndAllStaticFunctions() }.flatten() +
+          staticScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)).distinct()
+      } else null
+    }
+    else -> null
+  }
+}
+
+internal fun ModuleDescriptor.allImportsInfo(): List<ImportInfo> {
+  val packages = allPackages()
+  val imports = mutableListOf<ImportInfo>()
+  packages.forEach { fqName ->
+    val packageViewDescriptor = getPackage(fqName)
+    val descriptors = packageViewDescriptor.memberScope
+      .getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+    val allDescriptors = descriptors + descriptors.mapNotNull { it.getSubclassesAndAllStaticFunctions() }.flatten()
+    imports.addAll(allDescriptors.mapNotNull { it.toImportInfo() })
+  }
+  return imports
 }
 
 internal fun ModuleDescriptor.allPackages(): Collection<FqName> {

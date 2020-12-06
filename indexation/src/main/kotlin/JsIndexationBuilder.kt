@@ -4,8 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import common.model.ImportInfo
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.js.config.JsConfig
-import org.jetbrains.kotlin.resolve.scopes.DescriptorKindFilter
-import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import java.io.File
 
 class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): IndexationBuilder {
@@ -26,13 +24,7 @@ class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): Ind
       )
 
       configuration.moduleDescriptors.forEach { moduleDescriptor ->
-        val packages = moduleDescriptor.allPackages()
-        packages.forEach { fqName ->
-          val packageViewDescriptor = moduleDescriptor.getPackage(fqName)
-          val descriptors = packageViewDescriptor.memberScope
-            .getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-          imports.addAll(descriptors.mapNotNull { it.toImportInfo() })
-        }
+        imports.addAll(moduleDescriptor.allImportsInfo())
       }
     }
     return imports.distinct()
