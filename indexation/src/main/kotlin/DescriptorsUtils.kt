@@ -61,8 +61,7 @@ internal fun DeclarationDescriptor.getSubclassesAndAllStaticFunctions(): List<De
   return when (this) {
     is ClassDescriptor -> {
       if (visibility.isPublicAPI) {
-        (unsubstitutedInnerClassesScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-            .mapNotNull { it.getSubclassesAndAllStaticFunctions() }.flatten() +
+        (unsubstitutedInnerClassesScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER) +
           staticScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)).distinct()
       } else null
     }
