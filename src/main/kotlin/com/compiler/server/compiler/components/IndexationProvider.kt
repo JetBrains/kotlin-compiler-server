@@ -1,6 +1,5 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.service.KotlinProjectExecutor
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import common.model.ImportInfo
@@ -16,21 +15,8 @@ class IndexationProvider(
 ) {
   companion object {
     const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
+    private val log = LogFactory.getLog(IndexationProvider::class.java)
   }
-
-  internal fun hasIndexes(isJs: Boolean) =
-    if (!isJs) {
-      jvmIndexes != null
-    } else {
-      jsIndexes != null
-    }
-
-  internal fun getClassesByName(name: String, isJs: Boolean) =
-    if (!isJs) {
-      jvmIndexes?.filter { it.shortName == name }
-    } else {
-      jsIndexes?.filter { it.shortName == name }
-    }
 
   private val jvmIndexes: List<ImportInfo>? by lazy {
     initIndexes(indexesFileName)
@@ -40,16 +26,25 @@ class IndexationProvider(
     initIndexes(indexesJsFileName)
   }
 
-  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
+  fun hasIndexes(isJs: Boolean) = if (isJs) jsIndexes != null else jvmIndexes != null
 
-  private fun readIndexesFromJson(fileName: String): List<ImportInfo> =
-    jacksonObjectMapper().readValue(File(fileName).readText())
+  fun getClassesByName(name: String, isJs: Boolean): List<ImportInfo>? {
+    val indexes = if (isJs) jsIndexes else jvmIndexes
+    return indexes?.filter { it.shortName == name }
+  }
 
   private fun initIndexes(fileName: String): List<ImportInfo>? {
-    val indexes = kotlin.runCatching { readIndexesFromJson(fileName) }.getOrNull()
+    val file = File(fileName)
+    if (file.exists().not()) {
+      log.warn("No file was found at path: $fileName")
+      return null
+    }
+    val indexes = runCatching { readIndexesFromJson(file) }.getOrNull()
     if (indexes == null) {
-      log.warn("Server started without auto jvm imports.")
+      log.warn("Can not parse file=$fileName with indexes")
     }
     return indexes
   }
+
+  private fun readIndexesFromJson(file: File): List<ImportInfo> = jacksonObjectMapper().readValue(file.readText())
 }
