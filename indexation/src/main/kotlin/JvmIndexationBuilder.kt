@@ -12,11 +12,10 @@ import java.io.File
 
 class JvmIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): IndexationBuilder {
   override fun createIndexes(outputFilename: String) {
-    File(outputFilename).writeText(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getAllVariants()))
+    File(outputFilename).writeText(jacksonObjectMapper().writeValueAsString(getAllVariants()))
   }
 
-  private fun getAllVariants(): List<ImportInfo> {
-    val imports = mutableListOf<ImportInfo>()
+  private fun getAllVariants(): List<ImportInfo> =
     kotlinEnvironment.environment { coreEnvironment ->
       val trace = CliBindingTrace()
       val project = coreEnvironment.project
@@ -33,8 +32,6 @@ class JvmIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): In
         }
       )
       val moduleDescriptor = componentProvider.getService(ModuleDescriptor::class.java)
-      imports.addAll(moduleDescriptor.allImportsInfo())
+      return@environment moduleDescriptor.allImportsInfo().distinct()
     }
-    return imports
-  }
 }

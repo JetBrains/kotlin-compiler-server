@@ -9,11 +9,10 @@ import java.io.File
 class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): IndexationBuilder {
   override fun createIndexes(outputFilename: String) {
     val imports = getAllVariants()
-    File(outputFilename).writeText(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(imports))
+    File(outputFilename).writeText(jacksonObjectMapper().writeValueAsString(imports))
   }
 
-  private fun getAllVariants(): List<ImportInfo> {
-    val imports = mutableListOf<ImportInfo>()
+  private fun getAllVariants(): List<ImportInfo> =
     kotlinEnvironment.environment { coreEnvironment ->
       val project = coreEnvironment.project
       val configuration = JsConfig(
@@ -23,10 +22,8 @@ class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): Ind
         kotlinEnvironment.JS_LIBRARIES.toSet()
       )
 
-      configuration.moduleDescriptors.forEach { moduleDescriptor ->
-        imports.addAll(moduleDescriptor.allImportsInfo())
-      }
+      return@environment configuration.moduleDescriptors.flatMap { moduleDescriptor ->
+        moduleDescriptor.allImportsInfo()
+      }.distinct()
     }
-    return imports.distinct()
-  }
 }
