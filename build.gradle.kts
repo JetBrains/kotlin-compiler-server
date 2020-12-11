@@ -55,6 +55,11 @@ allprojects {
     afterEvaluate {
         dependencies {
             implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
+            implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
+            implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
+            implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
+                isTransitive = false
+            }
         }
     }
 }
@@ -83,13 +88,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
-        isTransitive = false
-    }
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 

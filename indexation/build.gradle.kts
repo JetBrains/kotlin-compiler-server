@@ -10,11 +10,6 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
-        isTransitive = false
-    }
 }
 
 application {
