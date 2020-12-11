@@ -7,7 +7,7 @@ package indexation
  */
 fun main(args: Array<String>) {
   val (directory, outputPathJvm, outputPathJs) = args
-  val kotlinEnvironmentConfiguration = KotlinEnvironmentConfiguration(directory)
-  JvmIndexationBuilder(directoryPath = directory).createIndexes(outputPathJvm)
-  JsIndexationBuilder(kotlinEnvironment = kotlinEnvironmentConfiguration.kotlinEnvironment).createIndexes(outputPathJs)
+  val kotlinEnvironment = KotlinEnvironmentConfiguration(directory).kotlinEnvironment
+  JvmIndexationBuilder(kotlinEnvironment = kotlinEnvironment).writeIndexesToFile(outputPathJvm)
+  JsIndexationBuilder(kotlinEnvironment = kotlinEnvironment).writeIndexesToFile(outputPathJs)
 }

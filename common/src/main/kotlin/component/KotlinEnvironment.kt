@@ -20,7 +20,7 @@ import com.intellij.openapi.util.Disposer
 
 class KotlinEnvironment(
   val classpath: List<File>,
-  additionalJsClaspath: List<File>
+  additionalJsClasspath: List<File>
 ) {
   companion object {
     /**
@@ -42,14 +42,14 @@ class KotlinEnvironment(
   }
 
   val JS_METADATA_CACHE =
-    additionalJsClaspath.flatMap {
+    additionalJsClasspath.flatMap {
       KotlinJavascriptMetadataUtils.loadMetadata(it.absolutePath).map { metadata ->
         val parts = KotlinJavascriptSerializationUtil.readModuleAsProto(metadata.body, metadata.version)
         JsModuleDescriptor(metadata.moduleName, parts.kind, parts.importedModules, parts)
       }
     }
 
-  val JS_LIBRARIES = additionalJsClaspath.map { it.absolutePath }
+  val JS_LIBRARIES = additionalJsClasspath.map { it.absolutePath }
 
   @Synchronized
   fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
