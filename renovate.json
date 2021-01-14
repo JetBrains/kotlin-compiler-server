@@ -8,9 +8,9 @@
     "org.jetbrains.kotlin:kotlin-stdlib-js",
     "org.jetbrains.kotlin:kotlin-stdlib",
     "org.jetbrains.kotlin:kotlin-script-runtime",
-    "org.jetbrains.kotlin:kotlin-plugin-ij201",
+    "org.jetbrains.kotlin:kotlin-plugin-ij202",
     "org.jetbrains.kotlin:kotlin-test",
-    "org.jetbrains.kotlin:ide-common-ij201",
+    "org.jetbrains.kotlin:ide-common-ij202",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   ]
