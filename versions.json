@@ -11,5 +11,8 @@
   {
     "version": "1.4.20",
     "latestStable": true
+  },
+  {
+    "version": "1.4.30-RC"
   }
 ]
