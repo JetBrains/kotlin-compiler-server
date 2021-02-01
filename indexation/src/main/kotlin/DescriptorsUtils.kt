@@ -57,13 +57,11 @@ internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
   }
 }
 
-internal fun DeclarationDescriptor.getSubclassesAndAllStaticFunctions(): List<DeclarationDescriptor>? {
-  return if (this is ClassDescriptor) {
-    if (visibility.isPublicAPI) {
-      (unsubstitutedInnerClassesScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER) +
-        staticScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)).distinct()
-    } else null
-  } else null
+internal fun DeclarationDescriptor.getInnerClassesAndAllStaticFunctions(): List<DeclarationDescriptor>? {
+  return if (this !is ClassDescriptor || !visibility.isPublicAPI)
+    null
+  else (unsubstitutedInnerClassesScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER) +
+    staticScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)).distinct()
 }
 
 internal fun ModuleDescriptor.allImportsInfo(): List<ImportInfo> {
@@ -72,7 +70,7 @@ internal fun ModuleDescriptor.allImportsInfo(): List<ImportInfo> {
     val packageViewDescriptor = getPackage(fqName)
     val descriptors = packageViewDescriptor.memberScope
       .getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
-    val allDescriptors = descriptors + descriptors.mapNotNull { it.getSubclassesAndAllStaticFunctions() }.flatten()
+    val allDescriptors = descriptors + descriptors.mapNotNull { it.getInnerClassesAndAllStaticFunctions() }.flatten()
     allDescriptors.mapNotNull { it.toImportInfo() }
   }
 }
