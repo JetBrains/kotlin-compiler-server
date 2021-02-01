@@ -41,8 +41,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.4.0"
-    id("io.spring.dependency-management") version "1.0.10.RELEASE"
+    id("org.springframework.boot") version "2.4.2"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.4.20-release-327"
     kotlin("plugin.spring") version "1.4.20-release-327"
 }
@@ -60,6 +60,7 @@ allprojects {
             implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
                 isTransitive = false
             }
+            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
         }
     }
 }
@@ -67,9 +68,9 @@ allprojects {
 dependencies {
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.10.0")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.10.0")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.10.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.12.1")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.12.1")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.12.1")
     // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
