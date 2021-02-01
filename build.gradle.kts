@@ -54,7 +54,6 @@ allprojects {
     }
     afterEvaluate {
         dependencies {
-            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0")
             implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
             implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
             implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
