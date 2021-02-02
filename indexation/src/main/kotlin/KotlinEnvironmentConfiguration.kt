@@ -4,8 +4,7 @@ import component.KotlinEnvironment
 import java.io.File
 
 class KotlinEnvironmentConfiguration(fileName: String) {
-  val kotlinEnvironment: KotlinEnvironment
-  init {
+  val kotlinEnvironment = run {
     val jvmFile = File(fileName)
     val jsFile = File("$fileName-js")
     val classPath =
@@ -16,6 +15,6 @@ class KotlinEnvironmentConfiguration(fileName: String) {
         }
 
     val additionalJsClasspath = listOfNotNull(jsFile)
-    kotlinEnvironment = KotlinEnvironment(classPath, additionalJsClasspath)
+    KotlinEnvironment(classPath, additionalJsClasspath)
   }
 }
