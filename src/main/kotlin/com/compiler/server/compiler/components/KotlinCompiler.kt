@@ -97,8 +97,8 @@ class KotlinCompiler(
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "tmp", sessionId)
     val policy = policyFile.readText()
-      .replace("%%GENERATED%%", outputDir.toString())
-      .replace("%%LIB_DIR%%", libDir)
+      .replace("%%GENERATED%%", outputDir.toString().replace('\\','/'))
+      .replace("%%LIB_DIR%%", libDir.replace('\\','/'))
     outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
@@ -128,8 +128,9 @@ class KotlinCompiler(
     outputDirectory: OutputDirectory,
     args: List<String>
   ): List<String> {
+    val pathSeparator = System.getProperty("path.separator") ?: ":"
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
-      .joinToString(":")
+      .joinToString(pathSeparator)
     val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
