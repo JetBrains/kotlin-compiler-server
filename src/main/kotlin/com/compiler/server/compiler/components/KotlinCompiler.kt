@@ -128,9 +128,8 @@ class KotlinCompiler(
     outputDirectory: OutputDirectory,
     args: List<String>
   ): List<String> {
-    val pathSeparator = System.getProperty("path.separator") ?: ":"
     val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
-      .joinToString(pathSeparator)
+      .joinToString(PATH_SEPARATOR)
     val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
@@ -147,6 +146,10 @@ class KotlinCompiler(
     return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
       PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
     }
+  }
+
+  companion object {
+    private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
   }
 
 }
