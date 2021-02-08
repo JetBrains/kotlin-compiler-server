@@ -6,13 +6,10 @@
     "version": "1.3.72"
   },
   {
-    "version": "1.4.10"
+    "version": "1.4.20"
   },
   {
-    "version": "1.4.20",
+    "version": "1.4.30",
     "latestStable": true
-  },
-  {
-    "version": "1.4.30-RC"
   }
 ]

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val kotlinVersion: String by System.getProperties()
+val kotlinIdeVersion: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
@@ -43,14 +44,17 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.4.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.4.20-release-327"
-    kotlin("plugin.spring") version "1.4.20-release-327"
+    kotlin("jvm") version "1.4.30"
+    kotlin("plugin.spring") version "1.4.30"
 }
 
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
+        maven("https://kotlin.bintray.com/kotlin-ide-plugin-dependencies")
+        maven("https://jetbrains.bintray.com/intellij-third-party-dependencies")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-compiler-for-ide")
     }
     afterEvaluate {
         dependencies {
@@ -89,7 +93,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
+    implementation("org.jetbrains.kotlin:core:202-$kotlinIdeVersion-IJ8194.7")
+    implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
+        isTransitive = false
+    }
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
