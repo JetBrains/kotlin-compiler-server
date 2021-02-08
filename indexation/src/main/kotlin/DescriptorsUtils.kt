@@ -53,6 +53,17 @@ internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
         )
       } else null
     }
+
+    is PropertyDescriptor -> {
+      ImportInfo(
+        importName = importName,
+        shortName = name.asString(),
+        fullName = name.asString(),
+        returnType = name.asString(),
+        icon = Icon.PROPERTY
+      )
+    }
+
     else -> null
   }
 }
