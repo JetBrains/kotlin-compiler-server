@@ -32,6 +32,7 @@ class KotlinCompiler(
   @Value("\${policy.file}") private val policyFileName: String
 ) {
 
+  private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
   private val policyFile = File(policyFileName)
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
@@ -146,10 +147,6 @@ class KotlinCompiler(
     return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
       PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
     }
-  }
-
-  companion object {
-    private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
   }
 
 }
