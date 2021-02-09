@@ -1,4 +1,3 @@
-
 val kotlinVersion: String by System.getProperties()
 val kotlinIdeVersion: String by System.getProperties()
 val indexes: String by System.getProperties()

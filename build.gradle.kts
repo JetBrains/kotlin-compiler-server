@@ -58,12 +58,9 @@ allprojects {
     }
     afterEvaluate {
         dependencies {
-            implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
-            implementation("org.jetbrains.kotlin:ide-common-ij201:$kotlinVersion")
-            implementation("org.jetbrains.kotlin:kotlin-plugin-ij201:$kotlinVersion") {
-                isTransitive = false
+            dependencies {
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
             }
-            implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
         }
     }
 }
@@ -92,7 +89,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion")
     implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
     implementation("org.jetbrains.kotlin:core:202-$kotlinIdeVersion-IJ8194.7")
