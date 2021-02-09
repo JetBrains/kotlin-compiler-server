@@ -10,9 +10,6 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
-        isTransitive = false
-    }
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion")
 }
 

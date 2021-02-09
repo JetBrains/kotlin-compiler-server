@@ -8,7 +8,4 @@ plugins {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
-    implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
-        isTransitive = false
-    }
 }
