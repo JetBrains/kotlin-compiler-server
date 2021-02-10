@@ -5,6 +5,7 @@ import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.LibrariesFile
+import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -72,7 +73,7 @@ class KotlinCompiler(
       val (errors, analysis) = errorAnalyzer.errorsFrom(
         files = files,
         coreEnvironment = coreEnvironment,
-        withImports = true
+        isJs = false
       )
       return if (errorAnalyzer.isOnlyWarnings(errors)) {
         val compilation = compile(files, analysis, coreEnvironment)

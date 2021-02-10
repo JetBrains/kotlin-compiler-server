@@ -8,6 +8,7 @@ import common.model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import common.model.completionTextFromFullName
+import model.Icon
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -63,9 +64,9 @@ class CompletionProvider(
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (indexationProvider.hasIndexes() && !isJs) {
+      val importCompletionVariants = if (indexationProvider.hasIndexes(isJs)) {
         val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
-        importVariants(file, prefix, errors, line, character)
+        importVariants(file, prefix, errors, line, character, isJs)
       } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
@@ -110,9 +111,11 @@ class CompletionProvider(
     prefix: String,
     errors: Map<String, List<ErrorDescriptor>>,
     line: Int,
-    character: Int
+    character: Int,
+    isJs: Boolean
   ): List<Completion> {
-    val importCompletionVariants = indexationProvider.getClassesByName(prefix)?.map { it.toCompletion() } ?: emptyList()
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix, isJs)
+      ?.map { it.toCompletion() } ?: emptyList()
     val currentErrors = errors[file.kotlinFile.name]?.filter {
       it.interval.start.line == line &&
         it.interval.start.ch <= character &&
@@ -123,7 +126,7 @@ class CompletionProvider(
     if (currentErrors.isNotEmpty()) return importCompletionVariants
     val oldImports = file.kotlinFile.importList?.imports?.mapNotNull { it.importPath.toString() } ?: emptyList()
     val suggestions = importCompletionVariants.filter { !oldImports.contains(it.import) }
-    return suggestions.also { it.forEach { completion -> completion.hasOtherImports = true } }
+    return suggestions.onEach { completion -> completion.hasOtherImports = true }
   }
 
   private fun completionVariantFor(
@@ -225,15 +228,15 @@ class CompletionProvider(
   }
 
   private fun iconFrom(descriptor: DeclarationDescriptor) = when (descriptor) {
-    is FunctionDescriptor -> "method"
-    is PropertyDescriptor -> "property"
-    is LocalVariableDescriptor -> "property"
-    is ClassDescriptor -> "class"
-    is PackageFragmentDescriptor -> "package"
-    is PackageViewDescriptor -> "package"
-    is ValueParameterDescriptor -> "genericValue"
-    is TypeParameterDescriptorImpl -> "class"
-    else -> ""
+    is FunctionDescriptor -> Icon.METHOD
+    is PropertyDescriptor -> Icon.PROPERTY
+    is LocalVariableDescriptor -> Icon.PROPERTY
+    is ClassDescriptor -> Icon.CLASS
+    is PackageFragmentDescriptor -> Icon.PACKAGE
+    is PackageViewDescriptor -> Icon.PACKAGE
+    is ValueParameterDescriptor -> Icon.GENERIC_VALUE
+    is TypeParameterDescriptorImpl -> Icon.CLASS
+    else -> null
   }
 
   private fun KtElement.isCallableReference() =

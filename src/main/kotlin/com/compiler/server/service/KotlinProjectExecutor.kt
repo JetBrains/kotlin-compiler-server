@@ -5,6 +5,7 @@ import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
 import common.model.Completion
 import com.compiler.server.model.bean.VersionInfo
+import component.KotlinEnvironment
 import org.apache.commons.logging.LogFactory
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.springframework.stereotype.Component
@@ -63,8 +64,7 @@ class KotlinProjectExecutor(
         errorAnalyzer.errorsFrom(
           files = files,
           coreEnvironment = environment,
-          isJs = isJs,
-          withImports = !isJs
+          isJs = isJs
         ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
