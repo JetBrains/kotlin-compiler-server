@@ -69,7 +69,7 @@ allprojects {
 }
 
 dependencies {
-    kotlinDependency("junit:junit:4.12")
+    kotlinDependency("junit:junit:4.13.2")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
     kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.12.1")
     kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.12.1")
