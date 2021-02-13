@@ -147,6 +147,7 @@ val buildLambda by tasks.creating(Zip::class) {
     }
     from(policy)
     from(indexes)
+    from(indexesJs)
     from(libJSFolder) { into(libJSFolder) }
     from(libJVMFolder) { into(libJVMFolder) }
     into("lib") {
