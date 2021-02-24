@@ -19,9 +19,10 @@ class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
   private val errorAnalyzer: ErrorAnalyzer
 ) {
-
-  private val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
-  private val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
+  companion object {
+    private const val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
+    private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
+  }
 
   fun translate(files: List<KtFile>, arguments: List<String>, coreEnvironment: KotlinCoreEnvironment): TranslationJSResult {
     val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)

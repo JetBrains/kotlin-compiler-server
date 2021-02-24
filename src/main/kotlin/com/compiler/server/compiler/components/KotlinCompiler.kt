@@ -33,8 +33,10 @@ class KotlinCompiler(
   @Value("\${policy.file}") private val policyFileName: String
 ) {
 
-  private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
   private val policyFile = File(policyFileName)
+  companion object {
+    private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
+  }
 
   class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
 
@@ -99,8 +101,8 @@ class KotlinCompiler(
     val sessionId = UUID.randomUUID().toString().replace("-", "")
     val outputDir = Paths.get(dir, "tmp", sessionId)
     val policy = policyFile.readText()
-      .replace("%%GENERATED%%", outputDir.toString().replace('\\','/'))
-      .replace("%%LIB_DIR%%", libDir.replace('\\','/'))
+      .replace("%%GENERATED%%", outputDir.toString().replace('\\', '/'))
+      .replace("%%LIB_DIR%%", libDir.replace('\\', '/'))
     outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
     return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
       outputDir.resolve(name).let { path ->
@@ -130,8 +132,9 @@ class KotlinCompiler(
     outputDirectory: OutputDirectory,
     args: List<String>
   ): List<String> {
-    val classPaths = (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
-      .joinToString(PATH_SEPARATOR)
+    val classPaths =
+      (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
+        .joinToString(PATH_SEPARATOR)
     val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,

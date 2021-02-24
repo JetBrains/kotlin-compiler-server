@@ -37,16 +37,18 @@ class CompletionProvider(
   private val errorAnalyzer: ErrorAnalyzer,
   private val indexationProvider: IndexationProvider
 ) {
-  private val excludedFromCompletion: List<String> = listOf(
-    "kotlin.jvm.internal",
-    "kotlin.coroutines.experimental.intrinsics",
-    "kotlin.coroutines.intrinsics",
-    "kotlin.coroutines.experimental.jvm.internal",
-    "kotlin.coroutines.jvm.internal",
-    "kotlin.reflect.jvm.internal"
-  )
-  private val NAME_FILTER = { name: Name -> !name.isSpecial }
-  private val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
+  companion object {
+    private val excludedFromCompletion: List<String> = listOf(
+      "kotlin.jvm.internal",
+      "kotlin.coroutines.experimental.intrinsics",
+      "kotlin.coroutines.intrinsics",
+      "kotlin.coroutines.experimental.jvm.internal",
+      "kotlin.coroutines.jvm.internal",
+      "kotlin.reflect.jvm.internal"
+    )
+    private val NAME_FILTER = { name: Name -> !name.isSpecial }
+    private const val COMPLETION_SUFFIX = "IntellijIdeaRulezzz"
+  }
 
   private data class DescriptorInfo(
     val isTipsManagerCompletion: Boolean,
