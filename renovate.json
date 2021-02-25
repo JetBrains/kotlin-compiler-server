@@ -9,6 +9,7 @@
     "org.jetbrains.kotlin:kotlin-stdlib",
     "org.jetbrains.kotlin:kotlin-script-runtime",
     "org.jetbrains.kotlin:ide",
+    "org.jetbrains.kotlin:idea",
     "org.jetbrains.kotlin:kotlin-test",
     "org.jetbrains.kotlin:common",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
