@@ -60,7 +60,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
-                implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
+                implementation("org.jetbrains.kotlin:idea:202-1.4.31-release-IJ8194.7") {
                     isTransitive = false
                 }
             }
