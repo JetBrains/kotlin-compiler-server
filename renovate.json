@@ -11,6 +11,7 @@
     "org.jetbrains.kotlin:ide",
     "org.jetbrains.kotlin:idea",
     "org.jetbrains.kotlin:kotlin-test",
+    "org.jetbrains.kotlin:core",
     "org.jetbrains.kotlin:common",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk7",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
