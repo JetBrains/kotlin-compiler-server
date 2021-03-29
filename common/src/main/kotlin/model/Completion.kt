@@ -1,5 +1,6 @@
 package common.model
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import model.Icon
 
@@ -13,9 +14,10 @@ data class Completion(
   var hasOtherImports: Boolean? = null
 )
 
+@JsonIgnoreProperties(value = ["shortName"])
 data class ImportInfo(
   val importName: String,
-  val shortName: String,
+  val shortName: String? = null,
   val fullName: String,
   val returnType: String,
   val icon: Icon
