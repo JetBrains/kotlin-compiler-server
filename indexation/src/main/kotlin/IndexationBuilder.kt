@@ -6,7 +6,9 @@ import java.io.File
 
 abstract class IndexationBuilder {
   fun writeIndexesToFile(outputFilename: String) {
-      File(outputFilename).writeText(jacksonObjectMapper().writeValueAsString(getAllIndexes()))
+    val indexes = getAllIndexes().groupBy { it.shortName }
+    File(outputFilename).writeText(jacksonObjectMapper().writeValueAsString(indexes))
   }
+
   abstract fun getAllIndexes(): List<ImportInfo>
 }
