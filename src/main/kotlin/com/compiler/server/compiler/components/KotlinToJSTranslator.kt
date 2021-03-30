@@ -151,6 +151,7 @@ class KotlinToJSTranslator(
       .lineSequence()
       .toMutableList()
 
+    listLines.add(listLines.size - 4, "if (isRewrite) output = new BufferedOutput_0()")
     listLines.add(listLines.size - 4, "_.output = output")
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
