@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import com.intellij.openapi.util.Disposer
+import org.jetbrains.kotlin.serialization.js.ModuleKind
 
 class KotlinEnvironment(
   val classpath: List<File>,
@@ -59,6 +60,7 @@ class KotlinEnvironment(
   private val configuration = createConfiguration()
   val jsConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
   }
 
