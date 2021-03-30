@@ -64,7 +64,7 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment {
       val file = getFilesFrom(project, it).first()
       try {
-        val isJs = project.confType == ProjectType.JS
+        val isJs = project.confType.isJsRelated()
         completionProvider.complete(file, line, character, isJs, it)
       } catch (e: Exception) {
         log.warn("Exception in getting completions. Project: $project", e)
@@ -77,7 +77,7 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        val isJs = (project.confType == ProjectType.JS)
+        val isJs = project.confType.isJsRelated()
         errorAnalyzer.errorsFrom(
           files = files,
           coreEnvironment = environment,
