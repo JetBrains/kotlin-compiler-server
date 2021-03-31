@@ -42,8 +42,7 @@ class KotlinProjectExecutor(
       kotlinToJSTranslator.translate(
         files,
         project.args.split(" "),
-        environment,
-        useIrCompiler = false
+        environment
       )
     }
   }
@@ -51,11 +50,10 @@ class KotlinProjectExecutor(
   fun convertToJsIr(project: Project): TranslationJSResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinToJSTranslator.translate(
+      kotlinToJSTranslator.translateIr(
         files,
         project.args.split(" "),
-        environment,
-        useIrCompiler = true
+        environment
       )
     }
   }

@@ -4,24 +4,16 @@ import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
-import org.jetbrains.kotlin.cli.common.createPhaseConfig
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.compile
-import org.jetbrains.kotlin.ir.backend.js.jsPhases
-import org.jetbrains.kotlin.ir.backend.js.jsResolveLibraries
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
 import org.jetbrains.kotlin.js.facade.TranslationResult
 import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.util.Logger
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -35,22 +27,19 @@ class KotlinToJSTranslator(
     private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
 
     private const val JS_IR_CODE_BUFFER = "moduleId.output._buffer;\n"
+
+    const val BEFORE_MAIN_CALL_LINE = 4
   }
 
   fun translate(
     files: List<KtFile>,
     arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment,
-    useIrCompiler: Boolean
+    coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
     val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
     return try {
       if (errorAnalyzer.isOnlyWarnings(errors)) {
-        (if (useIrCompiler) {
-          doTranslateWithIr(files, arguments, coreEnvironment)
-        } else {
-          doTranslate(files, arguments, coreEnvironment)
-        }).also {
+        doTranslate(files, arguments, coreEnvironment).also {
           it.addWarnings(errors)
         }
       } else {
@@ -96,6 +85,25 @@ class KotlinToJSTranslator(
     }
   }
 
+  fun translateIr(
+    files: List<KtFile>,
+    arguments: List<String>,
+    coreEnvironment: KotlinCoreEnvironment
+  ): TranslationJSResult {
+    val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
+    return try {
+      if (errorAnalyzer.isOnlyWarnings(errors)) {
+        doTranslateWithIr(files, arguments, coreEnvironment).also {
+          it.addWarnings(errors)
+        }
+      } else {
+        TranslationJSResult(errors = errors)
+      }
+    } catch (e: Exception) {
+      TranslationJSResult(exception = e.toExceptionDescriptor())
+    }
+  }
+
   @Throws(TranslationException::class)
   private fun doTranslateWithIr(
     files: List<KtFile>,
@@ -109,38 +117,14 @@ class KotlinToJSTranslator(
       kotlinEnvironment.JS_METADATA_CACHE,
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
-    val resolvedLibraries = jsResolveLibraries(
-      kotlinEnvironment.JS_LIBRARIES,
-      object : Logger {
-        override fun error(message: String) {}
-        override fun fatal(message: String): Nothing {
-          TODO("Fake logger for compiler server")
-        }
 
-        override fun log(message: String) {}
-        override fun warning(message: String) {}
-      }
-    )
-    val messageCollector = object : MessageCollector {
-      override fun clear() {}
-      override fun hasErrors(): Boolean {
-        return false
-      }
-
-      override fun report(
-        severity: CompilerMessageSeverity,
-        message: String,
-        location: CompilerMessageSourceLocation?
-      ) {
-      }
-    }
     val result = compile(
       currentProject,
       MainModule.SourceFiles(files),
       AnalyzerWithCompilerReport(configuration.configuration),
       configuration.configuration,
-      createPhaseConfig(jsPhases, K2JsIrCompiler().createArguments(), messageCollector),
-      allDependencies = resolvedLibraries,
+      kotlinEnvironment.jsIrPhaseConfig,
+      allDependencies = kotlinEnvironment.jsIrResolvedLibraries,
       friendDependencies = emptyList(),
       propertyLazyInitialization = false,
       mainArguments = arguments
@@ -151,8 +135,8 @@ class KotlinToJSTranslator(
       .lineSequence()
       .toMutableList()
 
-    listLines.add(listLines.size - 4, "if (isRewrite) output = new BufferedOutput_0()")
-    listLines.add(listLines.size - 4, "_.output = output")
+    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "if (isRewrite) output = new BufferedOutput_0()")
+    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "_.output = output")
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
     return TranslationJSResult(listLines.joinToString("\n"))

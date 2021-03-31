@@ -20,8 +20,5 @@ enum class ProjectType(@JsonValue val id: String) {
   JS("js"),
   JS_IR("js-ir");
 
-  fun isJsRelated(): Boolean =
-    this == JS ||
-      this == JS_IR ||
-      this == CANVAS
+  fun isJsRelated(): Boolean = this == JS || this == JS_IR || this == CANVAS
 }
