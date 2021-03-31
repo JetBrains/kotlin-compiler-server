@@ -35,15 +35,32 @@ class BaseExecutorTest {
   fun runJs(
     code: String,
     contains: String,
-    args: String = "",
-    useIrCompiler: Boolean
-  ) = testRunner.runJs(code, contains, args, useIrCompiler)
+    args: String = ""
+  ) = testRunner.runJs(code, contains, args) { project ->
+    convertToJs(project)
+  }
 
   fun runJs(
     code: List<String>,
+    contains: String
+  ) = testRunner.multiRunJs(code, contains) { project ->
+    convertToJs(project)
+  }
+
+  fun runJsIr(
+    code: String,
     contains: String,
-    useIrCompiler: Boolean
-  ) = testRunner.multiRunJs(code, contains, useIrCompiler)
+    args: String = ""
+  ) = testRunner.runJs(code, contains, args) { project ->
+    convertToJsIr(project)
+  }
+
+  fun runJsIr(
+    code: List<String>,
+    contains: String
+  ) = testRunner.multiRunJs(code, contains) { project ->
+    convertToJsIr(project)
+  }
 
   fun translateToJs(code: String) = testRunner.translateToJs(code)
 

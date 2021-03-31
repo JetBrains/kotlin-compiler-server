@@ -34,12 +34,13 @@ class KotlinToJSTranslator(
   fun translate(
     files: List<KtFile>,
     arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
+    coreEnvironment: KotlinCoreEnvironment,
+    translate: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationJSResult
   ): TranslationJSResult {
     val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
     return try {
       if (errorAnalyzer.isOnlyWarnings(errors)) {
-        doTranslate(files, arguments, coreEnvironment).also {
+        translate(files, arguments, coreEnvironment).also {
           it.addWarnings(errors)
         }
       } else {
@@ -51,7 +52,7 @@ class KotlinToJSTranslator(
   }
 
   @Throws(TranslationException::class)
-  private fun doTranslate(
+  fun doTranslate(
     files: List<KtFile>,
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment
@@ -85,27 +86,7 @@ class KotlinToJSTranslator(
     }
   }
 
-  fun translateIr(
-    files: List<KtFile>,
-    arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
-  ): TranslationJSResult {
-    val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
-    return try {
-      if (errorAnalyzer.isOnlyWarnings(errors)) {
-        doTranslateWithIr(files, arguments, coreEnvironment).also {
-          it.addWarnings(errors)
-        }
-      } else {
-        TranslationJSResult(errors = errors)
-      }
-    } catch (e: Exception) {
-      TranslationJSResult(exception = e.toExceptionDescriptor())
-    }
-  }
-
-  @Throws(TranslationException::class)
-  private fun doTranslateWithIr(
+  fun doTranslateWithIr(
     files: List<KtFile>,
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment

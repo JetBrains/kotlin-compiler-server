@@ -48,20 +48,20 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `a lot of hello word test JS`() {
-    aLotOfHelloWordTestJS(useIrCompiler = false)
+    runManyTest {
+      runJsIr(
+        code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+        contains = "println('Hello, world!!!');"
+      )
+    }
   }
 
   @Test
   fun `a lot of hello word test JS IR`() {
-    aLotOfHelloWordTestJS(useIrCompiler = true)
-  }
-
-  fun aLotOfHelloWordTestJS(useIrCompiler: Boolean) {
     runManyTest {
-      runJs(
+      runJsIr(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
-        contains = "println('Hello, world!!!');",
-        useIrCompiler = useIrCompiler
+        contains = "println('Hello, world!!!');"
       )
     }
   }
