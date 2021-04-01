@@ -1,10 +1,14 @@
 package component
 
-import java.io.File
+import com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
+import org.jetbrains.kotlin.cli.common.createPhaseConfig
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
+import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
@@ -12,11 +16,15 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.languageVersionSettings
+import org.jetbrains.kotlin.ir.backend.js.jsPhases
+import org.jetbrains.kotlin.ir.backend.js.jsResolveLibraries
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
 import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
+import org.jetbrains.kotlin.serialization.js.ModuleKind
+import org.jetbrains.kotlin.util.Logger
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
-import com.intellij.openapi.util.Disposer
+import java.io.File
 
 class KotlinEnvironment(
   val classpath: List<File>,
@@ -59,8 +67,38 @@ class KotlinEnvironment(
   private val configuration = createConfiguration()
   val jsConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
   }
+
+  private val messageCollector = object : MessageCollector {
+    override fun clear() {}
+    override fun hasErrors(): Boolean {
+      return false
+    }
+
+    override fun report(
+      severity: CompilerMessageSeverity,
+      message: String,
+      location: CompilerMessageSourceLocation?
+    ) {
+    }
+  }
+
+  val jsIrPhaseConfig = createPhaseConfig(jsPhases, K2JsIrCompiler().createArguments(), messageCollector)
+
+  val jsIrResolvedLibraries = jsResolveLibraries(
+    JS_LIBRARIES,
+    object : Logger {
+      override fun error(message: String) {}
+      override fun fatal(message: String): Nothing {
+        TODO("Fake logger for compiler server")
+      }
+
+      override fun log(message: String) {}
+      override fun warning(message: String) {}
+    }
+  )
 
   private val environment = KotlinCoreEnvironment.createForProduction(
     parentDisposable = Disposer.newDisposable(),
