@@ -49,7 +49,17 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   @Test
   fun `a lot of hello word test JS`() {
     runManyTest {
-      runJs(
+      runJsIr(
+        code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+        contains = "println('Hello, world!!!');"
+      )
+    }
+  }
+
+  @Test
+  fun `a lot of hello word test JS IR`() {
+    runManyTest {
+      runJsIr(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "println('Hello, world!!!');"
       )

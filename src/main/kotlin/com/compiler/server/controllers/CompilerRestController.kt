@@ -18,6 +18,9 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   @PostMapping("/translate")
   fun translateKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.convertToJs(project)
 
+  @PostMapping("/translate-ir")
+  fun translateIrKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.convertToJsIr(project)
+
   @PostMapping("/complete")
   fun getKotlinCompleteEndpoint(
     @RequestBody project: Project,

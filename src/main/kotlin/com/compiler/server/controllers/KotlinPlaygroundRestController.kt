@@ -40,6 +40,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
             when (project.confType) {
               ProjectType.JAVA -> kotlinProjectExecutor.run(project)
               ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
+              ProjectType.JS_IR -> kotlinProjectExecutor.convertToJsIr(project)
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }
           }
