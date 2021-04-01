@@ -25,14 +25,23 @@ class TestProjectRunner {
     runAndTest(project, contains)
   }
 
-  fun runJs(code: String, contains: String, args: String = "") {
+  fun runJs(
+    code: String,
+    contains: String,
+    args: String = "",
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+  ) {
     val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
-    convertAndTest(project, contains)
+    convertAndTest(project, contains, convert)
   }
 
-  fun multiRunJs(code: List<String>, contains: String) {
+  fun multiRunJs(
+    code: List<String>,
+    contains: String,
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+  ) {
     val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
-    convertAndTest(project, contains)
+    convertAndTest(project, contains, convert)
   }
 
   fun translateToJs(code: String): TranslationJSResult {
@@ -116,8 +125,12 @@ class TestProjectRunner {
     return result
   }
 
-  private fun convertAndTest(project: Project, contains: String) {
-    val result = kotlinProjectExecutor.convertToJs(project)
+  private fun convertAndTest(
+    project: Project,
+    contains: String,
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+  ) {
+    val result = kotlinProjectExecutor.convert(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
     Assertions.assertFalse(result.hasErrors) {
       "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
