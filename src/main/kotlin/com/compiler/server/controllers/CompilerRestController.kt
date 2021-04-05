@@ -2,6 +2,7 @@ package com.compiler.server.controllers
 
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.Project
+import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.bean.VersionInfo
 import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.web.bind.annotation.*
@@ -16,10 +17,13 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   fun testKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.test(project)
 
   @PostMapping("/translate")
-  fun translateKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.convertToJs(project)
-
-  @PostMapping("/translate-ir")
-  fun translateIrKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.convertToJsIr(project)
+  fun translateKotlinProjectEndpoint(
+    @RequestBody project: Project,
+    @RequestParam(defaultValue = "false") ir: Boolean
+  ): TranslationJSResult {
+    return if (ir) kotlinProjectExecutor.convertToJsIr(project)
+    else kotlinProjectExecutor.convertToJs(project)
+  }
 
   @PostMapping("/complete")
   fun getKotlinCompleteEndpoint(
