@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.jetbrains.kotlin.util.Logger
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import java.io.File
+import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
 
 class KotlinEnvironment(
   val classpath: List<File>,
@@ -115,12 +116,12 @@ class KotlinEnvironment(
       val messageCollector = MessageCollector.NONE
       put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
-      with(K2JVMCompilerArguments()) {
-        put(JVMConfigurationKeys.DISABLE_PARAM_ASSERTIONS, noParamAssertions)
-        put(JVMConfigurationKeys.DISABLE_CALL_ASSERTIONS, noCallAssertions)
-        put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
-      }
+      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
+
       languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
+
+      // it uses languageVersionSettings that was set above
+      configureAdvancedJvmOptions(arguments)
     }
   }
 }
