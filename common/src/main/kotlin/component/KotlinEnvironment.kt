@@ -89,6 +89,7 @@ class KotlinEnvironment(
 
   val jsIrResolvedLibraries = jsResolveLibraries(
     JS_LIBRARIES,
+    emptyList(),
     object : Logger {
       override fun error(message: String) {}
       override fun fatal(message: String): Nothing {
