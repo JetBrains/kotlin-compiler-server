@@ -122,6 +122,7 @@ class KotlinEnvironment(
 
       // it uses languageVersionSettings that was set above
       configureAdvancedJvmOptions(arguments)
+      put(JVMConfigurationKeys.DO_NOT_CLEAR_BINDING_CONTEXT, true)
     }
   }
 }
