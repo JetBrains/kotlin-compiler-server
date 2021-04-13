@@ -65,7 +65,7 @@ class KotlinEnvironment(
   }
 
   private val configuration = createConfiguration()
-  val jsConfiguration = configuration.copy().apply {
+  val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
     put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
