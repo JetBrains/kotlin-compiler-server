@@ -53,7 +53,7 @@ allprojects {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
         maven("https://kotlin.bintray.com/kotlin-ide-plugin-dependencies")
-        maven("http://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
+        maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
     }
     afterEvaluate {
