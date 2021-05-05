@@ -44,8 +44,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.4.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.4.30"
-    kotlin("plugin.spring") version "1.4.30"
+    kotlin("jvm") version "1.5.0"
+    kotlin("plugin.spring") version "1.5.0"
 }
 
 allprojects {
@@ -53,8 +53,8 @@ allprojects {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
         maven("https://kotlin.bintray.com/kotlin-ide-plugin-dependencies")
-        maven("https://jetbrains.bintray.com/intellij-third-party-dependencies")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-compiler-for-ide")
+        maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
     }
     afterEvaluate {
         dependencies {
@@ -79,7 +79,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.3")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.0-RC")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
@@ -95,7 +95,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion")
     implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
     implementation("org.jetbrains.kotlin:core:202-$kotlinIdeVersion-IJ8194.7")
     implementation(project(":executors", configuration = "default"))
@@ -104,7 +104,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.0-RC")
 }
 
 fun buildPropertyFile() {

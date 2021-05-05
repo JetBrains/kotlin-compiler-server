@@ -8,10 +8,16 @@ import com.compiler.server.model.bean.LibrariesFile
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
+import org.jetbrains.kotlin.backend.common.phaser.PhaseConfig
+import org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory
+import org.jetbrains.kotlin.backend.jvm.jvmPhases
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
+import org.jetbrains.kotlin.codegen.DefaultCodegenFactory
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
+import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.idea.MainFunctionDetector
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
@@ -117,6 +123,10 @@ class KotlinCompiler(
     analysis: Analysis,
     coreEnvironment: KotlinCoreEnvironment
   ): GenerationState {
+    val codegenFactory = if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR)) JvmIrCodegenFactory(
+            coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
+    ) else DefaultCodegenFactory
+
     return GenerationState.Builder(
       files.first().project,
       ClassBuilderFactories.BINARIES,
@@ -124,7 +134,7 @@ class KotlinCompiler(
       analysis.analysisResult.bindingContext,
       files,
       coreEnvironment.configuration
-    ).build()
+    ).codegenFactory(codegenFactory).build()
   }
 
   private fun argsFrom(

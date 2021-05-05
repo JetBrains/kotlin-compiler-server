@@ -2,8 +2,8 @@ data class Item(val name: String, val price: Float)                             
 
 data class Order(val items: Collection<Item>)  
 
-fun Order.maxPricedItemValue(): Float = this.items.maxBy { it.price }?.price ?: 0F    // 2  
-fun Order.maxPricedItemName() = this.items.maxBy { it.price }?.name ?: "NO_PRODUCTS"
+fun Order.maxPricedItemValue(): Float = this.items.maxByOrNull { it.price }?.price ?: 0F    // 2
+fun Order.maxPricedItemName() = this.items.maxByOrNull { it.price }?.name ?: "NO_PRODUCTS"
 
 val Order.commaDelimitedItemNames: String                                             // 3
     get() = items.map { it.name }.joinToString()
