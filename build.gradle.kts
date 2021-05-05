@@ -42,7 +42,7 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.4.4"
+    id("org.springframework.boot") version "2.4.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.5.0"
     kotlin("plugin.spring") version "1.5.0"
@@ -59,7 +59,7 @@ allprojects {
     afterEvaluate {
         dependencies {
             dependencies {
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
                 implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
                     isTransitive = false
                 }

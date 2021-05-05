@@ -18,11 +18,11 @@ class IndexationProvider(
     private val log = LogFactory.getLog(IndexationProvider::class.java)
   }
 
-  private val jvmIndexes: List<ImportInfo>? by lazy {
+  private val jvmIndexes: Map<String, List<ImportInfo>>? by lazy {
     initIndexes(indexesFileName)
   }
 
-  private val jsIndexes: List<ImportInfo>? by lazy {
+  private val jsIndexes: Map<String, List<ImportInfo>>? by lazy {
     initIndexes(indexesJsFileName)
   }
 
@@ -30,10 +30,10 @@ class IndexationProvider(
 
   fun getClassesByName(name: String, isJs: Boolean): List<ImportInfo>? {
     val indexes = if (isJs) jsIndexes else jvmIndexes
-    return indexes?.filter { it.shortName == name }
+    return indexes?.get(name)
   }
 
-  private fun initIndexes(fileName: String): List<ImportInfo>? {
+  private fun initIndexes(fileName: String): Map<String, List<ImportInfo>>? {
     val file = File(fileName)
     if (file.exists().not()) {
       log.warn("No file was found at path: $fileName")
@@ -46,5 +46,6 @@ class IndexationProvider(
     return indexes
   }
 
-  private fun readIndexesFromJson(file: File): List<ImportInfo> = jacksonObjectMapper().readValue(file.readText())
+  private fun readIndexesFromJson(file: File): Map<String, List<ImportInfo>> =
+    jacksonObjectMapper().readValue(file.readText())
 }

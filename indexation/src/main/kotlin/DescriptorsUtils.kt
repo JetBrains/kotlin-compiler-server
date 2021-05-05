@@ -26,6 +26,7 @@ internal val renderer = IdeDescriptorRenderers.SOURCE_CODE.withOptions {
 
 internal fun DeclarationDescriptor.toImportInfo(): ImportInfo? {
   val importName = importableFqName?.asString() ?: return null
+  if (name.asString() == "Companion") return null
   return when (this) {
     is FunctionDescriptor -> {
       if (visibility.isPublicAPI) {
