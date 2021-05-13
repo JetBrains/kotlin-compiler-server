@@ -1,0 +1,34 @@
+name: Collect samples CRON
+
+on:
+  schedule:
+   - cron: '30 18 * * 1,4' # 18:30 UTC Mon, Thu
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - repo: 'https://github.com/JetBrains/kotlin-web-site'
+            filter: '#tag="code" & kotlin-runnable="true"'
+            path: 'src/test/resources/test-compile-data/kotlin-web-site'
+          - repo: 'https://github.com/Kotlin/kotlin-by-example'
+            filter: '#tag="code" & class="language-run-kotlin"'
+            path: 'src/test/resources/test-compile-data//kotlin-by-example'
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '15'
+          distribution: 'adopt'
+      - name: Run a verifier
+        uses: vmishenev/kotlin-samples-pusher@dev
+        with:
+          io-event: '' #reset default behavior
+          repository: '${{ matrix.repo }}'
+          verify-branch: 'master'
+          push-repository: 'https://github.com/${{github.repository}}'
+          tag-filter: '${{ matrix.filter }}'
+          push-path: '${{ matrix.path }}'
+          username: '${{ secrets.GITHUB_TOKEN }}' #token with an access to create PR in push-repository
