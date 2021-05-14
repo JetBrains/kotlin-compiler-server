@@ -31,4 +31,4 @@ jobs:
           push-repository: 'https://github.com/${{github.repository}}'
           tag-filter: '${{ matrix.filter }}'
           push-path: '${{ matrix.path }}'
-          username: '${{ secrets.COMPILE_SERVICE_PUSHER }}' #token with an access to create PR in push-repository
+          username: '${{ secrets.GITHUB_TOKEN }}' #token with an access to create PR in push-repository
