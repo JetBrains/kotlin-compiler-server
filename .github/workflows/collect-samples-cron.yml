@@ -11,11 +11,11 @@ jobs:
       matrix:
         include:
           - repo: 'https://github.com/JetBrains/kotlin-web-site'
-            filter: '#tag="code" & kotlin-runnable="true"'
-            path: 'src/test/resources/test-compile-data/kotlin-web-site'
+            filter: '#tag="code" & kotlin-runnable="true" & !validate="false"'
+            path: 'src/test/resources/test-compile-data/jvm/kotlin-web-site'
           - repo: 'https://github.com/Kotlin/kotlin-by-example'
             filter: '#tag="code" & class="language-run-kotlin"'
-            path: 'src/test/resources/test-compile-data//kotlin-by-example'
+            path: 'src/test/resources/test-compile-data/jvm/kotlin-by-example'
     steps:
       - name: Set up JDK
         uses: actions/setup-java@v2
