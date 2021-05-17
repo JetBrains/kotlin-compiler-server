@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by System.getProperties()
 val kotlinIdeVersion: String by System.getProperties()
@@ -135,6 +136,11 @@ tasks.withType<KotlinCompile> {
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
+}
+
+tasks.withType<BootJar> {
+    requiresUnpack("**/kotlin-*.jar")
+    requiresUnpack("**/kotlinx-*.jar")
 }
 
 val buildLambda by tasks.creating(Zip::class) {
