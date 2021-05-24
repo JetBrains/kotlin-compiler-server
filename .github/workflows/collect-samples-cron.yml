@@ -23,7 +23,7 @@ jobs:
           java-version: '15'
           distribution: 'adopt'
       - name: Run a verifier
-        uses: AlexanderPrendota/kotlin-samples-pusher
+        uses: AlexanderPrendota/kotlin-samples-pusher@v1
         with:
           io-event: '' #reset default behavior
           repository: '${{ matrix.repo }}'
