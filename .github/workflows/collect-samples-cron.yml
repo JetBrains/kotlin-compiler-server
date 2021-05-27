@@ -14,10 +14,10 @@ jobs:
             filter: '#tag="code" & kotlin-runnable="true" & !validate="false"'
             path: 'src/test/resources/test-compile-data/jvm/kotlin-web-site'
           - repo: 'https://github.com/Kotlin/kotlin-by-example'
-            filter: '#tag="code" & class="language-run-kotlin"'
+            filter: '#tag="code" & class="language-run-kotlin" & !validate="false"'
             path: 'src/test/resources/test-compile-data/jvm/kotlin-by-example'
           - repo: 'https://github.com/kotlin-hands-on/hands-on'
-            filter: '#tag="code" & class="language-run-kotlin"'
+            filter: '#tag="code" & class="language-run-kotlin" & !validate="false"'
             path: 'src/test/resources/test-compile-data/jvm/kotlin-hands-on'
     steps:
       - name: Set up JDK
