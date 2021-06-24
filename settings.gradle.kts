@@ -5,8 +5,8 @@ pluginManagement {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
     }
     plugins{
-        kotlin("jvm") version "1.5.20-282"
-        kotlin("plugin.spring") version "1.5.20-282"
+        kotlin("jvm") version "1.5.20"
+        kotlin("plugin.spring") version "1.5.20"
     }
 }
 
