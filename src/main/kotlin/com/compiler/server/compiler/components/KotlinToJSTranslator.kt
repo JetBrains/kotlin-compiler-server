@@ -8,12 +8,15 @@ import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.compile
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.declarations.persistent.PersistentIrFactory
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
 import org.jetbrains.kotlin.js.facade.TranslationResult
 import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.resolve.CompilerEnvironment
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -61,6 +64,7 @@ class KotlinToJSTranslator(
     val configuration = JsConfig(
       currentProject,
       kotlinEnvironment.jsConfiguration,
+      CompilerEnvironment,
       kotlinEnvironment.JS_METADATA_CACHE,
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
@@ -95,6 +99,7 @@ class KotlinToJSTranslator(
     val configuration = JsConfig(
       currentProject,
       kotlinEnvironment.jsConfiguration,
+      CompilerEnvironment,
       kotlinEnvironment.JS_METADATA_CACHE,
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
@@ -108,7 +113,8 @@ class KotlinToJSTranslator(
       allDependencies = kotlinEnvironment.jsIrResolvedLibraries,
       friendDependencies = emptyList(),
       propertyLazyInitialization = false,
-      mainArguments = arguments
+      mainArguments = arguments,
+      irFactory = IrFactoryImpl
     )
     val jsCode = result.jsCode!!.mainModule
 

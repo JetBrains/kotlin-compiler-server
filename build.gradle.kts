@@ -45,8 +45,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.4.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.5.10"
-    kotlin("plugin.spring") version "1.5.10"
+    kotlin("jvm") version "1.5.20"
+    kotlin("plugin.spring") version "1.5.20"
 }
 
 allprojects {
@@ -56,10 +56,12 @@ allprojects {
         maven("https://kotlin.bintray.com/kotlin-ide-plugin-dependencies")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
+        maven("https://www.myget.org/F/rd-snapshots/maven/")
     }
     afterEvaluate {
         dependencies {
             dependencies {
+                implementation("com.jetbrains.rd:rd-core:0.202.100")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
                 implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
                     isTransitive = false
