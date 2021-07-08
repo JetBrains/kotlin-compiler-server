@@ -5,8 +5,8 @@ open class Rectangle {
 
 //sampleStart
 class FilledRectangle: Rectangle() {
-    override fun draw() { 
-    	val filler = Filler()
+    override fun draw() {
+        val filler = Filler()
         filler.drawAndFill()
     }
     
