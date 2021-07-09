@@ -3,18 +3,18 @@ class Host(val hostname: String) {
 }
 
 class Connection(val host: Host, val port: Int) {
-     fun printPort() { print(port) }
+    fun printPort() { print(port) }
 
-     fun Host.printConnectionString() {
-         printHostname()   // calls Host.printHostname()
-         print(":")
-         printPort()   // calls Connection.printPort()
-     }
+    fun Host.printConnectionString() {
+        printHostname()   // calls Host.printHostname()
+        print(":")
+        printPort()   // calls Connection.printPort()
+    }
 
-     fun connect() {
-         /*...*/
-         host.printConnectionString()   // calls the extension function
-     }
+    fun connect() {
+        /*...*/
+        host.printConnectionString()   // calls the extension function
+    }
 }
 
 fun main() {
