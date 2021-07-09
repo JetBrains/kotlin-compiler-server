@@ -4,7 +4,7 @@ fun main() {
     val intPlus: Int.(Int) -> Int = Int::plus
     
     println(stringPlus.invoke("<-", "->"))
-    println(stringPlus("Hello, ", "world!")) 
+    println(stringPlus("Hello, ", "world!"))
     
     println(intPlus.invoke(1, 1))
     println(intPlus(1, 2))
