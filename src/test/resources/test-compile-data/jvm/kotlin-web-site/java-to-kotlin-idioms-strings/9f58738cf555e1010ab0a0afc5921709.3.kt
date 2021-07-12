@@ -1,10 +1,10 @@
 fun main() {
 //sampleStart
     // Kotlin
-    val numbers = mutableListOf(1, 2, 3, 4, 5, 6)
-    val oddNumbers = numbers
+    val numbers = listOf(1, 2, 3, 4, 5, 6)
+    val invertedOddNumbers = numbers
         .filter { it % 2 != 0 }
         .joinToString{ "${-it}" }
-  println(oddNumbers)
+    println(invertedOddNumbers)
 //sampleEnd
 }
