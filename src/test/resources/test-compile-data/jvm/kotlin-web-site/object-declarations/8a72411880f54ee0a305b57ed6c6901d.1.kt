@@ -4,7 +4,7 @@ fun main() {
         val hello = "Hello"
         val world = "World"
         // object expressions extend Any, so `override` is required on `toString()`
-        override fun toString() = "$hello $world" 
+        override fun toString() = "$hello $world"
     }
 //sampleEnd
     print(helloWorld)
