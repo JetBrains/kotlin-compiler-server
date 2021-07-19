@@ -1,4 +1,4 @@
-fun main(args: Array<String>) {
+fun main() {
 //sampleStart
 
   val authors = setOf("Shakespeare", "Hemingway", "Twain")
