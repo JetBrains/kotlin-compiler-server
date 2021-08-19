@@ -117,7 +117,7 @@ curl -X POST \
   "files": [
     {
       "name": "File.kt",
-      "text": "fun main() {\n    val sinusoid = "sinusoid"\n    val s = sin\n}"
+      "text": "fun main() {\n    val sinusoid = \"sinusoid\"\n    val s = sin\n}"
     }
   ]
 }'
