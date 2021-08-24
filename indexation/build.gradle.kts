@@ -10,7 +10,9 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion") {
+        isTransitive = false
+    }
 }
 
 application {
@@ -19,5 +21,9 @@ application {
 
 tasks.withType<JavaExec> {
     val rootName = project.rootProject.projectDir.toString()
-    args = listOf("$rootName${File.separator}$kotlinVersion", "$rootName${File.separator}$indexes", "$rootName${File.separator}$indexesJs")
+    args = listOf(
+        "$rootName${File.separator}$kotlinVersion",
+        "$rootName${File.separator}$indexes",
+        "$rootName${File.separator}$indexesJs"
+    )
 }
