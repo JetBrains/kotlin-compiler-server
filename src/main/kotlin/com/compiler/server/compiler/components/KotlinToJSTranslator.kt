@@ -116,7 +116,7 @@ class KotlinToJSTranslator(
       mainArguments = arguments,
       irFactory = IrFactoryImpl
     )
-    val jsCode = result.jsCode!!.mainModule
+    val jsCode = result.outputs!!.jsCode
 
     val listLines = jsCode
       .lineSequence()
