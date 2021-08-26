@@ -14,6 +14,19 @@ open class ExecutionResult(
   fun addWarnings(warnings: Map<String, List<ErrorDescriptor>>) {
     errors = warnings
   }
+
+  fun isUnsuccessful() =
+    textWithError() || errors.any { (_, value) -> value.any { it.severity == ProjectSeveriry.ERROR } }
+
+  fun errorsMessages(): List<String> {
+    val compilationErrors: List<String> =
+      errors.flatMap { it.value }.filter { it.severity == ProjectSeveriry.ERROR }.map { it.message }
+
+    return if (textWithError()) compilationErrors + text
+    else compilationErrors
+  }
+
+  private fun textWithError() = text.startsWith("<errStream>")
 }
 
 data class TranslationJSResult(

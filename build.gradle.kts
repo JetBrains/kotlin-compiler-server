@@ -8,6 +8,7 @@ val kotlinIdeVersion: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
+val executorLogs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
@@ -129,6 +130,7 @@ fun generateProperties(prefix: String = "") = """
     indexesJs.file=${prefix + indexesJs}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
+    executor.logs=${executorLogs}
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {

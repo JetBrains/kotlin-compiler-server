@@ -6,8 +6,10 @@ import com.compiler.server.model.*
 import common.model.Completion
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
-import org.apache.commons.logging.LogFactory
+import net.logstash.logback.marker.Markers
+import org.slf4j.LoggerFactory
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,23 +19,24 @@ class KotlinProjectExecutor(
   private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
-  private val kotlinEnvironment: KotlinEnvironment
+  private val kotlinEnvironment: KotlinEnvironment,
+  @Value("\${executor.logs}") private val executorLogs: Boolean
 ) {
 
-  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
+  private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
   fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.run(files, environment, project.args)
-    }
+    }.also { onExecutionResult(project, it) }
   }
 
   fun test(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.test(files, environment)
-    }
+    }.also { onExecutionResult(project, it) }
   }
 
   fun convertToJs(project: Project): TranslationJSResult {
@@ -45,7 +48,7 @@ class KotlinProjectExecutor(
         environment,
         kotlinToJSTranslator::doTranslate
       )
-    }
+    }.also { onExecutionResult(project, it) }
   }
 
   fun convertToJsIr(project: Project): TranslationJSResult {
@@ -57,7 +60,7 @@ class KotlinProjectExecutor(
         environment,
         kotlinToJSTranslator::doTranslateWithIr
       )
-    }
+    }.also { onExecutionResult(project, it) }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -95,4 +98,24 @@ class KotlinProjectExecutor(
   private fun getFilesFrom(project: Project, coreEnvironment: KotlinCoreEnvironment) = project.files.map {
     KotlinFile.from(coreEnvironment.project, it.name, it.text)
   }
+
+  private fun onExecutionResult(project: Project, executionResult: ExecutionResult) {
+    if (executorLogs && executionResult.isUnsuccessful()) {
+      log.info(
+        Markers.appendFields(
+          UnsuccessfulExecutionDetails(
+            executionResult.errorsMessages(),
+            project.confType.toString(),
+            getVersion().version
+          )
+        ), "Execution is unsuccessful."
+      )
+    }
+  }
 }
+
+data class UnsuccessfulExecutionDetails(
+  val executionErrors: List<String>,
+  val confType: String,
+  val kotlinVersion: String
+)
