@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine as build
+FROM openjdk:18-jdk-alpine as build
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
@@ -7,7 +7,7 @@ ADD . /kotlin-compiler-server
 RUN ./gradlew build -x test
 RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/*.jar)
 
-FROM openjdk:8-jdk-alpine
+FROM openjdk:18-jdk-alpine
 
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
