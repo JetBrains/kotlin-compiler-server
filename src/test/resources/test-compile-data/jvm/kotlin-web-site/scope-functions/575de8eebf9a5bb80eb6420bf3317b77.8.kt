@@ -1,11 +1,17 @@
+import kotlin.random.Random
+
+fun writeToLog(message: String) {
+    println("INFO: $message")
+}
+
 fun main() {
 //sampleStart
-    val numbers = mutableListOf("one", "two", "three")
-    val countEndsWithE = numbers.run { 
-        add("four")
-        add("five")
-        count { it.endsWith("e") }
+    fun getRandomInt(): Int {
+        return Random.nextInt(100).also {
+            writeToLog("getRandomInt() generated value $it")
+        }
     }
-    println("There are $countEndsWithE elements that end with e.")
+    
+    val i = getRandomInt()
 //sampleEnd
 }

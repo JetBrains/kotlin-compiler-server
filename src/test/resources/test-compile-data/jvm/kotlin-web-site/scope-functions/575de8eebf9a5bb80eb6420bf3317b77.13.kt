@@ -1,13 +1,6 @@
-fun processNonNullString(str: String) {}
-
 fun main() {
 //sampleStart
-    val str: String? = "Hello"   
-    //processNonNullString(str)       // compilation error: str can be null
-    val length = str?.let { 
-        println("let() called on $it")        
-        processNonNullString(it)      // OK: 'it' is not null inside '?.let { }'
-        it.length
-    }
+    val numbers = mutableListOf("one", "two", "three", "four", "five")
+    numbers.map { it.length }.filter { it > 3 }.let(::println)
 //sampleEnd
 }

@@ -1,8 +1,11 @@
+data class Person(var name: String, var age: Int = 0, var city: String = "")
+
 fun main() {
 //sampleStart
-    val numbers = mutableListOf("one", "two", "three")
-    numbers
-        .also { println("The list elements before adding new one: $it") }
-        .add("four")
+    val adam = Person("Adam").apply {
+        age = 32
+        city = "London"        
+    }
+    println(adam)
 //sampleEnd
 }

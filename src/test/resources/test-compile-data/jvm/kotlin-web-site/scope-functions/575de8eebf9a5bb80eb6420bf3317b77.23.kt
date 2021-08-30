@@ -1,13 +1,8 @@
 fun main() {
 //sampleStart
-    fun displaySubstringPosition(input: String, sub: String) {
-        input.indexOf(sub).takeIf { it >= 0 }?.let {
-            println("The substring $sub is found in $input.")
-            println("Its start position is $it.")
-        }
-    }
-
-    displaySubstringPosition("010000011", "11")
-    displaySubstringPosition("010000011", "12")
+    val str = "Hello"
+    val caps = str.takeIf { it.isNotEmpty() }?.uppercase()
+   //val caps = str.takeIf { it.isNotEmpty() }.uppercase() //compilation error
+    println(caps)
 //sampleEnd
 }

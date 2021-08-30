@@ -1,11 +1,15 @@
-data class Person(var name: String, var age: Int = 0, var city: String = "")
-
 fun main() {
 //sampleStart
-    val adam = Person("Adam").apply {
-        age = 32
-        city = "London"        
+    val hexNumberRegex = run {
+        val digits = "0-9"
+        val hexDigits = "A-Fa-f"
+        val sign = "+-"
+        
+        Regex("[$sign]?[$digits$hexDigits]+")
     }
-    println(adam)
+    
+    for (match in hexNumberRegex.findAll("+1234 -FFFF not-a-number")) {
+        println(match.value)
+    }
 //sampleEnd
 }
