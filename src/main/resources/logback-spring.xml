@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appender name="jsonAppender" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>date_time</timestamp>
+            </fieldNames>
+            <timestampPattern>dd/MMM/yyyy:HH:mm:ss XXX</timestampPattern>
+        </encoder>
     </appender>
 
     <root level="INFO">
