@@ -1,10 +1,13 @@
+fun processNonNullString(str: String) {}
+
 fun main() {
 //sampleStart
-    val numbers = listOf("one", "two", "three", "four")
-    val modifiedFirstItem = numbers.first().let { firstItem ->
-        println("The first item of the list is '$firstItem'")
-        if (firstItem.length >= 5) firstItem else "!" + firstItem + "!"
-    }.uppercase()
-    println("First item after modifications: '$modifiedFirstItem'")
+    val str: String? = "Hello"   
+    //processNonNullString(str)       // compilation error: str can be null
+    val length = str?.let { 
+        println("let() called on $it")        
+        processNonNullString(it)      // OK: 'it' is not null inside '?.let { }'
+        it.length
+    }
 //sampleEnd
 }

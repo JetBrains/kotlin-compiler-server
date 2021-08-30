@@ -13,5 +13,6 @@ fun main() {
     }
     
     val i = getRandomInt()
+    println(i)
 //sampleEnd
 }

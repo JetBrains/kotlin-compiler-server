@@ -1,7 +1,10 @@
 fun main() {
 //sampleStart
-    val numbers = mutableListOf("one", "two", "three", "four", "five")
-    val resultList = numbers.map { it.length }.filter { it > 3 }
-    println(resultList)    
+    val numbers = mutableListOf("one", "two", "three")
+    with(numbers) {
+        val firstItem = first()
+        val lastItem = last()        
+        println("First item: $firstItem, last item: $lastItem")
+    }
 //sampleEnd
 }

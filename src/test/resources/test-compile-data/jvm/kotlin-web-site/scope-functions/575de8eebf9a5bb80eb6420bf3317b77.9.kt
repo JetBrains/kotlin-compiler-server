@@ -1,10 +1,11 @@
 fun main() {
 //sampleStart
     val numbers = mutableListOf("one", "two", "three")
-    with(numbers) {
-        val firstItem = first()
-        val lastItem = last()        
-        println("First item: $firstItem, last item: $lastItem")
+    val countEndsWithE = numbers.run { 
+        add("four")
+        add("five")
+        count { it.endsWith("e") }
     }
+    println("There are $countEndsWithE elements that end with e.")
 //sampleEnd
 }
