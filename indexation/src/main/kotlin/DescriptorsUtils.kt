@@ -1,6 +1,6 @@
 package indexation
 
-import common.model.ImportInfo
+import model.ImportInfo
 import model.Icon
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.imports.importableFqName
