@@ -13,9 +13,9 @@ object LoggerHelper {
     log.info(
       Markers.appendFields(
         UnsuccessfulExecutionDetails(
-          executionResult.errorsMessages(),
-          type.toString(),
-          version
+          executionErrors = executionResult.errorsMessages(),
+          confType = type.toString(),
+          version = version
         )
       ), "Execution is unsuccessful."
     )
