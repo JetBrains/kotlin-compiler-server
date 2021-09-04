@@ -5,7 +5,7 @@ import com.compiler.server.base.hasErrors
 import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
-import common.model.Completion
+import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
