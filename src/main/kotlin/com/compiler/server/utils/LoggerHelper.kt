@@ -24,6 +24,6 @@ object LoggerHelper {
   private data class UnsuccessfulExecutionDetails(
     val executionErrors: List<String>,
     val confType: String,
-    val kotlinVersion: String
+    val version: String
   )
 }
