@@ -9,11 +9,12 @@ object LoggerHelper {
   private val log = LoggerFactory.getLogger(LoggerHelper::class.java)
 
   fun logUnsuccessfulExecutionResult(executionResult: ExecutionResult, type: ProjectType, version: String) {
-    if (executionResult.isUnsuccessful().not()) return
+    val errors = executionResult.getErrorMessages()
+    if (errors.isEmpty()) return
     log.info(
       Markers.appendFields(
         UnsuccessfulExecutionDetails(
-          executionErrors = executionResult.errorsMessages(),
+          executionErrors = errors,
           confType = type.toString(),
           version = version
         )
