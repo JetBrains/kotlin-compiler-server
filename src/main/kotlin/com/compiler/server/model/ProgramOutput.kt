@@ -11,6 +11,9 @@ val outputMapper = ObjectMapper().apply {
   })
 }
 
+const val ERROR_STREAM_START = "<errStream>"
+const val ERROR_STREAM_END = "</errStream>"
+
 data class ProgramOutput(
   val standardOutput: String = "",
   val exception: Exception? = null,
@@ -52,5 +55,5 @@ data class ProgramOutput(
     }
   }
 
-  private fun buildRestriction(restriction: String) = "<errStream>$restriction</errStream>"
+  private fun buildRestriction(restriction: String) = "$ERROR_STREAM_START$restriction${ERROR_STREAM_END}"
 }
