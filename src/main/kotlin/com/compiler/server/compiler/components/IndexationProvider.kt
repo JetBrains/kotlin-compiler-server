@@ -2,7 +2,7 @@ package com.compiler.server.compiler.components
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import common.model.ImportInfo
+import model.ImportInfo
 import org.apache.commons.logging.LogFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
