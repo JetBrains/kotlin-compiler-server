@@ -1,6 +1,6 @@
 package indexation
 
-import common.model.ImportInfo
+import model.ImportInfo
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
