@@ -4,10 +4,10 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
-import common.model.Completion
+import model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import common.model.completionTextFromFullName
+import model.completionTextFromFullName
 import model.Icon
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
