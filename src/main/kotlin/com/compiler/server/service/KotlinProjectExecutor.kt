@@ -27,23 +27,24 @@ class KotlinProjectExecutor(
   private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
-  private val kotlinEnvironment: KotlinEnvironment
+  private val kotlinEnvironment: KotlinEnvironment,
+  @Value("\${executor.logs}") private val executorLogs: Boolean
 ) {
 
-  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
+  private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
   fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.run(files, environment, project.args)
-    }
+    }.also { logExecutionResult(project, it) }
   }
 
   fun test(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.test(files, environment)
-    }
+    }.also { logExecutionResult(project, it) }
   }
 
   fun convertToJs(project: Project): TranslationJSResult {
