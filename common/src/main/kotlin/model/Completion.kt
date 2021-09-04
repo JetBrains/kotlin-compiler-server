@@ -1,7 +1,6 @@
-package common.model
+package model
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import model.Icon
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Completion(

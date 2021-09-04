@@ -1,7 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
-import common.model.Completion
+import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
