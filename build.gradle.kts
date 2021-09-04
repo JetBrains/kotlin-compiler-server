@@ -3,6 +3,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by System.getProperties()
 val policy: String by System.getProperties()
+val executorLogs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
@@ -63,6 +64,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.5")
     implementation("junit:junit:4.12")
+    implementation("net.logstash.logback:logstash-logback-encoder:6.6")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20190514")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -98,6 +100,7 @@ fun generateProperties(prefix: String = "") = """
     policy.file=${prefix + policy}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
+    executor.logs=${executorLogs}
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {

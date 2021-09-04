@@ -4,7 +4,9 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
-import org.apache.commons.logging.LogFactory
+import com.compiler.server.utils.LoggerHelper
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,19 +16,20 @@ class KotlinProjectExecutor(
   private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
-  private val kotlinEnvironment: KotlinEnvironment
+  private val kotlinEnvironment: KotlinEnvironment,
+  @Value("\${executor.logs}") private val executorLogs: Boolean
 ) {
 
-  private val log = LogFactory.getLog(KotlinProjectExecutor::class.java)
+  private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
   fun run(project: Project): ExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinCompiler.run(files, project.args)
+    return kotlinCompiler.run(files, project.args).also { logExecutionResult(project, it) }
   }
 
   fun test(project: Project): ExecutionResult {
     val files = getFilesFrom(project).map { it.kotlinFile }
-    return kotlinCompiler.test(files)
+    return kotlinCompiler.test(files).also { logExecutionResult(project, it) }
   }
 
   fun convertToJs(project: Project): TranslationJSResult {
@@ -61,5 +64,14 @@ class KotlinProjectExecutor(
 
   private fun getFilesFrom(project: Project) = project.files.map {
     KotlinFile.from(kotlinEnvironment.coreEnvironment.project, it.name, it.text)
+  }
+
+  private fun logExecutionResult(project: Project, executionResult: ExecutionResult) {
+    if (executorLogs.not()) return
+    LoggerHelper.logUnsuccessfulExecutionResult(
+      executionResult,
+      project.confType,
+      getVersion().version
+    )
   }
 }
