@@ -1,7 +1,7 @@
 package indexation
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import common.model.ImportInfo
+import model.ImportInfo
 import java.io.File
 
 abstract class IndexationBuilder {
