@@ -11,8 +11,8 @@ import com.compiler.server.model.Project
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.bean.VersionInfo
 import com.compiler.server.utils.LoggerHelper
-import model.Completion
 import component.KotlinEnvironment
+import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
@@ -37,14 +37,14 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.run(files, environment, project.args)
-    }.also { logExecutionResult(project, it) }
+    }.also { logExecutionResult(project) }
   }
 
   fun test(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinCompiler.test(files, environment)
-    }.also { logExecutionResult(project, it) }
+    }.also { logExecutionResult(project) }
   }
 
   fun convertToJs(project: Project): TranslationJSResult {
@@ -99,16 +99,12 @@ class KotlinProjectExecutor(
         environment,
         converter
       )
-    }.also { logExecutionResult(project, it) }
+    }.also { logExecutionResult(project) }
   }
 
-  private fun logExecutionResult(project: Project, executionResult: ExecutionResult) {
+  private fun logExecutionResult(project: Project) {
     if (executorLogs.not()) return
-    LoggerHelper.logUnsuccessfulExecutionResult(
-      executionResult,
-      project.confType,
-      getVersion().version
-    )
+    LoggerHelper.logUnsuccessfulExecutionResult(project.confType, getVersion().version)
   }
 
   private fun getFilesFrom(project: Project, coreEnvironment: KotlinCoreEnvironment) = project.files.map {
