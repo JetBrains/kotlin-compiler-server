@@ -8,19 +8,19 @@ import org.slf4j.LoggerFactory
 object LoggerHelper {
   private val log = LoggerFactory.getLogger(LoggerHelper::class.java)
 
-  fun logUnsuccessfulExecutionResult(executionResult: ExecutionResult, type: ProjectType, version: String) {
+  fun logExecutionResult(executionResult: ExecutionResult, type: ProjectType, version: String) {
     log.info(
       Markers.appendFields(
-        UnsuccessfulExecutionDetails(
+        ExecutionDetails(
           hasErrors = executionResult.hasErrors(),
           confType = type.toString(),
           version = version
         )
-      ), "Execution is unsuccessful."
+      ), "Code execution is complete."
     )
   }
 
-  private data class UnsuccessfulExecutionDetails(
+  private data class ExecutionDetails(
     val hasErrors: Boolean,
     val confType: String,
     val version: String
