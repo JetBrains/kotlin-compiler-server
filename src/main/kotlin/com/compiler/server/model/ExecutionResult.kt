@@ -14,15 +14,7 @@ open class ExecutionResult(
     errors = warnings
   }
 
-  fun getErrorMessages(): List<String> {
-    val compilationErrors =
-      errors.flatMap { it.value }
-        .filter { it.severity == ProjectSeveriry.ERROR }
-        .map { it.message }
-
-    return if (textWithError()) compilationErrors + text
-    else compilationErrors
-  }
+  fun hasErrors() = textWithError() || errors.any { (_, value) -> value.any { it.severity == ProjectSeveriry.ERROR } }
 
   private fun textWithError() = text.startsWith(ERROR_STREAM_START)
 }
