@@ -64,7 +64,7 @@ class KotlinProjectExecutor(
 
   private fun logExecutionResult(project: Project, executionResult: ExecutionResult) {
     if (executorLogs.not()) return
-    LoggerHelper.logUnsuccessfulExecutionResult(
+    LoggerHelper.logExecutionResult(
       executionResult,
       project.confType,
       getVersion().version
