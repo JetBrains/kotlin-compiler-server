@@ -179,7 +179,7 @@ In case of an unsuccessful execution in the standard output will be the event wi
 {
   "date_time": "31/Aug/2021:11:49:45 +03:00",
   "@version": "1",
-  "message": "Execution is unsuccessful.",
+  "message": "Code execution is complete.",
   "logger_name": "com.compiler.server.service.KotlinProjectExecutor",
   "thread_name": "http-nio-8080-exec-1",
   "level": "INFO",
