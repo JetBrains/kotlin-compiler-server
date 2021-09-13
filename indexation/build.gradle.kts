@@ -10,7 +10,7 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinVersion-release-310")
 }
 
 application {
