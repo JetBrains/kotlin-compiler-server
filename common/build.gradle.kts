@@ -7,5 +7,10 @@ plugins {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide") {
+        version {
+            strictly( "$kotlinVersion-release-310")
+        }
+    }
     implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
 }
