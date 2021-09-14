@@ -46,8 +46,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.5.4"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.5.30"
-    kotlin("plugin.spring") version "1.5.30"
+    kotlin("jvm") version "1.6.0-M1-454"
+    kotlin("plugin.spring") version "1.6.0-M1-454"
 }
 
 allprojects {
@@ -58,12 +58,13 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
         maven("https://www.myget.org/F/rd-snapshots/maven/")
         maven("https://kotlin.jetbrains.space/p/kotlin/packages/maven/kotlin-ide")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev/")
     }
     afterEvaluate {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5")
-                implementation("org.jetbrains.kotlin:idea:202-$kotlinIdeVersion-IJ8194.7") {
+                implementation("org.jetbrains.kotlin:idea:211-$kotlinIdeVersion-IJ7442.40") {
                     isTransitive = false
                 }
             }
@@ -102,8 +103,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:common:202-$kotlinIdeVersion-IJ8194.7")
-    implementation("org.jetbrains.kotlin:core:202-$kotlinIdeVersion-IJ8194.7")
+    implementation("org.jetbrains.kotlin:common:211-$kotlinIdeVersion-IJ7442.40")
+    implementation("org.jetbrains.kotlin:core:211-$kotlinIdeVersion-IJ7442.40")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
