@@ -6,10 +6,9 @@ import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.compile
+import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
-import org.jetbrains.kotlin.ir.declarations.persistent.PersistentIrFactory
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -96,22 +95,21 @@ class KotlinToJSTranslator(
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
     val currentProject = coreEnvironment.project
-    val configuration = JsConfig(
-      currentProject,
-      kotlinEnvironment.jsConfiguration,
-      CompilerEnvironment,
-      kotlinEnvironment.JS_METADATA_CACHE,
-      kotlinEnvironment.JS_LIBRARIES.toSet()
-    )
 
-    val result = compile(
+    val sourceModule = prepareAnalyzedSourceModule(
       currentProject,
-      MainModule.SourceFiles(files),
-      AnalyzerWithCompilerReport(configuration.configuration),
-      configuration.configuration,
-      kotlinEnvironment.jsIrPhaseConfig,
-      allDependencies = kotlinEnvironment.jsIrResolvedLibraries,
+      files,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_LIBRARIES,
       friendDependencies = emptyList(),
+      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+      icUseGlobalSignatures = false,
+      icUseStdlibCache = false,
+      icCache = emptyMap()
+    )
+    val result = compile(
+      sourceModule,
+      kotlinEnvironment.jsIrPhaseConfig,
       propertyLazyInitialization = false,
       mainArguments = arguments,
       irFactory = IrFactoryImpl
