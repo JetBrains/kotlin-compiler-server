@@ -9,6 +9,7 @@ import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.findMainClass
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
@@ -62,7 +63,7 @@ class KotlinCompiler(
         KotlinCodegenFacade.compileCorrectFiles(generationState)
         return Compiled(
             files = generationState.factory.asList().map { it.relativePath to it.asByteArray() }.toMap(),
-            mainClass = mainClassFrom(generationState.bindingContext, files)
+            mainClass = findMainClass(generationState.bindingContext, LanguageVersionSettingsImpl.DEFAULT, files)?.asString()
         )
     }
 
@@ -145,12 +146,5 @@ class KotlinCompiler(
         ).toList()
     }
 
-
-    private fun mainClassFrom(bindingContext: BindingContext, files: List<KtFile>): String? {
-        val mainFunctionDetector = MainFunctionDetector(bindingContext, LanguageVersionSettingsImpl.DEFAULT)
-        return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
-            PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
-        }
-    }
 
 }
