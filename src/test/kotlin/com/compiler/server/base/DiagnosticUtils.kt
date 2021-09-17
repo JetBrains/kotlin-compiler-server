@@ -25,7 +25,7 @@ val Map<String, List<ErrorDescriptor>>.filterOnlyErrors: List<ErrorDescriptor>
 
 fun renderErrorDescriptors(errors: List<ErrorDescriptor>): String {
     return buildString {
-        errors.forEach { appendln(it.renderErrorDescriptor()) }
+        errors.forEach { appendLine(it.renderErrorDescriptor()) }
     }
 }
 
