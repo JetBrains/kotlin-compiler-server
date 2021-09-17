@@ -1,5 +1,5 @@
 fun main() {
 //sampleStart
-    println((1..10).filter { it % 2 == 0 })
+    for (i in (1..4).reversed()) print(i)
 //sampleEnd
 }
