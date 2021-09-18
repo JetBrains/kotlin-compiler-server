@@ -5,6 +5,7 @@ import com.compiler.server.base.hasErrors
 import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
@@ -117,11 +118,13 @@ class TestProjectRunner {
   private fun runAndTest(project: Project, contains: String): ExecutionResult {
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertTrue(result.text.contains(contains), """
+    Assertions.assertTrue(
+      result.text.contains(contains), """
       Actual: ${result.text} 
       Expected: $contains       
-      Result: ${result.errors}
-    """.trimIndent())
+      Full result: ${prettyPrint(result)}
+    """.trimIndent()
+    )
     return result
   }
 
@@ -137,4 +140,7 @@ class TestProjectRunner {
     }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
   }
+
+  private fun prettyPrint(result: ExecutionResult) =
+    jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result)
 }
