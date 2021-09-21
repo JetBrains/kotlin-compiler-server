@@ -4,11 +4,11 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
-import model.Completion
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import model.completionTextFromFullName
+import model.Completion
 import model.Icon
+import model.completionTextFromFullName
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.impl.LocalVariableDescriptor
@@ -61,7 +61,7 @@ class CompletionProvider(
     character: Int,
     isJs: Boolean,
     coreEnvironment: KotlinCoreEnvironment
-  ) : List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
+  ): List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
       val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
@@ -169,7 +169,8 @@ class CompletionProvider(
       componentProvider = componentProvider,
       moduleDescriptor = analysisResult.moduleDescriptor
     )
-    val inDescriptor: DeclarationDescriptor = elementKt.getResolutionScope(bindingContext, resolutionFacade).ownerDescriptor
+    val inDescriptor: DeclarationDescriptor =
+      elementKt.getResolutionScope(bindingContext, resolutionFacade).ownerDescriptor
     return when (element) {
       is KtSimpleNameExpression -> ReferenceVariantsHelper(
         bindingContext = analysisResult.bindingContext,
@@ -183,7 +184,8 @@ class CompletionProvider(
         filterOutJavaGettersAndSetters = true,
         filterOutShadowed = true,
         excludeNonInitializedVariable = true,
-        useReceiverType = null).toList()
+        useReceiverType = null
+      ).toList()
       else -> null
     }
   }
@@ -211,7 +213,10 @@ class CompletionProvider(
               analysisResult.bindingContext.get(BindingContext.EXPRESSION_TYPE_INFO, parent.receiverExpression)
                 ?.type?.let { expressionType ->
                   analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, parent.receiverExpression)?.let {
-                    expressionType.memberScope.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
+                    expressionType.memberScope.getContributedDescriptors(
+                      DescriptorKindFilter.ALL,
+                      MemberScope.ALL_NAME_FILTER
+                    )
                   }
                 }?.toList() ?: emptyList()
             }

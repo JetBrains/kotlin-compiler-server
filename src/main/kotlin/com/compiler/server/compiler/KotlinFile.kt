@@ -38,14 +38,16 @@ class KotlinFile(val kotlinFile: KtFile) {
 
   companion object {
     fun from(project: Project, name: String, content: String) =
-      KotlinFile((PsiFileFactory.getInstance(project) as PsiFileFactoryImpl)
-        .trySetupPsiForFile(
-          LightVirtualFile(
-            if (name.endsWith(".kt")) name else "$name.kt",
-            KotlinLanguage.INSTANCE,
-            content
-          ).apply { charset = CharsetToolkit.UTF8_CHARSET },
-          KotlinLanguage.INSTANCE, true, false
-        ) as KtFile)
+      KotlinFile(
+        (PsiFileFactory.getInstance(project) as PsiFileFactoryImpl)
+          .trySetupPsiForFile(
+            LightVirtualFile(
+              if (name.endsWith(".kt")) name else "$name.kt",
+              KotlinLanguage.INSTANCE,
+              content
+            ).apply { charset = CharsetToolkit.UTF8_CHARSET },
+            KotlinLanguage.INSTANCE, true, false
+          ) as KtFile
+      )
   }
 }

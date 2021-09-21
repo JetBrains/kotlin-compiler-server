@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class KotlinToJSTranslator(

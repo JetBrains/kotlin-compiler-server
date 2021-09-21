@@ -18,12 +18,13 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 @OptIn(FrontendInternals::class)
 class KotlinResolutionFacade(
-        override val project: Project,
-        override val moduleDescriptor: ModuleDescriptor,
-        private val componentProvider: ComponentProvider
+  override val project: Project,
+  override val moduleDescriptor: ModuleDescriptor,
+  private val componentProvider: ComponentProvider
 ) : ResolutionFacade {
   @Suppress("UNCHECKED_CAST")
-  override fun <T : Any> getFrontendService(serviceClass: Class<T>) = componentProvider.resolve(serviceClass)?.getValue() as T
+  override fun <T : Any> getFrontendService(serviceClass: Class<T>) =
+    componentProvider.resolve(serviceClass)?.getValue() as T
 
   override fun analyze(
     elements: Collection<KtElement>,
@@ -35,7 +36,11 @@ class KotlinResolutionFacade(
     bodyResolveMode: BodyResolveMode
   ): BindingContext = throw UnsupportedOperationException()
 
-  override fun analyzeWithAllCompilerChecks(elements: Collection<KtElement>, callback: DiagnosticSink.DiagnosticsCallback?): AnalysisResult = throw UnsupportedOperationException()
+  override fun analyzeWithAllCompilerChecks(
+    elements: Collection<KtElement>,
+    callback: DiagnosticSink.DiagnosticsCallback?
+  ): AnalysisResult = throw UnsupportedOperationException()
+
   override fun <T : Any> getFrontendService(
     element: PsiElement,
     serviceClass: Class<T>

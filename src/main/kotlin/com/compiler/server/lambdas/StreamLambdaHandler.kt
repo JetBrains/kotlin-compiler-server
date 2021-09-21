@@ -31,7 +31,8 @@ class StreamLambdaHandler : RequestStreamHandler {
   override fun handleRequest(
     inputStream: InputStream,
     outputStream: OutputStream,
-    context: Context) {
+    context: Context
+  ) {
     handler?.proxyStream(inputStream, outputStream, context)
   }
 }
