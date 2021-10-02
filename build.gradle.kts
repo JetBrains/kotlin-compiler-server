@@ -74,9 +74,9 @@ allprojects {
 dependencies {
     kotlinDependency("junit:junit:4.12")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.12.4")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.12.4")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.13.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.13.0")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.13.0")
     // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
