@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
-import org.jetbrains.kotlin.ir.declarations.persistent.PersistentIrFactory
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -18,7 +17,6 @@ import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class KotlinToJSTranslator(

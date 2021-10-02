@@ -33,7 +33,8 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   ) = kotlinProjectExecutor.complete(project, line, ch)
 
   @PostMapping("/highlight")
-  fun highlightEndpoint(@RequestBody project: Project) : Map<String, List<ErrorDescriptor>> = kotlinProjectExecutor.highlight(project)
+  fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> =
+    kotlinProjectExecutor.highlight(project)
 }
 
 @RestController

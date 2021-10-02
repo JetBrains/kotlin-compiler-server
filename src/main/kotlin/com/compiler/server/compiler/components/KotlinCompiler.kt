@@ -40,6 +40,7 @@ class KotlinCompiler(
 ) {
 
   private val policyFile = File(policyFileName)
+
   companion object {
     private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
   }
@@ -124,7 +125,7 @@ class KotlinCompiler(
     coreEnvironment: KotlinCoreEnvironment
   ): GenerationState {
     val codegenFactory = if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR)) JvmIrCodegenFactory(
-            coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
+      coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
     ) else DefaultCodegenFactory
 
     return GenerationState.Builder(

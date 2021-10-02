@@ -11,8 +11,8 @@ import com.compiler.server.model.Project
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.bean.VersionInfo
 import com.compiler.server.utils.LoggerHelper
-import model.Completion
 import component.KotlinEnvironment
+import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory

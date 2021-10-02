@@ -10,7 +10,6 @@ import java.nio.file.Path
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.text.appendLine
 
 @Component
 class JavaExecutor {
