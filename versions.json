@@ -9,10 +9,10 @@
     "version": "1.4.30"
   },
   {
-    "version": "1.6.0-M1"
-  },
-  {
     "version": "1.5.31",
     "latestStable": true
-  } 
+  },
+  {
+    "version": "1.6.0-M1"
+  }
 ]
