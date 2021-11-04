@@ -1,6 +1,8 @@
 fun main() {
 //sampleStart
-    val numberPairs = listOf("one" to 1, "two" to 2, "three" to 3, "four" to 4)
-    println(numberPairs.unzip())
+    val numbers = listOf("one", "two", "three", "four")
+
+    println(numbers.associateBy { it.first().uppercaseChar() })
+    println(numbers.associateBy(keySelector = { it.first().uppercaseChar() }, valueTransform = { it.length }))
 //sampleEnd
 }
