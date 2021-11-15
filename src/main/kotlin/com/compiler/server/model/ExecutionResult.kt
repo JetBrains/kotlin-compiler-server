@@ -14,7 +14,7 @@ open class ExecutionResult(
     errors = warnings
   }
 
-  fun hasErrors() = textWithError() || errors.any { (_, value) -> value.any { it.severity == ProjectSeveriry.ERROR } }
+  fun hasErrors() = textWithError() || exception != null || errors.any { (_, value) -> value.any { it.severity == ProjectSeveriry.ERROR } }
 
   private fun textWithError() = text.startsWith(ERROR_STREAM_START)
 }
