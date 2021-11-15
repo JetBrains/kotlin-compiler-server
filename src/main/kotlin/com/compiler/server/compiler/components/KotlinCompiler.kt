@@ -36,7 +36,8 @@ class KotlinCompiler(
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
   private val librariesFile: LibrariesFile,
-  @Value("\${policy.file}") private val policyFileName: String
+  @Value("\${policy.file}") private val policyFileName: String,
+  @Value("\${outputDirectoryPath:}") private val outputDirectoryPath: String
 ) {
 
   private val policyFile = File(policyFileName)
@@ -106,7 +107,12 @@ class KotlinCompiler(
     val dir = System.getProperty("user.dir")
     val libDir = librariesFile.jvm.absolutePath
     val sessionId = UUID.randomUUID().toString().replace("-", "")
-    val outputDir = Paths.get(dir, "tmp", sessionId)
+
+    val outputDir = if (outputDirectoryPath.isNotEmpty()) {
+      Paths.get(outputDirectoryPath, sessionId)
+    } else {
+      Paths.get(dir, "tmp", sessionId)
+    }
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString().replace('\\', '/'))
       .replace("%%LIB_DIR%%", libDir.replace('\\', '/'))
