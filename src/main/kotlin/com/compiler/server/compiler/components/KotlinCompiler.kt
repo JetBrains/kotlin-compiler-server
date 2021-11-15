@@ -128,12 +128,12 @@ class KotlinCompiler(
   ): GenerationState {
     val codegenFactory = getCodegenFactory(coreEnvironment)
     return GenerationState.Builder(
-      files.first().project,
-      ClassBuilderFactories.BINARIES,
-      analysis.analysisResult.moduleDescriptor,
-      analysis.analysisResult.bindingContext,
-      files,
-      coreEnvironment.configuration
+      project = files.first().project,
+      builderFactory = ClassBuilderFactories.BINARIES,
+      module = analysis.analysisResult.moduleDescriptor,
+      bindingContext = analysis.analysisResult.bindingContext,
+      files = files,
+      configuration = coreEnvironment.configuration
     ).codegenFactory(codegenFactory).build()
   }
 
