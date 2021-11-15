@@ -89,10 +89,10 @@ class KotlinCompiler(
   }
 
   private fun write(compiled: Compiled): OutputDirectory {
-    val dir = System.getProperty("user.dir")
+    val dir = System.getProperty("java.io.tmpdir")
     val libDir = librariesFile.jvm.absolutePath
     val sessionId = UUID.randomUUID().toString().replace("-", "")
-    val outputDir = Paths.get(dir, "tmp", sessionId)
+    val outputDir = Paths.get(dir, sessionId)
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString())
       .replace("%%LIB_DIR%%", libDir)
