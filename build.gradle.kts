@@ -38,7 +38,7 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
-        maven("https://cache-redirector.jetbrains.com/kotlin.bintray.com/kotlin-plugin")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-plugin")
     }
     afterEvaluate {
         dependencies {
@@ -74,8 +74,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion") {
+    implementation("org.jetbrains.kotlin:ide-common-ij193:$kotlinVersion-release-509")
+    implementation("org.jetbrains.kotlin:kotlin-plugin-ij193:$kotlinVersion-release-509") {
         isTransitive = false
     }
     implementation(project(":executors", configuration = "default"))
