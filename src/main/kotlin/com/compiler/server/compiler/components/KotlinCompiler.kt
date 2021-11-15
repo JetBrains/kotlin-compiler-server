@@ -13,16 +13,15 @@ import org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory
 import org.jetbrains.kotlin.backend.jvm.jvmPhases
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.findMainClass
 import org.jetbrains.kotlin.codegen.ClassBuilderFactories
+import org.jetbrains.kotlin.codegen.CodegenFactory
 import org.jetbrains.kotlin.codegen.DefaultCodegenFactory
 import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
-import org.jetbrains.kotlin.idea.MainFunctionDetector
-import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.resolve.BindingContext
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
@@ -38,7 +37,6 @@ class KotlinCompiler(
   private val librariesFile: LibrariesFile,
   @Value("\${policy.file}") private val policyFileName: String
 ) {
-
   private val policyFile = File(policyFileName)
 
   companion object {
@@ -69,7 +67,11 @@ class KotlinCompiler(
     KotlinCodegenFacade.compileCorrectFiles(generationState)
     return Compiled(
       files = generationState.factory.asList().map { it.relativePath to it.asByteArray() }.toMap(),
-      mainClass = mainClassFrom(generationState.bindingContext, files)
+      mainClass = findMainClass(
+        generationState.bindingContext,
+        LanguageVersionSettingsImpl.DEFAULT,
+        files
+      )?.asString()
     )
   }
 
@@ -124,18 +126,24 @@ class KotlinCompiler(
     analysis: Analysis,
     coreEnvironment: KotlinCoreEnvironment
   ): GenerationState {
-    val codegenFactory = if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR)) JvmIrCodegenFactory(
-      coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
-    ) else DefaultCodegenFactory
-
+    val codegenFactory = getCodegenFactory(coreEnvironment)
     return GenerationState.Builder(
-      files.first().project,
-      ClassBuilderFactories.BINARIES,
-      analysis.analysisResult.moduleDescriptor,
-      analysis.analysisResult.bindingContext,
-      files,
-      coreEnvironment.configuration
+      project = files.first().project,
+      builderFactory = ClassBuilderFactories.BINARIES,
+      module = analysis.analysisResult.moduleDescriptor,
+      bindingContext = analysis.analysisResult.bindingContext,
+      files = files,
+      configuration = coreEnvironment.configuration
     ).codegenFactory(codegenFactory).build()
+  }
+
+  private fun getCodegenFactory(coreEnvironment: KotlinCoreEnvironment): CodegenFactory {
+    return if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR))
+      JvmIrCodegenFactory(
+        coreEnvironment.configuration,
+        coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
+      ) else
+      DefaultCodegenFactory
   }
 
   private fun argsFrom(
@@ -154,14 +162,6 @@ class KotlinCompiler(
       memoryLimit = 32,
       arguments = args
     ).toList()
-  }
-
-
-  private fun mainClassFrom(bindingContext: BindingContext, files: List<KtFile>): String? {
-    val mainFunctionDetector = MainFunctionDetector(bindingContext, LanguageVersionSettingsImpl.DEFAULT)
-    return files.find { mainFunctionDetector.hasMain(it.declarations) }?.let {
-      PackagePartClassUtils.getPackagePartFqName(it.packageFqName, it.name).asString()
-    }
   }
 
 }
