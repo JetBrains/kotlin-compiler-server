@@ -126,14 +126,7 @@ class KotlinCompiler(
     analysis: Analysis,
     coreEnvironment: KotlinCoreEnvironment
   ): GenerationState {
-    fun getCodegenFactory(): CodegenFactory =
-      if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR))
-        JvmIrCodegenFactory(
-          coreEnvironment.configuration,
-          coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
-        ) else
-        DefaultCodegenFactory
-
+    val codegenFactory = getCodegenFactory(coreEnvironment)
     return GenerationState.Builder(
       files.first().project,
       ClassBuilderFactories.BINARIES,
@@ -141,7 +134,16 @@ class KotlinCompiler(
       analysis.analysisResult.bindingContext,
       files,
       coreEnvironment.configuration
-    ).codegenFactory(getCodegenFactory()).build()
+    ).codegenFactory(codegenFactory).build()
+  }
+
+  private fun getCodegenFactory(coreEnvironment: KotlinCoreEnvironment): CodegenFactory {
+    return if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR))
+      JvmIrCodegenFactory(
+        coreEnvironment.configuration,
+        coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
+      ) else
+      DefaultCodegenFactory
   }
 
   private fun argsFrom(
