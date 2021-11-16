@@ -1,10 +1,8 @@
 class Version(val major: Int, val minor: Int): Comparable<Version> {
-    override fun compareTo(other: Version): Int {
-        if (this.major != other.major) {
-            return this.major - other.major
-        } else if (this.minor != other.minor) {
-            return this.minor - other.minor
-        } else return 0
+    override fun compareTo(other: Version): Int = when {
+        this.major != other.major -> this.major compareTo other.major // compareTo() in the infix form 
+        this.minor != other.minor -> this.minor compareTo other.minor
+        else -> 0
     }
 }
 
