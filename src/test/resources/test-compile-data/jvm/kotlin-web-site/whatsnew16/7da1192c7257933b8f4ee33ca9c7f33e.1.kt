@@ -1,7 +1,12 @@
 fun main() {
 //sampleStart
-  println("What is your nickname?")
-  val nickname = readln()
-  println("Hello, $nickname!")
+    var sum = 0
+    while (true) {
+        val nextLine = readlnOrNull().takeUnless { 
+            it.isNullOrEmpty() 
+        } ?: break
+        sum += nextLine.toInt()
+    }
+    println(sum)
 //sampleEnd
 }
