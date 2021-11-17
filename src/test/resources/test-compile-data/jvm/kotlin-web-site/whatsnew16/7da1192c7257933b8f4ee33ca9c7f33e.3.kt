@@ -1,11 +1,6 @@
 fun main() {
 //sampleStart
-    val number: Short = 0b10001
-    println(number
-      .rotateRight(2)
-      .toString(radix = 2)) // 100000000000100
-    println(number
-      .rotateLeft(2)
-      .toString(radix = 2))  // 1000100
+    println(Regex("(.+)").replace("Kotlin", """\$ $1""")) // $ Kotlin
+    println(Regex("(.+)").replaceFirst("1.6.0", """\\ $1""")) // \ 1.6.0
 //sampleEnd
 }
