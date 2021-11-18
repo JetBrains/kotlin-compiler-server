@@ -1,6 +1,6 @@
 fun main() {
 //sampleStart
     val numbers = listOf("one", "two", "three", "four")
-    println(numbers.associateWith { it.length })
+    println(numbers.joinToString { "Element: ${it.uppercase()}"})
 //sampleEnd
 }
