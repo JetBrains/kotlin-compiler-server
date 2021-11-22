@@ -2,12 +2,12 @@ fun main() {
     val str = "Hello"
     // this
     str.run {
-        println("The receiver string length: $length")
-        //println("The receiver string length: ${this.length}") // does the same
+        println("The string's length: $length")
+        //println("The string's length: ${this.length}") // does the same
     }
 
     // it
     str.let {
-        println("The receiver string's length is ${it.length}")
+        println("The string's length is ${it.length}")
     }
 }
