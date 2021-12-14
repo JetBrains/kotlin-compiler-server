@@ -48,6 +48,14 @@ allprojects {
     }
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.apache.logging.log4j") {
+            useVersion("2.15.0")
+        }
+    }
+}
+
 dependencies {
 
     kotlinDependency("junit:junit:4.12")
