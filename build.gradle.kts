@@ -87,7 +87,7 @@ dependencies {
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.6")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.6.1")
     implementation("junit:junit:4.12")
     implementation("net.logstash.logback:logstash-logback-encoder:7.0.1")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20200330")
