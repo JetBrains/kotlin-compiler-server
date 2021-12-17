@@ -1,5 +1,5 @@
 fun main() {
 //sampleStart
-    for (i in 4 downTo 1) print(i)
+    for (i in 1..4) print(i)
 //sampleEnd
 }
