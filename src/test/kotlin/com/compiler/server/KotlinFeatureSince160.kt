@@ -56,19 +56,6 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
         )
     }
 
-  @Test
-  internal fun `Stdlib reads a system property to decide which strategy to use for several collection methods`() {
-    run(
-      code = """
-        fun main(){
-      //sampleStart
-      val list1 = listOf(1, 1, 2 ,3, 5, 8, -1)
-      val list2 = listOf(1, 1, 2, 2 ,3, 5)
-      println(list1 intersect list2)
-      //sampleEnd
-      }
-      """.trimIndent(),
-      contains = "<outStream>[1, 2, 3, 5]\n</outStream>"
-    )
-  }
 }
+
+
