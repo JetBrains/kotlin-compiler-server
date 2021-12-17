@@ -23,6 +23,7 @@ grant {
   permission java.io.FilePermission "%%GENERATED%%", "read";
   permission java.io.FilePermission "%%GENERATED%%/*", "read";
   permission java.util.PropertyPermission "com.fasterxml.jackson.core.util.BufferRecyclers.trackReusableBuffers", "read";
+  permission java.util.PropertyPermission "kotlin.collections.convert_arg_to_set_in_removeAll" "read";
 };
 
 grant codeBase "file:%%LIB_DIR%%/executors.jar"{
