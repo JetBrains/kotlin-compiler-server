@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
 ![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg)
 ![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build) 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.5.31-orange.svg) ](https://kotlinlang.org/) 
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.6.10-orange.svg) ](https://kotlinlang.org/) 
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/prendota/kotlin-compiler-server)
 
