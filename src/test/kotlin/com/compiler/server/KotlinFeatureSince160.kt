@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 
 class KotlinFeatureSince160 : BaseExecutorTest() {
 
-    @Test
-    fun `Stable Duration API`() {
-        run(
-            code = """
+  @Test
+  fun `Stable Duration API`() {
+    run(
+      code = """
             import kotlin.time.Duration.Companion.seconds
                 
             fun main() {
@@ -18,14 +18,14 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
             // sampleEnd
             }
       """.trimIndent(),
-            contains = "There are 83 minutes in 1 hours"
-        )
-    }
+      contains = "There are 83 minutes in 1 hours"
+    )
+  }
 
-    @Test
-    fun `Stable bit rotation operations for integers`() {
-        run(
-            code = """
+  @Test
+  fun `Stable bit rotation operations for integers`() {
+    run(
+      code = """
           fun main() {
         //sampleStart
         val number: Short = 0b10001
@@ -34,14 +34,14 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
         //sampleEnd
 }
       """.trimIndent(),
-            contains = "100000000000100\n1000100"
-        )
-    }
+      contains = "100000000000100\n1000100"
+    )
+  }
 
-    @Test
-    fun `Stable Regex function for splitting a string to a sequence`() {
-        run(
-            code = """
+  @Test
+  fun `Stable Regex function for splitting a string to a sequence`() {
+    run(
+      code = """
       fun main(){
       //sampleStart
       val colorsText = "green, red , brown&blue, orange, pink&green"
@@ -52,10 +52,23 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
       //sampleEnd
       }
       """.trimIndent(),
-            contains = "<outStream>brown&amp;blue\n</outStream>"
-        )
-    }
+      contains = "<outStream>brown&amp;blue\n</outStream>"
+    )
+  }
 
+  @Test
+  internal fun `Stdlib reads a system property to decide which strategy to use for several collection methods`() {
+    run(
+      code = """
+        fun main(){
+      //sampleStart
+      val list1 = listOf(1, 1, 2 ,3, 5, 8, -1)
+      val list2 = listOf(1, 1, 2, 2 ,3, 5)
+      println(list1 intersect list2) // [1, 2, 3, 5]
+      //sampleEnd
+      }
+      """.trimIndent(),
+      contains = "<outStream>[1, 2, 3, 5]\n</outStream>"
+    )
+  }
 }
-
-
