@@ -60,7 +60,7 @@ curl -X POST \
     "files": [
         {
             "name": "File.kt",
-            "text": "fun main(args: Array<String>) {\n    println(\"123\")\n}"
+            "text": "fun main() {\n    println(\"123\")\n}"
         }
     ]
 }'
@@ -77,7 +77,7 @@ curl -X POST \
       "files": [
         {
           "name": "File.kt",
-          "text": "fun main(args: Array<String>) {\n    println(args[0])\n }"
+          "text": "fun main() {\n    println(args[0])\n }"
         }
       ]
 }'
