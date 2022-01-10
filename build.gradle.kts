@@ -72,7 +72,7 @@ allprojects {
 }
 
 dependencies {
-    kotlinDependency("junit:junit:4.12")
+    kotlinDependency("junit:junit:4.13.2")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
     kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.13.0")
     kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.13.0")
@@ -88,7 +88,7 @@ dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.6.1")
-    implementation("junit:junit:4.12")
+    implementation("junit:junit:4.13.2")
     implementation("net.logstash.logback:logstash-logback-encoder:7.0.1")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20200330")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
