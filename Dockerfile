@@ -1,19 +1,19 @@
 FROM openjdk:8-jdk-alpine as build
 
+ENV KOTLIN_LIB=1.6.10
+ENV KOTLIN_LIB_JS=1.6.10-js
+
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
 ADD . /kotlin-compiler-server
 
 RUN ./gradlew build -x test
-RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/*.jar)
+RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/kotlin-compiler-server-${KOTLIN_LIB}-SNAPSHOT.jar)
 
 FROM openjdk:8-jdk-alpine
 
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
-
-ENV KOTLIN_LIB=1.6.10
-ENV KOTLIN_LIB_JS=1.6.10-js
 
 COPY --from=build /build/libs/BOOT-INF/lib /kotlin-compiler-server/lib
 COPY --from=build /build/libs/META-INF /kotlin-compiler-server/META-INF
