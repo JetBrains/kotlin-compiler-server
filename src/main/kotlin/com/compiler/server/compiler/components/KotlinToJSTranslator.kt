@@ -111,7 +111,6 @@ class KotlinToJSTranslator(
     val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
-      propertyLazyInitialization = false,
       irFactory = IrFactoryImpl
     )
     val transformer = IrModuleToJsTransformer(
