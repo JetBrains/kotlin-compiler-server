@@ -7,5 +7,5 @@ plugins {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:common:211-$kotlinIdeVersion-IJ7442.40")
+    implementation("org.jetbrains.kotlin:common:213-$kotlinIdeVersion-IJ6777.52")
 }
