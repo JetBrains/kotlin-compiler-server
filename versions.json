@@ -14,5 +14,8 @@
   {
     "version": "1.6.10",
     "latestStable": true
+  },
+  {
+    "version": "1.6.20-M1"
   }
 ]

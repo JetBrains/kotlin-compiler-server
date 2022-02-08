@@ -6,8 +6,10 @@ import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.ir.backend.js.CompilerResult
 import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
@@ -106,14 +108,22 @@ class KotlinToJSTranslator(
       icUseStdlibCache = false,
       icCache = emptyMap()
     )
-    val result = compile(
+    val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
-      propertyLazyInitialization = false,
-      mainArguments = arguments,
       irFactory = IrFactoryImpl
     )
-    val jsCode = result.outputs!!.jsCode
+    val transformer = IrModuleToJsTransformer(
+      ir.context,
+      arguments,
+      fullJs = true,
+      dceJs = false,
+      multiModule = false,
+      relativeRequirePath = true,
+    )
+
+    val compiledModule: CompilerResult = transformer.generateModule(ir.allModules)
+    val jsCode = compiledModule.outputs.values.single().jsCode
 
     val listLines = jsCode
       .lineSequence()
