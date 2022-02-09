@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.diagnostics.Errors
 import org.jetbrains.kotlin.diagnostics.Severity
 import org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
 import org.jetbrains.kotlin.frontend.di.configureModule
-import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.js.analyze.TopDownAnalyzerFacadeForJS
 import org.jetbrains.kotlin.js.config.JsConfig
@@ -200,7 +199,6 @@ class ErrorAnalyzer(
       registerSingleton(FileScopeProviderImpl::class.java)
       CompilerEnvironment.configure(this)
       useInstance(LookupTracker.DO_NOTHING)
-      useInstance(InlineConstTracker.DoNothing)
       registerSingleton(ResolveSession::class.java)
       registerSingleton(LazyTopDownAnalyzer::class.java)
     }
