@@ -46,8 +46,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 plugins {
     id("org.springframework.boot") version "2.5.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.6.20-M1"
-    kotlin("plugin.spring") version "1.6.20-M1"
+    kotlin("jvm") version "1.6.20"
+    kotlin("plugin.spring") version "1.6.20"
 }
 
 allprojects {
@@ -64,7 +64,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
-                implementation("org.jetbrains.kotlin:idea:211-$kotlinIdeVersion-IJ7442.40") {
+                implementation("org.jetbrains.kotlin:idea:213-$kotlinIdeVersion-IJ6777.52") {
                     isTransitive = false
                 }
             }
@@ -103,8 +103,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:common:211-$kotlinIdeVersion-IJ7442.40")
-    implementation("org.jetbrains.kotlin:core:211-$kotlinIdeVersion-IJ7442.40")
+    implementation("org.jetbrains.kotlin:common:213-$kotlinIdeVersion-IJ6777.52")
+    implementation("org.jetbrains.kotlin:core:213-$kotlinIdeVersion-IJ6777.52")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
