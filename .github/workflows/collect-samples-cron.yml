@@ -21,7 +21,7 @@ jobs:
             path: 'src/test/resources/test-compile-data/jvm/kotlin-hands-on'
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'adopt'
