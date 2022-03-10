@@ -1,12 +1,12 @@
+data class StringContainer(val values: List<String>)
+
 fun main() {
 //sampleStart
-    val numbers = listOf("one", "two", "three", "four")
-    
-    println(numbers)         
-    println(numbers.joinToString())
-    
-    val listString = StringBuffer("The list of numbers: ")
-    numbers.joinTo(listString)
-    println(listString)
+    val containers = listOf(
+        StringContainer(listOf("one", "two", "three")),
+        StringContainer(listOf("four", "five", "six")),
+        StringContainer(listOf("seven", "eight"))
+    )
+    println(containers.flatMap { it.values })
 //sampleEnd
 }
