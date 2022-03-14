@@ -1,7 +1,7 @@
 fun main() {
 //sampleStart 
-    val numbers = setOf(1, 2, 3)
-    println(numbers.map { it * 3 })
-    println(numbers.mapIndexed { idx, value -> value * idx })
+    val numbers = listOf("one", "two", "three", "four")  
+    val longerThan3 = numbers.filter { it.length > 3 }
+    println(longerThan3)
 //sampleEnd
 }
