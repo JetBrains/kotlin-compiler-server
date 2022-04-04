@@ -117,6 +117,7 @@ class KotlinEnvironment(
       put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
       put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
+      put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)
 
       languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
 
