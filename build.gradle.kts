@@ -47,7 +47,7 @@ plugins {
     id("org.springframework.boot") version "2.5.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.6.20"
-    kotlin("plugin.spring") version "1.6.20"
+    kotlin("plugin.spring") version "1.6.21"
 }
 
 allprojects {
