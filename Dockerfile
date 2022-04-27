@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine as build
 
-ENV KOTLIN_LIB=1.6.21
-ENV KOTLIN_LIB_JS=1.6.21-js
+ENV KOTLIN_LIB=1.7.0-Beta-87
+ENV KOTLIN_LIB_JS=1.7.0-Beta-87-js
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
