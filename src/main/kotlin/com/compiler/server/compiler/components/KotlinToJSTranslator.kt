@@ -103,10 +103,7 @@ class KotlinToJSTranslator(
       kotlinEnvironment.jsConfiguration,
       kotlinEnvironment.JS_LIBRARIES,
       friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
-      icUseGlobalSignatures = false,
-      icUseStdlibCache = false,
-      icCache = emptyMap()
+      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration)
     )
     val ir = compile(
       sourceModule,
