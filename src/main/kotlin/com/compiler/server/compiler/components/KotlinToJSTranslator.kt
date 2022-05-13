@@ -31,6 +31,13 @@ class KotlinToJSTranslator(
 
     private const val JS_IR_CODE_BUFFER = "moduleId.output._buffer;\n"
 
+    private val JS_IR_OUTPUT_REWRITE = """
+        if (kotlin.isRewrite) {
+            init_properties_console_kt_3903220573();
+            output = new BufferedOutput_0()
+        }
+        """.trimIndent()
+
     const val BEFORE_MAIN_CALL_LINE = 4
   }
 
@@ -129,7 +136,7 @@ class KotlinToJSTranslator(
       .lineSequence()
       .toMutableList()
 
-    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "if (kotlin.isRewrite) output = new BufferedOutput_0()")
+    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, JS_IR_OUTPUT_REWRITE)
     listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "_.output = output")
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
