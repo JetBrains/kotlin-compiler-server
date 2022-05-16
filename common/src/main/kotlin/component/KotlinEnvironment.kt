@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
+import org.jetbrains.kotlin.cli.jvm.config.configureJdkClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
@@ -124,6 +125,8 @@ class KotlinEnvironment(
       // it uses languageVersionSettings that was set above
       configureAdvancedJvmOptions(arguments)
       put(JVMConfigurationKeys.DO_NOT_CLEAR_BINDING_CONTEXT, true)
+
+      configureJdkClasspathRoots()
     }
   }
 }
