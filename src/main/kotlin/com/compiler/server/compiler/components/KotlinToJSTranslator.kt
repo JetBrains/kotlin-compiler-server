@@ -33,7 +33,7 @@ class KotlinToJSTranslator(
 
     private val JS_IR_OUTPUT_REWRITE = """
         if (kotlin.isRewrite) {
-            init_properties_console_kt_6h8hpf();
+            init_properties_console_kt_3903220573();
             output = new BufferedOutput_0()
         }
         """.trimIndent()
@@ -111,6 +111,9 @@ class KotlinToJSTranslator(
       kotlinEnvironment.JS_LIBRARIES,
       friendDependencies = emptyList(),
       analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+      icUseGlobalSignatures = false,
+      icUseStdlibCache = false,
+      icCache = emptyMap()
     )
     val ir = compile(
       sourceModule,
