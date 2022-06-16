@@ -51,8 +51,10 @@ class KotlinProjectExecutor(
     return convertJsWithConverter(project, kotlinToJSTranslator::doTranslate)
   }
 
-  fun convertToJsIr(project: Project): TranslationJSResult {
-    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
+  fun convertToJsIr(project: Project, shouldEliminateDeadCode: Boolean): TranslationJSResult {
+    return convertJsWithConverter(project) { files, args, env ->
+       kotlinToJSTranslator.doTranslateWithIr(files, args, env, shouldEliminateDeadCode)
+    }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -89,7 +91,7 @@ class KotlinProjectExecutor(
 
   private fun convertJsWithConverter(
     project: Project,
-    converter: KFunction3<List<KtFile>, List<String>, KotlinCoreEnvironment, TranslationJSResult>
+    converter: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationJSResult
   ): TranslationJSResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }

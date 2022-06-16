@@ -19,9 +19,10 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   @PostMapping("/translate")
   fun translateKotlinProjectEndpoint(
     @RequestBody project: Project,
-    @RequestParam(defaultValue = "false") ir: Boolean
+    @RequestParam(defaultValue = "false") ir: Boolean,
+    @RequestParam(defaultValue = "false") dce: Boolean
   ): TranslationJSResult {
-    return if (ir) kotlinProjectExecutor.convertToJsIr(project)
+    return if (ir) kotlinProjectExecutor.convertToJsIr(project, dce)
     else kotlinProjectExecutor.convertToJs(project)
   }
 
