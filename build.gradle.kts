@@ -44,7 +44,7 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.5.6"
+    id("org.springframework.boot") version "2.7.1"
     id("io.spring.dependency-management") version "1.0.12.RELEASE"
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.spring") version "1.7.10"
@@ -53,6 +53,8 @@ plugins {
 allprojects {
     repositories {
         mavenCentral()
+        maven("https://repo.spring.io/snapshot")
+        maven("https://repo.spring.io/milestone")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
