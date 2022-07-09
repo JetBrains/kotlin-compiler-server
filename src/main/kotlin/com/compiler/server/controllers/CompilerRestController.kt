@@ -1,6 +1,7 @@
 package com.compiler.server.controllers
 
 import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.Project
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.bean.VersionInfo
@@ -11,10 +12,14 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
 class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
   @PostMapping("/run")
-  fun executeKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.run(project)
+  fun executeKotlinProjectEndpoint(@RequestBody project: Project): ExecutionResult {
+    return kotlinProjectExecutor.run(project)
+  }
 
   @PostMapping("/test")
-  fun testKotlinProjectEndpoint(@RequestBody project: Project) = kotlinProjectExecutor.test(project)
+  fun testKotlinProjectEndpoint(@RequestBody project: Project): ExecutionResult {
+    return kotlinProjectExecutor.test(project)
+  }
 
   @PostMapping("/translate")
   fun translateKotlinProjectEndpoint(
