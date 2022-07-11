@@ -11,7 +11,7 @@ class KotlinEnvironmentConfiguration(fileName: String) {
       listOfNotNull(jvmFile)
         .flatMap {
           it.listFiles()?.toList()
-            ?: throw error("No kotlin libraries found in: ${jvmFile.absolutePath}")
+            ?: error("No kotlin libraries found in: ${jvmFile.absolutePath}")
         }
 
     val additionalJsClasspath = listOfNotNull(jsFile)
