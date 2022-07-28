@@ -25,6 +25,37 @@ class TestProjectRunner {
     runAndTest(project, contains)
   }
 
+  fun runJsDce(
+    code: String,
+    contains: String,
+    notContain: String,
+    args: String = "",
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+  ) {
+    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
+    convertAndTest(project, convert) {
+      isNotNull()
+      hasNoErrors()
+      contains(contains)
+      shouldNotContain(notContain)
+    }
+  }
+
+  fun multiRunJsDce(
+    code: List<String>,
+    contains: String,
+    notContain: String,
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+  ) {
+    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
+    convertAndTest(project, convert) {
+      isNotNull()
+      hasNoErrors()
+      contains(contains)
+      shouldNotContain(notContain)
+    }
+  }
+
   fun runJs(
     code: String,
     contains: String,
@@ -32,7 +63,11 @@ class TestProjectRunner {
     convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
   ) {
     val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
-    convertAndTest(project, contains, convert)
+    convertAndTest(project, convert) {
+      isNotNull()
+      hasNoErrors()
+      contains(contains)
+    }
   }
 
   fun multiRunJs(
@@ -41,7 +76,11 @@ class TestProjectRunner {
     convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
   ) {
     val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
-    convertAndTest(project, contains, convert)
+    convertAndTest(project, convert) {
+      isNotNull()
+      hasNoErrors()
+      contains(contains)
+    }
   }
 
   fun translateToJs(code: String): TranslationJSResult {
@@ -127,14 +166,27 @@ class TestProjectRunner {
 
   private fun convertAndTest(
     project: Project,
-    contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult,
+    test: TranslationJSResult.() -> Unit
   ) {
-    val result = kotlinProjectExecutor.convert(project)
-    Assertions.assertNotNull(result, "Test result should no be a null")
-    Assertions.assertFalse(result.hasErrors) {
-      "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
+    kotlinProjectExecutor.convert(project).test()
+  }
+
+  private fun TranslationJSResult.isNotNull() {
+    Assertions.assertNotNull(this, "Test result should no be a null")
+  }
+
+  private fun TranslationJSResult.hasNoErrors() {
+    Assertions.assertFalse(hasErrors) {
+      "Test contains errors!\n\n" + renderErrorDescriptors(errors.filterOnlyErrors)
     }
-    Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
+  }
+
+  private fun TranslationJSResult.contains(substring: String) {
+    Assertions.assertTrue(jsCode!!.contains(substring), "Actual: ${jsCode}. \n Expected: $substring")
+  }
+
+  private fun TranslationJSResult.shouldNotContain(substring: String) {
+    Assertions.assertFalse(jsCode!!.contains(substring), "Actual: ${jsCode}. \n Expected to eliminate: $substring")
   }
 }

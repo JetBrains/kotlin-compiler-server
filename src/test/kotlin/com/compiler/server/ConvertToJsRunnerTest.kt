@@ -43,6 +43,15 @@ class ConvertToJsIrRunnerTest : BaseExecutorTest() {
   }
 
   @Test
+  fun `base execute test with DCE`() {
+    runJsIrWithDce(
+      code = "class Cat\nfun main() {\n println(\"Hello, world!!!\")\n}",
+      contains = "println('Hello, world!!!');",
+      notContain = "function Cat"
+    )
+  }
+
+  @Test
   fun `base execute test multi`() {
     runJsIr(
       code = listOf(
@@ -50,6 +59,18 @@ class ConvertToJsIrRunnerTest : BaseExecutorTest() {
         "package cat\n    class Cat(val name: String)"
       ),
       contains = "var cat = new Cat('Kitty');"
+    )
+  }
+
+  @Test
+  fun `base execute test multi with DCE`() {
+    runJsIrWithDce(
+      code = listOf(
+        "import cat.Cat\n\nfun lonelyFun() {}\n\nfun main(args: Array<String>) {\nval cat = Cat(\"Kitty\")\nprintln(cat.name)\n}",
+        "package cat\n    class Cat(val name: String)"
+      ),
+      contains = "var cat = new Cat('Kitty');",
+      notContain = "function lonelyFun"
     )
   }
 }
