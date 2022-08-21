@@ -52,10 +52,12 @@ class JavaExecutor {
             // execution timeout. Both Future objects must be in 'done' state, to say that process finished
             ProgramOutput(restriction = ExecutorMessages.TIMEOUT_MESSAGE)
           }
+
           outputResults.any { it.length >= MAX_OUTPUT_SIZE } -> {
             // log-limit exceeded
             ProgramOutput(restriction = ExecutorMessages.TOO_LONG_OUTPUT_MESSAGE)
           }
+
           else -> {
             // normal exit
             ProgramOutput(standardText)

@@ -6,8 +6,8 @@ import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -21,7 +21,7 @@ import kotlin.test.assertNotNull
 )
 class CompilerAPITest {
 
-  @LocalServerPort
+  @Value("\${local.server.port}")
   private var port = 0
 
   private val host: String = InetAddress.getLocalHost().hostAddress

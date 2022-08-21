@@ -70,9 +70,9 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
     runBlocking {
       launch(Dispatchers.IO) {
         for (i in 0 until times) {
-            launch(Dispatchers.IO) {
-              test()
-            }
+          launch(Dispatchers.IO) {
+            test()
+          }
         }
       }.join()
     }

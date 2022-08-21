@@ -57,7 +57,7 @@ class ExceptionInProgramTest : BaseExecutorTest() {
   }
 
   @Test
-  fun `assert exception`(){
+  fun `assert exception`() {
     runWithException(
       """
         class Test() {

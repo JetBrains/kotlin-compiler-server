@@ -59,8 +59,10 @@ class HighlightTest : BaseExecutorTest() {
   @Test
   fun `highlight Type inference failed`() {
     val highlights = highlight("fun main() {\n   \"sdf\".to\n}")
-    errorContains(highlights,
-      "Not enough information to infer type variable B")
+    errorContains(
+      highlights,
+      "Not enough information to infer type variable B"
+    )
     errorContains(highlights, "No value passed for parameter 'that'")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
@@ -68,8 +70,10 @@ class HighlightTest : BaseExecutorTest() {
   @Test
   fun `highlight js Type inference failed`() {
     val highlights = highlightJS("fun main() {\n   \"sdf\".to\n}")
-    errorContains(highlights,
-      "Not enough information to infer type variable B")
+    errorContains(
+      highlights,
+      "Not enough information to infer type variable B"
+    )
     errorContains(highlights, "No value passed for parameter 'that'")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
