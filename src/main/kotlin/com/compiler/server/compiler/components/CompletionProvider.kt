@@ -99,6 +99,7 @@ class CompletionProvider(
           } ?: "")
         }
       }
+
       else -> presentableText to when (this) {
         is VariableDescriptor -> renderer.renderType(type)
         is ClassDescriptor -> " (${DescriptorUtils.getFqName(containingDeclaration)})"
@@ -186,6 +187,7 @@ class CompletionProvider(
         excludeNonInitializedVariable = true,
         useReceiverType = null
       ).toList()
+
       else -> null
     }
   }
@@ -220,6 +222,7 @@ class CompletionProvider(
                   }
                 }?.toList() ?: emptyList()
             }
+
             else -> analysisResult.bindingContext.get(BindingContext.LEXICAL_SCOPE, element as KtExpression)
               ?.getContributedDescriptors(DescriptorKindFilter.ALL, MemberScope.ALL_NAME_FILTER)
               ?.toList() ?: emptyList()
