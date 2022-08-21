@@ -59,10 +59,10 @@ class KotlinFeatureSince150 : BaseExecutorTest() {
                 ex3(Result.success(3)) // doesn't work
             }
                 """.trimIndent(),
-                contains = "Ex 1\n" +
-                        "Ex 2\n" +
-                        "Ex 3"
-        ).assertNoErrors()
+      contains = "Ex 1\n" +
+        "Ex 2\n" +
+        "Ex 3"
+    ).assertNoErrors()
   }
 
   @Test

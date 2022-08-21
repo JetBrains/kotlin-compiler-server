@@ -111,9 +111,14 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking {\nwithTimeout(1300L) {\n    repeat(1000) { i ->\n        println(\"I'm sleeping \$i ...\")\n        delay(500L)\n    }\n}\n}",
       contains = "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\n"
     )
-    Assertions.assertTrue(result.exception?.message == expectedExMessage,
-      "Actual: ${result.exception?.message}. Expected: $expectedExMessage")
-    Assertions.assertTrue(result.exception?.fullName == expectedEx, "Actual: ${result.exception?.fullName}. Expected: $expectedEx")
+    Assertions.assertTrue(
+      result.exception?.message == expectedExMessage,
+      "Actual: ${result.exception?.message}. Expected: $expectedExMessage"
+    )
+    Assertions.assertTrue(
+      result.exception?.fullName == expectedEx,
+      "Actual: ${result.exception?.fullName}. Expected: $expectedEx"
+    )
   }
 
   @Test

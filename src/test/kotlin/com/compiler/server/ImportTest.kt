@@ -96,7 +96,7 @@ class ImportTest : BaseExecutorTest() {
       line = 1,
       character = 15
     ).map { it.text }
-    val completions = listOf( "kotlin.math.sin(" )
+    val completions = listOf("kotlin.math.sin(")
     completions.forEach {
       Assertions.assertTrue(
         foundCompletionsTexts.contains(it),
@@ -203,7 +203,7 @@ class ImportTest : BaseExecutorTest() {
       character = 15,
       isJs = true
     ).map { it.text }
-    val completions = listOf( "kotlin.math.sin(" )
+    val completions = listOf("kotlin.math.sin(")
     completions.forEach {
       Assertions.assertTrue(
         foundCompletionsTexts.contains(it),

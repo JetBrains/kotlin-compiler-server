@@ -98,6 +98,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "Hello,\nKotlin 1.4-M2"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 arrays oneach shuffle`() {
     run(
@@ -120,6 +121,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "kotlin\n.kt"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 arrays sort`() {
     run(
@@ -136,6 +138,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "[k, o, t, l, i, n]"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 setOfNotNull`() {
     run(
@@ -150,6 +153,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "[1, 2, 0]"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 indexed`() {
     run(
@@ -167,6 +171,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "0:a\n1:b\n2:c"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 runningFold Reduce`() {
     run(
@@ -182,6 +187,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = ""
     ).assertNoErrors()
   }
+
   @Test
   fun `blog stdlib 14M2 accept null`() {
     run(
@@ -196,6 +202,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "false"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 double float constants`() {
     run(
@@ -212,6 +219,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "NaN\n-Infinity\ntrue\n64"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 maxOf vararg`() {
     run(
@@ -226,6 +234,7 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "4"
     )
   }
+
   @Test
   fun `blog stdlib 14M2 delegate`() {
     run(
