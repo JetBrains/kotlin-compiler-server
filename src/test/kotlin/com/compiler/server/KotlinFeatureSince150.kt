@@ -208,4 +208,20 @@ class KotlinFeatureSince150 : BaseExecutorTest() {
     )
   }
 
+
+  @Test
+  fun `Inline classes are Stable`() {
+    run(
+      code = """
+          @JvmInline
+          value class Hours(val value: Int)
+
+          fun main(args: Array<String>) {
+          	val hours = Hours(12)
+              println(hours.value)
+          }
+        """.trimIndent(),
+      contains = "12"
+    )
+  }
 }
