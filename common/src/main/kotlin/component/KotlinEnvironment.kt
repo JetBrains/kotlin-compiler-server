@@ -40,12 +40,12 @@ class KotlinEnvironment(
      * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
      */
     private val additionalCompilerArguments: List<String> = listOf(
-      "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
-      "-Xuse-experimental=kotlin.time.ExperimentalTime",
-      "-Xuse-experimental=kotlin.Experimental",
-      "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
-      "-Xuse-experimental=kotlin.contracts.ExperimentalContracts",
-      "-Xuse-experimental=kotlin.experimental.ExperimentalTypeInference",
+      "-Xopt-in=kotlin.ExperimentalStdlibApi",
+      "-Xopt-in=kotlin.time.ExperimentalTime",
+      "-Xopt-in=kotlin.RequiresOptIn",
+      "-Xopt-in=kotlin.ExperimentalUnsignedTypes",
+      "-Xopt-in=kotlin.contracts.ExperimentalContracts",
+      "-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
       "-XXLanguage:+InlineClasses"
     )
   }
