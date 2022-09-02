@@ -45,8 +45,7 @@ class KotlinEnvironment(
       "-Xopt-in=kotlin.RequiresOptIn",
       "-Xopt-in=kotlin.ExperimentalUnsignedTypes",
       "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-      "-Xopt-in=kotlin.experimental.ExperimentalTypeInference",
-      "-Xinline-classes"
+      "-Xopt-in=kotlin.experimental.ExperimentalTypeInference"
     )
   }
 
