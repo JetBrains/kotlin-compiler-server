@@ -47,7 +47,8 @@ class KotlinEnvironment(
       "-opt-in=kotlin.ExperimentalUnsignedTypes",
       "-opt-in=kotlin.contracts.ExperimentalContracts",
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
-      "-Xcontext-receivers"
+      "-Xcontext-receivers",
+      "-XXLanguage:+RangeUntilOperator"
     )
   }
 
