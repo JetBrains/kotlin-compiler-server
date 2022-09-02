@@ -247,19 +247,4 @@ class KotlinFeatureSince140 : BaseExecutorTest() {
       contains = "42"
     )
   }
-
-  @Test
-  fun `Inline classes are in Beta`() {
-    run(
-      code = """
-          inline class Hours(val value: Int)
-
-          fun main(args: Array<String>) {
-          	val hours = Hours(12)
-              println(hours.value)
-          }
-        """.trimIndent(),
-      contains = "12"
-    )
-  }
 }
