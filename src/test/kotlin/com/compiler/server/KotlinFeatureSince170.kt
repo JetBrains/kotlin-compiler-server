@@ -75,4 +75,23 @@ class KotlinFeatureSince170 : BaseExecutorTest() {
       contains = "Date of birth: 2022-04-27"
     )
   }
+
+  @Test
+  fun `New operator for defining the open-ended range`() {
+    run(
+      code = """
+        fun main() {
+          val number = 0.25
+          
+          when (number) {
+            in 0.0..<0.25 -> println("first quarter")
+            in 0.25..<0.5 -> println("second quarter")
+            in 0.5..<0.75 -> println("third quarter")
+            in 0.75..1.0 ->  println("last quarter")
+          }
+      }
+      """.trimIndent(),
+    contains = "second quarter"
+    )
+  }
 }
