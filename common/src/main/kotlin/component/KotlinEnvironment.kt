@@ -30,7 +30,8 @@ import java.io.File
 
 class KotlinEnvironment(
   val classpath: List<File>,
-  additionalJsClasspath: List<File>
+  additionalJsClasspath: List<File>,
+  private val compilerPlugins: List<File>
 ) {
   companion object {
     /**
@@ -113,6 +114,11 @@ class KotlinEnvironment(
   private fun createConfiguration(): CompilerConfiguration {
     val arguments = K2JVMCompilerArguments()
     parseCommandLineArguments(additionalCompilerArguments, arguments)
+
+    if (compilerPlugins.isNotEmpty()) {
+      parseCommandLineArguments(compilerPlugins.map { "-Xplugin=$it" }, arguments)
+    }
+
     return CompilerConfiguration().apply {
       addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
       val messageCollector = MessageCollector.NONE

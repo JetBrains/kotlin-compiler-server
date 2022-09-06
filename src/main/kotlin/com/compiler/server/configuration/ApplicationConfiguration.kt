@@ -30,7 +30,8 @@ class ApplicationConfiguration(
   @Bean
   fun librariesFiles() = LibrariesFile(
     File(librariesFolderProperties.jvm),
-    File(librariesFolderProperties.js)
+    File(librariesFolderProperties.js),
+    File(librariesFolderProperties.compilerPlugins)
   )
 }
 
@@ -38,4 +39,5 @@ class ApplicationConfiguration(
 class LibrariesFolderProperties {
   lateinit var jvm: String
   lateinit var js: String
+  lateinit var compilerPlugins: String
 }
