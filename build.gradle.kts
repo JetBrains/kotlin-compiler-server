@@ -33,7 +33,7 @@ val kotlinJsDependency: Configuration by configurations.creating {
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
-val jacksonVersionKotlinDepedenencyJar = "2.13.4" // don't forget to update version in `executor.policy` file.
+val jacksonVersionKotlinDependencyJar = "2.13.4" // don't forget to update version in `executor.policy` file.
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
@@ -77,9 +77,9 @@ allprojects {
 dependencies {
     kotlinDependency("junit:junit:4.13.2")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:$jacksonVersionKotlinDepedenencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:$jacksonVersionKotlinDepedenencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersionKotlinDepedenencyJar")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:$jacksonVersionKotlinDependencyJar")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:$jacksonVersionKotlinDependencyJar")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersionKotlinDependencyJar")
     // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
