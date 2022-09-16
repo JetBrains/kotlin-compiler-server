@@ -3,7 +3,7 @@ fun main() {
     // Kotlin   
     val result = """
         Kotlin
-        Java 
+           Java 
     """.trimIndent()
     println(result)
 //sampleEnd
