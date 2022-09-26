@@ -4,7 +4,6 @@
 ![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build) 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7.10-orange.svg) ](https://kotlinlang.org/) 
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/prendota/kotlin-compiler-server)
 
 A REST server for compiling and executing Kotlin code.
 The server provides the API for [Kotlin Playground](https://github.com/JetBrains/kotlin-playground) library.
