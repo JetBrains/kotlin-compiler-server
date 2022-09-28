@@ -30,8 +30,13 @@ val kotlinJsDependency: Configuration by configurations.creating {
         )
     }
 }
+val compilerPlugin: Configuration by configurations.creating {
+    isTransitive = false
+}
+
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
+val compilerPluginsFolder = "$kotlinVersion-compiler-plugins"
 val propertyFile = "application.properties"
 val jacksonVersionKotlinDependencyJar = "2.13.4" // don't forget to update version in `executor.policy` file.
 
@@ -42,6 +47,10 @@ val copyDependencies by tasks.creating(Copy::class) {
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
+}
+val copyCompilerPlugins by tasks.creating(Copy::class) {
+    from(compilerPlugin)
+    into(compilerPluginsFolder)
 }
 
 plugins {
@@ -86,7 +95,10 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.4.0")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.4.0")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
+    compilerPlugin("org.jetbrains.kotlin:kotlin-serialization-unshaded:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -132,6 +144,7 @@ fun generateProperties(prefix: String = "") = """
     indexesJs.file=${prefix + indexesJs}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
+    libraries.folder.compilerPlugins=${prefix + compilerPluginsFolder}
     executor.logs=${executorLogs}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
 """.trimIndent()
@@ -143,6 +156,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
+    dependsOn(copyCompilerPlugins)
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
@@ -166,6 +180,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(indexesJs)
     from(libJSFolder) { into(libJSFolder) }
     from(libJVMFolder) { into(libJVMFolder) }
+    from(compilerPluginsFolder) { into(compilerPluginsFolder) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }

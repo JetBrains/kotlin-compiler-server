@@ -7,6 +7,7 @@ class KotlinEnvironmentConfiguration(fileName: String) {
   val kotlinEnvironment = run {
     val jvmFile = File(fileName)
     val jsFile = File("$fileName-js")
+    val compilerPluginFile = File("$fileName-compiler-plugins")
     val classPath =
       listOfNotNull(jvmFile)
         .flatMap {
@@ -15,6 +16,11 @@ class KotlinEnvironmentConfiguration(fileName: String) {
         }
 
     val additionalJsClasspath = listOfNotNull(jsFile)
-    KotlinEnvironment(classPath, additionalJsClasspath)
+    val compilerPlugins = listOfNotNull(compilerPluginFile)
+      .flatMap {
+        it.listFiles()?.toList() ?: arrayListOf()
+      }
+
+    KotlinEnvironment(classPath, additionalJsClasspath, compilerPlugins)
   }
 }

@@ -17,6 +17,11 @@ class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
         }
 
     val additionalJsClasspath = listOfNotNull(librariesFile.js)
-    return KotlinEnvironment(classPath, additionalJsClasspath)
+
+    val compilerPlugins = listOfNotNull(librariesFile.compilerPlugins).flatMap {
+      it.listFiles()?.toList() ?: arrayListOf()
+    }
+
+    return KotlinEnvironment(classPath, additionalJsClasspath, compilerPlugins)
   }
 }
