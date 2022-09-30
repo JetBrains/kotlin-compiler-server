@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import kotlin.reflect.KFunction3
 
 @Component
 class KotlinProjectExecutor(
