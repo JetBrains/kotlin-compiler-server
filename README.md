@@ -1,8 +1,9 @@
 # Kotlin compiler server
+
 [![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
 ![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg)
-![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build) 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.7.10-orange.svg) ](https://kotlinlang.org/) 
+![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.7.10-orange.svg) ](https://kotlinlang.org/)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
 
 A REST server for compiling and executing Kotlin code.
@@ -40,11 +41,14 @@ Getting `.zip` file from `build/distributions`.
 
 Lambda handler: `com.compiler.server.lambdas.StreamLambdaHandler::handleRequest`.
 
-Publish your Lambda function: you can follow the instructions in [AWS Lambda's documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-java-how-to-create-deployment-package.html) on how to package your function for deployment.
+Publish your Lambda function: you can follow the instructions
+in [AWS Lambda's documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-java-how-to-create-deployment-package.html)
+on how to package your function for deployment.
 
 ### From Kotless
 
-Add [Kotless](https://github.com/JetBrains/kotless) and remove [aws-serverless-container](https://github.com/awslabs/aws-serverless-java-container) =)
+Add [Kotless](https://github.com/JetBrains/kotless) and
+remove [aws-serverless-container](https://github.com/awslabs/aws-serverless-java-container) =)
 
 ## API Documentation :page_with_curl:
 
@@ -106,7 +110,7 @@ curl -X POST \
 }'
 ```
 
-### Get code completions for a specified place in code 
+### Get code completions for a specified place in code
 
 ```shell script
 curl -X POST \
@@ -144,19 +148,24 @@ curl -X POST \
 curl -X GET http://localhost:8080/versions
 ```
 
-
-The server also supports an [API](https://github.com/JetBrains/kotlin-playground) for the Kotlin Playground library. 
+The server also supports an [API](https://github.com/JetBrains/kotlin-playground) for the Kotlin Playground library.
 
 ## How to add your dependencies to kotlin compiler :books:
 
-Just put whatever you need as dependencies to [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/build.gradle.kts) via a task called `kotlinDependency`:
+Just put whatever you need as dependencies
+to [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/build.gradle.kts) via a
+task called `kotlinDependency`:
 
 ```
  kotlinDependency "your dependency"
 ```
 
-NOTE: If the library you're adding uses reflection, accesses the file system, or performs any other type of security-sensitive operations, don't forget to
-configure the [executors.policy](https://github.com/AlexanderPrednota/kotlin-compiler-server/blob/master/executors.policy). [Click here](https://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html) for more information about *Java Security Policy*.
+NOTE: If the library you're adding uses reflection, accesses the file system, or performs any other type of
+security-sensitive operations, don't forget to
+configure
+the [executors.policy](https://github.com/AlexanderPrednota/kotlin-compiler-server/blob/master/executors.policy)
+. [Click here](https://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html) for more information
+about *Java Security Policy*.
 
 **How to set Java Security Policy in `executors.policy`**
 
@@ -180,9 +189,14 @@ Set the environment variables
 | ACCESS_CONTROL_ALLOW_ORIGIN_VALUE | *             |
 | ACCESS_CONTROL_ALLOW_HEADER_VALUE | *             |
 
-## Unsuccessful execution logs
+## Configure logging
+
+Set `prod` spring active profile to stream logs as JSON format
+
+### Unsuccessful execution logs
 
 In case of an unsuccessful execution in the standard output will be the event with INFO level:
+
 ```json
 {
   "date_time": "31/Aug/2021:11:49:45 +03:00",
@@ -197,17 +211,22 @@ In case of an unsuccessful execution in the standard output will be the event wi
   "kotlinVersion": "$koltinVersion"
 }
 ```
+
 The following property in `gradle.properties` can be used to disable execution events:
+
 ```
 systemProp.executorLogs=false
 ```
 
 ## Kotlin release guide :rocket:
 
-1) Update the kotlin version in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
-2) Update the kotlin version in [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/1a12996f40a5d3391bc06d2ddd719cbfe2578802/build.gradle.kts#L29) 
-3) Update the kotlin version in [Dockerfile](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/Dockerfile)
-4) Make sure everything is going well via the task: 
+1) Update the kotlin version
+   in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
+2) Update the kotlin version
+   in [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/1a12996f40a5d3391bc06d2ddd719cbfe2578802/build.gradle.kts#L29)
+3) Update the kotlin version
+   in [Dockerfile](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/Dockerfile)
+4) Make sure everything is going well via the task:
 
 ```shell script
 $ ./gradlew build
