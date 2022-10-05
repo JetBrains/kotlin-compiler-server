@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk as build
+FROM openjdk:11.0.16-jdk as build
 
 ENV KOTLIN_LIB=1.7.20-RC
 ENV KOTLIN_LIB_JS=1.7.20-RC-js
@@ -10,7 +10,7 @@ ADD . /kotlin-compiler-server
 RUN ./gradlew build -x test
 RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/kotlin-compiler-server-${KOTLIN_LIB}-SNAPSHOT.jar)
 
-FROM openjdk:11-jdk
+FROM openjdk:11.0.16-jdk
 
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
