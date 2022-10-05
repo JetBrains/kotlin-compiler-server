@@ -15,10 +15,10 @@
     "version": "1.6.21"
   },
   {
-    "version": "1.7.10",
-    "latestStable": true
+    "version": "1.7.10"
   },
   {
-    "version": "1.7.20-RC"
+    "version": "1.7.20",
+    "latestStable": true
   }
 ]
