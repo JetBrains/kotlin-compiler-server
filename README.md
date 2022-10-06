@@ -232,5 +232,5 @@ systemProp.executorLogs=false
 $ ./gradlew build
 ```
 
-1) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
-2) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
+5) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
+6) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
