@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import kotlin.reflect.KFunction3
 
 @Component
 class KotlinProjectExecutor(
@@ -89,7 +88,7 @@ class KotlinProjectExecutor(
 
   private fun convertJsWithConverter(
     project: Project,
-    converter: KFunction3<List<KtFile>, List<String>, KotlinCoreEnvironment, TranslationJSResult>
+    converter: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationJSResult
   ): TranslationJSResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }

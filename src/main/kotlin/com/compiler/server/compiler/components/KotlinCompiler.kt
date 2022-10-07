@@ -66,7 +66,7 @@ class KotlinCompiler(
     val generationState = generationStateFor(files, analysis, coreEnvironment)
     KotlinCodegenFacade.compileCorrectFiles(generationState)
     return Compiled(
-      files = generationState.factory.asList().map { it.relativePath to it.asByteArray() }.toMap(),
+      files = generationState.factory.asList().associate { it.relativePath to it.asByteArray() },
       mainClass = findMainClass(
         generationState.bindingContext,
         LanguageVersionSettingsImpl.DEFAULT,

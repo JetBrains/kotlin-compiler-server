@@ -33,6 +33,7 @@ val kotlinJsDependency: Configuration by configurations.creating {
 val libJSFolder = "$kotlinVersion-js"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
+val jacksonVersionKotlinDependencyJar = "2.13.4" // don't forget to update version in `executor.policy` file.
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
@@ -44,8 +45,8 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.7.3"
-    id("io.spring.dependency-management") version "1.0.13.RELEASE"
+    id("org.springframework.boot") version "2.7.4"
+    id("io.spring.dependency-management") version "1.0.14.RELEASE"
     kotlin("jvm") version "1.7.20"
     kotlin("plugin.spring") version "1.7.20"
 }
@@ -76,9 +77,9 @@ allprojects {
 dependencies {
     kotlinDependency("junit:junit:4.13.2")
     kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:2.13.3")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:2.13.3")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:2.13.3")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:$jacksonVersionKotlinDependencyJar")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-core:$jacksonVersionKotlinDependencyJar")
+    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersionKotlinDependencyJar")
     // Kotlin libraries
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
@@ -89,7 +90,7 @@ dependencies {
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.8.2")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9")
     implementation("junit:junit:4.13.2")
     implementation("net.logstash.logback:logstash-logback-encoder:7.2")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20200330")
