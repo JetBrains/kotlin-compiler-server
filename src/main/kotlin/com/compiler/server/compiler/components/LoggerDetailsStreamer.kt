@@ -1,12 +1,16 @@
-package com.compiler.server.utils
+package com.compiler.server.compiler.components
 
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.ProjectType
 import net.logstash.logback.marker.Markers
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
+import org.springframework.stereotype.Component
 
-object LoggerHelper {
-  private val log = LoggerFactory.getLogger(LoggerHelper::class.java)
+@Component
+@Profile("prod")
+class LoggerDetailsStreamer {
+  private val log = LoggerFactory.getLogger(LoggerDetailsStreamer::class.java)
 
   fun logExecutionResult(executionResult: ExecutionResult, type: ProjectType, version: String) {
     log.info(
@@ -16,7 +20,8 @@ object LoggerHelper {
           confType = type.toString(),
           version = version
         )
-      ), "Code execution is complete."
+      ),
+      "Code execution is complete."
     )
   }
 
