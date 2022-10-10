@@ -191,7 +191,8 @@ Set the environment variables
 
 ## Configure logging
 
-Set `prod` spring active profile to stream logs as JSON format
+We use `prod` spring active profile to stream logs as JSON format.
+You can set the spring profile by supplying `-Dspring.profiles.active=prod` or set env variable `SPRING_PROFILES_ACTIVE` to `prod` value.
 
 ### Unsuccessful execution logs
 
@@ -210,12 +211,6 @@ In case of an unsuccessful execution in the standard output will be the event wi
   "confType": "JAVA",
   "kotlinVersion": "$koltinVersion"
 }
-```
-
-The following property in `gradle.properties` can be used to disable execution events:
-
-```
-systemProp.executorLogs=false
 ```
 
 ## Kotlin release guide :rocket:
