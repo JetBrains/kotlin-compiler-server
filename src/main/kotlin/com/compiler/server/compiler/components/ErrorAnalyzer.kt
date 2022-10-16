@@ -58,7 +58,7 @@ class ErrorAnalyzer(
     return ErrorsAndAnalysis(
       errorsFrom(
         analysis.analysisResult.bindingContext.diagnostics.all(),
-        files.map { it.name to anylizeErrorsFrom(it, isJs) }.toMap(),
+        files.associate { it.name to anylizeErrorsFrom(it, isJs) },
         isJs
       ),
       analysis
@@ -132,13 +132,13 @@ class ErrorAnalyzer(
     isJs: Boolean
   ): Map<String, List<ErrorDescriptor>> {
     return (errors and errorsFrom(diagnostics, isJs)).map { (fileName, errors) ->
-      fileName to errors.sortedWith(Comparator { o1, o2 ->
+      fileName to errors.sortedWith { o1, o2 ->
         val line = o1.interval.start.line.compareTo(o2.interval.start.line)
         when (line) {
           0 -> o1.interval.start.ch.compareTo(o2.interval.start.ch)
           else -> line
         }
-      })
+      }
     }.toMap()
   }
 
