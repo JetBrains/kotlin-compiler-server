@@ -19,12 +19,10 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.ir.backend.js.jsPhases
-import org.jetbrains.kotlin.ir.backend.js.jsResolveLibraries
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
 import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
 import org.jetbrains.kotlin.serialization.js.ModuleKind
-import org.jetbrains.kotlin.util.Logger
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import java.io.File
 
@@ -89,20 +87,6 @@ class KotlinEnvironment(
   }
 
   val jsIrPhaseConfig = createPhaseConfig(jsPhases, K2JsIrCompiler().createArguments(), messageCollector)
-
-  val jsIrResolvedLibraries = jsResolveLibraries(
-    JS_LIBRARIES,
-    emptyList(),
-    object : Logger {
-      override fun error(message: String) {}
-      override fun fatal(message: String): Nothing {
-        TODO("Fake logger for compiler server")
-      }
-
-      override fun log(message: String) {}
-      override fun warning(message: String) {}
-    }
-  )
 
   private val environment = KotlinCoreEnvironment.createForProduction(
     parentDisposable = Disposer.newDisposable(),
