@@ -4,7 +4,7 @@ fun main() {
     val numbers = listOf(1, 2, 3, 4, 5, 6)
     val invertedOddNumbers = numbers
         .filter { it % 2 != 0 }
-        .joinToString{ "${-it}" }
+        .joinToString(separator = ";") {"${-it}"}
     println(invertedOddNumbers)
 //sampleEnd
 }
