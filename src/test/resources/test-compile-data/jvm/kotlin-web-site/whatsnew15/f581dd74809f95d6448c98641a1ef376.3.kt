@@ -1,8 +1,8 @@
 fun main() {
 //sampleStart
-    val chars = listOf('a', '1', '+')
-    val (letterOrDigitList, notLetterOrDigitList) = chars.partition { it.isLetterOrDigit() }
-    println(letterOrDigitList) // [a, 1]
-    println(notLetterOrDigitList) // [+]
+    val chars = listOf('ǅ', 'ǈ', 'ǋ', 'ǲ', '1', 'A', 'a', '+')
+    val (titleCases, notTitleCases) = chars.partition { it.isTitleCase() }
+    println(titleCases) // [ǅ, ǈ, ǋ, ǲ]
+    println(notTitleCases) // [1, A, a, +]
 //sampleEnd    
 }
