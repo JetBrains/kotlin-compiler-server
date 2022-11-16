@@ -17,5 +17,8 @@
   {
     "version": "1.7.21",
     "latestStable": true
+  },
+  {
+    "version": "1.8.0-Beta"
   }
 ]
