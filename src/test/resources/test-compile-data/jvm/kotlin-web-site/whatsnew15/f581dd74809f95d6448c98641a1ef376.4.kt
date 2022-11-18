@@ -1,8 +1,7 @@
 fun main() {
 //sampleStart
-    val chars = listOf('ǅ', 'ǈ', 'ǋ', 'ǲ', '1', 'A', 'a', '+')
-    val (titleCases, notTitleCases) = chars.partition { it.isTitleCase() }
-    println(titleCases) // [ǅ, ǈ, ǋ, ǲ]
-    println(notTitleCases) // [1, A, a, +]
-//sampleEnd    
+    val data = listOf("Kotlin", "1.5")
+    println(data.firstNotNullOf(String::toDoubleOrNull))
+    println(data.firstNotNullOfOrNull(String::toIntOrNull))
+//sampleEnd
 }
