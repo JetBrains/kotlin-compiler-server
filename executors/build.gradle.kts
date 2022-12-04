@@ -4,7 +4,7 @@ plugins {
   kotlin("jvm")
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 dependencies {
   implementation("junit:junit:4.12")
