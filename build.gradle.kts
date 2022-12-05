@@ -11,7 +11,7 @@ val indexesJs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false
@@ -136,8 +136,8 @@ fun generateProperties(prefix: String = "") = """
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict", "-Xskip-metadata-version-check")
-        jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "11"
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
