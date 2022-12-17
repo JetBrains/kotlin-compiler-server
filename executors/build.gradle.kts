@@ -7,7 +7,7 @@ plugins {
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 dependencies {
-  implementation("junit:junit:4.12")
+  implementation("junit:junit:4.13.2")
 }
 
 tasks.withType<Jar>().getByName("jar") {
