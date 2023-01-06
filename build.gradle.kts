@@ -65,7 +65,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
-                implementation("org.jetbrains.kotlin:idea:221-$kotlinIdeVersion-IJ5591.52") {
+                implementation("org.jetbrains.kotlin:idea:222-$kotlinIdeVersion-IJ4167.29") {
                     isTransitive = false
                 }
             }
@@ -104,8 +104,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:common:221-$kotlinIdeVersion-IJ5591.52")
-    implementation("org.jetbrains.kotlin:core:221-$kotlinIdeVersion-IJ5591.52")
+    implementation("org.jetbrains.kotlin:common:222-$kotlinIdeVersion-IJ4167.29")
+    implementation("org.jetbrains.kotlin:core:222-$kotlinIdeVersion-IJ4167.29")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
