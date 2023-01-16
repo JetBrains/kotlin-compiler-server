@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
+val arrowVersion = "1.1.2"
 val kotlinVersion: String by System.getProperties()
 val kotlinIdeVersion: String by System.getProperties()
 val policy: String by System.getProperties()
@@ -86,6 +87,11 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
+
+    kotlinDependency("io.arrow-kt:arrow-core:$arrowVersion")
+    kotlinDependency("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
+    kotlinDependency("io.arrow-kt:arrow-fx-stm:$arrowVersion")
+    kotlinDependency("io.arrow-kt:arrow-optics:$arrowVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
