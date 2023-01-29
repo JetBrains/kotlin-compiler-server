@@ -64,7 +64,7 @@ allprojects {
     afterEvaluate {
         dependencies {
             dependencies {
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
                 implementation("org.jetbrains.kotlin:idea:222-$kotlinIdeVersion-IJ4167.29") {
                     isTransitive = false
                 }
