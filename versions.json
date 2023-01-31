@@ -23,5 +23,8 @@
   {
     "version": "1.8.10",
     "latestStable": true
+  },
+  {
+    "version": "1.8.20-Beta"
   }
 ]
