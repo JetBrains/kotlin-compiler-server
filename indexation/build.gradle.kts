@@ -4,7 +4,7 @@ val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
 
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "1.8.20-Beta-145"
     application
 }
 
