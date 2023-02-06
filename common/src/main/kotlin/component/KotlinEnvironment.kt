@@ -112,6 +112,11 @@ class KotlinEnvironment(
       put(JVMConfigurationKeys.DO_NOT_CLEAR_BINDING_CONTEXT, true)
 
       configureJdkClasspathRoots()
+      val jdkHome = get(JVMConfigurationKeys.JDK_HOME)
+      if (jdkHome == null) {
+        val javaHome = File(System.getProperty("java.home"))
+        put(JVMConfigurationKeys.JDK_HOME, javaHome)
+      }
     }
   }
 }
