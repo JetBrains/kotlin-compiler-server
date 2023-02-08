@@ -150,7 +150,7 @@ class KotlinToJSTranslator(
     val jsCode = jsCodeClass.getDeclaredField("rawJsCode").let {
       it.isAccessible = true
       it.get(jsCodeObject) as String
-      }
+    }
     return jsCode
   }
 }
