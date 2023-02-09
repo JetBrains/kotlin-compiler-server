@@ -3,21 +3,12 @@ package com.compiler.server.compiler.components
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.toExceptionDescriptor
-import com.intellij.openapi.project.Project
 import component.KotlinEnvironment
-import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
-import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
-import org.jetbrains.kotlin.cli.js.klib.generateIrForKlibSerialization
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.ir.backend.js.*
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
-import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
-import org.jetbrains.kotlin.ir.symbols.IrSymbol
-import org.jetbrains.kotlin.js.analyzer.JsAnalysisResult
+import org.jetbrains.kotlin.ir.backend.js.ic.JsExecutableProducer
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputs
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputsBuilt
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -25,6 +16,7 @@ import org.jetbrains.kotlin.js.facade.TranslationResult
 import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
+import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.springframework.stereotype.Service
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
@@ -111,40 +103,39 @@ class KotlinToJSTranslator(
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
-    val currentProject = coreEnvironment.project
-
     val tmpDir = createTempDirectory()
-    val mainKlib = tmpDir.resolve("main")
+    val mainKlib = tmpDir.resolve("main").normalize().absolutePathString()
 
-    val caches = tmpDir.resolve("caches")
+    val caches = tmpDir.resolve("caches").normalize().absolutePathString()
 
-    val sourceModule = processSourceModule(
+    processSourceModule(
       coreEnvironment.project,
       files,
       kotlinEnvironment.JS_LIBRARIES,
       friendLibraries = emptyList(),
       kotlinEnvironment.jsConfiguration,
-      mainKlib.normalize().absolutePathString()
+      mainKlib
     )
 
-
-    val ir = compile(
-      sourceModule,
-      kotlinEnvironment.jsIrPhaseConfig,
-      irFactory = IrFactoryImplForJsIC(WholeWorldStageController())
-    )
-    val transformer = IrModuleToJsTransformer(
-      ir.context,
-      arguments
+    val icCaches = prepareIcCaches(
+      includes = mainKlib,
+      cacheDirectory = caches,
+      libraries = kotlinEnvironment.JS_LIBRARIES + mainKlib,
+      friendLibraries = emptyList(),
+      configurationJs = kotlinEnvironment.jsConfiguration,
     )
 
-    val compiledModule: CompilerResult = transformer.generateModule(
-      modules = ir.allModules,
-      modes = setOf(TranslationMode.FULL_DEV),
-      relativeRequirePath = false
+    val jsExecutableProducer = JsExecutableProducer(
+      mainModuleName = "main",
+      moduleKind =  ModuleKind.PLAIN,
+      sourceMapsInfo = null,
+      caches = icCaches,
+      relativeRequirePath = true
     )
 
-    val jsCode = getJsCodeFromModule(compiledModule)
+    val (outputs, _) = jsExecutableProducer.buildExecutable(multiModule = false, outJsProgram = false)
+
+    val jsCode = getJsCodeFromOutputs(outputs)
 
     val listLines = jsCode
       .lineSequence()
@@ -157,64 +148,8 @@ class KotlinToJSTranslator(
     return TranslationJSResult(listLines.joinToString("\n"))
   }
 
-  // copy from compiler private fun
-  private fun processSourceModule(
-    project: Project,
-    files: List<KtFile>,
-    libraries: List<String>,
-    friendLibraries: List<String>,
-    configuration: CompilerConfiguration,
-    outputKlibPath: String
-  ): ModulesStructure {
-    val sourceModule: ModulesStructure = prepareAnalyzedSourceModule(
-        project,
-        files,
-        configuration,
-        libraries,
-        friendLibraries,
-        AnalyzerWithCompilerReport(configuration)
-      )
-
-    val moduleSourceFiles = (sourceModule.mainModule as MainModule.SourceFiles).files
-    val expectDescriptorToSymbol = mutableMapOf<DeclarationDescriptor, IrSymbol>()
-
-    val (moduleFragment, _) = generateIrForKlibSerialization(
-      project,
-      moduleSourceFiles,
-      configuration,
-      sourceModule.jsFrontEndResult.jsAnalysisResult,
-      sourceModule.allDependencies.map { it.library },
-      emptyList(),
-      expectDescriptorToSymbol,
-      IrFactoryImpl,
-      verifySignatures = true
-    ) {
-      sourceModule.getModuleDescriptor(it)
-    }
-
-    val metadataSerializer =
-      KlibMetadataIncrementalSerializer(
-        configuration,
-        sourceModule.project,
-        sourceModule.jsFrontEndResult.hasErrors
-      )
-
-    generateKLib(
-      sourceModule,
-      outputKlibPath,
-      nopack = true,
-      jsOutputName = null,
-      icData = emptyList(),
-      expectDescriptorToSymbol = expectDescriptorToSymbol,
-      moduleFragment = moduleFragment
-    ) { file ->
-      metadataSerializer.serializeScope(file, sourceModule.jsFrontEndResult.bindingContext, moduleFragment.descriptor)
-    }
-    return sourceModule
-  }
-
-  private fun getJsCodeFromModule(compiledModule: CompilerResult): String {
-    val jsCodeObject = compiledModule.outputs.values.single()
+  private fun getJsCodeFromOutputs(outputs: CompilationOutputs): String {
+    val jsCodeObject = (outputs as CompilationOutputsBuilt)
 
     val jsCodeClass = jsCodeObject.javaClass
     val jsCode = jsCodeClass.getDeclaredField("rawJsCode").let {
