@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.springframework.stereotype.Service
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
 
 @Service
 class KotlinToJSTranslator(
@@ -106,34 +107,42 @@ class KotlinToJSTranslator(
     val tmpDir = createTempDirectory()
     val mainKlib = tmpDir.resolve("main").normalize().absolutePathString()
 
-    val caches = tmpDir.resolve("caches").normalize().absolutePathString()
+    val cachesDir = tmpDir.resolve("caches").normalize()
+    val caches = cachesDir.absolutePathString()
 
-    processSourceModule(
-      coreEnvironment.project,
-      files,
-      kotlinEnvironment.JS_LIBRARIES,
-      friendLibraries = emptyList(),
-      kotlinEnvironment.jsConfiguration,
-      mainKlib
-    )
+    kotlinEnvironment.cachesJsDir.copyRecursively(cachesDir.toFile())
 
-    val icCaches = prepareIcCaches(
-      includes = mainKlib,
-      cacheDirectory = caches,
-      libraries = kotlinEnvironment.JS_LIBRARIES + mainKlib,
-      friendLibraries = emptyList(),
-      configurationJs = kotlinEnvironment.jsConfiguration,
-    )
+    val outputs = try {
+      processSourceModule(
+        coreEnvironment.project,
+        files,
+        kotlinEnvironment.JS_LIBRARIES,
+        friendLibraries = emptyList(),
+        kotlinEnvironment.jsConfiguration,
+        mainKlib
+      )
 
-    val jsExecutableProducer = JsExecutableProducer(
-      mainModuleName = "main",
-      moduleKind =  ModuleKind.PLAIN,
-      sourceMapsInfo = null,
-      caches = icCaches,
-      relativeRequirePath = true
-    )
+      val icCaches = prepareIcCaches(
+        includes = mainKlib,
+        cacheDirectory = caches,
+        libraries = kotlinEnvironment.JS_LIBRARIES + mainKlib,
+        friendLibraries = emptyList(),
+        configurationJs = kotlinEnvironment.jsConfiguration,
+      )
 
-    val (outputs, _) = jsExecutableProducer.buildExecutable(multiModule = false, outJsProgram = false)
+      val jsExecutableProducer = JsExecutableProducer(
+        mainModuleName = "moduleId",
+        moduleKind = ModuleKind.PLAIN,
+        sourceMapsInfo = null,
+        caches = icCaches,
+        relativeRequirePath = true
+      )
+
+      val (outputs, _) = jsExecutableProducer.buildExecutable(multiModule = false, outJsProgram = false)
+      outputs
+    } finally {
+      tmpDir.normalize().toAbsolutePath().toFile().deleteRecursively()
+    }
 
     val jsCode = getJsCodeFromOutputs(outputs)
 

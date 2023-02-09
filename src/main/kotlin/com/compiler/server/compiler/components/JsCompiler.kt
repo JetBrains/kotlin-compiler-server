@@ -89,7 +89,7 @@ fun prepareIcCaches(
     cacheDir = cacheDirectory,
     compilerConfiguration = configurationJs,
     irFactory = { IrFactoryImplForJsIC(WholeWorldStageController()) },
-    mainArguments = null,
+    mainArguments = emptyList(),
     compilerInterfaceFactory = { mainModule, cfg ->
       JsIrCompilerWithIC(
         mainModule,
