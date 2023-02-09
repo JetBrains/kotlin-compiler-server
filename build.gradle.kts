@@ -132,6 +132,8 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+    server.compression.enabled=true
+    server.compression.mime-types=application/json
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {
