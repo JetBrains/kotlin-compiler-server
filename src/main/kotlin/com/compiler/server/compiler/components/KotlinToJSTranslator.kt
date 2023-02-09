@@ -31,12 +31,12 @@ class KotlinToJSTranslator(
     private const val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
     private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
 
-    private const val JS_IR_CODE_BUFFER = "moduleId.output._buffer;\n"
+    private const val JS_IR_CODE_BUFFER = "moduleId.output.buffer_1;\n"
 
     private val JS_IR_OUTPUT_REWRITE = """
         if (kotlin.isRewrite) {
-            init_properties_console_kt_6h8hpf();
-            output = new BufferedOutput_0()
+            _init_properties_console_kt__rfg7jv();
+            output = new BufferedOutput()
         }
         """.trimIndent()
 
