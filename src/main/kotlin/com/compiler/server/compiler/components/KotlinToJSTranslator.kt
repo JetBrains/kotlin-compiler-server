@@ -3,16 +3,21 @@ package com.compiler.server.compiler.components
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.toExceptionDescriptor
+import com.intellij.openapi.project.Project
 import component.KotlinEnvironment
+import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
+import org.jetbrains.kotlin.cli.js.klib.generateIrForKlibSerialization
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.backend.js.CompilerResult
-import org.jetbrains.kotlin.ir.backend.js.WholeWorldStageController
-import org.jetbrains.kotlin.ir.backend.js.compile
-import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
+import org.jetbrains.kotlin.config.CompilerConfiguration
+import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
+import org.jetbrains.kotlin.ir.backend.js.*
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
+import org.jetbrains.kotlin.ir.symbols.IrSymbol
+import org.jetbrains.kotlin.js.analyzer.JsAnalysisResult
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -21,6 +26,8 @@ import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
 import org.springframework.stereotype.Service
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempDirectory
 
 @Service
 class KotlinToJSTranslator(
@@ -106,14 +113,21 @@ class KotlinToJSTranslator(
   ): TranslationJSResult {
     val currentProject = coreEnvironment.project
 
-    val sourceModule = prepareAnalyzedSourceModule(
-      currentProject,
+    val tmpDir = createTempDirectory()
+    val mainKlib = tmpDir.resolve("main")
+
+    val caches = tmpDir.resolve("caches")
+
+    val sourceModule = processSourceModule(
+      coreEnvironment.project,
       files,
-      kotlinEnvironment.jsConfiguration,
       kotlinEnvironment.JS_LIBRARIES,
-      friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+      friendLibraries = emptyList(),
+      kotlinEnvironment.jsConfiguration,
+      mainKlib.normalize().absolutePathString()
     )
+
+
     val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
@@ -141,6 +155,62 @@ class KotlinToJSTranslator(
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
     return TranslationJSResult(listLines.joinToString("\n"))
+  }
+
+  // copy from compiler private fun
+  private fun processSourceModule(
+    project: Project,
+    files: List<KtFile>,
+    libraries: List<String>,
+    friendLibraries: List<String>,
+    configuration: CompilerConfiguration,
+    outputKlibPath: String
+  ): ModulesStructure {
+    val sourceModule: ModulesStructure = prepareAnalyzedSourceModule(
+        project,
+        files,
+        configuration,
+        libraries,
+        friendLibraries,
+        AnalyzerWithCompilerReport(configuration)
+      )
+
+    val moduleSourceFiles = (sourceModule.mainModule as MainModule.SourceFiles).files
+    val expectDescriptorToSymbol = mutableMapOf<DeclarationDescriptor, IrSymbol>()
+
+    val (moduleFragment, _) = generateIrForKlibSerialization(
+      project,
+      moduleSourceFiles,
+      configuration,
+      sourceModule.jsFrontEndResult.jsAnalysisResult,
+      sourceModule.allDependencies.map { it.library },
+      emptyList(),
+      expectDescriptorToSymbol,
+      IrFactoryImpl,
+      verifySignatures = true
+    ) {
+      sourceModule.getModuleDescriptor(it)
+    }
+
+    val metadataSerializer =
+      KlibMetadataIncrementalSerializer(
+        configuration,
+        sourceModule.project,
+        sourceModule.jsFrontEndResult.hasErrors
+      )
+
+    generateKLib(
+      sourceModule,
+      outputKlibPath,
+      nopack = true,
+      jsOutputName = null,
+      icData = emptyList(),
+      expectDescriptorToSymbol = expectDescriptorToSymbol,
+      moduleFragment = moduleFragment
+    ) { file ->
+      metadataSerializer.serializeScope(file, sourceModule.jsFrontEndResult.bindingContext, moduleFragment.descriptor)
+    }
+    return sourceModule
   }
 
   private fun getJsCodeFromModule(compiledModule: CompilerResult): String {
