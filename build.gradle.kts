@@ -30,7 +30,19 @@ val kotlinJsDependency: Configuration by configurations.creating {
         )
     }
 }
+
+val kotlinWasmDependency: Configuration by configurations.creating {
+    isTransitive = false
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.wasm
+        )
+    }
+}
+
 val libJSFolder = "$kotlinVersion-js"
+val libWasmFolder = "$kotlinVersion-wasm"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
 val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
@@ -42,6 +54,11 @@ val copyDependencies by tasks.creating(Copy::class) {
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
+}
+
+val copyWasmDependencies by tasks.creating(Copy::class) {
+    from(files(Callable { kotlinWasmDependency.map { zipTree(it) } }))
+    into(libWasmFolder)
 }
 
 plugins {
@@ -89,6 +106,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
+    kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
@@ -134,7 +152,10 @@ fun generateProperties(prefix: String = "") = """
     indexesJs.file=${prefix + indexesJs}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
+    libraries.folder.wasm=${prefix + libWasmFolder}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+    server.compression.enabled=true
+    server.compression.mime-types=application/json
 """.trimIndent()
 
 java {
@@ -150,6 +171,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
+    dependsOn(copyWasmDependencies)
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
