@@ -21,11 +21,24 @@ open class ExecutionResult(
   private fun textWithError() = text.startsWith(ERROR_STREAM_START)
 }
 
+abstract class TranslationResultWithJsCode(
+  open val jsCode: String?,
+  errors: Map<String, List<ErrorDescriptor>>,
+  exception: ExceptionDescriptor?
+) : ExecutionResult(errors, exception)
+
 data class TranslationJSResult(
-  val jsCode: String? = null,
+  override val jsCode: String? = null,
   override var exception: ExceptionDescriptor? = null,
   override var errors: Map<String, List<ErrorDescriptor>> = emptyMap()
-) : ExecutionResult(errors, exception)
+) : TranslationResultWithJsCode(jsCode, errors, exception)
+
+data class TranslationWasmResult(
+  override val jsCode: String? = null,
+  val wasm: ByteArray,
+  override var exception: ExceptionDescriptor? = null,
+  override var errors: Map<String, List<ErrorDescriptor>> = emptyMap()
+) : TranslationResultWithJsCode(jsCode, errors, exception)
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 class JunitExecutionResult(
