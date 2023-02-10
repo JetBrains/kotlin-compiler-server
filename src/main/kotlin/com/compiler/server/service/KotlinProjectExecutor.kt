@@ -2,10 +2,7 @@ package com.compiler.server.service
 
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.Project
-import com.compiler.server.model.TranslationJSResult
+import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
@@ -41,12 +38,16 @@ class KotlinProjectExecutor(
     }.also { logExecutionResult(project, it) }
   }
 
-  fun convertToJs(project: Project): TranslationJSResult {
+  fun convertToJs(project: Project): TranslationResultWithJsCode {
     return convertJsWithConverter(project, kotlinToJSTranslator::doTranslate)
   }
 
-  fun convertToJsIr(project: Project): TranslationJSResult {
+  fun convertToJsIr(project: Project): TranslationResultWithJsCode {
     return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
+  }
+
+  fun convertToWasm(project: Project): TranslationResultWithJsCode {
+    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -83,8 +84,8 @@ class KotlinProjectExecutor(
 
   private fun convertJsWithConverter(
     project: Project,
-    converter: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationJSResult
-  ): TranslationJSResult {
+    converter: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
+  ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinToJSTranslator.translate(
