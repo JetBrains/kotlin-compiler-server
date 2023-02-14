@@ -28,7 +28,8 @@ import java.io.File
 
 class KotlinEnvironment(
   val classpath: List<File>,
-  additionalJsClasspath: List<File>
+  additionalJsClasspath: List<File>,
+  val cachesJsDir: File
 ) {
   companion object {
     /**
