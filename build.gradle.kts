@@ -25,11 +25,31 @@ val kotlinJsDependency: Configuration by configurations.creating {
         )
         attribute(
             KotlinJsCompilerAttribute.jsCompilerAttribute,
-            KotlinJsCompilerAttribute.legacy
+            KotlinJsCompilerAttribute.ir
         )
     }
 }
+
+val kotlinJsIcCache: Configuration by configurations.creating {
+    isTransitive = false
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.js
+        )
+        attribute(
+            KotlinJsCompilerAttribute.jsCompilerAttribute,
+            KotlinJsCompilerAttribute.ir
+        )
+        attribute(
+            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+            objects.named(LibraryElements::class.java, "js-ir-cache")
+        )
+    }
+}
+
 val libJSFolder = "$kotlinVersion-js"
+val libJSCachesFolder = "$kotlinVersion-js-caches"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
 val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
@@ -41,6 +61,11 @@ val copyDependencies by tasks.creating(Copy::class) {
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
     into(libJSFolder)
+}
+
+val copyJSCaches by tasks.creating(Copy::class) {
+    from(kotlinJsIcCache)
+    into(libJSCachesFolder)
 }
 
 plugins {
@@ -87,6 +112,8 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
+    kotlinJsIcCache(project(":cache-preparator"))
+
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.1")
@@ -131,7 +158,10 @@ fun generateProperties(prefix: String = "") = """
     indexesJs.file=${prefix + indexesJs}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
+    caches.folder.js=${prefix + libJSCachesFolder}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+    server.compression.enabled=true
+    server.compression.mime-types=application/json
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {
@@ -141,6 +171,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
+    dependsOn(copyJSCaches)
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
