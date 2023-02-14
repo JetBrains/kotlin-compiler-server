@@ -1,12 +1,16 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.model.bean.CachesFile
 import com.compiler.server.model.bean.LibrariesFile
 import component.KotlinEnvironment
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
+class KotlinEnvironmentConfiguration(
+  val librariesFile: LibrariesFile,
+  val cachesFiles: CachesFile
+) {
   @Bean
   fun kotlinEnvironment(): KotlinEnvironment {
     val classPath =
@@ -17,6 +21,6 @@ class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
         }
 
     val additionalJsClasspath = listOfNotNull(librariesFile.js)
-    return KotlinEnvironment(classPath, additionalJsClasspath)
+    return KotlinEnvironment(classPath, additionalJsClasspath, cachesFiles.js)
   }
 }
