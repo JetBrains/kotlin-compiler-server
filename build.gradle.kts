@@ -80,6 +80,7 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
         maven("https://www.myget.org/F/rd-snapshots/maven/")
         maven("https://kotlin.jetbrains.space/p/kotlin/packages/maven/kotlin-ide")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
     }
     afterEvaluate {
         dependencies {
