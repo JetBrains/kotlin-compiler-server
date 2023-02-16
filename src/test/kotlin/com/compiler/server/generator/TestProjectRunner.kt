@@ -29,7 +29,7 @@ class TestProjectRunner {
     code: String,
     contains: String,
     args: String = "",
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
     convertAndTest(project, contains, convert)
@@ -38,13 +38,13 @@ class TestProjectRunner {
   fun multiRunJs(
     code: List<String>,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
     convertAndTest(project, contains, convert)
   }
 
-  fun translateToJs(code: String): TranslationJSResult {
+  fun translateToJs(code: String): TranslationResultWithJsCode {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS)
     return kotlinProjectExecutor.convertToJs(project)
   }
@@ -130,7 +130,7 @@ class TestProjectRunner {
   private fun convertAndTest(
     project: Project,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val result = kotlinProjectExecutor.convert(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
