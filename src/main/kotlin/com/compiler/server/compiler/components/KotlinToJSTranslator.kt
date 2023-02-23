@@ -127,6 +127,7 @@ class KotlinToJSTranslator(
         cacheDirectory = caches,
         libraries = kotlinEnvironment.JS_LIBRARIES + mainKlib,
         friendLibraries = emptyList(),
+        mainCallArgs = arguments,
         configurationJs = kotlinEnvironment.jsConfiguration,
       )
 
