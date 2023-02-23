@@ -23,5 +23,9 @@
   {
     "version": "1.8.21",
     "latestStable": true
+  },
+  {
+    "version": "1.9.0-latest",
+    "unstable": true
   }
 ]
