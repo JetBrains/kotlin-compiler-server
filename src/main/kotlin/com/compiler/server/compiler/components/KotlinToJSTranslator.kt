@@ -180,7 +180,7 @@ class KotlinToJSTranslator(
       generateSourceMaps = false
     )
 
-    return TranslationWasmResult(res.jsUninstantiatedWrapper, res.wasm)
+    return TranslationWasmResult(res.jsUninstantiatedWrapper, res.jsWrapper, res.wasm)
   }
 
   private fun getJsCodeFromModule(compiledModule: CompilerResult): String {
