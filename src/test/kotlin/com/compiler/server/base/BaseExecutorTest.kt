@@ -62,6 +62,11 @@ class BaseExecutorTest {
     convertToJsIr(project)
   }
 
+  fun runWasm(
+    code: String,
+    contains: String
+  ) = testRunner.runWasm(code, contains)
+
   fun translateToJs(code: String) = testRunner.translateToJs(code)
 
   fun runWithException(code: String, contains: String) = testRunner.runWithException(code, contains)

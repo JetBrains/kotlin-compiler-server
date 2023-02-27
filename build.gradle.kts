@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -68,6 +70,11 @@ plugins {
     kotlin("jvm") version "$kotlinVersion"
     kotlin("plugin.spring") version "$kotlinVersion"
 }
+
+apply<NodeJsRootPlugin>()
+
+the<NodeJsRootExtension>().nodeVersion = "20.0.0-nightly20230227fadcee71e0"
+the<NodeJsRootExtension>().nodeDownloadBaseUrl = "https://nodejs.org/download/nightly"
 
 allprojects {
     repositories {
@@ -202,5 +209,12 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.withType<Test> {
+    dependsOn(rootProject.the<NodeJsRootExtension>().nodeJsSetupTaskProvider)
     useJUnitPlatform()
+    doFirst {
+        this@withType.environment(
+            "kotlin.wasm.node.path",
+            rootProject.the<NodeJsRootExtension>().requireConfigured().nodeExecutable
+        )
+    }
 }
