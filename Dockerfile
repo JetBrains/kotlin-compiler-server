@@ -1,8 +1,8 @@
 FROM openjdk:11.0.16-jdk as build
 
-ENV KOTLIN_LIB=1.8.20-Beta
-ENV KOTLIN_LIB_JS=1.8.20-Beta-js
-ENV KOTLIN_CACHES_JS=1.8.20-Beta-js-caches
+ENV KOTLIN_LIB=1.8.20-RC
+ENV KOTLIN_LIB_JS=1.8.20-RC-js
+ENV KOTLIN_CACHES_JS=1.8.20-RC-js-caches
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
