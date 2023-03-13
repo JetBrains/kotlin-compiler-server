@@ -194,6 +194,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(indexes)
     from(indexesJs)
     from(libJSFolder) { into(libJSFolder) }
+    from(libJSCachesFolder) { into(libJSCachesFolder) }
     from(libJVMFolder) { into(libJVMFolder) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
