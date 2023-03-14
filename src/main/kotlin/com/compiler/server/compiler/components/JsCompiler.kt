@@ -80,7 +80,6 @@ fun prepareIcCaches(
   cacheDirectory: String,
   libraries: List<String>,
   friendLibraries: List<String>,
-  mainCallArgs: List<String>,
   configurationJs: CompilerConfiguration,
 ): List<ModuleArtifact> {
   val cacheUpdater = CacheUpdater(
@@ -90,7 +89,7 @@ fun prepareIcCaches(
     cacheDir = cacheDirectory,
     compilerConfiguration = configurationJs,
     irFactory = { IrFactoryImplForJsIC(WholeWorldStageController()) },
-    mainArguments = mainCallArgs,
+    mainArguments = emptyList(),
     compilerInterfaceFactory = { mainModule, cfg ->
       JsIrCompilerWithIC(
         mainModule,
