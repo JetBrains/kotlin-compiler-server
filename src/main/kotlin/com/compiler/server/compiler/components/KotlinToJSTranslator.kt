@@ -4,11 +4,15 @@ import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
+import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.backend.js.*
-import org.jetbrains.kotlin.ir.backend.js.ic.JsExecutableProducer
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputs
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.CompilationOutputsBuilt
+import org.jetbrains.kotlin.ir.backend.js.CompilerResult
+import org.jetbrains.kotlin.ir.backend.js.WholeWorldStageController
+import org.jetbrains.kotlin.ir.backend.js.compile
+import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -16,11 +20,7 @@ import org.jetbrains.kotlin.js.facade.TranslationResult
 import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.CompilerEnvironment
-import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.springframework.stereotype.Service
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.deleteRecursively
 
 @Service
 class KotlinToJSTranslator(
@@ -104,48 +104,33 @@ class KotlinToJSTranslator(
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
-    val tmpDir = createTempDirectory()
-    val mainKlib = tmpDir.resolve("main").normalize().absolutePathString()
+    val currentProject = coreEnvironment.project
 
-    val cachesDir = tmpDir.resolve("caches").normalize()
-    val caches = cachesDir.absolutePathString()
+    val sourceModule = prepareAnalyzedSourceModule(
+      currentProject,
+      files,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_LIBRARIES,
+      friendDependencies = emptyList(),
+      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+    )
+    val ir = compile(
+      sourceModule,
+      kotlinEnvironment.jsIrPhaseConfig,
+      irFactory = IrFactoryImplForJsIC(WholeWorldStageController())
+    )
+    val transformer = IrModuleToJsTransformer(
+      ir.context,
+      arguments
+    )
 
-    kotlinEnvironment.cachesJsDir.copyRecursively(cachesDir.toFile())
+    val compiledModule: CompilerResult = transformer.generateModule(
+      modules = ir.allModules,
+      modes = setOf(TranslationMode.FULL_PROD),
+      relativeRequirePath = false
+    )
 
-    val outputs = try {
-      processSourceModule(
-        coreEnvironment.project,
-        files,
-        kotlinEnvironment.JS_LIBRARIES,
-        friendLibraries = emptyList(),
-        kotlinEnvironment.jsConfiguration,
-        mainKlib
-      )
-
-      val icCaches = prepareIcCaches(
-        includes = mainKlib,
-        cacheDirectory = caches,
-        libraries = kotlinEnvironment.JS_LIBRARIES + mainKlib,
-        friendLibraries = emptyList(),
-        mainCallArgs = arguments,
-        configurationJs = kotlinEnvironment.jsConfiguration,
-      )
-
-      val jsExecutableProducer = JsExecutableProducer(
-        mainModuleName = "moduleId",
-        moduleKind = ModuleKind.PLAIN,
-        sourceMapsInfo = null,
-        caches = icCaches,
-        relativeRequirePath = true
-      )
-
-      val (outputs, _) = jsExecutableProducer.buildExecutable(multiModule = false, outJsProgram = false)
-      outputs
-    } finally {
-      tmpDir.normalize().toAbsolutePath().toFile().deleteRecursively()
-    }
-
-    val jsCode = getJsCodeFromOutputs(outputs)
+    val jsCode = getJsCodeFromModule(compiledModule)
 
     val listLines = jsCode
       .lineSequence()
@@ -158,8 +143,8 @@ class KotlinToJSTranslator(
     return TranslationJSResult(listLines.joinToString("\n"))
   }
 
-  private fun getJsCodeFromOutputs(outputs: CompilationOutputs): String {
-    val jsCodeObject = (outputs as CompilationOutputsBuilt)
+  private fun getJsCodeFromModule(compiledModule: CompilerResult): String {
+    val jsCodeObject = compiledModule.outputs.values.single()
 
     val jsCodeClass = jsCodeObject.javaClass
     val jsCode = jsCodeClass.getDeclaredField("rawJsCode").let {

@@ -2,7 +2,6 @@ FROM openjdk:11.0.16-jdk as build
 
 ENV KOTLIN_LIB=1.8.20-RC
 ENV KOTLIN_LIB_JS=1.8.20-RC-js
-ENV KOTLIN_CACHES_JS=1.8.20-RC-js-caches
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
@@ -21,7 +20,6 @@ COPY --from=build /build/libs/META-INF /kotlin-compiler-server/META-INF
 COPY --from=build /build/libs/BOOT-INF/classes /kotlin-compiler-server
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB} /kotlin-compiler-server/${KOTLIN_LIB}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_JS} /kotlin-compiler-server/${KOTLIN_LIB_JS}
-COPY --from=build /kotlin-compiler-server/${KOTLIN_CACHES_JS} /kotlin-compiler-server/${KOTLIN_CACHES_JS}
 COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/indexes.json /kotlin-compiler-server/
 

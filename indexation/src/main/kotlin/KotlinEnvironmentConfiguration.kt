@@ -7,7 +7,6 @@ class KotlinEnvironmentConfiguration(fileName: String) {
   val kotlinEnvironment = run {
     val jvmFile = File(fileName)
     val jsFile = File("$fileName-js")
-    val cachesJsDir = File("$fileName-js-caches")
     val classPath =
       listOfNotNull(jvmFile)
         .flatMap {
@@ -16,6 +15,6 @@ class KotlinEnvironmentConfiguration(fileName: String) {
         }
 
     val additionalJsClasspath = listOfNotNull(jsFile)
-    KotlinEnvironment(classPath, additionalJsClasspath, cachesJsDir)
+    KotlinEnvironment(classPath, additionalJsClasspath)
   }
 }
