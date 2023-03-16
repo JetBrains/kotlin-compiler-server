@@ -126,7 +126,7 @@ class KotlinToJSTranslator(
 
     val compiledModule: CompilerResult = transformer.generateModule(
       modules = ir.allModules,
-      modes = setOf(TranslationMode.FULL_DEV),
+      modes = setOf(TranslationMode.FULL_PROD),
       relativeRequirePath = false
     )
 
