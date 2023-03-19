@@ -9,8 +9,10 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.CompilerResult
 import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
-import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
+import org.jetbrains.kotlin.ir.backend.js.WholeWorldStageController
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -115,19 +117,25 @@ class KotlinToJSTranslator(
     val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
-      irFactory = IrFactoryImpl
+      irFactory = IrFactoryImplForJsIC(WholeWorldStageController())
     )
+
     val transformer = IrModuleToJsTransformer(
       ir.context,
       arguments,
-      fullJs = true,
-      dceJs = false,
-      multiModule = false,
       relativeRequirePath = true,
+      moduleToName = ir.moduleFragmentToUniqueName
     )
 
-    val compiledModule: CompilerResult = transformer.generateModule(ir.allModules)
-    val jsCode = compiledModule.outputs.values.single().jsCode
+    val translationMode = TranslationMode.fromFlags(
+      dce = false,
+      perModule = false,
+      minimizedMemberNames = false
+    )
+
+    val compiledModule: CompilerResult = transformer.generateModule(ir.allModules, setOf(translationMode))
+
+    val jsCode = compiledModule.outputs[translationMode]?.jsCode ?: error("Expect to have mode $mode inside CompilerResult outputs")
 
     val listLines = jsCode
       .lineSequence()
