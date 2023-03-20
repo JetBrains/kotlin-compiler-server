@@ -11,7 +11,7 @@ val indexesJs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+kotlin.jvmToolchain(11)
 
 val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false

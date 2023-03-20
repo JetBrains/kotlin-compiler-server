@@ -5,6 +5,8 @@ plugins {
     kotlin("jvm")
 }
 
+kotlin.jvmToolchain(11)
+
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:common:222-$kotlinIdeVersion-IJ4167.29")
