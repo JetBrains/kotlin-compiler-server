@@ -38,4 +38,21 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
       Assertions.assertTrue(it.expected == "OK")
     }
   }
+  
+  @Test
+  fun `supports kotlin test`() {
+    //language=kotlin
+    runKoanTest("""
+      import kotlin.test.Test
+      import kotlin.test.assertEquals
+      
+      class ToTest {
+        @Test
+        fun testing() {
+          assertEquals(42, 42)
+        }
+      }
+    """.trimIndent()
+    )
+  }
 }
