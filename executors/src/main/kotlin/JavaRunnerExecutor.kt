@@ -41,14 +41,13 @@ class JavaRunnerExecutor {
         }
         System.out.flush()
         System.err.flush()
-        outputObj.text = outputStream.toString()
+        outputObj.text = synchronized(outputStream) { outputStream.toString() }
           .replace("</errStream><errStream>".toRegex(), "")
           .replace("</outStream><outStream>".toRegex(), "")
         defaultOutputStream.print(mapper.writeValueAsString(outputObj))
       }
       catch (e: Throwable) {
-        System.setOut(defaultOutputStream)
-        println(mapper.writeValueAsString(RunOutput(exception = e)))
+        defaultOutputStream.println(mapper.writeValueAsString(RunOutput(exception = e)))
       }
     }
   }
