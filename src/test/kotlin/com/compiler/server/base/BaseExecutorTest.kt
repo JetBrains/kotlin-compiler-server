@@ -50,16 +50,33 @@ class BaseExecutorTest {
   fun runJsIr(
     code: String,
     contains: String,
-    args: String = ""
+    args: String = "",
   ) = testRunner.runJs(code, contains, args) { project ->
-    convertToJsIr(project)
+    convertToJsIr(project, shouldEliminateDeadCode = false)
   }
 
   fun runJsIr(
     code: List<String>,
     contains: String
   ) = testRunner.multiRunJs(code, contains) { project ->
-    convertToJsIr(project)
+    convertToJsIr(project, shouldEliminateDeadCode = false)
+  }
+
+  fun runJsIrWithDce(
+    code: String,
+    contains: String = "",
+    notContain: String = "",
+    args: String = "",
+  ) = testRunner.runJsDce(code, contains, notContain, args) { project ->
+    convertToJsIr(project, shouldEliminateDeadCode = true)
+  }
+
+  fun runJsIrWithDce(
+    code: List<String>,
+    contains: String = "",
+    notContain: String = "",
+  ) = testRunner.multiRunJsDce(code, contains, notContain) { project ->
+    convertToJsIr(project, shouldEliminateDeadCode = true)
   }
 
   fun translateToJs(code: String) = testRunner.translateToJs(code)

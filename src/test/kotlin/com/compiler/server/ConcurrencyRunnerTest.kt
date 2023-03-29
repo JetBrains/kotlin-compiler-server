@@ -49,7 +49,7 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
   @Test
   fun `a lot of hello word test JS`() {
     runManyTest {
-      runJsIr(
+      runJs(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "println('Hello, world!!!');"
       )
@@ -62,6 +62,17 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
       runJsIr(
         code = "fun main() {\n println(\"Hello, world!!!\")\n}",
         contains = "println('Hello, world!!!');"
+      )
+    }
+  }
+
+  @Test
+  fun `a lot of hello word test JS IR with DCE`() {
+    runManyTest {
+      runJsIrWithDce(
+        code = "enum class UnusedEnum {A, B}\nfun main() {\n println(\"Hello, world!!!\")\n}",
+        contains = "println('Hello, world!!!');",
+        notContain = "function UnusedEnum"
       )
     }
   }

@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.ir.backend.js.CompilerResult
 import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
@@ -100,7 +101,8 @@ class KotlinToJSTranslator(
   fun doTranslateWithIr(
     files: List<KtFile>,
     arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
+    coreEnvironment: KotlinCoreEnvironment,
+    shouldEliminateDeadCode: Boolean
   ): TranslationJSResult {
     val currentProject = coreEnvironment.project
 
@@ -121,13 +123,14 @@ class KotlinToJSTranslator(
       ir.context,
       arguments,
       fullJs = true,
-      dceJs = false,
+      dceJs = shouldEliminateDeadCode,
       multiModule = false,
       relativeRequirePath = true,
     )
 
     val compiledModule: CompilerResult = transformer.generateModule(ir.allModules)
-    val jsCode = compiledModule.outputs.values.single().jsCode
+    val mode = if (shouldEliminateDeadCode) TranslationMode.FULL_DCE else TranslationMode.FULL
+    val jsCode = compiledModule.outputs[mode]!!.jsCode
 
     val listLines = jsCode
       .lineSequence()

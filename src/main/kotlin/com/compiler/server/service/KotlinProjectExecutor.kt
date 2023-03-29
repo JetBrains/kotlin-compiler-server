@@ -45,8 +45,10 @@ class KotlinProjectExecutor(
     return convertJsWithConverter(project, kotlinToJSTranslator::doTranslate)
   }
 
-  fun convertToJsIr(project: Project): TranslationJSResult {
-    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
+  fun convertToJsIr(project: Project, shouldEliminateDeadCode: Boolean): TranslationJSResult {
+    return convertJsWithConverter(project) { files, args, env ->
+       kotlinToJSTranslator.doTranslateWithIr(files, args, env, shouldEliminateDeadCode)
+    }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {

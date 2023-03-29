@@ -29,7 +29,8 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     @RequestParam type: String,
     @RequestParam(required = false) line: Int?,
     @RequestParam(required = false) ch: Int?,
-    @RequestParam(required = false) project: Project?
+    @RequestParam(required = false) project: Project?,
+    @RequestParam(defaultValue = "false") dce: Boolean
   ): ResponseEntity<*> {
     val result = when (type) {
       "getKotlinVersions" -> listOf(kotlinProjectExecutor.getVersion())
@@ -40,7 +41,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
             when (project.confType) {
               ProjectType.JAVA -> kotlinProjectExecutor.run(project)
               ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
-              ProjectType.JS_IR -> kotlinProjectExecutor.convertToJsIr(project)
+              ProjectType.JS_IR -> kotlinProjectExecutor.convertToJsIr(project, dce)
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }
           }
