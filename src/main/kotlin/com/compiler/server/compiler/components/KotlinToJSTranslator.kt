@@ -7,10 +7,12 @@ import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.CompilerResult
+import org.jetbrains.kotlin.ir.backend.js.WholeWorldStageController
 import org.jetbrains.kotlin.ir.backend.js.compile
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
-import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
+import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImplForJsIC
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.facade.K2JSTranslator
 import org.jetbrains.kotlin.js.facade.MainCallParameters
@@ -29,12 +31,12 @@ class KotlinToJSTranslator(
     private const val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
     private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
 
-    private const val JS_IR_CODE_BUFFER = "moduleId.output._buffer;\n"
+    private const val JS_IR_CODE_BUFFER = "moduleId.output.buffer_1;\n"
 
     private val JS_IR_OUTPUT_REWRITE = """
         if (kotlin.isRewrite) {
-            init_properties_console_kt_6h8hpf();
-            output = new BufferedOutput_0()
+            _init_properties_console_kt__rfg7jv();
+            output = new BufferedOutput()
         }
         """.trimIndent()
 
@@ -115,19 +117,20 @@ class KotlinToJSTranslator(
     val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
-      irFactory = IrFactoryImpl
+      irFactory = IrFactoryImplForJsIC(WholeWorldStageController())
     )
     val transformer = IrModuleToJsTransformer(
       ir.context,
-      arguments,
-      fullJs = true,
-      dceJs = false,
-      multiModule = false,
-      relativeRequirePath = true,
+      arguments
     )
 
-    val compiledModule: CompilerResult = transformer.generateModule(ir.allModules)
-    val jsCode = compiledModule.outputs.values.single().jsCode
+    val compiledModule: CompilerResult = transformer.generateModule(
+      modules = ir.allModules,
+      modes = setOf(TranslationMode.FULL_PROD),
+      relativeRequirePath = false
+    )
+
+    val jsCode = getJsCodeFromModule(compiledModule)
 
     val listLines = jsCode
       .lineSequence()
@@ -138,5 +141,16 @@ class KotlinToJSTranslator(
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
     return TranslationJSResult(listLines.joinToString("\n"))
+  }
+
+  private fun getJsCodeFromModule(compiledModule: CompilerResult): String {
+    val jsCodeObject = compiledModule.outputs.values.single()
+
+    val jsCodeClass = jsCodeObject.javaClass
+    val jsCode = jsCodeClass.getDeclaredField("rawJsCode").let {
+      it.isAccessible = true
+      it.get(jsCodeObject) as String
+    }
+    return jsCode
   }
 }
