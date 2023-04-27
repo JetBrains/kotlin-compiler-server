@@ -5,6 +5,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val kotlinVersion: String by System.getProperties()
 val kotlinIdeVersion: String by System.getProperties()
+val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
@@ -66,7 +67,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
-                implementation("org.jetbrains.kotlin:idea:222-$kotlinIdeVersion-IJ4167.29") {
+                implementation("org.jetbrains.kotlin:idea:222-$kotlinIdeVersion-$kotlinIdeVersionSuffix") {
                     isTransitive = false
                 }
             }
@@ -105,8 +106,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:common:222-$kotlinIdeVersion-IJ4167.29")
-    implementation("org.jetbrains.kotlin:core:222-$kotlinIdeVersion-IJ4167.29")
+    implementation("org.jetbrains.kotlin:common:222-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
+    implementation("org.jetbrains.kotlin:core:222-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
