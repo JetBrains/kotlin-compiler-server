@@ -11,7 +11,7 @@ val indexesJs: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false
@@ -66,7 +66,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
-                implementation("org.jetbrains.kotlin:idea:222-$kotlinIdeVersion-IJ4167.29") {
+                implementation("org.jetbrains.kotlin:idea:223-$kotlinIdeVersion-IJ8836.35") {
                     isTransitive = false
                 }
             }
@@ -102,11 +102,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion") {
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:common:222-$kotlinIdeVersion-IJ4167.29")
-    implementation("org.jetbrains.kotlin:core:222-$kotlinIdeVersion-IJ4167.29")
+    implementation("org.jetbrains.kotlin:core:223-$kotlinIdeVersion-IJ8836.35")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
@@ -135,10 +134,16 @@ fun generateProperties(prefix: String = "") = """
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
 """.trimIndent()
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of("17"))
+    }
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     dependsOn(copyDependencies)
     dependsOn(copyJSDependencies)
@@ -157,7 +162,9 @@ val buildLambda by tasks.creating(Zip::class) {
     from(tasks.compileKotlin)
     from(tasks.processResources) {
         eachFile {
-            if (name == propertyFile) { file.writeText(generateProperties(lambdaWorkDirectoryPath)) }
+            if (name == propertyFile) {
+                file.writeText(generateProperties(lambdaWorkDirectoryPath))
+            }
         }
     }
     from(policy)
