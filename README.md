@@ -21,12 +21,11 @@ $ ./gradlew build -x test
 
 Start the Spring Boot project. The main class: `com.compiler.server.CompilerApplication`
 
-### From Docker Hub
+### With Docker
 
-View images on [Docker Hub](https://hub.docker.com/r/prendota/kotlin-compiler-server).
-
-```docker
-docker pull prendota/kotlin-compiler-server
+To build the app inside a Docker container, run the following command from the project directory:
+```shell
+$ ./docker-image-build.sh
 ```
 
 ### From Amazon lambda
@@ -219,13 +218,11 @@ In case of an unsuccessful execution in the standard output will be the event wi
    in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
 2) Update the kotlin version
    in [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/1a12996f40a5d3391bc06d2ddd719cbfe2578802/build.gradle.kts#L29)
-3) Update the kotlin version
-   in [Dockerfile](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/Dockerfile)
-4) Make sure everything is going well via the task:
+3) Make sure everything is going well via the task:
 
 ```shell script
 $ ./gradlew build
 ```
 
-5) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
-6) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
+4) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
+5) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
