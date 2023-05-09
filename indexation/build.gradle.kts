@@ -8,6 +8,8 @@ plugins {
     application
 }
 
+kotlin.jvmToolchain(11)
+
 dependencies {
     implementation(project(":common", configuration = "default"))
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion") {
