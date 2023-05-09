@@ -1,7 +1,14 @@
 FROM openjdk:11.0.16-jdk as build
 
-ENV KOTLIN_LIB=1.8.21
-ENV KOTLIN_LIB_JS=1.8.21-js
+ARG KOTLIN_VERSION
+
+RUN if [ -z "$KOTLIN_VERSION" ]; then \
+        echo "Error: KOTLIN_VERSION argument is not set. Use docker-image-build.sh to build the image." >&2; \
+        exit 1; \
+    fi
+
+ENV KOTLIN_LIB=$KOTLIN_VERSION
+ENV KOTLIN_LIB_JS=${KOTLIN_VERSION}-js
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
