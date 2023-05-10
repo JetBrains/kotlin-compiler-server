@@ -1,4 +1,4 @@
-FROM openjdk:11.0.16-jdk as build
+FROM amazoncorretto:17 as build
 
 ARG KOTLIN_VERSION
 
@@ -17,7 +17,7 @@ ADD . /kotlin-compiler-server
 RUN ./gradlew build -x test
 RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/kotlin-compiler-server-${KOTLIN_LIB}-SNAPSHOT.jar)
 
-FROM openjdk:11.0.16-jdk
+FROM amazoncorretto:17
 
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
