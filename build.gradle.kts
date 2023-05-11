@@ -58,6 +58,7 @@ allprojects {
         gradlePluginPortal()
         maven("https://repo.spring.io/snapshot")
         maven("https://repo.spring.io/milestone")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
@@ -91,6 +92,7 @@ dependencies {
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
+    implementation("com.google.code.gson:gson")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.1")
     implementation("junit:junit:4.13.2")
