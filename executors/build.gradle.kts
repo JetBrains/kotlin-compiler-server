@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 val kotlinVersion: String by System.getProperties()
 
 plugins {
@@ -5,6 +7,12 @@ plugins {
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
+
+tasks.withType<KotlinCompile> {
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+}
 
 dependencies {
   implementation("junit:junit:4.13.2")
