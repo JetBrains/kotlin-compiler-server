@@ -73,8 +73,7 @@ plugins {
 
 apply<NodeJsRootPlugin>()
 
-the<NodeJsRootExtension>().nodeVersion = "20.0.0-nightly20230227fadcee71e0"
-the<NodeJsRootExtension>().nodeDownloadBaseUrl = "https://nodejs.org/download/nightly"
+the<NodeJsRootExtension>().nodeVersion = "20.2.0"
 
 allprojects {
     repositories {
