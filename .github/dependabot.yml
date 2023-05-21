@@ -1,0 +1,38 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "org.jetbrains.kotlin:kotlin-compiler"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-reflect"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-js"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-compiler-for-ide"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-script-runtime"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:ide"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:idea"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-test"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:core"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:common"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk7"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        dependency-type: "direct"
+      - dependency-name: "org.jetbrains.kotlin.plugin.spring"
+        dependency-type: "direct"
