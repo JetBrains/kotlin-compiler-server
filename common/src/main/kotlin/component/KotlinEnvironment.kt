@@ -4,11 +4,7 @@ import com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
-import org.jetbrains.kotlin.cli.common.createPhaseConfig
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
@@ -18,7 +14,6 @@ import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.languageVersionSettings
-import org.jetbrains.kotlin.ir.backend.js.jsPhases
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
 import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
@@ -39,7 +34,7 @@ class KotlinEnvironment(
      * See [org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments] and
      * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
      */
-    private val additionalCompilerArguments: List<String> = listOf(
+    val additionalCompilerArguments: List<String> = listOf(
       "-opt-in=kotlin.ExperimentalStdlibApi",
       "-opt-in=kotlin.time.ExperimentalTime",
       "-opt-in=kotlin.RequiresOptIn",
@@ -47,7 +42,6 @@ class KotlinEnvironment(
       "-opt-in=kotlin.contracts.ExperimentalContracts",
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-Xcontext-receivers",
-      "-XXLanguage:+RangeUntilOperator"
     )
   }
 
@@ -80,22 +74,6 @@ class KotlinEnvironment(
     put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
-
-  private val messageCollector = object : MessageCollector {
-    override fun clear() {}
-    override fun hasErrors(): Boolean {
-      return false
-    }
-
-    override fun report(
-      severity: CompilerMessageSeverity,
-      message: String,
-      location: CompilerMessageSourceLocation?
-    ) {
-    }
-  }
-
-  val jsIrPhaseConfig = createPhaseConfig(jsPhases, K2JsIrCompiler().createArguments(), messageCollector)
 
   private val environment = KotlinCoreEnvironment.createForProduction(
     parentDisposable = Disposer.newDisposable(),

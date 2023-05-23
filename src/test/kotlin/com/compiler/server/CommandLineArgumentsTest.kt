@@ -28,7 +28,7 @@ class CommandLineArgumentsTest : BaseExecutorTest() {
     runJsIr(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "0 1",
-      contains = "main(['0', '1']);"
+      contains = """main(["0", "1"]);"""
     )
   }
 
@@ -37,7 +37,7 @@ class CommandLineArgumentsTest : BaseExecutorTest() {
     runJsIr(
       code = "fun main(args: Array<String>) {\n    println(args[0])\n    println(args[1])\n}",
       args = "alex1 alex2",
-      contains = "main(['alex1', 'alex2']);"
+      contains = """main(["alex1", "alex2"]);"""
     )
   }
 }
