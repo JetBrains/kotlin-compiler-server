@@ -15,9 +15,29 @@ class JvmRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `no main class jvm test`() {
-    run(
+    runWithException(
       code = "fun main1() {\n    println(\"sdf\")\n}",
-      contains = "No main method found in project"
+      contains = "IllegalArgumentException",
+      message = "No main method found in project",
+    )
+  }
+
+  @Test
+  fun `multiple main classes jvm test`() {
+    runWithException(
+      code = """
+                fun main() {
+                    println("sdf")
+                }
+                class A {
+                    companion object {
+                        @JvmStatic
+                        fun main(x: Array<String>) {
+                        }
+                    }
+                }""".trimIndent(),
+      contains = "IllegalArgumentException",
+      message = "Multiple classes in project contain main methods found: FileKt, A",
     )
   }
 
