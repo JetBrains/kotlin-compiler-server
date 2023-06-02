@@ -87,6 +87,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    kotlinDependency("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
 
