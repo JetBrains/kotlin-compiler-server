@@ -33,12 +33,13 @@ class KotlinToJSTranslator(
     private const val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
     private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
 
-    private const val JS_IR_CODE_BUFFER = "moduleId.output.buffer_1;\n"
+    private const val JS_IR_CODE_BUFFER = "moduleId.output?.buffer_1;\n"
 
     private val JS_IR_OUTPUT_REWRITE = """
-        if (kotlin.isRewrite) {
-            _init_properties_console_kt__rfg7jv();
-            output = new BufferedOutput()
+        if (typeof get_output !== "undefined") {
+          get_output();
+          output = new BufferedOutput();
+          _.output = get_output();
         }
         """.trimIndent()
 
@@ -139,7 +140,6 @@ class KotlinToJSTranslator(
       .toMutableList()
 
     listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, JS_IR_OUTPUT_REWRITE)
-    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "_.output = output")
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
 
     return TranslationJSResult(listLines.joinToString("\n"))
