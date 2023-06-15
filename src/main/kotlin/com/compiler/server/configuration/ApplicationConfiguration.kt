@@ -23,7 +23,7 @@ class ApplicationConfiguration(
 
   @Bean
   fun versionInfo() = VersionInfo(
-    version = version.substringBefore("-"),
+    version = version,
     stdlibVersion = version
   )
 
