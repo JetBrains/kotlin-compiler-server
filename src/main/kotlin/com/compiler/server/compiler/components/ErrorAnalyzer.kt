@@ -193,7 +193,9 @@ class ErrorAnalyzer(
         platform = JsPlatforms.defaultJsPlatform,
         analyzerServices = JsPlatformAnalyzerServices,
         trace = bindingTrace,
-        languageVersionSettings = LanguageVersionSettingsImpl.DEFAULT
+        languageVersionSettings = LanguageVersionSettingsImpl.DEFAULT,
+        optimizingOptions = null,
+        absentDescriptorHandlerClass = null
       )
       useInstance(declarationProviderFactory)
       registerSingleton(AnnotationResolverImpl::class.java)

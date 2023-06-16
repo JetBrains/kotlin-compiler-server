@@ -9,6 +9,9 @@ import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.io.IOException
+import kotlin.io.path.*
+
 
 @Component
 class TestProjectRunner {
@@ -29,7 +32,7 @@ class TestProjectRunner {
     code: String,
     contains: String,
     args: String = "",
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
     convertAndTest(project, contains, convert)
@@ -38,13 +41,21 @@ class TestProjectRunner {
   fun multiRunJs(
     code: List<String>,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
     convertAndTest(project, contains, convert)
   }
 
-  fun translateToJs(code: String): TranslationJSResult {
+  fun runWasm(
+    code: String,
+    contains: String,
+  ) {
+    val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
+    convertWasmAndTest(project, contains)
+  }
+
+  fun translateToJs(code: String): TranslationResultWithJsCode {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS)
     return kotlinProjectExecutor.convertToJs(project)
   }
@@ -130,7 +141,7 @@ class TestProjectRunner {
   private fun convertAndTest(
     project: Project,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val result = kotlinProjectExecutor.convert(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
@@ -138,5 +149,44 @@ class TestProjectRunner {
       "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
     }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
+  }
+
+  private fun convertWasmAndTest(
+    project: Project,
+    contains: String,
+  ): ExecutionResult {
+    val result = kotlinProjectExecutor.convertToWasm(project) as TranslationWasmResult
+    Assertions.assertNotNull(result, "Test result should no be a null")
+
+    val tmpDir = createTempDirectory()
+    val jsMain = tmpDir.resolve("moduleId.mjs")
+    jsMain.writeText(result.jsInstantiated)
+    val jsUninstantiated = tmpDir.resolve("moduleId.uninstantiated.mjs")
+    jsUninstantiated.writeText(result.jsCode!!)
+    val wasmMain = tmpDir.resolve("moduleId.wasm")
+    wasmMain.writeBytes(result.wasm)
+
+    val textResult = startNodeJsApp(
+      System.getenv("kotlin.wasm.node.path"),
+      jsMain.normalize().absolutePathString()
+    )
+
+    tmpDir.toFile().deleteRecursively()
+
+    Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
+    return result
+  }
+
+  @Throws(IOException::class, InterruptedException::class)
+  fun startNodeJsApp(
+    pathToBinNode: String?,
+    pathToAppScript: String?
+  ): String {
+    val processBuilder = ProcessBuilder()
+    processBuilder.command(pathToBinNode, "--experimental-wasm-gc", pathToAppScript)
+    val process = processBuilder.start()
+    val inputStream = process.inputStream
+    process.waitFor()
+    return inputStream.reader().readText()
   }
 }

@@ -17,6 +17,6 @@ class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
         }
 
     val additionalJsClasspath = listOfNotNull(librariesFile.js)
-    return KotlinEnvironment(classPath, additionalJsClasspath)
+    return KotlinEnvironment(classPath, additionalJsClasspath, listOfNotNull(librariesFile.wasm))
   }
 }
