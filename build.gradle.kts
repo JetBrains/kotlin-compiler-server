@@ -45,7 +45,7 @@ val copyJSDependencies by tasks.creating(Copy::class) {
 }
 
 plugins {
-    id("org.springframework.boot") version "2.7.10"
+    id("org.springframework.boot") version "3.1.0"
     id("io.spring.dependency-management") version "1.1.0"
     val kotlinVersion by System.getProperties()
     kotlin("jvm") version "$kotlinVersion"
