@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion: String by System.getProperties()
+val kotlinVersion = rootProject.properties["systemProp.kotlinVersion"]
 val kotlinIdeVersion: String by System.getProperties()
 val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()
@@ -82,6 +82,7 @@ allprojects {
         maven("https://repo.spring.io/snapshot")
         maven("https://repo.spring.io/milestone")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
         maven("https://www.myget.org/F/rd-snapshots/maven/")
@@ -183,6 +184,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(":indexation:run")
     buildPropertyFile()
 }
+println("Using Kotlin compiler $kotlinVersion")
 
 tasks.withType<BootJar> {
     requiresUnpack("**/kotlin-*.jar")

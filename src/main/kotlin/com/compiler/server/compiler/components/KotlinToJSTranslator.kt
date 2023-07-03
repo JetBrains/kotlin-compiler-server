@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.backend.wasm.wasmPhases
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.*
+import org.jetbrains.kotlin.ir.backend.js.dce.DceDumpNameCache
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
@@ -168,7 +169,7 @@ class KotlinToJSTranslator(
       exportedDeclarations = setOf(FqName("main")),
       propertyLazyInitialization = true,
     )
-    eliminateDeadDeclarations(allModules, backendContext)
+    eliminateDeadDeclarations(allModules, backendContext, DceDumpNameCache())
 
     val res = compileWasm(
       allModules = allModules,
