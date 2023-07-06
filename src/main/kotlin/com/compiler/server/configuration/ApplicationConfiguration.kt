@@ -23,14 +23,15 @@ class ApplicationConfiguration(
 
   @Bean
   fun versionInfo() = VersionInfo(
-    version = version.substringBefore("-"),
+    version = version,
     stdlibVersion = version
   )
 
   @Bean
   fun librariesFiles() = LibrariesFile(
     File(librariesFolderProperties.jvm),
-    File(librariesFolderProperties.js)
+    File(librariesFolderProperties.js),
+    File(librariesFolderProperties.wasm)
   )
 }
 
@@ -38,4 +39,5 @@ class ApplicationConfiguration(
 class LibrariesFolderProperties {
   lateinit var jvm: String
   lateinit var js: String
+  lateinit var wasm: String
 }

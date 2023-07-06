@@ -28,7 +28,8 @@ import java.io.File
 
 class KotlinEnvironment(
   val classpath: List<File>,
-  additionalJsClasspath: List<File>
+  additionalJsClasspath: List<File>,
+  additionalWasmClasspath: List<File>,
 ) {
   companion object {
     /**
@@ -59,6 +60,7 @@ class KotlinEnvironment(
     }
 
   val JS_LIBRARIES = additionalJsClasspath.map { it.absolutePath }
+  val WASM_LIBRARIES = additionalWasmClasspath.map { it.absolutePath }
 
   @Synchronized
   fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
@@ -70,6 +72,13 @@ class KotlinEnvironment(
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
     put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
+  }
+
+  val wasmConfiguration: CompilerConfiguration = configuration.copy().apply {
+    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
+    put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
+    put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
 
   private val messageCollector = object : MessageCollector {
