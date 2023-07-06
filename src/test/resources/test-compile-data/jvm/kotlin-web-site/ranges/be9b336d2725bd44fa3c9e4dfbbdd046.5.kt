@@ -1,7 +1,6 @@
 fun main() {
 //sampleStart
-    for (i in 1 until 10) {       // i in 1 until 10, excluding 10
-        print(i)
-    }
+    for (i in 1..10) print(i)
+    // 12345678910
 //sampleEnd
 }
