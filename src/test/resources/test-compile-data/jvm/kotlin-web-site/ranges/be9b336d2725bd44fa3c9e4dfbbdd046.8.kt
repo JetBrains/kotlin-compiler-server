@@ -1,5 +1,6 @@
 fun main() {
 //sampleStart
-    for (i in 1..8 step 2) print(i)
+    println((1..10).filter { it % 2 == 0 })
+    // [2, 4, 6, 8, 10]
 //sampleEnd
 }
