@@ -14,9 +14,11 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.config.configureJdkClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
+import org.jetbrains.kotlin.cli.jvm.setupJvmSpecificArguments
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.config.JvmTarget
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.ir.backend.js.jsPhases
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
@@ -28,7 +30,8 @@ import java.io.File
 
 class KotlinEnvironment(
   val classpath: List<File>,
-  additionalJsClasspath: List<File>
+  additionalJsClasspath: List<File>,
+  additionalCompilerFlags: List<String> = emptyList()
 ) {
   companion object {
     /**
@@ -59,6 +62,7 @@ class KotlinEnvironment(
     }
 
   val JS_LIBRARIES = additionalJsClasspath.map { it.absolutePath }
+  val additionalCompilerOptions = additionalCompilerFlags + additionalCompilerArguments
 
   @Synchronized
   fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
@@ -96,7 +100,7 @@ class KotlinEnvironment(
 
   private fun createConfiguration(): CompilerConfiguration {
     val arguments = K2JVMCompilerArguments()
-    parseCommandLineArguments(additionalCompilerArguments, arguments)
+    parseCommandLineArguments(additionalCompilerOptions, arguments)
     return CompilerConfiguration().apply {
       addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
       val messageCollector = MessageCollector.NONE
@@ -109,6 +113,7 @@ class KotlinEnvironment(
 
       // it uses languageVersionSettings that was set above
       configureAdvancedJvmOptions(arguments)
+      setupJvmSpecificArguments(arguments)
       put(JVMConfigurationKeys.DO_NOT_CLEAR_BINDING_CONTEXT, true)
 
       configureJdkClasspathRoots()
