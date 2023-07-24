@@ -6,5 +6,7 @@ fun main() {
     
     // Some customers leave the queue
     customers = 8
+    println(customers)
+    // 8
 //sampleEnd
 }
