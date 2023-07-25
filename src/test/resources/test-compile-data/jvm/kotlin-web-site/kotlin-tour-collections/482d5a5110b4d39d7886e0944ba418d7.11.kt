@@ -1,13 +1,13 @@
 fun main() {
 //sampleStart
     // Read-only map
-    val readOnlyAccountBalances = mapOf(1 to 100, 2 to 100, 3 to 100)
-    println(readOnlyAccountBalances)
-    // {1=100, 2=100, 3=100}
-    
+    val readOnlyJuiceMenu = mapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    println(readOnlyJuiceMenu)
+    // {apple=100, kiwi=190, orange=100}
+
     // Mutable map with explicit type declaration
-    val accountBalances: MutableMap<Int, Int> = mutableMapOf(1 to 100, 2 to 100, 3 to 100)         
-    println(accountBalances)
-    // {1=100, 2=100, 3=100}
+    val juiceMenu: MutableMap<String, Int> = mutableMapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    println(juiceMenu)
+    // {apple=100, kiwi=190, orange=100}
 //sampleEnd
 }

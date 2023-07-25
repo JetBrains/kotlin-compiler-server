@@ -1,7 +1,8 @@
-fun main() { 
+fun main() {
 //sampleStart
-    val readOnlyAccountBalances = mapOf(1 to 100, 2 to 100, 3 to 100)
-    println("The first value in the map is: ${readOnlyAccountBalances[1]}")
-    // The first value in the map is: 100
+    // Read-only map
+    val readOnlyJuiceMenu = mapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    println("The value of apple juice is: ${readOnlyJuiceMenu["apple"]}")
+    // The value of apple juice is: 100
 //sampleEnd
 }
