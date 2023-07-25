@@ -1,7 +1,7 @@
-fun main() { 
+fun main() {
 //sampleStart
-    val readOnlyAccountBalances = mapOf(1 to 100, 2 to 100, 3 to 100)
-    println(readOnlyAccountBalances.containsKey(2))
+    val readOnlyJuiceMenu = mapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    println(readOnlyJuiceMenu.containsKey("kiwi"))
     // true
 //sampleEnd
 }

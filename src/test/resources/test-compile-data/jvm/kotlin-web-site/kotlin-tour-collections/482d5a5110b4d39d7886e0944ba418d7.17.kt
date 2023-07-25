@@ -1,9 +1,9 @@
 fun main() {
 //sampleStart
-    val readOnlyAccountBalances = mapOf(1 to 100, 2 to 100, 3 to 100)
-    println(2 in readOnlyAccountBalances.keys)
+    val readOnlyJuiceMenu = mapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    println("orange" in readOnlyJuiceMenu.keys)
     // true
-    println(200 in readOnlyAccountBalances.values)
+    println(200 in readOnlyJuiceMenu.values)
     // false
 //sampleEnd
 }

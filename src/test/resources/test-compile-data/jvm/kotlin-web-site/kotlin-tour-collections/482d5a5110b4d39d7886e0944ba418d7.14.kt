@@ -1,10 +1,12 @@
-fun main() { 
+fun main() {
 //sampleStart
-    val accountBalances: MutableMap<Int, Int> = mutableMapOf(1 to 100, 2 to 100, 3 to 100)
-    accountBalances.put(4, 100)  // Add key 4 with value 100 to the list
-    println(accountBalances)     // {1=100, 2=100, 3=100, 4=100}
-    
-    accountBalances.remove(4)    // Remove the key 4 from the list
-    println(accountBalances)     // {1=100, 2=100, 3=100}
+    val juiceMenu: MutableMap<String, Int> = mutableMapOf("apple" to 100, "kiwi" to 190, "orange" to 100)
+    juiceMenu.put("coconut", 150) // Add key "coconut" with value 150 to the map
+    println(juiceMenu)
+    // {apple=100, kiwi=190, orange=100, coconut=150}
+
+    juiceMenu.remove("orange")    // Remove key "orange" from the map
+    println(juiceMenu)
+    // {apple=100, kiwi=190, coconut=150}
 //sampleEnd
 }
