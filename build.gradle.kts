@@ -92,7 +92,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-                implementation("org.jetbrains.kotlin:idea:223-$kotlinIdeVersion-$kotlinIdeVersionSuffix") {
+                implementation("org.jetbrains.kotlin:idea:231-$kotlinIdeVersion-$kotlinIdeVersionSuffix") {
                     isTransitive = false
                 }
             }
@@ -133,7 +133,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:core:223-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
+    implementation("org.jetbrains.kotlin:core:231-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
