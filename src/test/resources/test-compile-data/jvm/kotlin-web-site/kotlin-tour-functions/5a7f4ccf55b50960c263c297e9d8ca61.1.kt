@@ -1,4 +1,4 @@
-fun hello(){
+fun hello() {
     return println("Hello, world!")
 }
 
