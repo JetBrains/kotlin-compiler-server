@@ -34,7 +34,7 @@ class TestProjectRunner {
     args: String = "",
     convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
@@ -43,7 +43,7 @@ class TestProjectRunner {
     contains: String,
     convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
+    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
@@ -56,7 +56,7 @@ class TestProjectRunner {
   }
 
   fun translateToJs(code: String): TranslationResultWithJsCode {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.convertToJs(project)
   }
 
@@ -87,7 +87,7 @@ class TestProjectRunner {
     completions: List<String>,
     isJs: Boolean = false
   ) {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
@@ -103,7 +103,7 @@ class TestProjectRunner {
     character: Int,
     isJs: Boolean = false
   ): List<Completion> {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     return kotlinProjectExecutor.complete(project, line, character)
   }
@@ -114,7 +114,7 @@ class TestProjectRunner {
   }
 
   fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.highlight(project)
   }
 
