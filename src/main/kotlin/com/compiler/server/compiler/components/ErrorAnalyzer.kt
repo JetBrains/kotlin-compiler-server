@@ -32,6 +32,7 @@ import org.jetbrains.kotlin.frontend.di.configureModule
 import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.ir.backend.js.MainModule
+import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
@@ -114,17 +115,14 @@ class ErrorAnalyzer(
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
 
-    val sourceModule = prepareAnalyzedSourceModule(
+    val mainModule = MainModule.SourceFiles(files)
+    val sourceModule = ModulesStructure(
       project,
-      files,
+      mainModule,
       kotlinEnvironment.jsConfiguration,
       kotlinEnvironment.JS_LIBRARIES,
-      friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+      emptyList()
     )
-
-    val mainModule = sourceModule.mainModule
-    require(mainModule is MainModule.SourceFiles)
 
     val mds = sourceModule.allDependencies.map {
       sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
