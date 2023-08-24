@@ -12,6 +12,8 @@ import com.intellij.psi.PsiFile
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
+import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForJSIR
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
@@ -29,7 +31,8 @@ import org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
 import org.jetbrains.kotlin.frontend.di.configureModule
 import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
-import org.jetbrains.kotlin.js.analyze.TopDownAnalyzerFacadeForJS
+import org.jetbrains.kotlin.ir.backend.js.MainModule
+import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
 import org.jetbrains.kotlin.name.Name
@@ -111,18 +114,44 @@ class ErrorAnalyzer(
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
 
-    val module = ContextForNewModule(
+    val sourceModule = prepareAnalyzedSourceModule(
+      project,
+      files,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_LIBRARIES,
+      friendDependencies = emptyList(),
+      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+    )
+
+    val mainModule = sourceModule.mainModule
+    require(mainModule is MainModule.SourceFiles)
+
+    val mds = sourceModule.allDependencies.map {
+      sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
+    }
+
+    val analysisResult = TopDownAnalyzerFacadeForJSIR.analyzeFiles(
+      mainModule.files,
+      project,
+      kotlinEnvironment.jsConfiguration,
+      mds,
+      emptyList(),
+      AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration).targetEnvironment
+    )
+
+    val context = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
       moduleName = Name.special("<" + configuration.moduleId + ">"),
       builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
     )
-    module.setDependencies(computeDependencies(module.module, configuration))
+    val dependencies = mutableSetOf(context.module) + mds + JsPlatformAnalyzerServices.builtIns.builtInsModule
+    context.module.setDependencies(dependencies.toList())
     val trace = CliBindingTrace()
-    val providerFactory = FileBasedDeclarationProviderFactory(module.storageManager, files)
-    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(module, trace, providerFactory)
+    val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
+    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory)
     return Analysis(
       componentProvider = analyzerAndProvider.second,
-      analysisResult = TopDownAnalyzerFacadeForJS.analyzeFiles(files, configuration)
+      analysisResult = analysisResult
     )
   }
 
