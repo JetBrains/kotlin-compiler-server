@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.model.ProjectType
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import model.ImportInfo
@@ -11,7 +12,8 @@ import java.io.File
 @Component
 class IndexationProvider(
   @Value("\${indexes.file}") private val indexesFileName: String,
-  @Value("\${indexesJs.file}") private val indexesJsFileName: String
+  @Value("\${indexesJs.file}") private val indexesJsFileName: String,
+  @Value("\${indexesWasm.file}") private val indexesWasmFileName: String
 ) {
   companion object {
     const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
@@ -26,10 +28,24 @@ class IndexationProvider(
     initIndexes(indexesJsFileName)
   }
 
-  fun hasIndexes(isJs: Boolean) = if (isJs) jsIndexes != null else jvmIndexes != null
+  private val wasmIndexes: Map<String, List<ImportInfo>>? by lazy {
+    initIndexes(indexesWasmFileName)
+  }
 
-  fun getClassesByName(name: String, isJs: Boolean): List<ImportInfo>? {
-    val indexes = if (isJs) jsIndexes else jvmIndexes
+  fun hasIndexes(projectType: ProjectType) = when {
+    projectType.isJsRelated() -> jsIndexes != null
+    projectType.isJvmRelated() -> jvmIndexes != null
+    projectType == ProjectType.WASM -> wasmIndexes != null
+    else -> throw IllegalArgumentException("Platform $projectType not found")
+  }
+
+  fun getClassesByName(name: String, projectType: ProjectType): List<ImportInfo>? {
+    val indexes = when {
+      projectType.isJsRelated() -> jsIndexes
+      projectType.isJvmRelated() -> jvmIndexes
+      projectType == ProjectType.WASM -> wasmIndexes
+      else -> throw IllegalArgumentException("Platform $projectType not found")
+    }
     return indexes?.get(name)
   }
 
