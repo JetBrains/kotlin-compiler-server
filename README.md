@@ -1,6 +1,7 @@
 # Kotlin compiler server
 
-[![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
+[![official JetBrains project](https://jb.gg/badges/official-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+![Build status](https://buildserver.labs.intellij.net/app/rest/builds/buildType:id:Kotlin_KotlinSites_Deployments_PlayKotlinlangOrg_Backend_BuildMaster/statusIcon.svg)
 ![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg)
 ![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7.20-orange.svg) ](https://kotlinlang.org/)
