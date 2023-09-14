@@ -26,5 +26,8 @@
   {
     "version": "1.9.10",
     "latestStable": true
+  },
+  {
+    "version": "1.9.20-Beta"
   }
 ]
