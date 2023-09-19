@@ -16,7 +16,9 @@ class KotlinEnvironmentConfiguration(val librariesFile: LibrariesFile) {
             ?: error("No kotlin libraries found in: ${librariesFile.jvm.absolutePath}")
         }
 
-    val additionalJsClasspath = listOfNotNull(librariesFile.js)
-    return KotlinEnvironment(classPath, additionalJsClasspath, listOfNotNull(librariesFile.wasm))
+    val additionalJsClasspath = librariesFile.js.listFiles()?.toList() ?: emptyList()
+    val additionalWasmClasspath = librariesFile.wasm.listFiles()?.toList() ?: emptyList()
+
+    return KotlinEnvironment(classPath, additionalJsClasspath, additionalWasmClasspath)
   }
 }
