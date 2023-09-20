@@ -54,12 +54,12 @@ val copyDependencies by tasks.creating(Copy::class) {
     into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
+    from(kotlinJsDependency)
     into(libJSFolder)
 }
 
 val copyWasmDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinWasmDependency.map { zipTree(it) } }))
+    from(kotlinWasmDependency)
     into(libWasmFolder)
 }
 
@@ -114,6 +114,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
+    kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
     kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
