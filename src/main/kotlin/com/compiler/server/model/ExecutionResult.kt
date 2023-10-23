@@ -37,6 +37,7 @@ data class TranslationWasmResult(
   override val jsCode: String? = null,
   val jsInstantiated: String,
   val wasm: ByteArray,
+  val wat: String?,
   override var exception: ExceptionDescriptor? = null,
   override var errors: Map<String, List<ErrorDescriptor>> = emptyMap()
 ) : TranslationResultWithJsCode(jsCode, errors, exception)

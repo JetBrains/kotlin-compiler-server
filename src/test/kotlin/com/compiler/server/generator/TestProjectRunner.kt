@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
 import kotlin.io.path.*
+import kotlin.test.assertTrue
 
 
 @Component
@@ -165,6 +166,14 @@ class TestProjectRunner {
     jsUninstantiated.writeText(result.jsCode!!)
     val wasmMain = tmpDir.resolve("moduleId.wasm")
     wasmMain.writeBytes(result.wasm)
+
+    val wat = result.wat
+    val maxWatLengthInMessage = 97
+    val formattedWat = wat?.let { if (it.length > maxWatLengthInMessage) "${it.take(maxWatLengthInMessage)}..." else it }
+    assertTrue(
+      actual = wat != null && wat.dropWhile { it.isWhitespace() }.startsWith("(module"),
+      message = "wat is expected to start with \"(module\" but is $formattedWat"
+    )
 
     val textResult = startNodeJsApp(
       System.getenv("kotlin.wasm.node.path"),
