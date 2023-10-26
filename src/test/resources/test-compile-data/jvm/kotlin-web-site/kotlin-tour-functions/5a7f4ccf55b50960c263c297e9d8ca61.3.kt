@@ -1,4 +1,4 @@
-fun printMessageWithPrefix(message: String, prefix: String = "Info") {
+fun printMessageWithPrefix(message: String, prefix: String) {
     println("[$prefix] $message")
 }
 
