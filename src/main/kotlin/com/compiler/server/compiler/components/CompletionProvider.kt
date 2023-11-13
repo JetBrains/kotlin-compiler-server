@@ -4,6 +4,7 @@ import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
 import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ProjectType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import model.Completion
@@ -59,16 +60,16 @@ class CompletionProvider(
     file: KotlinFile,
     line: Int,
     character: Int,
-    isJs: Boolean,
+    projectType: ProjectType,
     coreEnvironment: KotlinCoreEnvironment
   ): List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
-      val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
+      val descriptorInfo = descriptorsFrom(this, element, projectType, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (indexationProvider.hasIndexes(isJs)) {
-        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
-        importVariants(file, prefix, errors, line, character, isJs)
+      val importCompletionVariants = if (indexationProvider.hasIndexes(projectType)) {
+        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, projectType)
+        importVariants(file, prefix, errors, line, character, projectType)
       } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
         sortWith(Comparator { a, b ->
@@ -115,9 +116,9 @@ class CompletionProvider(
     errors: Map<String, List<ErrorDescriptor>>,
     line: Int,
     character: Int,
-    isJs: Boolean
+    projectType: ProjectType
   ): List<Completion> {
-    val importCompletionVariants = indexationProvider.getClassesByName(prefix, isJs)
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix, projectType)
       ?.map { it.toCompletion() } ?: emptyList()
     val currentErrors = errors[file.kotlinFile.name]?.filter {
       it.interval.start.line == line &&
@@ -195,14 +196,16 @@ class CompletionProvider(
   private fun descriptorsFrom(
     file: KotlinFile,
     element: PsiElement,
-    isJs: Boolean,
+    projectType: ProjectType,
     coreEnvironment: KotlinCoreEnvironment
   ): DescriptorInfo {
     val files = listOf(file.kotlinFile)
-    val analysis = if (isJs.not())
-      errorAnalyzer.analysisOf(files, coreEnvironment)
-    else
-      errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
+    val analysis = when {
+      projectType.isJvmRelated() -> errorAnalyzer.analysisOf(files, coreEnvironment)
+      projectType.isJsRelated() -> errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
+      projectType == ProjectType.WASM -> errorAnalyzer.analyzeFileForWasm(files, coreEnvironment)
+      else -> throw IllegalArgumentException("Unknown project type $projectType")
+    }
     return with(analysis) {
       (referenceVariantsFrom(element, coreEnvironment)
         ?: referenceVariantsFrom(element.parent, coreEnvironment))?.let { descriptors ->

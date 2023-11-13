@@ -3,11 +3,15 @@ package indexation
 import model.ImportInfo
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
+import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
-import org.jetbrains.kotlin.js.config.JsConfig
-import org.jetbrains.kotlin.resolve.CompilerEnvironment
 
-class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): IndexationBuilder() {
+class WebIndexationBuilder(
+  private val kotlinEnvironment: KotlinEnvironment,
+  private val configuration: CompilerConfiguration,
+  private val libraries: List<String>
+): IndexationBuilder() {
+
   override fun getAllIndexes(): List<ImportInfo> =
     kotlinEnvironment.environment { coreEnvironment ->
       val project = coreEnvironment.project
@@ -15,8 +19,8 @@ class JsIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): Ind
       val sourceModule = prepareAnalyzedSourceModule(
         project,
         coreEnvironment.getSourceFiles(),
-        kotlinEnvironment.jsConfiguration,
-        kotlinEnvironment.JS_LIBRARIES,
+        configuration,
+        libraries,
         friendDependencies = emptyList(),
         analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
       )

@@ -6,6 +6,7 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
+import org.jetbrains.kotlin.utils.addToStdlib.assertedCast
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -56,9 +57,9 @@ class TestProjectRunner {
     convertWasmAndTest(project, contains)
   }
 
-  fun translateToJs(code: String): TranslationResultWithJsCode {
+  fun translateToJsIr(code: String): TranslationResultWithJsCode {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
-    return kotlinProjectExecutor.convertToJs(project)
+    return kotlinProjectExecutor.convertToJsIr(project)
   }
 
   fun runWithException(code: String, contains: String): ExecutionResult {
@@ -119,6 +120,11 @@ class TestProjectRunner {
     return kotlinProjectExecutor.highlight(project)
   }
 
+  fun highlightWasm(code: String): Map<String, List<ErrorDescriptor>> {
+    val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
+    return kotlinProjectExecutor.highlight(project)
+  }
+
   fun getVersion() = kotlinProjectExecutor.getVersion().version
 
   private fun executeTest(vararg test: String): JunitExecutionResult? {
@@ -156,7 +162,16 @@ class TestProjectRunner {
     project: Project,
     contains: String,
   ): ExecutionResult {
-    val result = kotlinProjectExecutor.convertToWasm(project) as TranslationWasmResult
+    val result = kotlinProjectExecutor.convertToWasm(project)
+
+    if (result !is TranslationWasmResult) {
+      Assertions.assertFalse(result.hasErrors) {
+        "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
+      }
+    }
+
+    result as TranslationWasmResult
+
     Assertions.assertNotNull(result, "Test result should no be a null")
 
     val tmpDir = createTempDirectory()

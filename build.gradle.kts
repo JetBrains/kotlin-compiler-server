@@ -11,6 +11,7 @@ val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
+val indexesWasm: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
@@ -160,6 +161,7 @@ fun generateProperties(prefix: String = "") = """
     policy.file=${prefix + policy}
     indexes.file=${prefix + indexes}
     indexesJs.file=${prefix + indexesJs}
+    indexesWasm.file=${prefix + indexesWasm}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
     libraries.folder.wasm=${prefix + libWasmFolder}
@@ -204,6 +206,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(policy)
     from(indexes)
     from(indexesJs)
+    from(indexesWasm)
     from(libJSFolder) { into(libJSFolder) }
     from(libWasmFolder) { into(libWasmFolder) }
     from(libJVMFolder) { into(libJVMFolder) }
