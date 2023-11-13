@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.backend.wasm.wasmPhases
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.ir.backend.js.*
+import org.jetbrains.kotlin.ir.backend.js.dce.DceDumpNameCache
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
 import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.TranslationMode
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
@@ -50,12 +51,13 @@ class KotlinToJSTranslator(
     files: List<KtFile>,
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment,
-    translate: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
+    projectType: ProjectType,
+    translate: (ModulesStructure, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
   ): TranslationResultWithJsCode {
-    val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
+    val (errors, analysis) = errorAnalyzer.errorsFrom(files, coreEnvironment, projectType = projectType)
     return try {
       if (errorAnalyzer.isOnlyWarnings(errors)) {
-        translate(files, arguments, coreEnvironment).also {
+        translate((analysis as AnalysisJs).sourceModule, arguments, coreEnvironment).also {
           it.addWarnings(errors)
         }
       } else {
@@ -66,57 +68,11 @@ class KotlinToJSTranslator(
     }
   }
 
-  @Throws(TranslationException::class)
-  fun doTranslate(
-    files: List<KtFile>,
-    arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
-  ): TranslationJSResult {
-    val currentProject = coreEnvironment.project
-    val configuration = JsConfig(
-      currentProject,
-      kotlinEnvironment.jsConfiguration,
-      CompilerEnvironment,
-      kotlinEnvironment.JS_METADATA_CACHE,
-      kotlinEnvironment.JS_LIBRARIES.toSet()
-    )
-    val reporter = object : JsConfig.Reporter() {
-      override fun error(message: String) {}
-      override fun warning(message: String) {}
-    }
-    val translator = K2JSTranslator(configuration)
-    val result = translator.translate(
-      reporter = reporter,
-      files = files,
-      mainCallParameters = MainCallParameters.mainWithArguments(arguments)
-    )
-    return if (result is TranslationResult.Success) {
-      TranslationJSResult(JS_CODE_FLUSH + result.getCode() + JS_CODE_BUFFER)
-    } else {
-      val errors = HashMap<String, List<ErrorDescriptor>>()
-      for (psiFile in files) {
-        errors[psiFile.name] = ArrayList()
-      }
-      errorAnalyzer.errorsFrom(result.diagnostics.all(), errors, isJs = true)
-      TranslationJSResult(errors = errors)
-    }
-  }
-
   fun doTranslateWithIr(
-    files: List<KtFile>,
+    sourceModule: ModulesStructure,
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationJSResult {
-    val currentProject = coreEnvironment.project
-
-    val sourceModule = prepareAnalyzedSourceModule(
-      currentProject,
-      files,
-      kotlinEnvironment.jsConfiguration,
-      kotlinEnvironment.JS_LIBRARIES,
-      friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
-    )
     val ir = compile(
       sourceModule,
       kotlinEnvironment.jsIrPhaseConfig,
@@ -146,21 +102,10 @@ class KotlinToJSTranslator(
   }
 
   fun doTranslateWithWasm(
-    files: List<KtFile>,
+    sourceModule: ModulesStructure,
     arguments: List<String>,
     coreEnvironment: KotlinCoreEnvironment
   ): TranslationWasmResult {
-    val currentProject = coreEnvironment.project
-
-    val sourceModule = prepareAnalyzedSourceModule(
-      currentProject,
-      files,
-      kotlinEnvironment.wasmConfiguration,
-      kotlinEnvironment.WASM_LIBRARIES,
-      friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.wasmConfiguration),
-    )
-
     val (allModules, backendContext) = compileToLoweredIr(
       depsDescriptors = sourceModule,
       phaseConfig = PhaseConfig(wasmPhases),
@@ -168,7 +113,7 @@ class KotlinToJSTranslator(
       exportedDeclarations = setOf(FqName("main")),
       propertyLazyInitialization = true,
     )
-    eliminateDeadDeclarations(allModules, backendContext)
+    eliminateDeadDeclarations(allModules, backendContext, DceDumpNameCache())
 
     val res = compileWasm(
       allModules = allModules,

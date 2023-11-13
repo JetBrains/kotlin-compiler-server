@@ -7,7 +7,7 @@ import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -38,24 +38,19 @@ class KotlinProjectExecutor(
     }.also { logExecutionResult(project, it) }
   }
 
-  fun convertToJs(project: Project): TranslationResultWithJsCode {
-    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslate)
-  }
-
   fun convertToJsIr(project: Project): TranslationResultWithJsCode {
-    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
+    return convertJsWithConverter(project, ProjectType.JS_IR, kotlinToJSTranslator::doTranslateWithIr)
   }
 
   fun convertToWasm(project: Project): TranslationResultWithJsCode {
-    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithWasm)
+    return convertJsWithConverter(project, ProjectType.WASM, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
     return kotlinEnvironment.environment {
       val file = getFilesFrom(project, it).first()
       try {
-        val isJs = project.confType.isJsRelated()
-        completionProvider.complete(file, line, character, isJs, it)
+        completionProvider.complete(file, line, character, project.confType, it)
       } catch (e: Exception) {
         log.warn("Exception in getting completions. Project: $project", e)
         emptyList()
@@ -67,11 +62,10 @@ class KotlinProjectExecutor(
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       try {
-        val isJs = project.confType.isJsRelated()
         errorAnalyzer.errorsFrom(
           files = files,
           coreEnvironment = environment,
-          isJs = isJs
+          projectType = project.confType
         ).errors
       } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
@@ -84,7 +78,8 @@ class KotlinProjectExecutor(
 
   private fun convertJsWithConverter(
     project: Project,
-    converter: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
+    projectType: ProjectType,
+    converter: (ModulesStructure, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
@@ -92,6 +87,7 @@ class KotlinProjectExecutor(
         files,
         project.args.split(" "),
         environment,
+        projectType,
         converter
       )
     }.also { logExecutionResult(project, it) }

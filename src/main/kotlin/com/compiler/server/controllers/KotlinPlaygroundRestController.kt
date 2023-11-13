@@ -1,5 +1,6 @@
 package com.compiler.server.controllers
 
+import com.compiler.server.exceptions.LegacyJsException
 import com.compiler.server.model.Project
 import com.compiler.server.model.ProjectType
 import com.compiler.server.service.KotlinProjectExecutor
@@ -39,8 +40,8 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
           "run" -> {
             when (project.confType) {
               ProjectType.JAVA -> kotlinProjectExecutor.run(project)
-              ProjectType.JS, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJs(project)
-              ProjectType.JS_IR -> kotlinProjectExecutor.convertToJsIr(project)
+              ProjectType.JS -> throw LegacyJsException()
+              ProjectType.JS_IR, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJsIr(project)
               ProjectType.WASM -> kotlinProjectExecutor.convertToWasm(project)
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }

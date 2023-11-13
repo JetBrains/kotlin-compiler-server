@@ -84,7 +84,7 @@ class KotlinCompiler(
       val (errors, analysis) = errorAnalyzer.errorsFrom(
         files = files,
         coreEnvironment = coreEnvironment,
-        isJs = false
+        projectType = ProjectType.JAVA
       )
       return if (errorAnalyzer.isOnlyWarnings(errors)) {
         val compilation = compile(files, analysis, coreEnvironment)

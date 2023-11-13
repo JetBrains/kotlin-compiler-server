@@ -36,7 +36,7 @@ class ResourceCompileTest : BaseExecutorTest() {
     testFilesJS.forEach { file ->
       val code = file.readText()
 
-      val jsResult = translateToJs(code)
+      val jsResult = translateToJsIr(code)
       val errorsJs = validateErrors(jsResult.errors)
       if (errorsJs != null) badMap[file.path + ":JS"] = errorsJs
     }

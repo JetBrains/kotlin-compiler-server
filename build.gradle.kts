@@ -5,12 +5,13 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion: String by System.getProperties()
+val kotlinVersion = rootProject.properties["systemProp.kotlinVersion"]
 val kotlinIdeVersion: String by System.getProperties()
 val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
+val indexesWasm: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
@@ -54,12 +55,12 @@ val copyDependencies by tasks.creating(Copy::class) {
     into(libJVMFolder)
 }
 val copyJSDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinJsDependency.map { zipTree(it) } }))
+    from(kotlinJsDependency)
     into(libJSFolder)
 }
 
 val copyWasmDependencies by tasks.creating(Copy::class) {
-    from(files(Callable { kotlinWasmDependency.map { zipTree(it) } }))
+    from(kotlinWasmDependency)
     into(libWasmFolder)
 }
 
@@ -73,7 +74,9 @@ plugins {
 
 apply<NodeJsRootPlugin>()
 
-the<NodeJsRootExtension>().nodeVersion = "20.2.0"
+// for new Wasm opcodes
+the<NodeJsRootExtension>().nodeVersion = "21.0.0-v8-canary202309167e82ab1fa2"
+the<NodeJsRootExtension>().nodeDownloadBaseUrl = "https://nodejs.org/download/v8-canary"
 
 allprojects {
     repositories {
@@ -82,6 +85,7 @@ allprojects {
         maven("https://repo.spring.io/snapshot")
         maven("https://repo.spring.io/milestone")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
         maven("https://www.myget.org/F/rd-snapshots/maven/")
@@ -113,7 +117,8 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm:$kotlinVersion")
+    kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
+    kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
 
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
@@ -129,7 +134,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
         isTransitive = false
     }
@@ -157,6 +161,7 @@ fun generateProperties(prefix: String = "") = """
     policy.file=${prefix + policy}
     indexes.file=${prefix + indexes}
     indexesJs.file=${prefix + indexesJs}
+    indexesWasm.file=${prefix + indexesWasm}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
     libraries.folder.wasm=${prefix + libWasmFolder}
@@ -183,6 +188,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(":indexation:run")
     buildPropertyFile()
 }
+println("Using Kotlin compiler $kotlinVersion")
 
 tasks.withType<BootJar> {
     requiresUnpack("**/kotlin-*.jar")
@@ -200,6 +206,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(policy)
     from(indexes)
     from(indexesJs)
+    from(indexesWasm)
     from(libJSFolder) { into(libJSFolder) }
     from(libWasmFolder) { into(libWasmFolder) }
     from(libJVMFolder) { into(libJVMFolder) }

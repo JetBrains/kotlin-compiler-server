@@ -6,6 +6,7 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
+import org.jetbrains.kotlin.utils.addToStdlib.assertedCast
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -35,7 +36,7 @@ class TestProjectRunner {
     args: String = "",
     convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
@@ -44,7 +45,7 @@ class TestProjectRunner {
     contains: String,
     convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
+    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
@@ -56,9 +57,9 @@ class TestProjectRunner {
     convertWasmAndTest(project, contains)
   }
 
-  fun translateToJs(code: String): TranslationResultWithJsCode {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
-    return kotlinProjectExecutor.convertToJs(project)
+  fun translateToJsIr(code: String): TranslationResultWithJsCode {
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
+    return kotlinProjectExecutor.convertToJsIr(project)
   }
 
   fun runWithException(code: String, contains: String): ExecutionResult {
@@ -88,7 +89,7 @@ class TestProjectRunner {
     completions: List<String>,
     isJs: Boolean = false
   ) {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
@@ -104,7 +105,7 @@ class TestProjectRunner {
     character: Int,
     isJs: Boolean = false
   ): List<Completion> {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     return kotlinProjectExecutor.complete(project, line, character)
   }
@@ -115,7 +116,12 @@ class TestProjectRunner {
   }
 
   fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
+    return kotlinProjectExecutor.highlight(project)
+  }
+
+  fun highlightWasm(code: String): Map<String, List<ErrorDescriptor>> {
+    val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
     return kotlinProjectExecutor.highlight(project)
   }
 
@@ -156,7 +162,16 @@ class TestProjectRunner {
     project: Project,
     contains: String,
   ): ExecutionResult {
-    val result = kotlinProjectExecutor.convertToWasm(project) as TranslationWasmResult
+    val result = kotlinProjectExecutor.convertToWasm(project)
+
+    if (result !is TranslationWasmResult) {
+      Assertions.assertFalse(result.hasErrors) {
+        "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
+      }
+    }
+
+    result as TranslationWasmResult
+
     Assertions.assertNotNull(result, "Test result should no be a null")
 
     val tmpDir = createTempDirectory()

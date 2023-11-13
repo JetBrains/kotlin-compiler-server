@@ -16,10 +16,12 @@ data class ProjectFile(val text: String = "", val name: String = "")
 enum class ProjectType(@JsonValue val id: String) {
   JAVA("java"),
   JUNIT("junit"),
-  CANVAS("canvas"),
   JS("js"),
+  CANVAS("canvas"),
   JS_IR("js-ir"),
   WASM("wasm");
 
-  fun isJsRelated(): Boolean = this == JS || this == JS_IR || this == CANVAS
+  fun isJvmRelated(): Boolean = this == JAVA || this == JUNIT
+
+  fun isJsRelated(): Boolean = this == JS_IR || this == JS || this == CANVAS
 }
