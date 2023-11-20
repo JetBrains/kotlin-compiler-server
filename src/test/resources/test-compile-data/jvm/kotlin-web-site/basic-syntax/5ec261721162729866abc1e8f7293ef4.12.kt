@@ -1,5 +1,5 @@
-class Rectangle(var height: Double, var length: Double) {
-    var perimeter = (height + length) * 2 
+class Rectangle(val height: Double, val length: Double) {
+    val perimeter = (height + length) * 2 
 }
 fun main() {
 //sampleStart
