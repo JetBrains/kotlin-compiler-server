@@ -3,10 +3,7 @@ package com.compiler.server.model
 import com.intellij.openapi.editor.Document
 
 data class TextInterval(val start: TextPosition, val end: TextPosition) {
-  data class TextPosition(val line: Int, val ch: Int) : Comparable<TextPosition> {
-    override fun compareTo(other: TextPosition): Int = compareValuesBy(this, other, { it.line }, { it.ch })
-  }
-
+  data class TextPosition(val line: Int, val ch: Int)
   companion object {
     fun from(start: Int, end: Int, currentDocument: Document): TextInterval {
       val lineNumberForElementStart = currentDocument.getLineNumber(start)

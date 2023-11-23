@@ -1,31 +1,37 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
+import com.compiler.server.executor.ExecutorMessages
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.*
 import com.compiler.server.model.bean.LibrariesFile
-import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
-import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import org.jetbrains.kotlin.backend.common.phaser.PhaseConfig
+import org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory
+import org.jetbrains.kotlin.backend.jvm.jvmPhases
+import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
+import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
+import org.jetbrains.kotlin.cli.jvm.compiler.findMainClass
+import org.jetbrains.kotlin.codegen.ClassBuilderFactories
+import org.jetbrains.kotlin.codegen.CodegenFactory
+import org.jetbrains.kotlin.codegen.DefaultCodegenFactory
+import org.jetbrains.kotlin.codegen.KotlinCodegenFacade
+import org.jetbrains.kotlin.codegen.state.GenerationState
+import org.jetbrains.kotlin.config.JVMConfigurationKeys
+import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.org.objectweb.asm.ClassReader
-import org.jetbrains.org.objectweb.asm.ClassReader.*
-import org.jetbrains.org.objectweb.asm.ClassVisitor
-import org.jetbrains.org.objectweb.asm.MethodVisitor
-import org.jetbrains.org.objectweb.asm.Opcodes.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
-import java.nio.file.FileVisitResult
 import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.*
+import java.nio.file.Paths
+import java.util.*
 
 @Component
 class KotlinCompiler(
+  private val errorAnalyzer: ErrorAnalyzer,
   private val kotlinEnvironment: KotlinEnvironment,
   private val javaExecutor: JavaExecutor,
   private val librariesFile: LibrariesFile,
@@ -33,119 +39,111 @@ class KotlinCompiler(
 ) {
   private val policyFile = File(policyFileName)
 
-  data class JvmClasses(
-    val files: Map<String, ByteArray> = emptyMap(),
-    val mainClasses: Set<String> = emptySet()
-  )
+  companion object {
+    private val PATH_SEPARATOR = System.getProperty("path.separator") ?: ":"
+  }
 
-  fun run(files: List<KtFile>, args: String): ExecutionResult {
-    return execute(files) { output, compiled ->
+  class Compiled(val files: Map<String, ByteArray> = emptyMap(), val mainClass: String? = null)
+
+  fun run(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment, args: String): ExecutionResult {
+    return execute(files, coreEnvironment) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
-      val compiledMainClass = when (compiled.mainClasses.size) {
-        0 -> return@execute ExecutionResult(
-          exception = IllegalArgumentException("No main method found in project").toExceptionDescriptor()
-        )
-
-        1 -> compiled.mainClasses.single()
-        else -> return@execute ExecutionResult(
-          exception = IllegalArgumentException(
-            "Multiple classes in project contain main methods found: ${compiled.mainClasses.joinToString()}"
-          ).toExceptionDescriptor()
-        )
-      }
-      val arguments = listOfNotNull(compiledMainClass) + args.split(" ")
+      val arguments = listOfNotNull(compiled.mainClass) + args.split(" ")
       javaExecutor.execute(argsFrom(mainClass, output, arguments))
         .asExecutionResult()
     }
   }
 
-  fun test(files: List<KtFile>): ExecutionResult {
-    return execute(files) { output, _ ->
+  fun test(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): ExecutionResult {
+    return execute(files, coreEnvironment) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
       javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
         .asJUnitExecutionResult()
     }
   }
 
-  @OptIn(ExperimentalPathApi::class)
-  fun compile(files: List<KtFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-    val ioFiles = files.writeToIoFiles(inputDir)
-    usingTempDirectory { outputDir ->
-      val arguments = ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
-        "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
-        "-module-name", "web-module",
-        "-no-stdlib", "-no-reflect",
-        "-d", outputDir.absolutePathString()
-      )
-      K2JVMCompiler().tryCompilation(arguments) {
-        val outputFiles = buildMap {
-          outputDir.visitFileTree {
-            onVisitFile { file, _ ->
-              put(file.relativeTo(outputDir).pathString, file.readBytes())
-              FileVisitResult.CONTINUE
-            }
-          }
-        }
-        val mainClasses = findMainClasses(outputFiles)
-        JvmClasses(
-            files = outputFiles,
-            mainClasses = mainClasses,
-        )
-      }
-    }
+  private fun compile(files: List<KtFile>, analysis: Analysis, coreEnvironment: KotlinCoreEnvironment): Compiled {
+    val generationState = generationStateFor(files, analysis, coreEnvironment)
+    KotlinCodegenFacade.compileCorrectFiles(generationState)
+    return Compiled(
+      files = generationState.factory.asList().associate { it.relativePath to it.asByteArray() },
+      mainClass = findMainClass(
+        generationState.bindingContext,
+        LanguageVersionSettingsImpl.DEFAULT,
+        files
+      )?.asString()
+    )
   }
-
-  private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
-    outputFiles.mapNotNull { (name, bytes) ->
-      if (!name.endsWith(".class")) return@mapNotNull null
-      val reader = ClassReader(bytes)
-      var hasMain = false
-      val visitor = object : ClassVisitor(ASM9) {
-        override fun visitMethod(
-          access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?
-        ): MethodVisitor? {
-          if (name == "main" && descriptor == "([Ljava/lang/String;)V" && (access and ACC_PUBLIC != 0) && (access and ACC_STATIC != 0)) {
-            hasMain = true
-          }
-          return null
-        }
-      }
-      reader.accept(visitor, SKIP_CODE or SKIP_DEBUG or SKIP_FRAMES)
-      if (hasMain) name.removeSuffix(".class") else null
-    }.toSet()
 
   private fun execute(
     files: List<KtFile>,
-    block: (output: OutputDirectory, compilation: JvmClasses) -> ExecutionResult
-  ): ExecutionResult = try {
-    when (val compilationResult = compile(files)) {
-      is Compiled<JvmClasses> -> {
-        usingTempDirectory { outputDir ->
-          val output = write(compilationResult.result, outputDir)
-          block(output, compilationResult.result).also {
-            it.addWarnings(compilationResult.compilerDiagnostics)
+    coreEnvironment: KotlinCoreEnvironment,
+    block: (output: OutputDirectory, compilation: Compiled) -> ExecutionResult
+  ): ExecutionResult {
+    return try {
+      val (errors, analysis) = errorAnalyzer.errorsFrom(
+        files = files,
+        coreEnvironment = coreEnvironment,
+        projectType = ProjectType.JAVA
+      )
+      return if (errorAnalyzer.isOnlyWarnings(errors)) {
+        val compilation = compile(files, analysis, coreEnvironment)
+        if (compilation.files.isEmpty())
+          return ProgramOutput(restriction = ExecutorMessages.NO_COMPILERS_FILE_FOUND).asExecutionResult()
+        val output = write(compilation)
+        try {
+          block(output, compilation).also {
+            it.addWarnings(errors)
           }
+        } finally {
+          output.path.toAbsolutePath().toFile().deleteRecursively()
         }
-      }
-
-      is NotCompiled -> ExecutionResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
+      } else ExecutionResult(errors)
+    } catch (e: Exception) {
+      ExecutionResult(exception = e.toExceptionDescriptor())
     }
-  } catch (e: Exception) {
-    ExecutionResult(exception = e.toExceptionDescriptor())
   }
 
-  private fun write(classes: JvmClasses, outputDir: Path): OutputDirectory {
+  private fun write(compiled: Compiled): OutputDirectory {
+    val dir = System.getProperty("java.io.tmpdir")
     val libDir = librariesFile.jvm.absolutePath
+    val sessionId = UUID.randomUUID().toString().replace("-", "")
+    val outputDir = Paths.get(dir, sessionId)
     val policy = policyFile.readText()
       .replace("%%GENERATED%%", outputDir.toString().replace('\\', '/'))
       .replace("%%LIB_DIR%%", libDir.replace('\\', '/'))
-    (outputDir / policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
-    return OutputDirectory(outputDir, classes.files.map { (name, bytes) ->
-      (outputDir / name).let { path ->
+    outputDir.resolve(policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
+    return OutputDirectory(outputDir, compiled.files.map { (name, bytes) ->
+      outputDir.resolve(name).let { path ->
         path.parent.toFile().mkdirs()
         Files.write(path, bytes)
       }
     })
+  }
+
+  private fun generationStateFor(
+    files: List<KtFile>,
+    analysis: Analysis,
+    coreEnvironment: KotlinCoreEnvironment
+  ): GenerationState {
+    val codegenFactory = getCodegenFactory(coreEnvironment)
+    return GenerationState.Builder(
+      project = files.first().project,
+      builderFactory = ClassBuilderFactories.BINARIES,
+      module = analysis.analysisResult.moduleDescriptor,
+      bindingContext = analysis.analysisResult.bindingContext,
+      files = files,
+      configuration = coreEnvironment.configuration
+    ).codegenFactory(codegenFactory).build()
+  }
+
+  private fun getCodegenFactory(coreEnvironment: KotlinCoreEnvironment): CodegenFactory {
+    return if (coreEnvironment.configuration.getBoolean(JVMConfigurationKeys.IR))
+      JvmIrCodegenFactory(
+        coreEnvironment.configuration,
+        coreEnvironment.configuration.get(CLIConfigurationKeys.PHASE_CONFIG) ?: PhaseConfig(jvmPhases)
+      ) else
+      DefaultCodegenFactory
   }
 
   private fun argsFrom(
@@ -156,7 +154,7 @@ class KotlinCompiler(
     val classPaths =
       (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
         .joinToString(PATH_SEPARATOR)
-    val policy = (outputDirectory.path / policyFile.name).toAbsolutePath()
+    val policy = outputDirectory.path.resolve(policyFile.name).toAbsolutePath()
     return CommandLineArgument(
       classPaths = classPaths,
       mainClass = mainClass,
@@ -165,4 +163,5 @@ class KotlinCompiler(
       arguments = args
     ).toList()
   }
+
 }

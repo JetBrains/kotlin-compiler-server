@@ -56,7 +56,7 @@ class BaseExecutorTest {
 
   fun translateToJsIr(code: String) = testRunner.translateToJsIr(code)
 
-  fun runWithException(code: String, contains: String, message: String? = null) = testRunner.runWithException(code, contains, message)
+  fun runWithException(code: String, contains: String) = testRunner.runWithException(code, contains)
 
   fun version() = testRunner.getVersion()
 }

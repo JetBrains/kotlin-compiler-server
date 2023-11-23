@@ -6,6 +6,7 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
+import org.jetbrains.kotlin.utils.addToStdlib.assertedCast
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -61,7 +62,7 @@ class TestProjectRunner {
     return kotlinProjectExecutor.convertToJsIr(project)
   }
 
-  fun runWithException(code: String, contains: String, message: String? = null): ExecutionResult {
+  fun runWithException(code: String, contains: String): ExecutionResult {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result.exception, "Test result should no be a null")
@@ -69,7 +70,6 @@ class TestProjectRunner {
       result.exception?.fullName?.contains(contains) == true,
       "Actual: ${result.exception?.message}, Expected: $contains"
     )
-    if (message != null) Assertions.assertEquals(message, result.exception?.message)
     return result
   }
 
@@ -110,17 +110,17 @@ class TestProjectRunner {
     return kotlinProjectExecutor.complete(project, line, character)
   }
 
-  fun highlight(code: String): CompilerDiagnostics {
+  fun highlight(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightJS(code: String): CompilerDiagnostics {
+  fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightWasm(code: String): CompilerDiagnostics {
+  fun highlightWasm(code: String): Map<String, List<ErrorDescriptor>> {
     val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
     return kotlinProjectExecutor.highlight(project)
   }
@@ -139,7 +139,7 @@ class TestProjectRunner {
       result.text.contains(contains), """
       Actual: ${result.text} 
       Expected: $contains       
-      Result: ${result.compilerDiagnostics}
+      Result: ${result.errors}
     """.trimIndent()
     )
     return result
@@ -153,7 +153,7 @@ class TestProjectRunner {
     val result = kotlinProjectExecutor.convert(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
     Assertions.assertFalse(result.hasErrors) {
-      "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
+      "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
     }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
   }
@@ -166,7 +166,7 @@ class TestProjectRunner {
 
     if (result !is TranslationWasmResult) {
       Assertions.assertFalse(result.hasErrors) {
-        "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
+        "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
       }
     }
 
