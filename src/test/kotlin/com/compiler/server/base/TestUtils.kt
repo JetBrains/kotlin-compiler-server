@@ -1,13 +1,11 @@
 package com.compiler.server.base
 
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.model.*
 import org.junit.jupiter.api.Assertions
 
-internal fun ExecutionResult.assertNoErrors() = compilerDiagnostics.assertNoErrors()
+internal fun ExecutionResult.assertNoErrors() = errors.assertNoErrors()
 
-internal fun List<ErrorDescriptor>.assertNoErrors() {
+internal fun Map<String, List<ErrorDescriptor>>.assertNoErrors() {
     Assertions.assertFalse(hasErrors) {
         "No errors expected, but the following errors were found:\n" +
                 "\n" +
@@ -15,21 +13,21 @@ internal fun List<ErrorDescriptor>.assertNoErrors() {
     }
 }
 
-internal fun errorContains(highlights: List<ErrorDescriptor>, message: String) {
-    Assertions.assertTrue(highlights.any { it.message.contains(message) }) {
+internal fun errorContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
+    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) }) {
         "Haven't found diagnostic with message $message, actual diagnostics:\n" +
                 "\n" +
-          renderErrorDescriptors(highlights)
+          renderErrorDescriptors(highlights.values.flatten())
     }
-    Assertions.assertTrue(highlights.any { it.severity == ProjectSeveriry.ERROR }) { highlights.toString() }
+    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.ERROR })
 }
 
-internal fun warningContains(highlights: List<ErrorDescriptor>, message: String) {
-    Assertions.assertTrue(highlights.any { it.message.contains(message) }) {
+internal fun warningContains(highlights: Map<String, List<ErrorDescriptor>>, message: String) {
+    Assertions.assertTrue(highlights.values.flatten().map { it.message }.any { it.contains(message) }) {
         "Haven't found diagnostic with message $message, actual diagnostics:\n" +
                 "\n" +
-          renderErrorDescriptors(highlights)
+          renderErrorDescriptors(highlights.values.flatten())
     }
-    Assertions.assertTrue(highlights.any { it.className == "WARNING" }) { highlights.toString() }
-    Assertions.assertTrue(highlights.any { it.severity == ProjectSeveriry.WARNING }) { highlights.toString() }
+    Assertions.assertTrue(highlights.values.flatten().map { it.className }.any { it == "WARNING" })
+    Assertions.assertTrue(highlights.values.flatten().map { it.severity }.any { it == ProjectSeveriry.WARNING })
 }

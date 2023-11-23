@@ -4,15 +4,23 @@ import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.ProjectSeveriry
 
+val ErrorDescriptor.isError: Boolean
+  get() = severity == ProjectSeveriry.ERROR
+
 val ExecutionResult.hasErrors: Boolean
-  get() = compilerDiagnostics.hasErrors
+  get() = errors.hasErrors
 
-val List<ErrorDescriptor>.hasErrors: Boolean
-  get() = any { it.severity == ProjectSeveriry.ERROR }
+val Map<String, List<ErrorDescriptor>>.hasErrors: Boolean
+  get() = asSequence()
+    .flatMap { it.value.asSequence() }
+    .any { it.isError }
 
 
-val List<ErrorDescriptor>.filterOnlyErrors: List<ErrorDescriptor>
-  get() = filter { it.severity == ProjectSeveriry.ERROR }
+val ExecutionResult.filterOnlyErrors: List<ErrorDescriptor>
+  get() = errors.filterOnlyErrors
+
+val Map<String, List<ErrorDescriptor>>.filterOnlyErrors: List<ErrorDescriptor>
+  get() = flatMap { it.value }.filter { it.isError }
 
 
 fun renderErrorDescriptors(errors: List<ErrorDescriptor>): String {
@@ -21,5 +29,4 @@ fun renderErrorDescriptors(errors: List<ErrorDescriptor>): String {
   }
 }
 
-fun ErrorDescriptor.renderErrorDescriptor(): String =
-  interval?.let { "(${it.start.line}, ${it.end.line}): $message" } ?: message
+fun ErrorDescriptor.renderErrorDescriptor(): String = "(${interval.start.line}, ${interval.end.line}): $message"

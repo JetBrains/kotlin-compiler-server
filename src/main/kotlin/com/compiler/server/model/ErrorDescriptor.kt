@@ -7,7 +7,7 @@ import model.Completion
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ErrorDescriptor(
-  val interval: TextInterval?,
+  val interval: TextInterval,
   val message: String,
   val severity: ProjectSeveriry,
   val className: String? = null,

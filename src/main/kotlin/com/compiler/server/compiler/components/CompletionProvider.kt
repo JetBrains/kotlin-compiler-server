@@ -3,7 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
@@ -72,11 +72,11 @@ class CompletionProvider(
         importVariants(file, prefix, errors, line, character, projectType)
       } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
-        sortWith { a, b ->
+        sortWith(Comparator { a, b ->
           val (a1, a2) = a.presentableName()
           val (b1, b2) = b.presentableName()
           ("$a1$a2").compareTo("$b1$b2", true)
-        }
+        })
       }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } +
         keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) +
         keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix) +
@@ -113,16 +113,15 @@ class CompletionProvider(
   private fun importVariants(
     file: KotlinFile,
     prefix: String,
-    compilerDiagnostics: CompilerDiagnostics,
+    errors: Map<String, List<ErrorDescriptor>>,
     line: Int,
     character: Int,
     projectType: ProjectType
   ): List<Completion> {
     val importCompletionVariants = indexationProvider.getClassesByName(prefix, projectType)
       ?.map { it.toCompletion() } ?: emptyList()
-    val currentErrors = compilerDiagnostics.map[file.kotlinFile.name]?.filter {
-      it.interval != null &&
-        it.interval.start.line == line &&
+    val currentErrors = errors[file.kotlinFile.name]?.filter {
+      it.interval.start.line == line &&
         it.interval.start.ch <= character &&
         it.interval.end.line == line &&
         it.interval.end.ch >= character &&
@@ -258,7 +257,7 @@ class CompletionProvider(
 
   // This code is a fragment of org.jetbrains.kotlin.idea.completion.CompletionSession from Kotlin IDE Plugin
   // with a few simplifications which were possible because webdemo has very restricted environment (and well,
-  // because requirements on completion' quality in web-demo are lower)
+  // because requirements on compeltion' quality in web-demo are lower)
   private inner class VisibilityFilter(
     private val inDescriptor: DeclarationDescriptor,
     private val bindingContext: BindingContext,
