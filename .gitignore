@@ -5,6 +5,13 @@ build/
 !**/src/test/**
 src/main/resources/application.properties
 
+# compile artifacts
+.kotlin/
+1.9.*/
+2.*/
+indexes*.json
+*.log
+
 ### STS ###
 .apt_generated
 .classpath
