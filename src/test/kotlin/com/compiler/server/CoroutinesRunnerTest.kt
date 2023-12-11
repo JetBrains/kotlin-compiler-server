@@ -178,6 +178,26 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
     )
   }
 
+  @Test
+  @Disabled("@ToDo: incorrect result - 'A\n<outStream>B\n</outStream>'")
+  fun `IO coroutine out order`() {
+    run(
+      //language=kotlin
+      code = """
+        import kotlinx.coroutines.*
+
+        fun main() {
+            CoroutineScope(Dispatchers.IO).launch { 
+                delay(1)
+                println("A")
+            }
+            println("B")
+          
+        }
+      """.trimIndent(),
+      contains = "<outStream>B\nA\n</outStream>"
+    )
+  }
 
   @Test
   @Disabled
