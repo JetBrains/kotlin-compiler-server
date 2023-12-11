@@ -47,69 +47,57 @@ class HighlightTest : BaseExecutorTest() {
   @Test
   fun `base highlight false condition`() {
     val highlights = highlight("fun main() {\n    val a: String = \"\"\n    if (a == null) print(\"b\")\n}")
-    warningContains(highlights, "Condition 'a == null' is always 'false'")
+    warningContains(highlights, "Condition is always 'false'.")
   }
 
   @Test
   fun `base highlight false condition js`() {
     val highlights = highlightJS("fun main() {\n    val a: String = \"\"\n    if (a == null) print(\"b\")\n}")
-    warningContains(highlights, "Condition 'a == null' is always 'false'")
+    warningContains(highlights, "Condition is always 'false'.")
   }
 
   @Test
   fun `base highlight false condition wasm`() {
     val highlights = highlightWasm("fun main() {\n    val a: String = \"\"\n    if (a == null) print(\"b\")\n}")
-    warningContains(highlights, "Condition 'a == null' is always 'false'")
+    warningContains(highlights, "Condition is always 'false'.")
   }
 
   @Test
   fun `highlight  Unresolved reference`() {
     val highlights = highlight("fun main() {\n   dfsdf\n}")
-    errorContains(highlights, "Unresolved reference: dfsdf")
+    errorContains(highlights, "Unresolved reference 'dfsdf'.")
   }
 
   @Test
   fun `highlight js Unresolved reference`() {
     val highlights = highlightJS("fun main() {\n   dfsdf\n}")
-    errorContains(highlights, "Unresolved reference: dfsdf")
+    errorContains(highlights, "Unresolved reference 'dfsdf'.")
   }
 
   @Test
   fun `highlight wasm Unresolved reference`() {
     val highlights = highlightWasm("fun main() {\n   dfsdf\n}")
-    errorContains(highlights, "Unresolved reference: dfsdf")
+    errorContains(highlights, "Unresolved reference 'dfsdf'.")
   }
 
   @Test
   fun `highlight Type inference failed`() {
     val highlights = highlight("fun main() {\n   \"sdf\".to\n}")
-    errorContains(
-      highlights,
-      "Not enough information to infer type variable B"
-    )
-    errorContains(highlights, "No value passed for parameter 'that'")
+    Assertions.assertEquals(highlights.size, 1)
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
   @Test
   fun `highlight js Type inference failed`() {
     val highlights = highlightJS("fun main() {\n   \"sdf\".to\n}")
-    errorContains(
-      highlights,
-      "Not enough information to infer type variable B"
-    )
-    errorContains(highlights, "No value passed for parameter 'that'")
+    Assertions.assertEquals(highlights.size, 1)
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
   @Test
   fun `highlight wasm Type inference failed`() {
     val highlights = highlightWasm("fun main() {\n   \"sdf\".to\n}")
-    errorContains(
-      highlights,
-      "Not enough information to infer type variable B"
-    )
-    errorContains(highlights, "No value passed for parameter 'that'")
+    Assertions.assertEquals(highlights.size, 1)
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 }
