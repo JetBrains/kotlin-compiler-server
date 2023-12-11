@@ -93,7 +93,7 @@ class KotlinToJSTranslator(
             ))
           }
           .map { (outputDir / "js" / "$moduleName.js").readText() }
-          .map { it.withMainArgumentsIr(arguments, moduleName) }
+          .map { it.withMainArgumentsIr(arguments) }
           .map(::redirectOutput)
       }
     }
@@ -149,17 +149,17 @@ class KotlinToJSTranslator(
     }
 }
 
-private fun String.withMainArgumentsIr(arguments: List<String>, moduleName: String): String {
-  val postfix = """|  main([]);
-                   |  return _;
-                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
-                   |""".trimMargin()
-  if (!endsWith(postfix)) return this
-  val objectMapper = ObjectMapper()
-  return this.removeSuffix(postfix) + """|  main([${arguments.joinToString { objectMapper.writeValueAsString(it) }}]);
-                   |  return _;
-                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
-                   |""".trimMargin()
+private fun String.withMainArgumentsIr(arguments: List<String>): String {
+  val mainIrFunction = """
+    |  function mainWrapper() {
+    |    main([%s]);
+    |  }
+  """.trimMargin()
+
+  return replace(
+    String.format(mainIrFunction, ""),
+    String.format(mainIrFunction, arguments.joinToString { ObjectMapper().writeValueAsString(it) })
+  )
 }
 
 data class WasmTranslationSuccessfulOutput(
