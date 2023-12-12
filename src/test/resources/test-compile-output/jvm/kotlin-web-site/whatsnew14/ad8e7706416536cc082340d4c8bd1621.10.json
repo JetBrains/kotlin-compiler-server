@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>Kotlin type: java.lang.String (Kotlin reflection is not available)\nJava type: class java.lang.String\nKotlin type: java.util.List<java.lang.String> (Kotlin reflection is not available)\nJava type: java.util.List<java.lang.String>\n</outStream>"}

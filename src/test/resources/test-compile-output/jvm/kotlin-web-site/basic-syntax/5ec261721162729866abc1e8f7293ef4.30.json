@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>Getting the length of 'Incomprehensibilities'. Result: 21 \nGetting the length of '1000'. Result: Error: The object is not a string \nGetting the length of '[java.lang.Object@4d405ef7]'. Result: Error: The object is not a string \n</outStream>"}

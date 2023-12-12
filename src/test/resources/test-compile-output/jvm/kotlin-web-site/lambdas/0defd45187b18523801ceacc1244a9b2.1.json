@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>acc = 0, i = 1, result = 1\nacc = 1, i = 2, result = 3\nacc = 3, i = 3, result = 6\nacc = 6, i = 4, result = 10\nacc = 10, i = 5, result = 15\njoinedToString = Elements: 1 2 3 4 5\nproduct = 120\n</outStream>"}
