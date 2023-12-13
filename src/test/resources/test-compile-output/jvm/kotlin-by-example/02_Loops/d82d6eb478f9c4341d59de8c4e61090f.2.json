@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":3,"ch":9},"end":{"line":3,"ch":13}},"message":"Parameter 'args' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>Eat a Cake\nEat a Cake\nEat a Cake\nEat a Cake\nEat a Cake\nBake a Cake\nBake a Cake\nBake a Cake\nBake a Cake\nBake a Cake\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>Eat a Cake\nEat a Cake\nEat a Cake\nEat a Cake\nEat a Cake\nBake a Cake\nBake a Cake\nBake a Cake\nBake a Cake\nBake a Cake\n</outStream>"}
