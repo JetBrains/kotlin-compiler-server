@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":9,"ch":11},"end":{"line":9,"ch":18}},"message":"'oldName: Int' is deprecated. Use 'newName' instead","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>42\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>42\n</outStream>"}
