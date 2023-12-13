@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.compiler.components.IndexationProvider.Companion.UNRESOLVED_REFERENCE_PREFIX
 import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
@@ -16,6 +17,7 @@ import java.nio.file.Paths
 import java.util.*
 import kotlin.io.path.*
 
+fun minusOne(value: Int) = if (value > 0) value - 1 else value
 
 sealed class CompilationResult<out T> {
   abstract val compilerDiagnostics: CompilerDiagnostics
@@ -64,8 +66,8 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
     ): String {
       val textInterval = location?.let {
         TextInterval(
-          start = TextInterval.TextPosition(location.line, location.column),
-          end = TextInterval.TextPosition(location.lineEnd, location.columnEnd)
+          start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
+          end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
         )
       }
       val messageSeverity: ProjectSeveriry = when (severity) {
@@ -74,7 +76,15 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
         INFO, LOGGING, OUTPUT -> ProjectSeveriry.INFO
       }
       val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
-      val errorDescriptor = ErrorDescriptor(textInterval, message, messageSeverity, className = "WARNING".takeIf { messageSeverity == ProjectSeveriry.WARNING })
+
+      val errorDescriptor =
+        ErrorDescriptor(textInterval, message, messageSeverity, className = messageSeverity.name.let {
+          when {
+            !message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR -> "red_wavy_line"
+            else -> it
+          }
+        })
+
       diagnosticsMap.getOrPut(errorFilePath) { mutableListOf() }.add(errorDescriptor)
       return ""
     }
