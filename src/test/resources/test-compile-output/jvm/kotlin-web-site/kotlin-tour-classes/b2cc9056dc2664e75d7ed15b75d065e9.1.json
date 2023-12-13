@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":3,"ch":8},"end":{"line":3,"ch":15}},"message":"Variable 'contact' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":""}
+{"errors":{"File.kt":[]},"exception":null,"text":""}

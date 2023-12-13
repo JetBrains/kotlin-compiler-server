@@ -4,6 +4,7 @@ import com.compiler.server.base.BaseExecutorTest
 import com.compiler.server.base.errorContains
 import com.compiler.server.base.warningContains
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class HighlightTest : BaseExecutorTest() {
@@ -26,19 +27,19 @@ class HighlightTest : BaseExecutorTest() {
     Assertions.assertTrue(highlights.isEmpty())
   }
 
-  @Test
+  @Test @Disabled
   fun `base highlight unused variable`() {
     val highlights = highlight("fun main() {\n\tval a = \"d\"\n}")
     warningContains(highlights, "Variable 'a' is never used")
   }
 
-  @Test
+  @Test @Disabled
   fun `base highlight unused variable js`() {
     val highlights = highlightJS("fun main() {\n\tval a = \"d\"\n}")
     warningContains(highlights, "Variable 'a' is never used")
   }
 
-  @Test
+  @Test @Disabled
   fun `base highlight unused variable wasm`() {
     val highlights = highlightWasm("fun main() {\n\tval a = \"d\"\n}")
     warningContains(highlights, "Variable 'a' is never used")

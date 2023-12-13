@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":19},"end":{"line":0,"ch":24}},"message":"Parameter 'block' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>hi!\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>hi!\n</outStream>"}

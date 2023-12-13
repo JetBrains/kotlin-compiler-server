@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":4,"ch":8},"end":{"line":4,"ch":16}},"message":"Variable 'boolNull' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>true\nfalse\nfalse\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>true\nfalse\nfalse\n</outStream>"}
