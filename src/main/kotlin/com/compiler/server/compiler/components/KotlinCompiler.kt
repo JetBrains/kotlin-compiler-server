@@ -111,7 +111,7 @@ class KotlinCompiler(
         }
       }
       reader.accept(visitor, SKIP_CODE or SKIP_DEBUG or SKIP_FRAMES)
-      if (hasMain) name.removeSuffix(".class") else null
+      if (hasMain) name.removeSuffix(".class").replace(File.separatorChar, '.') else null
     }.toSet()
 
   private fun execute(
