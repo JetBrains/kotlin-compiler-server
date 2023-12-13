@@ -14,6 +14,14 @@ class JvmRunnerTest : BaseExecutorTest() {
   }
 
   @Test
+  fun `execute test JVM different package`() {
+    run(
+      code = "package com.example\nfun main() {\n println(\"Hello, world!!!\")\n}",
+      contains = "Hello, world!!!"
+    )
+  }
+
+  @Test
   fun `no main class jvm test`() {
     runWithException(
       code = "fun main1() {\n    println(\"sdf\")\n}",
@@ -59,5 +67,4 @@ class JvmRunnerTest : BaseExecutorTest() {
       contains = version().substringBefore("-")
     )
   }
-
 }
