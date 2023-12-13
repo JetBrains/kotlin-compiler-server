@@ -75,6 +75,7 @@ class KotlinCompiler(
         "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
         "-module-name", "web-module",
         "-no-stdlib", "-no-reflect",
+        "-progressive",
         "-d", outputDir.absolutePathString()
       )
       K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
