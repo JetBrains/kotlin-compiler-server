@@ -77,13 +77,8 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
       }
       val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
 
-      val errorDescriptor =
-        ErrorDescriptor(textInterval, message, messageSeverity, className = messageSeverity.name.let {
-          when {
-            !message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR -> "red_wavy_line"
-            else -> it
-          }
-        })
+      val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
+      val errorDescriptor = ErrorDescriptor(textInterval, message, messageSeverity, className)
 
       diagnosticsMap.getOrPut(errorFilePath) { mutableListOf() }.add(errorDescriptor)
       return ""
