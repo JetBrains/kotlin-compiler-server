@@ -17,7 +17,7 @@ import java.nio.file.Paths
 import java.util.*
 import kotlin.io.path.*
 
-fun minusOne(value: Int) = if (value > 0) value - 1 else value
+private fun minusOne(value: Int) = if (value > 0) value - 1 else value
 
 sealed class CompilationResult<out T> {
   abstract val compilerDiagnostics: CompilerDiagnostics
