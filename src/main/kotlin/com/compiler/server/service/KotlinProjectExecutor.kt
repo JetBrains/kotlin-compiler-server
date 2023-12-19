@@ -63,10 +63,6 @@ class KotlinProjectExecutor(
       }
     }
   }
-  
-  private fun CompilerDiagnostics.withoutInfoDiagnostics() = CompilerDiagnostics(
-    map.mapValues { (_, l) -> l.filter { it.severity != ProjectSeveriry.INFO } }.filterValues { it.isNotEmpty() }
-  )
 
   fun highlight(project: Project): CompilerDiagnostics = try {
     when (project.confType) {
@@ -77,7 +73,7 @@ class KotlinProjectExecutor(
   } catch (e: Exception) {
     log.warn("Exception in getting highlight. Project: $project", e)
     CompilerDiagnostics(emptyMap())
-  }.withoutInfoDiagnostics()
+  }
 
   fun getVersion() = version
 

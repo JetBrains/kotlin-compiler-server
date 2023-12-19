@@ -60,6 +60,7 @@ abstract class TranslationResultWithJsCode(
 data class TranslationJSResult(
   override val jsCode: String? = null,
   override var exception: ExceptionDescriptor? = null,
+  @field:JsonProperty("errors")
   override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
 ) : TranslationResultWithJsCode(jsCode, compilerDiagnostics, exception)
 
@@ -69,6 +70,7 @@ data class TranslationWasmResult(
   val wasm: ByteArray,
   val wat: String?,
   override var exception: ExceptionDescriptor? = null,
+  @field:JsonProperty("errors")
   override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
 ) : TranslationResultWithJsCode(jsCode, compilerDiagnostics, exception)
 
@@ -76,6 +78,7 @@ data class TranslationWasmResult(
 class JunitExecutionResult(
   val testResults: Map<String, List<TestDescription>> = emptyMap(),
   override var exception: ExceptionDescriptor? = null,
+  @field:JsonProperty("errors")
   override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
 ) : ExecutionResult(compilerDiagnostics, exception)
 
