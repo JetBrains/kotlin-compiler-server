@@ -73,7 +73,7 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
       val messageSeverity: ProjectSeveriry = when (severity) {
         EXCEPTION, ERROR -> ProjectSeveriry.ERROR
         STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
-        INFO, LOGGING, OUTPUT -> ProjectSeveriry.INFO
+        INFO, LOGGING, OUTPUT -> return ""
       }
       val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
 
