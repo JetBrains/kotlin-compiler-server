@@ -64,17 +64,25 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
       message: String,
       location: CompilerMessageSourceLocation?
     ): String {
+      when {
+        // suppress -XXLanguage:+ExplicitBackingFields
+        severity == STRONG_WARNING && message.contains("ExplicitBackingFields") ->
+          return ""
+      }
+
+      val messageSeverity: ProjectSeveriry = when (severity) {
+        EXCEPTION, ERROR -> ProjectSeveriry.ERROR
+        STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
+        INFO, LOGGING, OUTPUT -> return ""
+      }
+
       val textInterval = location?.let {
         TextInterval(
           start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
           end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
         )
       }
-      val messageSeverity: ProjectSeveriry = when (severity) {
-        EXCEPTION, ERROR -> ProjectSeveriry.ERROR
-        STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
-        INFO, LOGGING, OUTPUT -> return ""
-      }
+
       val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
 
       val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
