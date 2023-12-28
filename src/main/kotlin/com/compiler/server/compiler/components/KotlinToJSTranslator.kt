@@ -4,7 +4,6 @@ import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
-import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
@@ -29,9 +28,9 @@ class KotlinToJSTranslator(
   }
 
   fun translateJs(
-    files: List<KtFile>,
+    files: List<ProjectFile>,
     arguments: List<String>,
-    translate: (List<KtFile>, List<String>) -> CompilationResult<String>
+    translate: (List<ProjectFile>, List<String>) -> CompilationResult<String>
   ): TranslationJSResult = try {
     val compilationResult = translate(files, arguments)
     val jsCode = when (compilationResult) {
@@ -44,8 +43,8 @@ class KotlinToJSTranslator(
   }
 
   fun translateWasm(
-    files: List<KtFile>,
-    translate: (List<KtFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    files: List<ProjectFile>,
+    translate: (List<ProjectFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
       val compilationResult = translate(files)
@@ -65,7 +64,7 @@ class KotlinToJSTranslator(
     }
   }
 
-  fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>): CompilationResult<String> =
+  fun doTranslateWithIr(files: List<ProjectFile>, arguments: List<String>): CompilationResult<String> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
@@ -109,7 +108,7 @@ class KotlinToJSTranslator(
   }
 
 
-  fun doTranslateWithWasm(files: List<KtFile>): CompilationResult<WasmTranslationSuccessfulOutput> =
+  fun doTranslateWithWasm(files: List<ProjectFile>): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->

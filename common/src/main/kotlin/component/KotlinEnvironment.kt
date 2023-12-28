@@ -1,24 +1,5 @@
 package component
 
-import com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
-import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
-import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
-import org.jetbrains.kotlin.cli.jvm.config.configureJdkClasspathRoots
-import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
-import org.jetbrains.kotlin.config.CommonConfigurationKeys
-import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.config.JVMConfigurationKeys
-import org.jetbrains.kotlin.config.languageVersionSettings
-import org.jetbrains.kotlin.js.config.JSConfigurationKeys
-import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
-import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
-import org.jetbrains.kotlin.serialization.js.ModuleKind
-import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import java.io.File
 
 class KotlinEnvironment(
@@ -45,65 +26,7 @@ class KotlinEnvironment(
     )
   }
 
-  val JS_METADATA_CACHE =
-    additionalJsClasspath.flatMap {
-      KotlinJavascriptMetadataUtils.loadMetadata(it.absolutePath).map { metadata ->
-        val parts = KotlinJavascriptSerializationUtil.readModuleAsProto(metadata.body, metadata.version)
-        JsModuleDescriptor(metadata.moduleName, parts.kind, parts.importedModules, parts)
-      }
-    }
-
   val JS_LIBRARIES = additionalJsClasspath.map { it.absolutePath }
   val WASM_LIBRARIES = additionalWasmClasspath.map { it.absolutePath }
 
-  @Synchronized
-  fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {
-    return f(environment)
-  }
-
-  private val configuration = createConfiguration()
-  val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
-    put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
-    put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
-  }
-
-  val wasmConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
-    put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
-    put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
-    put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
-  }
-
-  private val environment = KotlinCoreEnvironment.createForProduction(
-    parentDisposable = Disposer.newDisposable(),
-    configuration = configuration.copy(),
-    configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
-  )
-
-  private fun createConfiguration(): CompilerConfiguration {
-    val arguments = K2JVMCompilerArguments()
-    parseCommandLineArguments(additionalCompilerArguments, arguments)
-    return CompilerConfiguration().apply {
-      addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
-      val messageCollector = MessageCollector.NONE
-      put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
-      put(CommonConfigurationKeys.MODULE_NAME, "web-module")
-      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
-      put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)
-
-      languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
-
-      // it uses languageVersionSettings that was set above
-      configureAdvancedJvmOptions(arguments)
-      put(JVMConfigurationKeys.DO_NOT_CLEAR_BINDING_CONTEXT, true)
-
-      configureJdkClasspathRoots()
-      val jdkHome = get(JVMConfigurationKeys.JDK_HOME)
-      if (jdkHome == null) {
-        val javaHome = File(System.getProperty("java.home"))
-        put(JVMConfigurationKeys.JDK_HOME, javaHome)
-      }
-    }
-  }
 }

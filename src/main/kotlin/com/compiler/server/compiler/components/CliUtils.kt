@@ -1,8 +1,8 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.compiler.components.IndexationProvider.Companion.UNRESOLVED_REFERENCE_PREFIX
 import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.TextInterval
 import org.jetbrains.kotlin.cli.common.CLICompiler
@@ -11,13 +11,14 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
-import org.jetbrains.kotlin.psi.KtFile
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
 import kotlin.io.path.*
 
 private fun minusOne(value: Int) = if (value > 0) value - 1 else value
+
+private const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
 sealed class CompilationResult<out T> {
   abstract val compilerDiagnostics: CompilerDiagnostics
@@ -121,10 +122,10 @@ private fun getTempDirectory(): Path {
   return Paths.get(dir, sessionId)
 }
 
-fun List<KtFile>.writeToIoFiles(inputDir: Path): List<Path> {
+fun List<ProjectFile>.writeToIoFiles(inputDir: Path): List<Path> {
   val ioFiles = map { inputDir / it.name }
-  for ((ioFile, ktFile) in ioFiles zip this) {
-    ioFile.writeText(ktFile.text)
+  for ((ioFile, projectFile) in ioFiles zip this) {
+    ioFile.writeText(projectFile.text)
   }
   return ioFiles
 }

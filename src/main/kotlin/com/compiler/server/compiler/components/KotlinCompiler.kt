@@ -4,13 +4,13 @@ import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -38,7 +38,7 @@ class KotlinCompiler(
     val mainClasses: Set<String> = emptySet()
   )
 
-  fun run(files: List<KtFile>, args: String): ExecutionResult {
+  fun run(files: List<ProjectFile>, args: String): ExecutionResult {
     return execute(files) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
       val compiledMainClass = when (compiled.mainClasses.size) {
@@ -59,7 +59,7 @@ class KotlinCompiler(
     }
   }
 
-  fun test(files: List<KtFile>): ExecutionResult {
+  fun test(files: List<ProjectFile>): ExecutionResult {
     return execute(files) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
       javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
@@ -68,7 +68,7 @@ class KotlinCompiler(
   }
 
   @OptIn(ExperimentalPathApi::class)
-  fun compile(files: List<KtFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
+  fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
     val ioFiles = files.writeToIoFiles(inputDir)
     usingTempDirectory { outputDir ->
       val arguments = ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
@@ -116,7 +116,7 @@ class KotlinCompiler(
     }.toSet()
 
   private fun execute(
-    files: List<KtFile>,
+    files: List<ProjectFile>,
     block: (output: OutputDirectory, compilation: JvmClasses) -> ExecutionResult
   ): ExecutionResult = try {
     when (val compilationResult = compile(files)) {
