@@ -7,7 +7,7 @@ import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
+import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component
 class KotlinProjectExecutor(
   private val kotlinCompiler: KotlinCompiler,
   private val completionProvider: CompletionProvider,
-  private val errorAnalyzer: ErrorAnalyzer,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
   private val kotlinEnvironment: KotlinEnvironment,
@@ -27,23 +26,30 @@ class KotlinProjectExecutor(
   fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinCompiler.run(files, environment, project.args)
+      kotlinCompiler.run(files, project.args)
     }.also { logExecutionResult(project, it) }
   }
 
   fun test(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinCompiler.test(files, environment)
+      kotlinCompiler.test(files)
     }.also { logExecutionResult(project, it) }
   }
 
-  fun convertToJsIr(project: Project): TranslationResultWithJsCode {
-    return convertJsWithConverter(project, ProjectType.JS_IR, kotlinToJSTranslator::doTranslateWithIr)
+  fun convertToJsIr(project: Project): TranslationJSResult {
+    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
+  }
+
+  fun compileToJvm(project: Project): CompilationResult<KotlinCompiler.JvmClasses> {
+    val files = kotlinEnvironment.environment { environment ->
+      getFilesFrom(project, environment).map { it.kotlinFile }
+    }
+    return kotlinCompiler.compile(files)
   }
 
   fun convertToWasm(project: Project): TranslationResultWithJsCode {
-    return convertJsWithConverter(project, ProjectType.WASM, kotlinToJSTranslator::doTranslateWithWasm)
+    return convertWasmWithConverter(project, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -58,38 +64,36 @@ class KotlinProjectExecutor(
     }
   }
 
-  fun highlight(project: Project): Map<String, List<ErrorDescriptor>> {
-    return kotlinEnvironment.environment { environment ->
-      val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      try {
-        errorAnalyzer.errorsFrom(
-          files = files,
-          coreEnvironment = environment,
-          projectType = project.confType
-        ).errors
-      } catch (e: Exception) {
-        log.warn("Exception in getting highlight. Project: $project", e)
-        emptyMap()
-      }
+  fun highlight(project: Project): CompilerDiagnostics = try {
+    when (project.confType) {
+      ProjectType.JAVA, ProjectType.JUNIT -> compileToJvm(project).compilerDiagnostics
+      ProjectType.CANVAS, ProjectType.JS, ProjectType.JS_IR -> convertToJsIr(project).compilerDiagnostics
+      ProjectType.WASM -> convertToWasm(project).compilerDiagnostics
     }
+  } catch (e: Exception) {
+    log.warn("Exception in getting highlight. Project: $project", e)
+    CompilerDiagnostics(emptyMap())
   }
 
   fun getVersion() = version
 
   private fun convertJsWithConverter(
     project: Project,
-    projectType: ProjectType,
-    converter: (ModulesStructure, List<String>, KotlinCoreEnvironment) -> TranslationResultWithJsCode
+    converter: (List<KtFile>, List<String>) -> CompilationResult<String>
+  ): TranslationJSResult {
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      kotlinToJSTranslator.translateJs(files, project.args.split(" "), converter)
+    }.also { logExecutionResult(project, it) }
+  }
+
+  private fun convertWasmWithConverter(
+    project: Project,
+    converter: (List<KtFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinToJSTranslator.translate(
-        files,
-        project.args.split(" "),
-        environment,
-        projectType,
-        converter
-      )
+      kotlinToJSTranslator.translateWasm(files, converter)
     }.also { logExecutionResult(project, it) }
   }
 

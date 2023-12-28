@@ -9,9 +9,9 @@ import com.intellij.psi.PsiFile
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
-import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForJSIR
+import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
@@ -31,7 +31,6 @@ import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
-import org.jetbrains.kotlin.js.config.ErrorTolerancePolicy
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
 import org.jetbrains.kotlin.name.Name
@@ -60,7 +59,7 @@ class ErrorAnalyzer(
     projectType: ProjectType
   ): ErrorsAndAnalysis {
     val analysis = when {
-        projectType.isJvmRelated() ->analysisOf(files, coreEnvironment)
+        projectType.isJvmRelated() -> analysisOf(files, coreEnvironment)
         projectType.isJsRelated() -> analyzeFileForJs(files, coreEnvironment)
         projectType == ProjectType.WASM -> analyzeFileForWasm(files, coreEnvironment)
         else -> throw IllegalArgumentException("Unknown platform: $projectType")
@@ -68,7 +67,7 @@ class ErrorAnalyzer(
     return ErrorsAndAnalysis(
       errorsFrom(
         analysis.analysisResult.bindingContext.diagnostics.all(),
-        files.associate { it.name to anylizeErrorsFrom(it, projectType) },
+        CompilerDiagnostics(files.associate { it.name to analyzeErrorsFrom(it, projectType) }),
         projectType
       ),
       analysis
@@ -233,24 +232,13 @@ class ErrorAnalyzer(
 
   fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
-    errors: Map<String, List<ErrorDescriptor>>,
+    compilerDiagnostics: CompilerDiagnostics,
     projectType: ProjectType
-  ): Map<String, List<ErrorDescriptor>> {
-    return (errors and errorsFrom(diagnostics, projectType)).map { (fileName, errors) ->
-      fileName to errors.sortedWith { o1, o2 ->
-        val line = o1.interval.start.line.compareTo(o2.interval.start.line)
-        when (line) {
-          0 -> o1.interval.start.ch.compareTo(o2.interval.start.ch)
-          else -> line
-        }
-      }
-    }.toMap()
-  }
+  ): CompilerDiagnostics = (compilerDiagnostics.map and errorsFrom(diagnostics, projectType)).map { (fileName, errors) ->
+    fileName to errors.sortedWith(Comparator.comparing({ it.interval?.start }, nullsFirst()))
+  }.toMap().let(::CompilerDiagnostics)
 
-  fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) =
-    errors.none { it.value.any { error -> error.severity == ProjectSeveriry.ERROR } }
-
-  private fun anylizeErrorsFrom(file: PsiFile, projectType: ProjectType): List<ErrorDescriptor> {
+  private fun analyzeErrorsFrom(file: PsiFile, projectType: ProjectType): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {
       val errors = mutableListOf<PsiErrorElement>()
       override fun visitElement(element: PsiElement) {
@@ -362,4 +350,4 @@ class ErrorAnalyzer(
   }
 }
 
-data class ErrorsAndAnalysis(val errors: Map<String, List<ErrorDescriptor>>, val analysis: Analysis)
+data class ErrorsAndAnalysis(val compilerDiagnostics: CompilerDiagnostics, val analysis: Analysis)

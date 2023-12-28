@@ -11,19 +11,19 @@ class HighlightTest : BaseExecutorTest() {
   @Test
   fun `base highlight ok`() {
     val highlights = highlight("\nfun main() {\n    println(\"Hello, world!!!\")\n}")
-    Assertions.assertTrue(highlights.values.flatten().isEmpty())
+    Assertions.assertTrue(highlights.isEmpty()) { highlights.toString() }
   }
 
   @Test
   fun `base highlight js ok`() {
     val highlights = highlightJS("\nfun main() {\n    println(\"Hello, world!!!\")\n}")
-    Assertions.assertTrue(highlights.values.flatten().isEmpty())
+    Assertions.assertTrue(highlights.isEmpty()) { highlights.toString() }
   }
 
   @Test
   fun `base highlight wasm ok`() {
     val highlights = highlightWasm("\nfun main() {\n    println(\"Hello, world!!!\")\n}")
-    Assertions.assertTrue(highlights.values.flatten().isEmpty())
+    Assertions.assertTrue(highlights.isEmpty())
   }
 
   @Test
