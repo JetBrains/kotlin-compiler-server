@@ -80,7 +80,7 @@ curl -X POST \
       "files": [
         {
           "name": "File.kt",
-          "text": "fun main() {\n    println(args[0])\n }"
+          "text": "fun main(args: Array<String>) {\n    println(args[0])\n }"
         }
       ]
 }'
