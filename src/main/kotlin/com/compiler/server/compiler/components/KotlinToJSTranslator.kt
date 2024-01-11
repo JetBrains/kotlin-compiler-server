@@ -79,7 +79,11 @@ class KotlinToJSTranslator(
           "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
-        )
+        ) + kotlinEnvironment.COMPILER_PLUGINS.map {
+          "-Xplugin=$it"
+        } + kotlinEnvironment.compilerPluginOptions.map {
+          "-P=$it"
+        }
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
@@ -123,7 +127,12 @@ class KotlinToJSTranslator(
           "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
-        )
+        ) + kotlinEnvironment.COMPILER_PLUGINS.map {
+          "-Xplugin=$it"
+        } + kotlinEnvironment.compilerPluginOptions.map {
+          "-P=$it"
+        }
+
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(

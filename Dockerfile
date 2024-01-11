@@ -10,6 +10,7 @@ RUN if [ -z "$KOTLIN_VERSION" ]; then \
 ENV KOTLIN_LIB=$KOTLIN_VERSION
 ENV KOTLIN_LIB_JS=${KOTLIN_VERSION}-js
 ENV KOTLIN_LIB_WASM=${KOTLIN_VERSION}-wasm
+ENV KOTLIN_COMPILER_PLUGINS=${KOTLIN_VERSION}-compiler-plugins
 
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
@@ -29,6 +30,7 @@ COPY --from=build /build/libs/BOOT-INF/classes /kotlin-compiler-server
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB} /kotlin-compiler-server/${KOTLIN_LIB}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_JS} /kotlin-compiler-server/${KOTLIN_LIB_JS}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_WASM} /kotlin-compiler-server/${KOTLIN_LIB_WASM}
+COPY --from=build /kotlin-compiler-server/${KOTLIN_COMPILER_PLUGINS} /kotlin-compiler-server/${KOTLIN_COMPILER_PLUGINS}
 COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/indexes.json /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/indexesJs.json /kotlin-compiler-server/

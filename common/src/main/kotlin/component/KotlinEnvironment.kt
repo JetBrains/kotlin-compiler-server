@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.js.config.JSConfigurationKeys
+import org.jetbrains.kotlin.library.impl.isKotlinLibrary
 import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
 import org.jetbrains.kotlin.serialization.js.ModuleKind
@@ -25,6 +26,8 @@ class KotlinEnvironment(
   val classpath: List<File>,
   additionalJsClasspath: List<File>,
   additionalWasmClasspath: List<File>,
+  compilerPlugins: List<File>,
+  compilerPluginsOptions: List<CompilerPluginOption>
 ) {
   companion object {
     /**
@@ -53,8 +56,17 @@ class KotlinEnvironment(
       }
     }
 
-  val JS_LIBRARIES = additionalJsClasspath.map { it.absolutePath }
-  val WASM_LIBRARIES = additionalWasmClasspath.map { it.absolutePath }
+  val JS_LIBRARIES = additionalJsClasspath
+    .map { it.absolutePath }
+    .filter { isKotlinLibrary(File(it)) }
+  val WASM_LIBRARIES = additionalWasmClasspath
+    .map { it.absolutePath }
+    .filter { isKotlinLibrary(File(it)) }
+  val COMPILER_PLUGINS = compilerPlugins
+    .map { it.absolutePath }
+
+  val compilerPluginOptions = compilerPluginsOptions
+    .map { "plugin:${it.id}:${it.option}=${it.value}" }
 
   @Synchronized
   fun <T> environment(f: (KotlinCoreEnvironment) -> T): T {

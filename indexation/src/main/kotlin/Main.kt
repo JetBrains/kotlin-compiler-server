@@ -6,8 +6,8 @@ package indexation
  * Third argument is path to output file for js indexes
  */
 fun main(args: Array<String>) {
-  val (directory, outputPathJvm, outputPathJs, outputPathWasm) = args
-  val kotlinEnvironment = KotlinEnvironmentConfiguration(directory).kotlinEnvironment
+  val (version, directory, outputPathJvm, outputPathJs, outputPathWasm) = args
+  val kotlinEnvironment = KotlinEnvironmentConfiguration(version, directory).kotlinEnvironment
   JvmIndexationBuilder(kotlinEnvironment = kotlinEnvironment).writeIndexesToFile(outputPathJvm)
 
   WebIndexationBuilder(

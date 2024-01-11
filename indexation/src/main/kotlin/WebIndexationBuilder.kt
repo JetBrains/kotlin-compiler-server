@@ -5,6 +5,8 @@ import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
+import org.jetbrains.kotlin.library.impl.isKotlinLibrary
+import java.io.File
 
 class WebIndexationBuilder(
   private val kotlinEnvironment: KotlinEnvironment,
@@ -20,7 +22,7 @@ class WebIndexationBuilder(
         project,
         coreEnvironment.getSourceFiles(),
         configuration,
-        libraries,
+        libraries.filter { isKotlinLibrary(File(it)) },
         friendDependencies = emptyList(),
         analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
       )
