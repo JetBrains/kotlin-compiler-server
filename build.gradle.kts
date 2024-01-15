@@ -116,6 +116,7 @@ dependencies {
     kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
+    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
     kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
