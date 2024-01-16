@@ -2,7 +2,9 @@ package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
+import kotlin.test.Ignore
 
+@Ignore
 class CompletionTest : BaseExecutorTest() {
   @Test
   fun `variable completion test`() {

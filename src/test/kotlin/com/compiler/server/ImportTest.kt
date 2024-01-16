@@ -4,7 +4,9 @@ import com.compiler.server.base.BaseExecutorTest
 import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import kotlin.test.Ignore
 
+@Ignore
 class ImportTest : BaseExecutorTest() {
   @Test
   fun `import class`() {

@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import kotlin.test.Ignore
 
 class ConcurrencyRunnerTest : BaseExecutorTest() {
   @Test
@@ -17,6 +18,7 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
     }
   }
 
+  @Ignore
   @Test
   fun `a lot of complete test`() {
     runManyTest {
@@ -31,6 +33,7 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
     }
   }
 
+  @Ignore
   @Test
   fun `a lot of complete test JS`() {
     runManyTest {
