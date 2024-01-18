@@ -204,7 +204,7 @@ class CompletionProvider(
     val analysis = when {
       projectType.isJvmRelated() -> errorAnalyzer.analysisOf(files, coreEnvironment)
       projectType.isJsRelated() -> errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
-      projectType == ProjectType.WASM -> errorAnalyzer.analyzeFileForWasm(files, coreEnvironment)
+      projectType.isWasmRelated() -> errorAnalyzer.analyzeFileForWasm(files, coreEnvironment)
       else -> throw IllegalArgumentException("Unknown project type $projectType")
     }
     return with(analysis) {

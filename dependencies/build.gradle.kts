@@ -83,9 +83,12 @@ dependencies {
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
     kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
     kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
+
+    // compose
     kotlinWasmDependency("org.jetbrains.compose.runtime:runtime:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.ui:ui:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.animation:animation:1.6.0-alpha01")
+    kotlinWasmDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.foundation:foundation:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.material:material:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0-alpha01")
@@ -93,6 +96,7 @@ dependencies {
     kotlinJsDependency("org.jetbrains.compose.runtime:runtime:1.6.0-alpha01")
     kotlinJsDependency("org.jetbrains.compose.ui:ui:1.6.0-alpha01")
     kotlinJsDependency("org.jetbrains.compose.animation:animation:1.6.0-alpha01")
+    kotlinJsDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0-alpha01")
     kotlinJsDependency("org.jetbrains.compose.foundation:foundation:1.6.0-alpha01")
     kotlinJsDependency("org.jetbrains.compose.material:material:1.6.0-alpha01")
     kotlinJsDependency("org.jetbrains.compose.components:components-resources:1.6.0-alpha01")

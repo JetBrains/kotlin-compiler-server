@@ -61,7 +61,7 @@ class ErrorAnalyzer(
     val analysis = when {
         projectType.isJvmRelated() -> analysisOf(files, coreEnvironment)
         projectType.isJsRelated() -> analyzeFileForJs(files, coreEnvironment)
-        projectType == ProjectType.WASM -> analyzeFileForWasm(files, coreEnvironment)
+        projectType.isWasmRelated() -> analyzeFileForWasm(files, coreEnvironment)
         else -> throw IllegalArgumentException("Unknown platform: $projectType")
     }
     return ErrorsAndAnalysis(

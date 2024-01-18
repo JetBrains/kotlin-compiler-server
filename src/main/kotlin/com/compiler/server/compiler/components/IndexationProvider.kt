@@ -35,7 +35,7 @@ class IndexationProvider(
   fun hasIndexes(projectType: ProjectType) = when {
     projectType.isJsRelated() -> jsIndexes != null
     projectType.isJvmRelated() -> jvmIndexes != null
-    projectType == ProjectType.WASM -> wasmIndexes != null
+    projectType.isWasmRelated() -> wasmIndexes != null
     else -> throw IllegalArgumentException("Platform $projectType not found")
   }
 
@@ -43,7 +43,7 @@ class IndexationProvider(
     val indexes = when {
       projectType.isJsRelated() -> jsIndexes
       projectType.isJvmRelated() -> jvmIndexes
-      projectType == ProjectType.WASM -> wasmIndexes
+      projectType.isWasmRelated() -> wasmIndexes
       else -> throw IllegalArgumentException("Platform $projectType not found")
     }
     return indexes?.get(name)

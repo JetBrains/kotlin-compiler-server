@@ -31,9 +31,10 @@ class KotlinToJSTranslator(
   fun translateJs(
     files: List<KtFile>,
     arguments: List<String>,
-    translate: (List<KtFile>, List<String>) -> CompilationResult<String>
+    compilerPlugins: Boolean,
+    translate: (List<KtFile>, List<String>, Boolean) -> CompilationResult<String>
   ): TranslationJSResult = try {
-    val compilationResult = translate(files, arguments)
+    val compilationResult = translate(files, arguments, compilerPlugins)
     val jsCode = when (compilationResult) {
       is Compiled<String> -> compilationResult.result
       is NotCompiled -> null
@@ -45,10 +46,12 @@ class KotlinToJSTranslator(
 
   fun translateWasm(
     files: List<KtFile>,
-    translate: (List<KtFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    debugInfo: Boolean,
+    compilerPlugins: Boolean,
+    translate: (List<KtFile>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
-      val compilationResult = translate(files)
+      val compilationResult = translate(files, compilerPlugins)
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
         is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
@@ -58,14 +61,14 @@ class KotlinToJSTranslator(
         jsInstantiated = wasmCompilationOutput.jsInstantiated,
         compilerDiagnostics = compilationResult.compilerDiagnostics,
         wasm = wasmCompilationOutput.wasm,
-        wat = wasmCompilationOutput.wat
+        wat = if (debugInfo) wasmCompilationOutput.wat else null
       )
     } catch (e: Exception) {
       TranslationJSResult(exception = e.toExceptionDescriptor())
     }
   }
 
-  fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>): CompilationResult<String> =
+  fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>, compilerPlugins: Boolean): CompilationResult<String> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
@@ -79,11 +82,13 @@ class KotlinToJSTranslator(
           "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
-        ) + kotlinEnvironment.COMPILER_PLUGINS.map {
-          "-Xplugin=$it"
-        } + kotlinEnvironment.compilerPluginOptions.map {
-          "-P=$it"
-        }
+        ) + if (compilerPlugins) {
+          kotlinEnvironment.COMPILER_PLUGINS.map {
+            "-Xplugin=$it"
+          } + kotlinEnvironment.compilerPluginOptions.map {
+            "-P=$it"
+          }
+        } else emptyList()
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
@@ -113,7 +118,7 @@ class KotlinToJSTranslator(
   }
 
 
-  fun doTranslateWithWasm(files: List<KtFile>): CompilationResult<WasmTranslationSuccessfulOutput> =
+  fun doTranslateWithWasm(files: List<KtFile>, compilerPlugins: Boolean): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
@@ -127,11 +132,13 @@ class KotlinToJSTranslator(
           "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
-        ) + kotlinEnvironment.COMPILER_PLUGINS.map {
-          "-Xplugin=$it"
-        } + kotlinEnvironment.compilerPluginOptions.map {
-          "-P=$it"
-        }
+        ) + if (compilerPlugins) {
+          kotlinEnvironment.COMPILER_PLUGINS.map {
+            "-Xplugin=$it"
+          } + kotlinEnvironment.compilerPluginOptions.map {
+            "-P=$it"
+          }
+        } else emptyList()
 
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
