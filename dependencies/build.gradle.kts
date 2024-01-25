@@ -93,13 +93,5 @@ dependencies {
     kotlinWasmDependency("org.jetbrains.compose.material:material:1.6.0-alpha01")
     kotlinWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0-alpha01")
 
-    kotlinJsDependency("org.jetbrains.compose.runtime:runtime:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.ui:ui:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.animation:animation:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.foundation:foundation:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.material:material:1.6.0-alpha01")
-    kotlinJsDependency("org.jetbrains.compose.components:components-resources:1.6.0-alpha01")
-
     compilerPlugins("org.jetbrains.compose.compiler:compiler-hosted:1.5.4")
 }

@@ -11,10 +11,13 @@ import java.io.File
 
 class WebIndexationBuilder(
   private val kotlinEnvironment: KotlinEnvironment,
-  private val configuration: CompilerConfiguration,
+  inputConfiguration: CompilerConfiguration,
   private val libraries: List<String>,
-  private val compilerPlugins: Boolean
+  private val compilerPlugins: Boolean,
+  private val platformConfiguration: CompilerConfiguration
 ): IndexationBuilder() {
+
+  private val configuration = inputConfiguration.copy()
 
   override fun getAllIndexes(): List<ImportInfo> =
     kotlinEnvironment.environment { coreEnvironment ->
@@ -34,7 +37,7 @@ class WebIndexationBuilder(
         configuration,
         libraries.filter { isKotlinLibrary(File(it)) },
         friendDependencies = emptyList(),
-        analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
+        analyzer = AnalyzerWithCompilerReport(platformConfiguration),
       )
 
       val mds = sourceModule.allDependencies.map {

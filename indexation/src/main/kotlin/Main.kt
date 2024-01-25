@@ -12,15 +12,17 @@ fun main(args: Array<String>) {
 
   WebIndexationBuilder(
     kotlinEnvironment = kotlinEnvironment,
-    configuration = kotlinEnvironment.jsConfiguration,
+    inputConfiguration = kotlinEnvironment.jsConfiguration,
     libraries = kotlinEnvironment.JS_LIBRARIES,
-    compilerPlugins = false
+    compilerPlugins = false,
+    platformConfiguration = kotlinEnvironment.jsConfiguration
   ).writeIndexesToFile(outputPathJs)
 
   WebIndexationBuilder(
     kotlinEnvironment = kotlinEnvironment,
-    configuration = kotlinEnvironment.wasmConfiguration,
+    inputConfiguration = kotlinEnvironment.wasmConfiguration,
     libraries = kotlinEnvironment.WASM_LIBRARIES,
-    compilerPlugins = true
+    compilerPlugins = true,
+    platformConfiguration = kotlinEnvironment.wasmConfiguration
   ).writeIndexesToFile(outputPathWasm)
 }
