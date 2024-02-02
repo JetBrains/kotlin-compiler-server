@@ -9,6 +9,10 @@ import model.Completion
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.io.IOException
+import kotlin.io.path.*
+import kotlin.test.assertTrue
+
 
 @Component
 class TestProjectRunner {
@@ -29,27 +33,35 @@ class TestProjectRunner {
     code: String,
     contains: String,
     args: String = "",
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS)
+    val project = generateSingleProject(text = code, args = args, projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
   fun multiRunJs(
     code: List<String>,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
-    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS)
+    val project = generateMultiProject(*code.toTypedArray(), projectType = ProjectType.JS_IR)
     convertAndTest(project, contains, convert)
   }
 
-  fun translateToJs(code: String): TranslationJSResult {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
-    return kotlinProjectExecutor.convertToJs(project)
+  fun runWasm(
+    code: String,
+    contains: String,
+  ) {
+    val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
+    convertWasmAndTest(project, contains)
   }
 
-  fun runWithException(code: String, contains: String): ExecutionResult {
+  fun translateToJsIr(code: String): TranslationResultWithJsCode {
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
+    return kotlinProjectExecutor.convertToJsIr(project)
+  }
+
+  fun runWithException(code: String, contains: String, message: String? = null): ExecutionResult {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result.exception, "Test result should no be a null")
@@ -57,6 +69,7 @@ class TestProjectRunner {
       result.exception?.fullName?.contains(contains) == true,
       "Actual: ${result.exception?.message}, Expected: $contains"
     )
+    if (message != null) Assertions.assertEquals(message, result.exception?.message)
     return result
   }
 
@@ -76,7 +89,7 @@ class TestProjectRunner {
     completions: List<String>,
     isJs: Boolean = false
   ) {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     val result = kotlinProjectExecutor.complete(project, line, character)
       .map { it.displayText }
@@ -92,18 +105,23 @@ class TestProjectRunner {
     character: Int,
     isJs: Boolean = false
   ): List<Completion> {
-    val type = if (isJs) ProjectType.JS else ProjectType.JAVA
+    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
     val project = generateSingleProject(text = code, projectType = type)
     return kotlinProjectExecutor.complete(project, line, character)
   }
 
-  fun highlight(code: String): Map<String, List<ErrorDescriptor>> {
+  fun highlight(code: String): CompilerDiagnostics {
     val project = generateSingleProject(text = code)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightJS(code: String): Map<String, List<ErrorDescriptor>> {
-    val project = generateSingleProject(text = code, projectType = ProjectType.JS)
+  fun highlightJS(code: String): CompilerDiagnostics {
+    val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
+    return kotlinProjectExecutor.highlight(project)
+  }
+
+  fun highlightWasm(code: String): CompilerDiagnostics {
+    val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
     return kotlinProjectExecutor.highlight(project)
   }
 
@@ -121,7 +139,7 @@ class TestProjectRunner {
       result.text.contains(contains), """
       Actual: ${result.text} 
       Expected: $contains       
-      Result: ${result.errors}
+      Result: ${result.compilerDiagnostics}
     """.trimIndent()
     )
     return result
@@ -130,13 +148,69 @@ class TestProjectRunner {
   private fun convertAndTest(
     project: Project,
     contains: String,
-    convert: KotlinProjectExecutor.(Project) -> TranslationJSResult
+    convert: KotlinProjectExecutor.(Project) -> TranslationResultWithJsCode
   ) {
     val result = kotlinProjectExecutor.convert(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
     Assertions.assertFalse(result.hasErrors) {
-      "Test contains errors!\n\n" + renderErrorDescriptors(result.errors.filterOnlyErrors)
+      "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
     }
     Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
+  }
+
+  private fun convertWasmAndTest(
+    project: Project,
+    contains: String,
+  ): ExecutionResult {
+    val result = kotlinProjectExecutor.convertToWasm(project)
+
+    if (result !is TranslationWasmResult) {
+      Assertions.assertFalse(result.hasErrors) {
+        "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
+      }
+    }
+
+    result as TranslationWasmResult
+
+    Assertions.assertNotNull(result, "Test result should no be a null")
+
+    val tmpDir = createTempDirectory()
+    val jsMain = tmpDir.resolve("moduleId.mjs")
+    jsMain.writeText(result.jsInstantiated)
+    val jsUninstantiated = tmpDir.resolve("moduleId.uninstantiated.mjs")
+    jsUninstantiated.writeText(result.jsCode!!)
+    val wasmMain = tmpDir.resolve("moduleId.wasm")
+    wasmMain.writeBytes(result.wasm)
+
+    val wat = result.wat
+    val maxWatLengthInMessage = 97
+    val formattedWat = wat?.let { if (it.length > maxWatLengthInMessage) "${it.take(maxWatLengthInMessage)}..." else it }
+    assertTrue(
+      actual = wat != null && wat.dropWhile { it.isWhitespace() }.startsWith("(module"),
+      message = "wat is expected to start with \"(module\" but is $formattedWat"
+    )
+
+    val textResult = startNodeJsApp(
+      System.getenv("kotlin.wasm.node.path"),
+      jsMain.normalize().absolutePathString()
+    )
+
+    tmpDir.toFile().deleteRecursively()
+
+    Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
+    return result
+  }
+
+  @Throws(IOException::class, InterruptedException::class)
+  fun startNodeJsApp(
+    pathToBinNode: String?,
+    pathToAppScript: String?
+  ): String {
+    val processBuilder = ProcessBuilder()
+    processBuilder.command(pathToBinNode, "--experimental-wasm-gc", pathToAppScript)
+    val process = processBuilder.start()
+    val inputStream = process.inputStream
+    process.waitFor()
+    return inputStream.reader().readText()
   }
 }

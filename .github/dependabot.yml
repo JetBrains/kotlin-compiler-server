@@ -1,0 +1,24 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "org.jetbrains.kotlin:kotlin-compiler"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-reflect"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-js"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-compiler-for-ide"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-script-runtime"
+      - dependency-name: "org.jetbrains.kotlin:ide"
+      - dependency-name: "org.jetbrains.kotlin:idea"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-test"
+      - dependency-name: "org.jetbrains.kotlin:core"
+      - dependency-name: "org.jetbrains.kotlin:common"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk7"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+      - dependency-name: "org.jetbrains.kotlin.plugin.spring"

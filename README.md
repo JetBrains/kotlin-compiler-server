@@ -1,6 +1,7 @@
 # Kotlin compiler server
 
-[![Build Status](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server.svg?branch=master)](https://travis-ci.com/AlexanderPrendota/kotlin-compiler-server)
+[![official JetBrains project](https://jb.gg/badges/official-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+![Build status](https://buildserver.labs.intellij.net/app/rest/builds/buildType:id:Kotlin_KotlinSites_Deployments_PlayKotlinlangOrg_Backend_BuildMaster/statusIcon.svg)
 ![Java CI](https://github.com/AlexanderPrendota/kotlin-compiler-server/workflows/Java%20CI/badge.svg)
 ![TC status](https://img.shields.io/teamcity/build/s/Kotlin_KotlinPlayground_KotlinCompilerServer_Build?label=TeamCity%20build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.7.20-orange.svg) ](https://kotlinlang.org/)
@@ -21,12 +22,11 @@ $ ./gradlew build -x test
 
 Start the Spring Boot project. The main class: `com.compiler.server.CompilerApplication`
 
-### From Docker Hub
+### With Docker
 
-View images on [Docker Hub](https://hub.docker.com/r/prendota/kotlin-compiler-server).
-
-```docker
-docker pull prendota/kotlin-compiler-server
+To build the app inside a Docker container, run the following command from the project directory:
+```shell
+$ ./docker-image-build.sh
 ```
 
 ### From Amazon lambda
@@ -80,7 +80,7 @@ curl -X POST \
       "files": [
         {
           "name": "File.kt",
-          "text": "fun main() {\n    println(args[0])\n }"
+          "text": "fun main(args: Array<String>) {\n    println(args[0])\n }"
         }
       ]
 }'
@@ -217,15 +217,11 @@ In case of an unsuccessful execution in the standard output will be the event wi
 
 1) Update the kotlin version
    in [gradle.properties](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/gradle.properties)
-2) Update the kotlin version
-   in [build.gradle.kts](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/1a12996f40a5d3391bc06d2ddd719cbfe2578802/build.gradle.kts#L29)
-3) Update the kotlin version
-   in [Dockerfile](https://github.com/AlexanderPrendota/kotlin-compiler-server/blob/master/Dockerfile)
-4) Make sure everything is going well via the task:
+2) Make sure everything is going well via the task:
 
 ```shell script
 $ ./gradlew build
 ```
 
-5) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
-6) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)
+3) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
+4) Bump version on GitHub [releases](https://github.com/AlexanderPrendota/kotlin-compiler-server/releases) (optional)

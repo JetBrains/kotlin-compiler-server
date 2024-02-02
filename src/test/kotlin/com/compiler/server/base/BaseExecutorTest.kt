@@ -28,25 +28,12 @@ class BaseExecutorTest {
 
   fun highlightJS(code: String) = testRunner.highlightJS(code)
 
+  fun highlightWasm(code: String) = testRunner.highlightWasm(code)
+
   fun run(code: String, contains: String, args: String = "") = testRunner.run(code, contains, args)
 
   fun run(code: List<String>, contains: String) = testRunner.multiRun(code, contains)
 
-  fun runJs(
-    code: String,
-    contains: String,
-    args: String = ""
-  ) = testRunner.runJs(code, contains, args) { project ->
-    convertToJs(project)
-  }
-
-  fun runJs(
-    code: List<String>,
-    contains: String
-  ) = testRunner.multiRunJs(code, contains) { project ->
-    convertToJs(project)
-  }
-
   fun runJsIr(
     code: String,
     contains: String,
@@ -62,9 +49,14 @@ class BaseExecutorTest {
     convertToJsIr(project)
   }
 
-  fun translateToJs(code: String) = testRunner.translateToJs(code)
+  fun runWasm(
+    code: String,
+    contains: String
+  ) = testRunner.runWasm(code, contains)
 
-  fun runWithException(code: String, contains: String) = testRunner.runWithException(code, contains)
+  fun translateToJsIr(code: String) = testRunner.translateToJsIr(code)
+
+  fun runWithException(code: String, contains: String, message: String? = null) = testRunner.runWithException(code, contains, message)
 
   fun version() = testRunner.getVersion()
 }

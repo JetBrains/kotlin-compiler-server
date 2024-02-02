@@ -3,7 +3,8 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.KotlinResolutionFacade
 import com.compiler.server.model.Analysis
-import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ProjectType
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import model.Completion
@@ -59,23 +60,23 @@ class CompletionProvider(
     file: KotlinFile,
     line: Int,
     character: Int,
-    isJs: Boolean,
+    projectType: ProjectType,
     coreEnvironment: KotlinCoreEnvironment
   ): List<Completion> = with(file.insert("$COMPLETION_SUFFIX ", line, character)) {
     elementAt(line, character)?.let { element ->
-      val descriptorInfo = descriptorsFrom(this, element, isJs, coreEnvironment)
+      val descriptorInfo = descriptorsFrom(this, element, projectType, coreEnvironment)
       val prefix = (if (descriptorInfo.isTipsManagerCompletion) element.text else element.parent.text)
         .substringBefore(COMPLETION_SUFFIX).let { if (it.endsWith(".")) "" else it }
-      val importCompletionVariants = if (indexationProvider.hasIndexes(isJs)) {
-        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, isJs)
-        importVariants(file, prefix, errors, line, character, isJs)
+      val importCompletionVariants = if (indexationProvider.hasIndexes(projectType)) {
+        val (errors, _) = errorAnalyzer.errorsFrom(listOf(file.kotlinFile), coreEnvironment, projectType)
+        importVariants(file, prefix, errors, line, character, projectType)
       } else emptyList()
       descriptorInfo.descriptors.toMutableList().apply {
-        sortWith(Comparator { a, b ->
+        sortWith { a, b ->
           val (a1, a2) = a.presentableName()
           val (b1, b2) = b.presentableName()
           ("$a1$a2").compareTo("$b1$b2", true)
-        })
+        }
       }.mapNotNull { descriptor -> completionVariantFor(prefix, descriptor, element) } +
         keywordsCompletionVariants(KtTokens.KEYWORDS, prefix) +
         keywordsCompletionVariants(KtTokens.SOFT_KEYWORDS, prefix) +
@@ -112,15 +113,16 @@ class CompletionProvider(
   private fun importVariants(
     file: KotlinFile,
     prefix: String,
-    errors: Map<String, List<ErrorDescriptor>>,
+    compilerDiagnostics: CompilerDiagnostics,
     line: Int,
     character: Int,
-    isJs: Boolean
+    projectType: ProjectType
   ): List<Completion> {
-    val importCompletionVariants = indexationProvider.getClassesByName(prefix, isJs)
+    val importCompletionVariants = indexationProvider.getClassesByName(prefix, projectType)
       ?.map { it.toCompletion() } ?: emptyList()
-    val currentErrors = errors[file.kotlinFile.name]?.filter {
-      it.interval.start.line == line &&
+    val currentErrors = compilerDiagnostics.map[file.kotlinFile.name]?.filter {
+      it.interval != null &&
+        it.interval.start.line == line &&
         it.interval.start.ch <= character &&
         it.interval.end.line == line &&
         it.interval.end.ch >= character &&
@@ -195,14 +197,16 @@ class CompletionProvider(
   private fun descriptorsFrom(
     file: KotlinFile,
     element: PsiElement,
-    isJs: Boolean,
+    projectType: ProjectType,
     coreEnvironment: KotlinCoreEnvironment
   ): DescriptorInfo {
     val files = listOf(file.kotlinFile)
-    val analysis = if (isJs.not())
-      errorAnalyzer.analysisOf(files, coreEnvironment)
-    else
-      errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
+    val analysis = when {
+      projectType.isJvmRelated() -> errorAnalyzer.analysisOf(files, coreEnvironment)
+      projectType.isJsRelated() -> errorAnalyzer.analyzeFileForJs(files, coreEnvironment)
+      projectType == ProjectType.WASM -> errorAnalyzer.analyzeFileForWasm(files, coreEnvironment)
+      else -> throw IllegalArgumentException("Unknown project type $projectType")
+    }
     return with(analysis) {
       (referenceVariantsFrom(element, coreEnvironment)
         ?: referenceVariantsFrom(element.parent, coreEnvironment))?.let { descriptors ->
@@ -254,7 +258,7 @@ class CompletionProvider(
 
   // This code is a fragment of org.jetbrains.kotlin.idea.completion.CompletionSession from Kotlin IDE Plugin
   // with a few simplifications which were possible because webdemo has very restricted environment (and well,
-  // because requirements on compeltion' quality in web-demo are lower)
+  // because requirements on completion' quality in web-demo are lower)
   private inner class VisibilityFilter(
     private val inDescriptor: DeclarationDescriptor,
     private val bindingContext: BindingContext,

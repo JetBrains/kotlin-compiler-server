@@ -1,9 +1,6 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.Project
-import com.compiler.server.model.TranslationJSResult
+import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
 import com.compiler.server.service.KotlinProjectExecutor
 import org.springframework.web.bind.annotation.*
@@ -24,10 +21,12 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   @PostMapping("/translate")
   fun translateKotlinProjectEndpoint(
     @RequestBody project: Project,
-    @RequestParam(defaultValue = "false") ir: Boolean
-  ): TranslationJSResult {
-    return if (ir) kotlinProjectExecutor.convertToJsIr(project)
-    else kotlinProjectExecutor.convertToJs(project)
+    @RequestParam(defaultValue = "js") compiler: String
+  ): TranslationResultWithJsCode {
+    return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase())) {
+      KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
+      KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(project)
+    }
   }
 
   @PostMapping("/complete")
@@ -38,7 +37,7 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   ) = kotlinProjectExecutor.complete(project, line, ch)
 
   @PostMapping("/highlight")
-  fun highlightEndpoint(@RequestBody project: Project): Map<String, List<ErrorDescriptor>> =
+  fun highlightEndpoint(@RequestBody project: Project): CompilerDiagnostics =
     kotlinProjectExecutor.highlight(project)
 }
 

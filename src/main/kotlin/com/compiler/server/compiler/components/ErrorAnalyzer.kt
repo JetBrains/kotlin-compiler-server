@@ -1,9 +1,6 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.model.Analysis
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.ProjectSeveriry
-import com.compiler.server.model.TextInterval
+import com.compiler.server.model.*
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
@@ -12,6 +9,9 @@ import com.intellij.psi.PsiFile
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
+import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
+import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForJSIR
+import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
@@ -29,11 +29,14 @@ import org.jetbrains.kotlin.diagnostics.rendering.DefaultErrorMessages
 import org.jetbrains.kotlin.frontend.di.configureModule
 import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
-import org.jetbrains.kotlin.js.analyze.TopDownAnalyzerFacadeForJS
+import org.jetbrains.kotlin.ir.backend.js.MainModule
+import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
 import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.platform.TargetPlatform
 import org.jetbrains.kotlin.platform.js.JsPlatforms
+import org.jetbrains.kotlin.platform.wasm.WasmPlatforms
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.*
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
@@ -42,6 +45,7 @@ import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession
 import org.jetbrains.kotlin.resolve.lazy.declarations.DeclarationProviderFactory
 import org.jetbrains.kotlin.resolve.lazy.declarations.FileBasedDeclarationProviderFactory
+import org.jetbrains.kotlin.wasm.resolve.WasmPlatformAnalyzerServices
 import org.springframework.stereotype.Component
 
 @Component
@@ -52,14 +56,19 @@ class ErrorAnalyzer(
   fun errorsFrom(
     files: List<KtFile>,
     coreEnvironment: KotlinCoreEnvironment,
-    isJs: Boolean
+    projectType: ProjectType
   ): ErrorsAndAnalysis {
-    val analysis = if (isJs.not()) analysisOf(files, coreEnvironment) else analyzeFileForJs(files, coreEnvironment)
+    val analysis = when {
+        projectType.isJvmRelated() -> analysisOf(files, coreEnvironment)
+        projectType.isJsRelated() -> analyzeFileForJs(files, coreEnvironment)
+        projectType == ProjectType.WASM -> analyzeFileForWasm(files, coreEnvironment)
+        else -> throw IllegalArgumentException("Unknown platform: $projectType")
+    }
     return ErrorsAndAnalysis(
       errorsFrom(
         analysis.analysisResult.bindingContext.diagnostics.all(),
-        files.associate { it.name to anylizeErrorsFrom(it, isJs) },
-        isJs
+        CompilerDiagnostics(files.associate { it.name to analyzeErrorsFrom(it, projectType) }),
+        projectType
       ),
       analysis
     )
@@ -95,7 +104,7 @@ class ErrorAnalyzer(
           files = files
         ) != null
       }
-    return Analysis(
+    return AnalysisJvm(
       componentProvider = componentProvider,
       analysisResult = AnalysisResult.success(trace.bindingContext, moduleDescriptor)
     )
@@ -111,41 +120,125 @@ class ErrorAnalyzer(
       kotlinEnvironment.JS_LIBRARIES.toSet()
     )
 
-    val module = ContextForNewModule(
+    val mainModule = MainModule.SourceFiles(files)
+    val sourceModule = ModulesStructure(
+      project,
+      mainModule,
+      kotlinEnvironment.jsConfiguration,
+      kotlinEnvironment.JS_LIBRARIES,
+      emptyList()
+    )
+
+    val mds = sourceModule.allDependencies.map {
+      sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
+    }
+
+    val builtInModuleDescriptor = sourceModule.builtInModuleDescriptor
+
+    val analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration)
+    val analyzerFacade = TopDownAnalyzerFacadeForJSIR
+    val analysisResult = analyzerFacade.analyzeFiles(
+      mainModule.files,
+      project,
+      kotlinEnvironment.jsConfiguration,
+      mds,
+      emptyList(),
+      analyzer.targetEnvironment,
+      thisIsBuiltInsModule = builtInModuleDescriptor == null,
+      customBuiltInsModule = builtInModuleDescriptor
+    )
+
+    val context = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
       moduleName = Name.special("<" + configuration.moduleId + ">"),
       builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
     )
-    module.setDependencies(computeDependencies(module.module, configuration))
+    val dependencies = mutableSetOf(context.module) + mds + JsPlatformAnalyzerServices.builtIns.builtInsModule
+    context.module.setDependencies(dependencies.toList())
     val trace = CliBindingTrace()
-    val providerFactory = FileBasedDeclarationProviderFactory(module.storageManager, files)
-    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(module, trace, providerFactory)
-    return Analysis(
+    val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
+    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory, JsPlatforms.defaultJsPlatform, JsPlatformAnalyzerServices)
+
+    val hasErrors = analyzer.hasErrors()
+
+    sourceModule.jsFrontEndResult = ModulesStructure.JsFrontEndResult(analysisResult, hasErrors)
+
+    return AnalysisJs(
+      sourceModule = sourceModule,
       componentProvider = analyzerAndProvider.second,
-      analysisResult = TopDownAnalyzerFacadeForJS.analyzeFiles(files, configuration)
+      analysisResult = analysisResult
+    )
+  }
+
+  fun analyzeFileForWasm(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
+    val project = coreEnvironment.project
+    val configuration = JsConfig(
+      project,
+      kotlinEnvironment.wasmConfiguration,
+      CompilerEnvironment,
+      emptyList(),
+      kotlinEnvironment.WASM_LIBRARIES.toSet()
+    )
+
+    val mainModule = MainModule.SourceFiles(files)
+    val sourceModule = ModulesStructure(
+      project,
+      mainModule,
+      kotlinEnvironment.wasmConfiguration,
+      kotlinEnvironment.WASM_LIBRARIES,
+      emptyList()
+    )
+
+    val mds = sourceModule.allDependencies.map {
+      sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
+    }
+
+    val builtInModuleDescriptor = sourceModule.builtInModuleDescriptor
+
+    val analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration)
+    val analyzerFacade = TopDownAnalyzerFacadeForWasmJs
+    val analysisResult = analyzerFacade.analyzeFiles(
+      mainModule.files,
+      project,
+      kotlinEnvironment.wasmConfiguration,
+      mds,
+      emptyList(),
+      analyzer.targetEnvironment,
+      thisIsBuiltInsModule = builtInModuleDescriptor == null,
+      customBuiltInsModule = builtInModuleDescriptor
+    )
+
+    val context = ContextForNewModule(
+      projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
+      moduleName = Name.special("<" + configuration.moduleId + ">"),
+      builtIns = WasmPlatformAnalyzerServices.builtIns, platform = null
+    )
+    val dependencies = mutableSetOf(context.module) + mds + WasmPlatformAnalyzerServices.builtIns.builtInsModule
+    context.module.setDependencies(dependencies.toList())
+    val trace = CliBindingTrace()
+    val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
+    val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory, WasmPlatforms.Default, WasmPlatformAnalyzerServices)
+
+    val hasErrors = analyzer.hasErrors()
+
+    sourceModule.jsFrontEndResult = ModulesStructure.JsFrontEndResult(analysisResult, hasErrors)
+
+    return AnalysisJs(
+      sourceModule = sourceModule,
+      componentProvider = analyzerAndProvider.second,
+      analysisResult = analysisResult
     )
   }
 
   fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
-    errors: Map<String, List<ErrorDescriptor>>,
-    isJs: Boolean
-  ): Map<String, List<ErrorDescriptor>> {
-    return (errors and errorsFrom(diagnostics, isJs)).map { (fileName, errors) ->
-      fileName to errors.sortedWith { o1, o2 ->
-        val line = o1.interval.start.line.compareTo(o2.interval.start.line)
-        when (line) {
-          0 -> o1.interval.start.ch.compareTo(o2.interval.start.ch)
-          else -> line
-        }
-      }
-    }.toMap()
-  }
+    compilerDiagnostics: CompilerDiagnostics,
+    projectType: ProjectType
+  ): CompilerDiagnostics = (compilerDiagnostics.map and errorsFrom(diagnostics, projectType)).map { (fileName, errors) ->
+    fileName to errors.sortedWith(Comparator.comparing({ it.interval?.start }, nullsFirst()))
+  }.toMap().let(::CompilerDiagnostics)
 
-  fun isOnlyWarnings(errors: Map<String, List<ErrorDescriptor>>) =
-    errors.none { it.value.any { error -> error.severity == ProjectSeveriry.ERROR } }
-
-  private fun anylizeErrorsFrom(file: PsiFile, isJs: Boolean): List<ErrorDescriptor> {
+  private fun analyzeErrorsFrom(file: PsiFile, projectType: ProjectType): List<ErrorDescriptor> {
     class Visitor : PsiElementVisitor() {
       val errors = mutableListOf<PsiErrorElement>()
       override fun visitElement(element: PsiElement) {
@@ -166,34 +259,30 @@ class ErrorAnalyzer(
         message = it.errorDescription,
         severity = ProjectSeveriry.ERROR,
         className = "red_wavy_line",
-        imports = completionsForErrorMessage(it.errorDescription, isJs)
+        imports = completionsForErrorMessage(it.errorDescription, projectType)
       )
     }
-  }
-
-  private fun computeDependencies(module: ModuleDescriptorImpl, config: JsConfig): List<ModuleDescriptorImpl> {
-    val allDependencies = ArrayList<ModuleDescriptorImpl>()
-    allDependencies.add(module)
-    config.moduleDescriptors.mapTo(allDependencies) { it }
-    allDependencies.add(JsPlatformAnalyzerServices.builtIns.builtInsModule)
-    return allDependencies
   }
 
   private fun createContainerForTopDownAnalyzerForJs(
     moduleContext: ModuleContext,
     bindingTrace: BindingTrace,
-    declarationProviderFactory: DeclarationProviderFactory
+    declarationProviderFactory: DeclarationProviderFactory,
+    platform: TargetPlatform,
+    analyzerServices: PlatformDependentAnalyzerServices
   ): Pair<LazyTopDownAnalyzer, ComponentProvider> {
     val container = composeContainer(
       "TopDownAnalyzerForJs",
-      JsPlatformAnalyzerServices.platformConfigurator.platformSpecificContainer
+      analyzerServices.platformConfigurator.platformSpecificContainer
     ) {
       configureModule(
         moduleContext = moduleContext,
-        platform = JsPlatforms.defaultJsPlatform,
-        analyzerServices = JsPlatformAnalyzerServices,
+        platform = platform,
+        analyzerServices = analyzerServices,
         trace = bindingTrace,
-        languageVersionSettings = LanguageVersionSettingsImpl.DEFAULT
+        languageVersionSettings = LanguageVersionSettingsImpl.DEFAULT,
+        optimizingOptions = null,
+        absentDescriptorHandlerClass = null
       )
       useInstance(declarationProviderFactory)
       registerSingleton(AnnotationResolverImpl::class.java)
@@ -212,7 +301,7 @@ class ErrorAnalyzer(
 
   private fun errorsFrom(
     diagnostics: Collection<Diagnostic>,
-    isJs: Boolean
+    projectType: ProjectType
   ) = diagnostics.mapNotNull { diagnostic ->
     diagnostic.psiFile.virtualFile?.let {
       val render = DefaultErrorMessages.render(diagnostic)
@@ -222,7 +311,7 @@ class ErrorAnalyzer(
           if (textRanges.hasNext()) {
             var className = diagnostic.severity.name
             val imports = if (diagnostic.factory === Errors.UNRESOLVED_REFERENCE) {
-              completionsForErrorMessage(render, isJs)
+              completionsForErrorMessage(render, projectType)
             } else null
             if (!(diagnostic.factory === Errors.UNRESOLVED_REFERENCE) && diagnostic.severity == Severity.ERROR) {
               className = "red_wavy_line"
@@ -252,13 +341,13 @@ class ErrorAnalyzer(
       .map { it.key to it.value.fold(emptyList<ErrorDescriptor>()) { acc, (_, errors) -> acc + errors } }
       .toMap()
 
-  private fun completionsForErrorMessage(message: String, isJs: Boolean): List<Completion>? {
-    if (!indexationProvider.hasIndexes(isJs) ||
+  private fun completionsForErrorMessage(message: String, projectType: ProjectType): List<Completion>? {
+    if (!indexationProvider.hasIndexes(projectType) ||
       !message.startsWith(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
     ) return null
     val name = message.removePrefix(IndexationProvider.UNRESOLVED_REFERENCE_PREFIX)
-    return indexationProvider.getClassesByName(name, isJs)?.map { suggest -> suggest.toCompletion() }
+    return indexationProvider.getClassesByName(name, projectType)?.map { suggest -> suggest.toCompletion() }
   }
 }
 
-data class ErrorsAndAnalysis(val errors: Map<String, List<ErrorDescriptor>>, val analysis: Analysis)
+data class ErrorsAndAnalysis(val compilerDiagnostics: CompilerDiagnostics, val analysis: Analysis)

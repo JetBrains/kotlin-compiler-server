@@ -18,10 +18,10 @@
     "version": "1.7.21"
   },
   {
-    "version": "1.8.10",
-    "latestStable": true
+    "version": "1.8.21"
   },
   {
-    "version": "1.8.20-RC"
+    "version": "1.9.22",
+    "latestStable": true
   }
 ]

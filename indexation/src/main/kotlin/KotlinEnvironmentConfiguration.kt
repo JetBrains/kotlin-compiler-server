@@ -7,6 +7,7 @@ class KotlinEnvironmentConfiguration(fileName: String) {
   val kotlinEnvironment = run {
     val jvmFile = File(fileName)
     val jsFile = File("$fileName-js")
+    val wasmFile = File("$fileName-wasm")
     val classPath =
       listOfNotNull(jvmFile)
         .flatMap {
@@ -14,7 +15,9 @@ class KotlinEnvironmentConfiguration(fileName: String) {
             ?: error("No kotlin libraries found in: ${jvmFile.absolutePath}")
         }
 
-    val additionalJsClasspath = listOfNotNull(jsFile)
-    KotlinEnvironment(classPath, additionalJsClasspath)
+    val additionalJsClasspath = jsFile.listFiles()?.toList() ?: emptyList()
+    val additionalWasmClasspath = wasmFile.listFiles()?.toList() ?: emptyList()
+
+    KotlinEnvironment(classPath, additionalJsClasspath, additionalWasmClasspath)
   }
 }

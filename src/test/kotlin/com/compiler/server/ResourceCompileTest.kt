@@ -26,7 +26,7 @@ class ResourceCompileTest : BaseExecutorTest() {
       val code = file.readText()
 
       val jvmResult = run(code, "")
-      val errorsJvm = validateErrors(jvmResult.errors)
+      val errorsJvm = validateErrors(jvmResult.compilerDiagnostics)
       if (errorsJvm != null) badMap[file.path + ":JVM"] = errorsJvm
     }
 
@@ -36,8 +36,8 @@ class ResourceCompileTest : BaseExecutorTest() {
     testFilesJS.forEach { file ->
       val code = file.readText()
 
-      val jsResult = translateToJs(code)
-      val errorsJs = validateErrors(jsResult.errors)
+      val jsResult = translateToJsIr(code)
+      val errorsJs = validateErrors(jsResult.compilerDiagnostics)
       if (errorsJs != null) badMap[file.path + ":JS"] = errorsJs
     }
 
@@ -46,8 +46,8 @@ class ResourceCompileTest : BaseExecutorTest() {
     }
   }
 
-  private fun validateErrors(errors: Map<String, List<ErrorDescriptor>>): String? {
-    val errs = errors.map { it.value }.flatten().filter { it.severity == ProjectSeveriry.ERROR }
+  private fun validateErrors(errors: List<ErrorDescriptor>): String? {
+    val errs = errors.filter { it.severity == ProjectSeveriry.ERROR }
     if (errs.isNotEmpty()) {
       return renderErrorDescriptors(errs)
     }

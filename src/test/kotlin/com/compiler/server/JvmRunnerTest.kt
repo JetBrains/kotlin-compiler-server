@@ -2,6 +2,7 @@ package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class JvmRunnerTest : BaseExecutorTest() {
 
@@ -14,10 +15,38 @@ class JvmRunnerTest : BaseExecutorTest() {
   }
 
   @Test
-  fun `no main class jvm test`() {
+  fun `execute test JVM different package`() {
     run(
+      code = "package com.example\nfun main() {\n println(\"Hello, world!!!\")\n}",
+      contains = "Hello, world!!!"
+    )
+  }
+
+  @Test
+  fun `no main class jvm test`() {
+    runWithException(
       code = "fun main1() {\n    println(\"sdf\")\n}",
-      contains = "No main method found in project"
+      contains = "IllegalArgumentException",
+      message = "No main method found in project",
+    )
+  }
+
+  @Test
+  fun `multiple main classes jvm test`() {
+    runWithException(
+      code = """
+                fun main() {
+                    println("sdf")
+                }
+                class A {
+                    companion object {
+                        @JvmStatic
+                        fun main(x: Array<String>) {
+                        }
+                    }
+                }""".trimIndent(),
+      contains = "IllegalArgumentException",
+      message = "Multiple classes in project contain main methods found: FileKt, A",
     )
   }
 
@@ -40,4 +69,22 @@ class JvmRunnerTest : BaseExecutorTest() {
     )
   }
 
+  @Test
+  fun `report deprecation warning`() {
+    val result = run(
+      contains = "<outStream>97\n</outStream>", /*language=kotlin */ code = """
+        fun main() {
+          println("abc"[0].toInt())
+        }
+      """.trimIndent()
+    )
+
+    assertEquals(1, result.compilerDiagnostics.size)
+    assertEquals(1, result.compilerDiagnostics[0].interval?.start?.line)
+    assertEquals(19, result.compilerDiagnostics[0].interval?.start?.ch)
+    assertEquals(
+      "'toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.",
+      result.compilerDiagnostics[0].message
+    )
+  }
 }

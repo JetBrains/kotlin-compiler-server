@@ -1,142 +1,170 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.model.ErrorDescriptor
-import com.compiler.server.model.TranslationJSResult
-import com.compiler.server.model.toExceptionDescriptor
+import com.compiler.server.model.*
+import com.fasterxml.jackson.databind.ObjectMapper
 import component.KotlinEnvironment
-import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.ir.backend.js.CompilerResult
-import org.jetbrains.kotlin.ir.backend.js.compile
-import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
-import org.jetbrains.kotlin.ir.backend.js.transformers.irToJs.IrModuleToJsTransformer
-import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
-import org.jetbrains.kotlin.js.config.JsConfig
-import org.jetbrains.kotlin.js.facade.K2JSTranslator
-import org.jetbrains.kotlin.js.facade.MainCallParameters
-import org.jetbrains.kotlin.js.facade.TranslationResult
-import org.jetbrains.kotlin.js.facade.exceptions.TranslationException
+import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.resolve.CompilerEnvironment
 import org.springframework.stereotype.Service
+import kotlin.io.path.div
+import kotlin.io.path.readBytes
+import kotlin.io.path.readText
 
 @Service
 class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
-  private val errorAnalyzer: ErrorAnalyzer
 ) {
   companion object {
-    private const val JS_CODE_FLUSH = "kotlin.kotlin.io.output.flush();\n"
-    private const val JS_CODE_BUFFER = "\nkotlin.kotlin.io.output.buffer;\n"
-
-    private const val JS_IR_CODE_BUFFER = "moduleId.output._buffer;\n"
+    private const val JS_IR_CODE_BUFFER = "moduleId.output?.buffer_1;\n"
 
     private val JS_IR_OUTPUT_REWRITE = """
-        if (kotlin.isRewrite) {
-            init_properties_console_kt_6h8hpf();
-            output = new BufferedOutput_0()
+        if (typeof get_output !== "undefined") {
+          get_output();
+          output = new BufferedOutput();
+          _.output = get_output();
         }
         """.trimIndent()
 
     const val BEFORE_MAIN_CALL_LINE = 4
   }
 
-  fun translate(
+  fun translateJs(
     files: List<KtFile>,
     arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment,
-    translate: (List<KtFile>, List<String>, KotlinCoreEnvironment) -> TranslationJSResult
-  ): TranslationJSResult {
-    val (errors, _) = errorAnalyzer.errorsFrom(files, coreEnvironment, isJs = true)
+    translate: (List<KtFile>, List<String>) -> CompilationResult<String>
+  ): TranslationJSResult = try {
+    val compilationResult = translate(files, arguments)
+    val jsCode = when (compilationResult) {
+      is Compiled<String> -> compilationResult.result
+      is NotCompiled -> null
+    }
+    TranslationJSResult(jsCode = jsCode, compilerDiagnostics = compilationResult.compilerDiagnostics)
+  } catch (e: Exception) {
+    TranslationJSResult(exception = e.toExceptionDescriptor())
+  }
+
+  fun translateWasm(
+    files: List<KtFile>,
+    translate: (List<KtFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+  ): TranslationResultWithJsCode {
     return try {
-      if (errorAnalyzer.isOnlyWarnings(errors)) {
-        translate(files, arguments, coreEnvironment).also {
-          it.addWarnings(errors)
-        }
-      } else {
-        TranslationJSResult(errors = errors)
+      val compilationResult = translate(files)
+      val wasmCompilationOutput = when (compilationResult) {
+        is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
+        is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
       }
+      TranslationWasmResult(
+        jsCode = wasmCompilationOutput.jsCode,
+        jsInstantiated = wasmCompilationOutput.jsInstantiated,
+        compilerDiagnostics = compilationResult.compilerDiagnostics,
+        wasm = wasmCompilationOutput.wasm,
+        wat = wasmCompilationOutput.wat
+      )
     } catch (e: Exception) {
       TranslationJSResult(exception = e.toExceptionDescriptor())
     }
   }
 
-  @Throws(TranslationException::class)
-  fun doTranslate(
-    files: List<KtFile>,
-    arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
-  ): TranslationJSResult {
-    val currentProject = coreEnvironment.project
-    val configuration = JsConfig(
-      currentProject,
-      kotlinEnvironment.jsConfiguration,
-      CompilerEnvironment,
-      kotlinEnvironment.JS_METADATA_CACHE,
-      kotlinEnvironment.JS_LIBRARIES.toSet()
-    )
-    val reporter = object : JsConfig.Reporter() {
-      override fun error(message: String) {}
-      override fun warning(message: String) {}
-    }
-    val translator = K2JSTranslator(configuration)
-    val result = translator.translate(
-      reporter = reporter,
-      files = files,
-      mainCallParameters = MainCallParameters.mainWithArguments(arguments)
-    )
-    return if (result is TranslationResult.Success) {
-      TranslationJSResult(JS_CODE_FLUSH + result.getCode() + JS_CODE_BUFFER)
-    } else {
-      val errors = HashMap<String, List<ErrorDescriptor>>()
-      for (psiFile in files) {
-        errors[psiFile.name] = ArrayList()
+  fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>): CompilationResult<String> =
+    usingTempDirectory { inputDir ->
+      val moduleName = "moduleId"
+      usingTempDirectory { outputDir ->
+        val ioFiles = files.writeToIoFiles(inputDir)
+        val k2JsIrCompiler = K2JsIrCompiler()
+        val filePaths = ioFiles.map { it.toFile().canonicalPath }
+        val klibPath = (outputDir / "klib").toFile().canonicalPath
+        val additionalCompilerArgumentsForKLib = listOf(
+          "-Xir-only",
+          "-Xir-produce-klib-dir",
+          "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+          "-ir-output-dir=$klibPath",
+          "-ir-output-name=$moduleName",
+        )
+        k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+          .flatMap {
+            k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+              "-Xir-only",
+              "-Xir-produce-js",
+              "-Xir-dce",
+              "-Xinclude=$klibPath",
+              "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+              "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}",
+              "-ir-output-name=$moduleName",
+            ))
+          }
+          .map { (outputDir / "js" / "$moduleName.js").readText() }
+          .map { it.withMainArgumentsIr(arguments, moduleName) }
+          .map(::redirectOutput)
       }
-      errorAnalyzer.errorsFrom(result.diagnostics.all(), errors, isJs = true)
-      TranslationJSResult(errors = errors)
     }
-  }
 
-  fun doTranslateWithIr(
-    files: List<KtFile>,
-    arguments: List<String>,
-    coreEnvironment: KotlinCoreEnvironment
-  ): TranslationJSResult {
-    val currentProject = coreEnvironment.project
-
-    val sourceModule = prepareAnalyzedSourceModule(
-      currentProject,
-      files,
-      kotlinEnvironment.jsConfiguration,
-      kotlinEnvironment.JS_LIBRARIES,
-      friendDependencies = emptyList(),
-      analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration),
-    )
-    val ir = compile(
-      sourceModule,
-      kotlinEnvironment.jsIrPhaseConfig,
-      irFactory = IrFactoryImpl
-    )
-    val transformer = IrModuleToJsTransformer(
-      ir.context,
-      arguments,
-      fullJs = true,
-      dceJs = false,
-      multiModule = false,
-      relativeRequirePath = true,
-    )
-
-    val compiledModule: CompilerResult = transformer.generateModule(ir.allModules)
-    val jsCode = compiledModule.outputs.values.single().jsCode
-
-    val listLines = jsCode
+  private fun redirectOutput(code: String): String {
+    val listLines = code
       .lineSequence()
       .toMutableList()
 
     listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, JS_IR_OUTPUT_REWRITE)
-    listLines.add(listLines.size - BEFORE_MAIN_CALL_LINE, "_.output = output")
     listLines.add(listLines.size - 1, JS_IR_CODE_BUFFER)
-
-    return TranslationJSResult(listLines.joinToString("\n"))
+    return listLines.joinToString("\n")
   }
+
+
+  fun doTranslateWithWasm(files: List<KtFile>): CompilationResult<WasmTranslationSuccessfulOutput> =
+    usingTempDirectory { inputDir ->
+      val moduleName = "moduleId"
+      usingTempDirectory { outputDir ->
+        val ioFiles = files.writeToIoFiles(inputDir)
+        val k2JsIrCompiler = K2JsIrCompiler()
+        val filePaths = ioFiles.map { it.toFile().canonicalPath }
+        val klibPath = (outputDir / "klib").toFile().canonicalPath
+        val additionalCompilerArgumentsForKLib = listOf(
+          "-Xwasm",
+          "-Xir-produce-klib-dir",
+          "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+          "-ir-output-dir=$klibPath",
+          "-ir-output-name=$moduleName",
+        )
+        k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+          .flatMap {
+            k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+              "-Xwasm",
+              "-Xwasm-generate-wat",
+              "-Xir-produce-js",
+              "-Xir-dce",
+              "-Xinclude=$klibPath",
+              "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+              "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
+              "-ir-output-name=$moduleName",
+            ))
+          }
+          .map {
+            WasmTranslationSuccessfulOutput(
+              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
+              jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
+              wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
+              wat = (outputDir / "wasm" / "$moduleName.wat").readText(),
+            )
+          }
+      }
+    }
 }
+
+private fun String.withMainArgumentsIr(arguments: List<String>, moduleName: String): String {
+  val postfix = """|  main([]);
+                   |  return _;
+                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
+                   |""".trimMargin()
+  if (!endsWith(postfix)) return this
+  val objectMapper = ObjectMapper()
+  return this.removeSuffix(postfix) + """|  main([${arguments.joinToString { objectMapper.writeValueAsString(it) }}]);
+                   |  return _;
+                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
+                   |""".trimMargin()
+}
+
+data class WasmTranslationSuccessfulOutput(
+  val jsCode: String,
+  val jsInstantiated: String,
+  val wasm: ByteArray,
+  val wat: String?,
+)
