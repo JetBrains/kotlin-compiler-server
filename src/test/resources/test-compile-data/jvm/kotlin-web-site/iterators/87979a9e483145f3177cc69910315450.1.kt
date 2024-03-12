@@ -4,6 +4,10 @@ fun main() {
     val numbersIterator = numbers.iterator()
     while (numbersIterator.hasNext()) {
         println(numbersIterator.next())
+        // one
+        // two
+        // three
+        // four
     }
 //sampleEnd
 }
