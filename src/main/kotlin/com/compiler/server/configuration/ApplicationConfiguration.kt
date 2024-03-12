@@ -31,7 +31,9 @@ class ApplicationConfiguration(
   fun librariesFiles() = LibrariesFile(
     File(librariesFolderProperties.jvm),
     File(librariesFolderProperties.js),
-    File(librariesFolderProperties.wasm)
+    File(librariesFolderProperties.wasm),
+    File(librariesFolderProperties.composeWasm),
+    File(librariesFolderProperties.composeWasmCompilerPlugins)
   )
 }
 
@@ -40,4 +42,6 @@ class LibrariesFolderProperties {
   lateinit var jvm: String
   lateinit var js: String
   lateinit var wasm: String
+  lateinit var composeWasm: String
+  lateinit var composeWasmCompilerPlugins: String
 }

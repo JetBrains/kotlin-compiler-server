@@ -39,14 +39,18 @@ class BaseExecutorTest {
     contains: String,
     args: String = ""
   ) = testRunner.runJs(code, contains, args) { project ->
-    convertToJsIr(project)
+    convertToJsIr(
+      project,
+    )
   }
 
   fun runJsIr(
     code: List<String>,
     contains: String
   ) = testRunner.multiRunJs(code, contains) { project ->
-    convertToJsIr(project)
+    convertToJsIr(
+      project,
+    )
   }
 
   fun runWasm(

@@ -1,7 +1,3 @@
-val kotlinVersion: String by System.getProperties()
-val kotlinIdeVersion: String by System.getProperties()
-val kotlinIdeVersionSuffix: String by System.getProperties()
-
 plugins {
     kotlin("jvm")
 }

@@ -1,7 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val kotlinVersion: String by System.getProperties()
-
 plugins {
   kotlin("jvm")
 }
@@ -19,5 +17,5 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks.withType<Jar>().getByName("jar") {
-  destinationDirectory.set(File("../$kotlinVersion"))
+  destinationDirectory.set(libJVMFolder)
 }
