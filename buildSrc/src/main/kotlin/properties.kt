@@ -7,10 +7,12 @@ val kotlinIdeVersionSuffix: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
 val indexesWasm: String by System.getProperties()
+val indexesComposeWasm: String by System.getProperties()
 
 val libJS = "$kotlinVersion-js"
 val libWasm = "$kotlinVersion-wasm"
-val libCompilerPlugins = "$kotlinVersion-compiler-plugins"
+val libComposeWasm = "$kotlinVersion-compose-wasm"
+val libComposeWasmCompilerPlugins = "$kotlinVersion-compose-wasm-compiler-plugins"
 val libJVM = kotlinVersion
 
 val Project.libJSFolder
@@ -19,8 +21,11 @@ val Project.libJSFolder
 val Project.libWasmFolder
     get() = rootProject.layout.projectDirectory.dir(libWasm)
 
-val Project.libCompilerPluginsFolder
-    get() = rootProject.layout.projectDirectory.dir(libCompilerPlugins)
+val Project.libComposeWasmFolder
+    get() = rootProject.layout.projectDirectory.dir(libComposeWasm)
+
+val Project.libComposeWasmCompilerPluginsFolder
+    get() = rootProject.layout.projectDirectory.dir(libComposeWasmCompilerPlugins)
 
 val Project.libJVMFolder
     get() = rootProject.layout.projectDirectory.dir(libJVM)

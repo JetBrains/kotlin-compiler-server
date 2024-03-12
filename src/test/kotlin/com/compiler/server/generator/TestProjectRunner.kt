@@ -60,7 +60,6 @@ class TestProjectRunner {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.convertToJsIr(
       project,
-      compilerPlugins = false
     )
   }
 
@@ -168,7 +167,6 @@ class TestProjectRunner {
     val result = kotlinProjectExecutor.convertToWasm(
       project,
       debugInfo = true,
-      compilerPlugins = false
     )
 
     if (result !is TranslationWasmResult) {
@@ -190,8 +188,8 @@ class TestProjectRunner {
     wasmMain.writeBytes(result.wasm)
 
     // It is necessary because wasm DCE leaves skiko references
-    Path(this::class.java.classLoader.getResource("wasm-resources/skiko.mjs")!!.path)
-      .copyTo(tmpDir.resolve("skiko.mjs"))
+//    Path(this::class.java.classLoader.getResource("wasm-resources/skiko.mjs")!!.path)
+//      .copyTo(tmpDir.resolve("skiko.mjs"))
 
     val wat = result.wat
     val maxWatLengthInMessage = 97

@@ -41,7 +41,6 @@ class BaseExecutorTest {
   ) = testRunner.runJs(code, contains, args) { project ->
     convertToJsIr(
       project,
-      compilerPlugins = false
     )
   }
 
@@ -51,7 +50,6 @@ class BaseExecutorTest {
   ) = testRunner.multiRunJs(code, contains) { project ->
     convertToJsIr(
       project,
-      compilerPlugins = false
     )
   }
 

@@ -97,10 +97,12 @@ fun generateProperties(prefix: String = "") = """
     indexes.file=${prefix + indexes}
     indexesJs.file=${prefix + indexesJs}
     indexesWasm.file=${prefix + indexesWasm}
+    indexesComposeWasm.file=${prefix + indexesComposeWasm}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
     libraries.folder.wasm=${prefix + libWasmFolder}
-    libraries.folder.compiler-plugins=${prefix + libCompilerPluginsFolder}
+    libraries.folder.compose-wasm=${prefix + libComposeWasmFolder}
+    libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPluginsFolder}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json
@@ -120,7 +122,8 @@ tasks.withType<KotlinCompile> {
     dependsOn(":dependencies:copyDependencies")
     dependsOn(":dependencies:copyJSDependencies")
     dependsOn(":dependencies:copyWasmDependencies")
-    dependsOn(":dependencies:copyCompilerPlugins")
+    dependsOn(":dependencies:copyComposeWasmDependencies")
+    dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
@@ -146,8 +149,9 @@ val buildLambda by tasks.creating(Zip::class) {
     from(indexesWasm)
     from(libJSFolder) { into(libJS) }
     from(libWasmFolder) { into(libWasm) }
+    from(libComposeWasmFolder) { into(libComposeWasm) }
     from(libJVMFolder) { into(libJVM) }
-    from(libCompilerPluginsFolder) { into(libCompilerPlugins) }
+    from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }

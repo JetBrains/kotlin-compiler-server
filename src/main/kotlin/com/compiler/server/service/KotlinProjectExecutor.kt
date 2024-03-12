@@ -37,8 +37,8 @@ class KotlinProjectExecutor(
     }.also { logExecutionResult(project, it) }
   }
 
-  fun convertToJsIr(project: Project, compilerPlugins: Boolean): TranslationJSResult {
-    return convertJsWithConverter(project, compilerPlugins, kotlinToJSTranslator::doTranslateWithIr)
+  fun convertToJsIr(project: Project): TranslationJSResult {
+    return convertJsWithConverter(project, kotlinToJSTranslator::doTranslateWithIr)
   }
 
   fun compileToJvm(project: Project): CompilationResult<KotlinCompiler.JvmClasses> {
@@ -48,8 +48,8 @@ class KotlinProjectExecutor(
     return kotlinCompiler.compile(files)
   }
 
-  fun convertToWasm(project: Project, debugInfo: Boolean, compilerPlugins: Boolean): TranslationResultWithJsCode {
-    return convertWasmWithConverter(project, debugInfo, compilerPlugins, kotlinToJSTranslator::doTranslateWithWasm)
+  fun convertToWasm(project: Project, debugInfo: Boolean): TranslationResultWithJsCode {
+    return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -70,13 +70,11 @@ class KotlinProjectExecutor(
       ProjectType.CANVAS, ProjectType.JS, ProjectType.JS_IR ->
         convertToJsIr(
           project,
-          compilerPlugins = false
         ).compilerDiagnostics
       ProjectType.WASM, ProjectType.COMPOSE_WASM ->
         convertToWasm(
           project,
           debugInfo = false,
-          compilerPlugins = false
         ).compilerDiagnostics
     }
   } catch (e: Exception) {
@@ -88,15 +86,13 @@ class KotlinProjectExecutor(
 
   private fun convertJsWithConverter(
     project: Project,
-    compilerPlugins: Boolean,
-    converter: (List<KtFile>, List<String>, Boolean) -> CompilationResult<String>
+    converter: (List<KtFile>, List<String>) -> CompilationResult<String>
   ): TranslationJSResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinToJSTranslator.translateJs(
         files,
         project.args.split(" "),
-        compilerPlugins,
         converter
       )
     }.also { logExecutionResult(project, it) }
@@ -105,15 +101,14 @@ class KotlinProjectExecutor(
   private fun convertWasmWithConverter(
     project: Project,
     debugInfo: Boolean,
-    compilerPlugins: Boolean,
-    converter: (List<KtFile>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    converter: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinToJSTranslator.translateWasm(
         files,
         debugInfo,
-        compilerPlugins,
+        project.confType,
         converter
       )
     }.also { logExecutionResult(project, it) }

@@ -13,7 +13,8 @@ class WebIndexationBuilder(
   private val kotlinEnvironment: KotlinEnvironment,
   inputConfiguration: CompilerConfiguration,
   private val libraries: List<String>,
-  private val compilerPlugins: Boolean,
+  private val compilerPlugins: List<String>,
+  private val compilerPluginOptions: List<String>,
   private val platformConfiguration: CompilerConfiguration
 ): IndexationBuilder() {
 
@@ -23,10 +24,10 @@ class WebIndexationBuilder(
     kotlinEnvironment.environment { coreEnvironment ->
       val project = coreEnvironment.project
 
-      if (compilerPlugins) {
+      if (compilerPlugins.isNotEmpty()) {
         PluginCliParser.loadPluginsSafe(
-          kotlinEnvironment.COMPILER_PLUGINS,
-          kotlinEnvironment.compilerPluginOptions,
+          compilerPlugins,
+          compilerPluginOptions,
           emptyList(),
           configuration
         )

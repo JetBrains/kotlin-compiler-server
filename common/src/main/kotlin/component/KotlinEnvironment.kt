@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.config.configureJdkClasspathRoots
 import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
+import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.JVMConfigurationKeys
@@ -26,8 +27,9 @@ class KotlinEnvironment(
   val classpath: List<File>,
   additionalJsClasspath: List<File>,
   additionalWasmClasspath: List<File>,
-  compilerPlugins: List<File>,
-  compilerPluginsOptions: List<CompilerPluginOption>
+  additionalComposeWasmClasspath: List<File>,
+  composeWasmCompilerPlugins: List<File>,
+  composeWasmCompilerPluginsOptions: List<CompilerPluginOption>
 ) {
   companion object {
     /**
@@ -62,10 +64,13 @@ class KotlinEnvironment(
   val WASM_LIBRARIES = additionalWasmClasspath
     .map { it.absolutePath }
     .filter { isKotlinLibrary(File(it)) }
-  val COMPILER_PLUGINS = compilerPlugins
+  val COMPOSE_WASM_LIBRARIES = additionalComposeWasmClasspath
+    .map { it.absolutePath }
+    .filter { isKotlinLibrary(File(it)) }
+  val COMPOSE_WASM_COMPILER_PLUGINS = composeWasmCompilerPlugins
     .map { it.absolutePath }
 
-  val compilerPluginOptions = compilerPluginsOptions
+  val composeWasmCompilerPluginOptions = composeWasmCompilerPluginsOptions
     .map { "plugin:${it.id}:${it.option}=${it.value}" }
 
   @Synchronized
@@ -85,6 +90,20 @@ class KotlinEnvironment(
     put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
     put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
+  }
+
+  val composeWasmConfiguration: CompilerConfiguration = configuration.copy().apply {
+    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(JSConfigurationKeys.LIBRARIES, COMPOSE_WASM_LIBRARIES)
+    put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
+    put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
+
+    PluginCliParser.loadPluginsSafe(
+      COMPOSE_WASM_COMPILER_PLUGINS,
+      composeWasmCompilerPluginOptions,
+      emptyList(),
+      this
+    )
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(

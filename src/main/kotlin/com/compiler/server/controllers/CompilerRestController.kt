@@ -22,12 +22,12 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
   fun translateKotlinProjectEndpoint(
     @RequestBody project: Project,
     @RequestParam(defaultValue = "js") compiler: String,
-    @RequestParam(defaultValue = "false") compilerPlugins: Boolean,
     @RequestParam(defaultValue = "false") debugInfo: Boolean
   ): TranslationResultWithJsCode {
-    return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase())) {
-      KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project, compilerPlugins)
-      KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo, compilerPlugins)
+    return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
+      KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
+      KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
+      KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
     }
   }
 

@@ -23,23 +23,20 @@ class KotlinEnvironmentConfiguration(
 
     val additionalJsClasspath = librariesFile.js.listFiles()?.toList() ?: emptyList()
     val additionalWasmClasspath = librariesFile.wasm.listFiles()?.toList() ?: emptyList()
-    val compilerPlugins = librariesFile.composeCompiler.listFiles()?.toList() ?: emptyList()
+    val additionalComposeWasmClasspath = librariesFile.composeWasm.listFiles()?.toList() ?: emptyList()
+    val composeWasmCompilerPlugins = librariesFile.composeWasmComposeCompiler.listFiles()?.toList() ?: emptyList()
 
     return KotlinEnvironment(
       classPath,
       additionalJsClasspath,
       additionalWasmClasspath,
-      compilerPlugins,
+      additionalComposeWasmClasspath,
+      composeWasmCompilerPlugins,
       listOf(
         CompilerPluginOption(
           "androidx.compose.compiler.plugins.kotlin",
           "generateDecoys",
           "false"
-        ),
-        CompilerPluginOption(
-          "androidx.compose.compiler.plugins.kotlin",
-          "suppressKotlinVersionCompatibilityCheck",
-          versionInfo.version
         ),
       )
     )

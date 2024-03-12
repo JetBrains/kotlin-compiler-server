@@ -21,6 +21,7 @@ tasks.withType<JavaExec> {
         "$rootName${File.separator}$kotlinVersion",
         "$rootName${File.separator}$indexes",
         "$rootName${File.separator}$indexesJs",
-        "$rootName${File.separator}$indexesWasm"
+        "$rootName${File.separator}$indexesWasm",
+        "$rootName${File.separator}$indexesComposeWasm",
     )
 }

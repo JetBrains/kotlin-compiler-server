@@ -44,12 +44,10 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
               ProjectType.JS_IR, ProjectType.CANVAS ->
                 kotlinProjectExecutor.convertToJsIr(
                   project,
-                  compilerPlugins = false
                 )
               ProjectType.WASM, ProjectType.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
                 debugInfo = false,
-                compilerPlugins = false
               )
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }

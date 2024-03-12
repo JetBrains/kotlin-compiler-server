@@ -13,7 +13,8 @@ import java.io.File
 class IndexationProvider(
   @Value("\${indexes.file}") private val indexesFileName: String,
   @Value("\${indexesJs.file}") private val indexesJsFileName: String,
-  @Value("\${indexesWasm.file}") private val indexesWasmFileName: String
+  @Value("\${indexesWasm.file}") private val indexesWasmFileName: String,
+  @Value("\${indexesComposeWasm.file}") private val indexesComposeWasmFileName: String,
 ) {
   companion object {
     const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
@@ -32,10 +33,15 @@ class IndexationProvider(
     initIndexes(indexesWasmFileName)
   }
 
+  private val composeWasmIndexes: Map<String, List<ImportInfo>>? by lazy {
+    initIndexes(indexesComposeWasmFileName)
+  }
+
   fun hasIndexes(projectType: ProjectType) = when {
     projectType.isJsRelated() -> jsIndexes != null
     projectType.isJvmRelated() -> jvmIndexes != null
-    projectType.isWasmRelated() -> wasmIndexes != null
+    projectType == ProjectType.WASM -> wasmIndexes != null
+    projectType == ProjectType.COMPOSE_WASM -> composeWasmIndexes != null
     else -> throw IllegalArgumentException("Platform $projectType not found")
   }
 
@@ -43,7 +49,8 @@ class IndexationProvider(
     val indexes = when {
       projectType.isJsRelated() -> jsIndexes
       projectType.isJvmRelated() -> jvmIndexes
-      projectType.isWasmRelated() -> wasmIndexes
+      projectType == ProjectType.WASM -> wasmIndexes
+      projectType == ProjectType.COMPOSE_WASM -> composeWasmIndexes
       else -> throw IllegalArgumentException("Platform $projectType not found")
     }
     return indexes?.get(name)
