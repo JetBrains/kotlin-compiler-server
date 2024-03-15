@@ -1,17 +1,25 @@
 package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
+import com.compiler.server.model.JvmExecutionResult
 import org.junit.jupiter.api.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class JvmRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `base execute test JVM`() {
-    run(
+    val executionResult = run(
       code = "fun main() {\n println(\"Hello, world!!!\")\n}",
       contains = "Hello, world!!!"
     )
+    
+    val byteCode = (executionResult as JvmExecutionResult).jvmByteCode!!
+    assertContains(byteCode, "public static synthetic main([Ljava/lang/String;)V", message = byteCode)
+    assertContains(byteCode, "public final static main()V", message = byteCode)
+    assertContains(byteCode, "LDC \"Hello, world!!!\"", message = byteCode)
+    assertContains(byteCode, "INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V", message = byteCode)
   }
 
   @Test

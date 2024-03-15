@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 
-open class ExecutionResult(
+sealed class ExecutionResult(
   @field:JsonProperty("errors")
   open var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics(),
   open var exception: ExceptionDescriptor? = null
@@ -51,6 +51,12 @@ data class CompilerDiagnostics(
   val map: Map<String, List<ErrorDescriptor>> = mapOf()
 ): List<ErrorDescriptor> by map.values.flatten()
 
+open class JvmExecutionResult(
+  compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics(),
+  exception: ExceptionDescriptor? = null,
+  var jvmByteCode: String? = null,
+): ExecutionResult(compilerDiagnostics, exception)
+
 abstract class TranslationResultWithJsCode(
   open val jsCode: String?,
   compilerDiagnostics: CompilerDiagnostics,
@@ -79,8 +85,9 @@ class JunitExecutionResult(
   val testResults: Map<String, List<TestDescription>> = emptyMap(),
   override var exception: ExceptionDescriptor? = null,
   @field:JsonProperty("errors")
-  override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
-) : ExecutionResult(compilerDiagnostics, exception)
+  override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics(),
+  jvmBytecode: String? = null,
+) : JvmExecutionResult(compilerDiagnostics, exception, jvmBytecode)
 
 private fun unEscapeOutput(value: String) = value.replace("&amp;lt;".toRegex(), "<")
   .replace("&amp;gt;".toRegex(), ">")
