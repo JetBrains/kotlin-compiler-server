@@ -26,14 +26,7 @@ data class ProgramOutput(
       standardOutput.isBlank() -> ExecutionResult()
       else -> {
         try {
-          // coroutines can produce incorrect output. see example in `base coroutines test 7`
-          if (standardOutput.startsWith("{")) outputMapper.readValue(standardOutput, ExecutionResult::class.java)
-          else {
-            val result = outputMapper.readValue("{" + standardOutput.substringAfter("{"), ExecutionResult::class.java)
-            result.apply {
-              text = standardOutput.substringBefore("{") + text
-            }
-          }
+          outputMapper.readValue(standardOutput, ExecutionResult::class.java)
         } catch (e: Exception) {
           ExecutionResult(exception = e.toExceptionDescriptor())
         }

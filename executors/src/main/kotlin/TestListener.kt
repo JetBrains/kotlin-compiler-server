@@ -54,7 +54,9 @@ internal class TestListener : RunListener() {
     System.err.flush()
     JUnitExecutors.output[JUnitExecutors.output.size - 1].apply {
       executionTime = System.currentTimeMillis() - startTime
-      output = testOutputStream?.toString().orEmpty()
+      output = testOutputStream?.let {
+        synchronized(it) { it.toString() }
+      }.orEmpty()
         .replace("</errStream><errStream>".toRegex(), "")
         .replace("</outStream><outStream>".toRegex(), "")
     }

@@ -29,13 +29,12 @@ class JUnitExecutors {
           }
           groupedTestResults[testRunInfo.className]?.add(testRunInfo)
         }
-        print(mapper.writeValueAsString(groupedTestResults))
+        standardOutput.print(mapper.writeValueAsString(groupedTestResults))
       }
       catch (e: Exception) {
-        System.setOut(standardOutput)
-        print("[\"")
+        standardOutput.print("[\"")
         e.printStackTrace()
-        print("\"]")
+        standardOutput.print("\"]")
       }
     }
 

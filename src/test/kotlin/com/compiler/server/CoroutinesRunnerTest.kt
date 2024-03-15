@@ -57,10 +57,11 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `base coroutines test 7`() {
-    run(
+    val result = run(
       code = "import kotlinx.coroutines.*\n\nfun main() = runBlocking {\nGlobalScope.launch {\n    repeat(1000) { i ->\n        println(\"I'm sleeping \$i ...\")\n        delay(500L)\n    }\n}\ndelay(1300L) // just quit after delay    \n}",
-      contains = "I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\n"
+      contains = ""
     )
+    Assertions.assertEquals("<outStream>I'm sleeping 0 ...\nI'm sleeping 1 ...\nI'm sleeping 2 ...\n</outStream>", result.text)
   }
 
   @Test
