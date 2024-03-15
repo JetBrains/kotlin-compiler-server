@@ -48,7 +48,7 @@ val libJSFolder = "$kotlinVersion-js"
 val libWasmFolder = "$kotlinVersion-wasm"
 val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
-val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
+val jacksonVersionKotlinDependencyJar = "2.16.0" // don't forget to update version in `executor.policy` file.
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
