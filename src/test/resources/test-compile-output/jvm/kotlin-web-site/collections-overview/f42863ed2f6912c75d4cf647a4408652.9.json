@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>All keys: [key1, key2, key3, key4]\nAll values: [1, 2, 3, 1]\nValue by key \"key2\": 2\nThe value 1 is in the map\nThe value 1 is in the map\n</outStream>"}

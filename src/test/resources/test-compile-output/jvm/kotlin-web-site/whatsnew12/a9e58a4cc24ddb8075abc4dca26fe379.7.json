@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":9},"end":{"line":0,"ch":13}},"message":"Parameter 'args' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>Shuffled items: [4, 1, 5, 2, 3]\nItems doubled: [8, 2, 10, 4, 6]\nItems filled with 5: [5, 5, 5, 5, 5]\n</outStream>"}

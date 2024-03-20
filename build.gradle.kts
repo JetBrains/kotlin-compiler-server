@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = rootProject.properties["systemProp.kotlinVersion"]
+val kotlinVersion = rootProject.properties["systemProp.kotlinVersion"] ?: throw IllegalStateException("kotlinVersion is not specified")
 val kotlinIdeVersion: String by System.getProperties()
 val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()

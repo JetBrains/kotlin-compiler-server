@@ -94,4 +94,28 @@ class KotlinFeatureSince170 : BaseExecutorTest() {
     contains = "second quarter"
     )
   }
+
+  @Test
+  fun `Experimental support for explicit backing fields`() {
+    run(
+      code = """
+        fun main() {
+          class Test {
+            val names: List<String>
+              field: MutableList<String> = mutableListOf<String>()
+  
+            fun doThing() {
+              names.add("Hello!")
+            }
+          }
+        
+          val test = Test()
+          test.doThing()
+
+          println(test.names)
+        }
+      """.trimIndent(),
+      contains = "[Hello!]"
+    )
+  }
 }
