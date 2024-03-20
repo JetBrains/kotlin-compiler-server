@@ -75,8 +75,8 @@ class ErrorAnalyzer(
   }
 
   fun analysisOf(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
-    val trace = CliBindingTrace()
     val project = files.first().project
+    val trace = CliBindingTrace(project)
     val componentProvider = TopDownAnalyzerFacadeForJVM.createContainer(
       project = project,
       files = files,
@@ -155,7 +155,7 @@ class ErrorAnalyzer(
     )
     val dependencies = mutableSetOf(context.module) + mds + JsPlatformAnalyzerServices.builtIns.builtInsModule
     context.module.setDependencies(dependencies.toList())
-    val trace = CliBindingTrace()
+    val trace = CliBindingTrace(project)
     val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
     val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory, JsPlatforms.defaultJsPlatform, JsPlatformAnalyzerServices)
 
@@ -215,7 +215,7 @@ class ErrorAnalyzer(
     )
     val dependencies = mutableSetOf(context.module) + mds + WasmPlatformAnalyzerServices.builtIns.builtInsModule
     context.module.setDependencies(dependencies.toList())
-    val trace = CliBindingTrace()
+    val trace = CliBindingTrace(project)
     val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
     val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory, WasmPlatforms.Default, WasmPlatformAnalyzerServices)
 
