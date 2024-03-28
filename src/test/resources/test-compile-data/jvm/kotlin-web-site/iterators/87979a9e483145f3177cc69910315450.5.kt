@@ -6,5 +6,6 @@ fun main() {
     mutableIterator.next()
     mutableIterator.remove()    
     println("After removal: $numbers")
+    // After removal: [two, three, four]
 //sampleEnd
 }

@@ -1,7 +1,8 @@
 fun main() {
 //sampleStart
-    val b: Byte = 1 // OK, literals are checked statically
-    // val i: Int = b // ERROR
-    val i1: Int = b.toInt()
+    println(1 + 2)
+    println(2_500_000_000L - 1L)
+    println(3.14 * 2.71)
+    println(10.0 / 3)
 //sampleEnd
 }
