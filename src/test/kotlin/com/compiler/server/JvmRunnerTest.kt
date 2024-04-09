@@ -83,7 +83,7 @@ class JvmRunnerTest : BaseExecutorTest() {
     assertEquals(1, result.compilerDiagnostics[0].interval?.start?.line)
     assertEquals(19, result.compilerDiagnostics[0].interval?.start?.ch)
     assertEquals(
-      "'@Deprecated(...) @DeprecatedSinceKotlin(...) @IntrinsicConstEvaluation() fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead..",
+      "'@Deprecated(...) @DeprecatedSinceKotlin(...) @IntrinsicConstEvaluation() fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.",
       result.compilerDiagnostics[0].message
     )
   }
