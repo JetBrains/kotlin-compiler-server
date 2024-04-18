@@ -51,6 +51,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
                 debugInfo = false,
               )
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project, addByteCode)
+              ProjectType.SWIFT_EXPORT -> kotlinProjectExecutor.convertToSwift(project)
             }
           }
 

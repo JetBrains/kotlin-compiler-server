@@ -34,6 +34,10 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
       KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
       KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
       KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
+      KotlinTranslatableCompiler.SWIFT_EXPORT -> kotlinProjectExecutor.convertToSwift(project).let {
+        // TODO: A hack to avoid changing the return type of the function.
+        object : TranslationResultWithJsCode(it.swiftCode, it.compilerDiagnostics, it.exception) {}
+      }
     }
   }
 
