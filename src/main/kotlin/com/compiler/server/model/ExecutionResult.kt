@@ -89,6 +89,14 @@ class JunitExecutionResult(
   jvmBytecode: String? = null,
 ) : JvmExecutionResult(compilerDiagnostics, exception, jvmBytecode)
 
+class SwiftExportResult(
+  val swiftCode: String,
+  override var exception: ExceptionDescriptor? = null,
+  @field:JsonProperty("errors")
+  override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
+) : ExecutionResult(compilerDiagnostics, exception)
+
+
 private fun unEscapeOutput(value: String) = value.replace("&amp;lt;".toRegex(), "<")
   .replace("&amp;gt;".toRegex(), ">")
   .replace("\r", "")

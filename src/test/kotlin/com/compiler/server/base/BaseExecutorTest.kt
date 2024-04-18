@@ -65,6 +65,8 @@ class BaseExecutorTest {
 
   fun translateToJsIr(@Language("kotlin") code: String) = testRunner.translateToJsIr(code)
 
+  fun translateToSwift(code: String) = testRunner.translateToSwift(code)
+
   fun runWithException(@Language("kotlin") code: String, contains: String, message: String? = null, addByteCode: Boolean = false) =
     testRunner.runWithException(code, contains, message, addByteCode)
 

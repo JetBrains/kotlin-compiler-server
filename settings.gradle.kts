@@ -3,6 +3,7 @@ include(":executors")
 include(":indexation")
 include(":common")
 include(":dependencies")
+include(":swift-export-playground")
 
 pluginManagement {
     repositories {
