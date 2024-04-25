@@ -10,7 +10,6 @@ version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 val propertyFile = "application.properties"
-val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
 
 plugins {
     id("org.springframework.boot") version "2.7.10"
