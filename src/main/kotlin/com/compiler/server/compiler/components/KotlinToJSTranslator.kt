@@ -45,10 +45,30 @@ class KotlinToJSTranslator(
 
   fun translateWasm(
     files: List<KtFile>,
-    translate: (List<KtFile>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    debugInfo: Boolean,
+    projectType: ProjectType,
+    translate: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
-      val compilationResult = translate(files)
+      val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
+        ProjectType.WASM -> listOf(
+          kotlinEnvironment.WASM_LIBRARIES,
+          emptyList(),
+          emptyList()
+        )
+        ProjectType.COMPOSE_WASM -> listOf(
+          kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
+          kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS,
+          kotlinEnvironment.composeWasmCompilerPluginOptions
+        )
+        else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
+      }
+      val compilationResult = translate(
+        files,
+        dependencies,
+        compilerPlugins,
+        compilerPluginOptions
+      )
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
         is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
@@ -58,7 +78,7 @@ class KotlinToJSTranslator(
         jsInstantiated = wasmCompilationOutput.jsInstantiated,
         compilerDiagnostics = compilationResult.compilerDiagnostics,
         wasm = wasmCompilationOutput.wasm,
-        wat = wasmCompilationOutput.wat
+        wat = if (debugInfo) wasmCompilationOutput.wat else null
       )
     } catch (e: Exception) {
       TranslationJSResult(exception = e.toExceptionDescriptor())
@@ -109,7 +129,12 @@ class KotlinToJSTranslator(
   }
 
 
-  fun doTranslateWithWasm(files: List<KtFile>): CompilationResult<WasmTranslationSuccessfulOutput> =
+  fun doTranslateWithWasm(
+    files: List<KtFile>,
+    dependencies: List<String>,
+    compilerPlugins: List<String>,
+    compilerPluginOptions: List<String>,
+  ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
@@ -117,13 +142,23 @@ class KotlinToJSTranslator(
         val k2JsIrCompiler = K2JsIrCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
-        val additionalCompilerArgumentsForKLib = listOf(
+          val compilerPluginsArgs: List<String> = compilerPlugins
+              .takeIf { it.isNotEmpty() }
+              ?.let { plugins ->
+                  plugins.map {
+                      "-Xplugin=$it"
+                  } + compilerPluginOptions.map {
+                      "-P=$it"
+                  }
+              } ?: emptyList()
+          val additionalCompilerArgumentsForKLib: List<String> = listOf(
           "-Xwasm",
           "-Xir-produce-klib-dir",
-          "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+          "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
-        )
+        ) + compilerPluginsArgs
+
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
@@ -132,7 +167,7 @@ class KotlinToJSTranslator(
               "-Xir-produce-js",
               "-Xir-dce",
               "-Xinclude=$klibPath",
-              "-libraries=${kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)}",
+              "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
               "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
               "-ir-output-name=$moduleName",
             ))
