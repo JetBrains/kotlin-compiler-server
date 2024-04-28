@@ -17,7 +17,7 @@ enum class IntArithmetics : BinaryOperator<Int>, IntBinaryOperator {
 fun main() {
     val a = 13
     val b = 31
-    for (f in IntArithmetics.values()) {
+    for (f in IntArithmetics.entries) {
         println("$f($a, $b) = ${f.apply(a, b)}")
     }
 }

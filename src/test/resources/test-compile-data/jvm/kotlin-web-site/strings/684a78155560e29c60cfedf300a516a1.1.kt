@@ -1,8 +1,8 @@
 fun main() {
-val str = "abcd"
+    val str = "abcd" 
 //sampleStart
-for (c in str) {
-    println(c)
-}
+    for (c in str) {
+        println(c)
+    }
 //sampleEnd
 }
