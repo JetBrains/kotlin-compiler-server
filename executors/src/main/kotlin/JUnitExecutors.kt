@@ -22,13 +22,14 @@ class JUnitExecutors {
           jUnitCore.run(request)
         }
         System.setOut(standardOutput)
+
         standardOutput.print(mapper.writeValueAsString(output.groupBy({ it.className }, { it })))
+
       }
       catch (e: Exception) {
-        System.setOut(standardOutput)
-        print("[\"")
+        standardOutput.print("[\"")
         e.printStackTrace()
-        print("\"]")
+        standardOutput.print("\"]")
       }
     }
 
