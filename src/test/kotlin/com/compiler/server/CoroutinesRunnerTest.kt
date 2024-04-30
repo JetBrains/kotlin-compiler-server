@@ -180,20 +180,19 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
   }
 
   @Test
-  @Disabled("@ToDo: incorrect result - 'A\n<outStream>B\n</outStream>'")
   fun `IO coroutine out order`() {
     run(
       //language=kotlin
       code = """
         import kotlinx.coroutines.*
 
-        fun main() {
-            CoroutineScope(Dispatchers.IO).launch { 
-                delay(1)
+        fun main() = runBlocking {
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(1000)
                 println("A")
             }
             println("B")
-          
+            delay(2000)
         }
       """.trimIndent(),
       contains = "<outStream>B\nA\n</outStream>"
