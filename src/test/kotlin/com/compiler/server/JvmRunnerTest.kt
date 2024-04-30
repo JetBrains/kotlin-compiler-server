@@ -3,6 +3,8 @@ package com.compiler.server
 import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class JvmRunnerTest : BaseExecutorTest() {
 
@@ -48,6 +50,22 @@ class JvmRunnerTest : BaseExecutorTest() {
       contains = "IllegalArgumentException",
       message = "Multiple classes in project contain main methods found: FileKt, A",
     )
+  }
+
+  @Test
+  fun `warnings after exception`() {
+    // language=kotlin
+    val result = run(
+      """
+        fun main() {
+          println("")g
+          var someVar = 1
+        }
+      """.trimIndent(), "")
+
+    assertTrue(result.compilerDiagnostics.any {
+      it.message.contains("Variable 'kotlin' is never used") == true
+    })
   }
 
   @Test
