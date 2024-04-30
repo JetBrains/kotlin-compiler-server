@@ -41,8 +41,14 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
             when (project.confType) {
               ProjectType.JAVA -> kotlinProjectExecutor.run(project)
               ProjectType.JS -> throw LegacyJsException()
-              ProjectType.JS_IR, ProjectType.CANVAS -> kotlinProjectExecutor.convertToJsIr(project)
-              ProjectType.WASM -> kotlinProjectExecutor.convertToWasm(project)
+              ProjectType.JS_IR, ProjectType.CANVAS ->
+                kotlinProjectExecutor.convertToJsIr(
+                  project,
+                )
+              ProjectType.WASM, ProjectType.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
+                project,
+                debugInfo = false,
+              )
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }
           }

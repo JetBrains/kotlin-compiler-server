@@ -22,20 +22,14 @@ class JUnitExecutors {
           jUnitCore.run(request)
         }
         System.setOut(standardOutput)
-        val groupedTestResults = HashMap<String, MutableList<TestRunInfo>>()
-        for (testRunInfo in output) {
-          if (!groupedTestResults.containsKey(testRunInfo.className)) {
-            groupedTestResults[testRunInfo.className] = ArrayList()
-          }
-          groupedTestResults[testRunInfo.className]?.add(testRunInfo)
-        }
-        print(mapper.writeValueAsString(groupedTestResults))
+
+        standardOutput.print(mapper.writeValueAsString(output.groupBy({ it.className }, { it })))
+
       }
       catch (e: Exception) {
-        System.setOut(standardOutput)
-        print("[\"")
+        standardOutput.print("[\"")
         e.printStackTrace()
-        print("\"]")
+        standardOutput.print("\"]")
       }
     }
 

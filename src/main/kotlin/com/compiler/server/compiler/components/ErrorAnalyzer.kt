@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
+import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.container.*
 import org.jetbrains.kotlin.context.ContextForNewModule
@@ -62,6 +63,7 @@ class ErrorAnalyzer(
         projectType.isJvmRelated() -> analysisOf(files, coreEnvironment)
         projectType.isJsRelated() -> analyzeFileForJs(files, coreEnvironment)
         projectType == ProjectType.WASM -> analyzeFileForWasm(files, coreEnvironment)
+        projectType == ProjectType.COMPOSE_WASM -> analyzeFileForComposeWasm(files, coreEnvironment)
         else -> throw IllegalArgumentException("Unknown platform: $projectType")
     }
     return ErrorsAndAnalysis(
@@ -170,22 +172,47 @@ class ErrorAnalyzer(
     )
   }
 
-  fun analyzeFileForWasm(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
+  fun analyzeFileForWasm(
+    files: List<KtFile>,
+    coreEnvironment: KotlinCoreEnvironment
+  ) = analyzeFileForWasmCommon(
+    files,
+    kotlinEnvironment.wasmConfiguration,
+    kotlinEnvironment.WASM_LIBRARIES,
+    coreEnvironment
+  )
+
+  fun analyzeFileForComposeWasm(
+    files: List<KtFile>,
+    coreEnvironment: KotlinCoreEnvironment
+  ) = analyzeFileForWasmCommon(
+    files,
+    kotlinEnvironment.composeWasmConfiguration,
+    kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
+    coreEnvironment
+  )
+
+  private fun analyzeFileForWasmCommon(
+    files: List<KtFile>,
+    environmentConfiguration: CompilerConfiguration,
+    dependencies: List<String>,
+    coreEnvironment: KotlinCoreEnvironment
+  ): Analysis {
     val project = coreEnvironment.project
     val configuration = JsConfig(
       project,
-      kotlinEnvironment.wasmConfiguration,
+      environmentConfiguration,
       CompilerEnvironment,
       emptyList(),
-      kotlinEnvironment.WASM_LIBRARIES.toSet()
+      dependencies.toSet()
     )
 
     val mainModule = MainModule.SourceFiles(files)
     val sourceModule = ModulesStructure(
       project,
       mainModule,
-      kotlinEnvironment.wasmConfiguration,
-      kotlinEnvironment.WASM_LIBRARIES,
+      environmentConfiguration,
+      dependencies,
       emptyList()
     )
 
@@ -195,12 +222,12 @@ class ErrorAnalyzer(
 
     val builtInModuleDescriptor = sourceModule.builtInModuleDescriptor
 
-    val analyzer = AnalyzerWithCompilerReport(kotlinEnvironment.jsConfiguration)
+    val analyzer = AnalyzerWithCompilerReport(environmentConfiguration)
     val analyzerFacade = TopDownAnalyzerFacadeForWasmJs
     val analysisResult = analyzerFacade.analyzeFiles(
       mainModule.files,
       project,
-      kotlinEnvironment.wasmConfiguration,
+      environmentConfiguration,
       mds,
       emptyList(),
       analyzer.targetEnvironment,
@@ -213,8 +240,8 @@ class ErrorAnalyzer(
       moduleName = Name.special("<" + configuration.moduleId + ">"),
       builtIns = WasmPlatformAnalyzerServices.builtIns, platform = null
     )
-    val dependencies = mutableSetOf(context.module) + mds + WasmPlatformAnalyzerServices.builtIns.builtInsModule
-    context.module.setDependencies(dependencies.toList())
+    val dependenciesDescriptors = mutableSetOf(context.module) + mds + WasmPlatformAnalyzerServices.builtIns.builtInsModule
+    context.module.setDependencies(dependenciesDescriptors.toList())
     val trace = CliBindingTrace(project)
     val providerFactory = FileBasedDeclarationProviderFactory(context.storageManager, files)
     val analyzerAndProvider = createContainerForTopDownAnalyzerForJs(context, trace, providerFactory, WasmPlatforms.Default, WasmPlatformAnalyzerServices)

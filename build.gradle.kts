@@ -1,68 +1,15 @@
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val kotlinVersion = rootProject.properties["systemProp.kotlinVersion"] ?: throw IllegalStateException("kotlinVersion is not specified")
-val kotlinIdeVersion: String by System.getProperties()
-val kotlinIdeVersionSuffix: String by System.getProperties()
 val policy: String by System.getProperties()
-val indexes: String by System.getProperties()
-val indexesJs: String by System.getProperties()
-val indexesWasm: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-val kotlinDependency: Configuration by configurations.creating {
-    isTransitive = false
-}
-val kotlinJsDependency: Configuration by configurations.creating {
-    isTransitive = false
-    attributes {
-        attribute(
-            KotlinPlatformType.attribute,
-            KotlinPlatformType.js
-        )
-        attribute(
-            KotlinJsCompilerAttribute.jsCompilerAttribute,
-            KotlinJsCompilerAttribute.ir
-        )
-    }
-}
-
-val kotlinWasmDependency: Configuration by configurations.creating {
-    isTransitive = false
-    attributes {
-        attribute(
-            KotlinPlatformType.attribute,
-            KotlinPlatformType.wasm
-        )
-    }
-}
-
-val libJSFolder = "$kotlinVersion-js"
-val libWasmFolder = "$kotlinVersion-wasm"
-val libJVMFolder = kotlinVersion
 val propertyFile = "application.properties"
-val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
-
-val copyDependencies by tasks.creating(Copy::class) {
-    from(kotlinDependency)
-    into(libJVMFolder)
-}
-val copyJSDependencies by tasks.creating(Copy::class) {
-    from(kotlinJsDependency)
-    into(libJSFolder)
-}
-
-val copyWasmDependencies by tasks.creating(Copy::class) {
-    from(kotlinWasmDependency)
-    into(libWasmFolder)
-}
 
 plugins {
     id("org.springframework.boot") version "2.7.10"
@@ -91,6 +38,8 @@ allprojects {
         maven("https://www.myget.org/F/rd-snapshots/maven/")
         maven("https://kotlin.jetbrains.space/p/kotlin/packages/maven/kotlin-ide")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
     afterEvaluate {
         dependencies {
@@ -105,22 +54,6 @@ allprojects {
 }
 
 dependencies {
-    kotlinDependency("junit:junit:4.13.2")
-    kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:$jacksonVersionKotlinDependencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:$jacksonVersionKotlinDependencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersionKotlinDependencyJar")
-    // Kotlin libraries
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
-    kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
-
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -163,9 +96,12 @@ fun generateProperties(prefix: String = "") = """
     indexes.file=${prefix + indexes}
     indexesJs.file=${prefix + indexesJs}
     indexesWasm.file=${prefix + indexesWasm}
+    indexesComposeWasm.file=${prefix + indexesComposeWasm}
     libraries.folder.jvm=${prefix + libJVMFolder}
     libraries.folder.js=${prefix + libJSFolder}
     libraries.folder.wasm=${prefix + libWasmFolder}
+    libraries.folder.compose-wasm=${prefix + libComposeWasmFolder}
+    libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPluginsFolder}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json
@@ -182,9 +118,11 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "17"
     }
-    dependsOn(copyDependencies)
-    dependsOn(copyJSDependencies)
-    dependsOn(copyWasmDependencies)
+    dependsOn(":dependencies:copyDependencies")
+    dependsOn(":dependencies:copyJSDependencies")
+    dependsOn(":dependencies:copyWasmDependencies")
+    dependsOn(":dependencies:copyComposeWasmDependencies")
+    dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()
@@ -208,9 +146,11 @@ val buildLambda by tasks.creating(Zip::class) {
     from(indexes)
     from(indexesJs)
     from(indexesWasm)
-    from(libJSFolder) { into(libJSFolder) }
-    from(libWasmFolder) { into(libWasmFolder) }
-    from(libJVMFolder) { into(libJVMFolder) }
+    from(libJSFolder) { into(libJS) }
+    from(libWasmFolder) { into(libWasm) }
+    from(libComposeWasmFolder) { into(libComposeWasm) }
+    from(libJVMFolder) { into(libJVM) }
+    from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
