@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -53,6 +54,11 @@ allprojects {
     }
 }
 
+val resourceDependency: Configuration by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
 dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
@@ -79,6 +85,8 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    resourceDependency("org.jetbrains.skiko:skiko-js-wasm-runtime:0.7.90")
 }
 
 fun buildPropertyFile() {
@@ -153,6 +161,15 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
+    }
+}
+
+tasks.named<Copy>("processResources") {
+    val archiveOperation = project.serviceOf<ArchiveOperations>()
+    from(resourceDependency.map {
+        archiveOperation.zipTree(it)
+    }) {
+        into("com/compiler/server")
     }
 }
 
