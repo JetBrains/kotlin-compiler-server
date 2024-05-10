@@ -109,13 +109,4 @@ dependencies {
 
     // compose
     kotlinComposeWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
-    kotlinComposeWasmDependency("org.jetbrains.compose.runtime:runtime:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.ui:ui:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.foundation:foundation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.material:material:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0")
-
-    composeWasmCompilerPlugins("org.jetbrains.compose.compiler:compiler-hosted:1.5.10")
 }
