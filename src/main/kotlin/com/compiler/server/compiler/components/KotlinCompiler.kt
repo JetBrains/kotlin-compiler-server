@@ -59,8 +59,8 @@ class KotlinCompiler(
       ?.joinToString("\n\n")
   }
 
-  fun run(files: List<KtFile>, args: String): JvmExecutionResult {
-    return execute(files) { output, compiled ->
+  fun run(files: List<KtFile>, addByteCode: Boolean, args: String): JvmExecutionResult {
+    return execute(files, addByteCode) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
       val compiledMainClass = when (compiled.mainClasses.size) {
         0 -> return@execute JvmExecutionResult(
@@ -80,8 +80,8 @@ class KotlinCompiler(
     }
   }
 
-  fun test(files: List<KtFile>): JvmExecutionResult {
-    return execute(files) { output, _ ->
+  fun test(files: List<KtFile>, addByteCode: Boolean): JvmExecutionResult {
+    return execute(files, addByteCode) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
       javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
         .asJUnitExecutionResult()
@@ -138,6 +138,7 @@ class KotlinCompiler(
 
   private fun execute(
     files: List<KtFile>,
+    addByteCode: Boolean,
     block: (output: OutputDirectory, compilation: JvmClasses) -> JvmExecutionResult
   ): JvmExecutionResult = try {
     when (val compilationResult = compile(files)) {
@@ -146,7 +147,9 @@ class KotlinCompiler(
           val output = write(compilationResult.result, outputDir)
           block(output, compilationResult.result).also {
             it.addWarnings(compilationResult.compilerDiagnostics)
-            it.addByteCode(compilationResult.result)
+            if (addByteCode) {
+              it.addByteCode(compilationResult.result)
+            }
           }
         }
       }

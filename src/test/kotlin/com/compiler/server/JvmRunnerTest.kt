@@ -5,6 +5,7 @@ import com.compiler.server.model.JvmExecutionResult
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class JvmRunnerTest : BaseExecutorTest() {
 
@@ -12,7 +13,18 @@ class JvmRunnerTest : BaseExecutorTest() {
   fun `base execute test JVM`() {
     val executionResult = run(
       code = "fun main() {\n println(\"Hello, world!!!\")\n}",
-      contains = "Hello, world!!!"
+      contains = "Hello, world!!!",
+      addByteCode = false,
+    )
+    assertNull((executionResult as JvmExecutionResult).jvmByteCode, "Bytecode should not be generated")
+  }
+
+  @Test
+  fun `jvm bytecode`() {
+    val executionResult = run(
+      code = "fun main() {\n println(\"Hello, world!!!\")\n}",
+      contains = "Hello, world!!!",
+      addByteCode = true,
     )
     
     val byteCode = (executionResult as JvmExecutionResult).jvmByteCode!!
