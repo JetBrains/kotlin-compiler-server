@@ -27,7 +27,7 @@ class SwiftExportTests {
         """,
         """
             public func foo() -> Swift.Int32 {
-                fatalError()
+                stub()
             }
         """
     )
@@ -42,7 +42,7 @@ class SwiftExportTests {
 
             public class A : KotlinRuntime.KotlinBase {
                 public override init() {
-                    fatalError()
+                    stub()
                 }
             }
         """.trimIndent()
@@ -59,11 +59,11 @@ class SwiftExportTests {
             public class O : KotlinRuntime.KotlinBase {
                 public static var shared: Playground.O {
                     get {
-                        fatalError()
+                        stub()
                     }
                 }
                 private override init() {
-                    fatalError()
+                    stub()
                 }
             }
         """.trimIndent()

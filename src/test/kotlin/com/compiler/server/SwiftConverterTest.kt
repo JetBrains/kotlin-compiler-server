@@ -36,7 +36,7 @@ class SwiftConverterTest : BaseExecutorTest() {
         input = "fun foo(): UInt = 42",
         expected = """
             public func foo() -> Swift.UInt32 {
-                fatalError()
+                stub()
             }
         """.trimIndent()
     )
@@ -49,10 +49,10 @@ class SwiftConverterTest : BaseExecutorTest() {
 
         public class MyClass : KotlinRuntime.KotlinBase {
             public override init() {
-                fatalError()
+                stub()
             }
             public func A() -> Swift.Void {
-                fatalError()
+                stub()
             }
         }
         """.trimIndent()
@@ -69,7 +69,7 @@ class SwiftConverterTest : BaseExecutorTest() {
             public extension Playground.foo.bar {
                 public static var myProperty: Swift.Int32 {
                     get {
-                        fatalError()
+                        stub()
                     }
                 }
             }
@@ -92,7 +92,7 @@ class SwiftConverterTest : BaseExecutorTest() {
         input = "fun foo(): Bar = error()",
         expected = """
             public func foo() -> ERROR_TYPE {
-                fatalError()
+                stub()
             }
         """.trimIndent()
     )

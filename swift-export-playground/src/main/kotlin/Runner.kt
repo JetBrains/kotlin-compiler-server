@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.analysis.project.structure.builder.buildKtLibraryMod
 import org.jetbrains.kotlin.analysis.project.structure.builder.buildKtSourceModule
 import org.jetbrains.kotlin.platform.konan.NativePlatforms
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.sir.SirFunctionBody
 import org.jetbrains.kotlin.sir.SirModule
 import org.jetbrains.kotlin.sir.SirMutableDeclarationContainer
 import org.jetbrains.kotlin.sir.util.addChild
@@ -37,7 +38,14 @@ fun runSwiftExport(
                 }
             }
         }
-        SirAsSwiftSourcesPrinter.print(sirModule, stableDeclarationsOrder = true, renderDocComments = true)
+        SirAsSwiftSourcesPrinter.print(
+            sirModule,
+            stableDeclarationsOrder = true,
+            renderDocComments = true,
+            emptyBodyStub = SirFunctionBody(
+                listOf("stub()")
+            )
+        )
     }
 }
 
