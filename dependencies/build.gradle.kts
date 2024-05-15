@@ -117,5 +117,5 @@ dependencies {
     kotlinComposeWasmDependency("org.jetbrains.compose.material:material:1.6.0")
     kotlinComposeWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0")
 
-    composeWasmCompilerPlugins("org.jetbrains.compose.compiler:compiler-hosted:1.5.10")
+    composeWasmCompilerPlugins("org.jetbrains.kotlin:kotlin-compose-compiler-plugin:$kotlinVersion")
 }
