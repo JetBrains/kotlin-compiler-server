@@ -61,6 +61,8 @@ val composeWasmCompilerPlugins: Configuration by configurations.creating {
 
 val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
 
+val composeRuntimeVersion = "1.6.0"
+
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
     into(libJVMFolder)
@@ -109,13 +111,13 @@ dependencies {
 
     // compose
     kotlinComposeWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
-    kotlinComposeWasmDependency("org.jetbrains.compose.runtime:runtime:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.ui:ui:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.foundation:foundation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.material:material:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0")
+    kotlinComposeWasmDependency("org.jetbrains.compose.runtime:runtime:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.ui:ui:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation-graphics:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.foundation:foundation:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.material:material:$composeRuntimeVersion")
+    kotlinComposeWasmDependency("org.jetbrains.compose.components:components-resources:$composeRuntimeVersion")
 
     composeWasmCompilerPlugins("org.jetbrains.kotlin:kotlin-compose-compiler-plugin:$kotlinVersion")
 }
