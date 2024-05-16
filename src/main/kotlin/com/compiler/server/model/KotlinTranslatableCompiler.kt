@@ -4,5 +4,5 @@ enum class KotlinTranslatableCompiler {
   JS,
   WASM,
   COMPOSE_WASM,
-  SWIFT,
+  SWIFT_EXPORT,
 }
