@@ -30,19 +30,19 @@ class HighlightTest : BaseExecutorTest() {
   @Test @Disabled
   fun `base highlight unused variable`() {
     val highlights = highlight("fun main() {\n\tval a = \"d\"\n}")
-    warningContains(highlights, "Variable 'a' is never used")
+    warningContains(highlights, "Variable is unused")
   }
 
   @Test @Disabled
   fun `base highlight unused variable js`() {
     val highlights = highlightJS("fun main() {\n\tval a = \"d\"\n}")
-    warningContains(highlights, "Variable 'a' is never used")
+    warningContains(highlights, "Variable is unused")
   }
 
   @Test @Disabled
   fun `base highlight unused variable wasm`() {
     val highlights = highlightWasm("fun main() {\n\tval a = \"d\"\n}")
-    warningContains(highlights, "Variable 'a' is never used")
+    warningContains(highlights, "Variable is unused")
   }
 
   @Test
