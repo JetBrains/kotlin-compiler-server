@@ -66,7 +66,7 @@ class JvmRunnerTest : BaseExecutorTest() {
                     }
                 }""".trimIndent(),
       contains = "IllegalArgumentException",
-      message = "Multiple classes in project contain main methods found: FileKt, A",
+      message = "Multiple classes in project contain main methods found: A, FileKt",
     )
   }
 
