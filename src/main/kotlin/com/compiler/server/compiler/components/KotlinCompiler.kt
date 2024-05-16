@@ -70,7 +70,7 @@ class KotlinCompiler(
         1 -> compiled.mainClasses.single()
         else -> return@execute JvmExecutionResult(
           exception = IllegalArgumentException(
-            "Multiple classes in project contain main methods found: ${compiled.mainClasses.joinToString()}"
+            "Multiple classes in project contain main methods found: ${compiled.mainClasses.sorted().joinToString()}"
           ).toExceptionDescriptor()
         )
       }
