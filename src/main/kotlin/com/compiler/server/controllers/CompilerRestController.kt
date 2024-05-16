@@ -9,19 +9,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
 class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExecutor) {
   @PostMapping("/run")
-  fun executeKotlinProjectEndpoint(
-    @RequestBody project: Project,
-    @RequestParam(defaultValue = "false") addByteCode: Boolean,
-  ): ExecutionResult {
-    return kotlinProjectExecutor.run(project, addByteCode)
+  fun executeKotlinProjectEndpoint(@RequestBody project: Project): ExecutionResult {
+    return kotlinProjectExecutor.run(project)
   }
 
   @PostMapping("/test")
-  fun testKotlinProjectEndpoint(
-    @RequestBody project: Project,
-    @RequestParam(defaultValue = "false") addByteCode: Boolean,
-  ): ExecutionResult {
-    return kotlinProjectExecutor.test(project, addByteCode)
+  fun testKotlinProjectEndpoint(@RequestBody project: Project): ExecutionResult {
+    return kotlinProjectExecutor.test(project)
   }
 
   @PostMapping("/translate")

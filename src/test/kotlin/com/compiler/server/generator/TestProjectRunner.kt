@@ -6,15 +6,11 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.IOException
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.writeBytes
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 import kotlin.test.assertTrue
 
 
@@ -23,24 +19,17 @@ class TestProjectRunner {
   @Autowired
   private lateinit var kotlinProjectExecutor: KotlinProjectExecutor
 
-  fun run(
-    @Language("kotlin")
-    code: String,
-    contains: String,
-    args: String = "",
-    addByteCode: Boolean,
-  ): ExecutionResult {
+  fun run(code: String, contains: String, args: String = ""): ExecutionResult {
     val project = generateSingleProject(text = code, args = args)
-    return runAndTest(project, contains, addByteCode)
+    return runAndTest(project, contains)
   }
 
-  fun multiRun(code: List<String>, contains: String, addByteCode: Boolean) {
+  fun multiRun(code: List<String>, contains: String) {
     val project = generateMultiProject(*code.toTypedArray())
-    runAndTest(project, contains, addByteCode)
+    runAndTest(project, contains)
   }
 
   fun runJs(
-    @Language("kotlin")
     code: String,
     contains: String,
     args: String = "",
@@ -60,7 +49,6 @@ class TestProjectRunner {
   }
 
   fun runWasm(
-    @Language("kotlin")
     code: String,
     contains: String,
   ) {
@@ -68,22 +56,16 @@ class TestProjectRunner {
     convertWasmAndTest(project, contains)
   }
 
-  fun translateToJsIr(@Language("kotlin") code: String): TranslationResultWithJsCode {
+  fun translateToJsIr(code: String): TranslationResultWithJsCode {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.convertToJsIr(
       project,
     )
   }
 
-  fun runWithException(
-    @Language("kotlin")
-    code: String,
-    contains: String,
-    message: String? = null,
-    addByteCode: Boolean
-  ): ExecutionResult {
+  fun runWithException(code: String, contains: String, message: String? = null): ExecutionResult {
     val project = generateSingleProject(text = code)
-    val result = kotlinProjectExecutor.run(project, addByteCode)
+    val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result.exception, "Test result should no be a null")
     Assertions.assertTrue(
       result.exception?.fullName?.contains(contains) == true,
@@ -93,18 +75,16 @@ class TestProjectRunner {
     return result
   }
 
-  fun test(@Language("kotlin") vararg test: String, addByteCode: Boolean): List<TestDescription> {
+  fun test(vararg test: String): List<TestDescription> {
     val project = generateMultiProject(*test, projectType = ProjectType.JUNIT)
-    val result = kotlinProjectExecutor.test(project, addByteCode) as? JunitExecutionResult
+    val result = kotlinProjectExecutor.test(project) as? JunitExecutionResult
     Assertions.assertNotNull(result?.testResults, "Test result should no be a null")
     return result?.testResults?.values?.flatten() ?: emptyList()
   }
 
-  fun testRaw(@Language("kotlin") vararg test: String, addByteCode: Boolean): JunitExecutionResult? =
-    executeTest(*test, addByteCode = addByteCode)
+  fun testRaw(vararg test: String): JunitExecutionResult? = executeTest(*test)
 
   fun complete(
-    @Language("kotlin")
     code: String,
     line: Int,
     character: Int,
@@ -122,7 +102,6 @@ class TestProjectRunner {
   }
 
   fun getCompletions(
-    @Language("kotlin")
     code: String,
     line: Int,
     character: Int,
@@ -133,30 +112,30 @@ class TestProjectRunner {
     return kotlinProjectExecutor.complete(project, line, character)
   }
 
-  fun highlight(@Language("kotlin") code: String): CompilerDiagnostics {
+  fun highlight(code: String): CompilerDiagnostics {
     val project = generateSingleProject(text = code)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightJS(@Language("kotlin") code: String): CompilerDiagnostics {
+  fun highlightJS(code: String): CompilerDiagnostics {
     val project = generateSingleProject(text = code, projectType = ProjectType.JS_IR)
     return kotlinProjectExecutor.highlight(project)
   }
 
-  fun highlightWasm(@Language("kotlin") code: String): CompilerDiagnostics {
+  fun highlightWasm(code: String): CompilerDiagnostics {
     val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
     return kotlinProjectExecutor.highlight(project)
   }
 
   fun getVersion() = kotlinProjectExecutor.getVersion().version
 
-  private fun executeTest(@Language("kotlin") vararg test: String, addByteCode: Boolean): JunitExecutionResult? {
+  private fun executeTest(vararg test: String): JunitExecutionResult? {
     val project = generateMultiProject(*test, projectType = ProjectType.JUNIT)
-    return kotlinProjectExecutor.test(project, addByteCode) as? JunitExecutionResult
+    return kotlinProjectExecutor.test(project) as? JunitExecutionResult
   }
 
-  private fun runAndTest(project: Project, contains: String, addByteCode: Boolean): ExecutionResult {
-    val result = kotlinProjectExecutor.run(project, addByteCode)
+  private fun runAndTest(project: Project, contains: String): ExecutionResult {
+    val result = kotlinProjectExecutor.run(project)
     Assertions.assertNotNull(result, "Test result should no be a null")
     Assertions.assertTrue(
       result.text.contains(contains), """
@@ -214,8 +193,7 @@ class TestProjectRunner {
 
     val wat = result.wat
     val maxWatLengthInMessage = 97
-    val formattedWat =
-      wat?.let { if (it.length > maxWatLengthInMessage) "${it.take(maxWatLengthInMessage)}..." else it }
+    val formattedWat = wat?.let { if (it.length > maxWatLengthInMessage) "${it.take(maxWatLengthInMessage)}..." else it }
     assertTrue(
       actual = wat != null && wat.dropWhile { it.isWhitespace() }.startsWith("(module"),
       message = "wat is expected to start with \"(module\" but is $formattedWat"

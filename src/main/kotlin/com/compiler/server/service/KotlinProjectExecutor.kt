@@ -23,17 +23,17 @@ class KotlinProjectExecutor(
 
   private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
-  fun run(project: Project, addByteCode: Boolean): ExecutionResult {
+  fun run(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinCompiler.run(files, addByteCode, project.args)
+      kotlinCompiler.run(files, project.args)
     }.also { logExecutionResult(project, it) }
   }
 
-  fun test(project: Project, addByteCode: Boolean): ExecutionResult {
+  fun test(project: Project): ExecutionResult {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
-      kotlinCompiler.test(files, addByteCode)
+      kotlinCompiler.test(files)
     }.also { logExecutionResult(project, it) }
   }
 

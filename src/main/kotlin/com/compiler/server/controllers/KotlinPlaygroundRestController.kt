@@ -30,8 +30,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
     @RequestParam type: String,
     @RequestParam(required = false) line: Int?,
     @RequestParam(required = false) ch: Int?,
-    @RequestParam(required = false) project: Project?,
-    @RequestParam(defaultValue = "false") addByteCode: Boolean,
+    @RequestParam(required = false) project: Project?
   ): ResponseEntity<*> {
     val result = when (type) {
       "getKotlinVersions" -> listOf(kotlinProjectExecutor.getVersion())
@@ -40,7 +39,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
         when (type) {
           "run" -> {
             when (project.confType) {
-              ProjectType.JAVA -> kotlinProjectExecutor.run(project, addByteCode)
+              ProjectType.JAVA -> kotlinProjectExecutor.run(project)
               ProjectType.JS -> throw LegacyJsException()
               ProjectType.JS_IR, ProjectType.CANVAS ->
                 kotlinProjectExecutor.convertToJsIr(
@@ -50,7 +49,7 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
                 project,
                 debugInfo = false,
               )
-              ProjectType.JUNIT -> kotlinProjectExecutor.test(project, addByteCode)
+              ProjectType.JUNIT -> kotlinProjectExecutor.test(project)
             }
           }
 

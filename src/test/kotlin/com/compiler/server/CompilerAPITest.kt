@@ -1,7 +1,7 @@
 package com.compiler.server
 
 import com.compiler.server.generator.generateSingleProject
-import com.compiler.server.model.JvmExecutionResult
+import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -51,7 +51,7 @@ class CompilerAPITest {
           ),
           headers
         ),
-        JvmExecutionResult::class.java
+        ExecutionResult::class.java
       )
       assertNotNull(response, "Empty response!")
       assertContains(
