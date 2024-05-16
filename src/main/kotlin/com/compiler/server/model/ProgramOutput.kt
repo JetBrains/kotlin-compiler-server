@@ -16,19 +16,20 @@ const val ERROR_STREAM_END = "</errStream>"
 
 data class ProgramOutput(
   val standardOutput: String = "",
+  val jvmByteCode: String? = null,
   val exception: Exception? = null,
   val restriction: String? = null
 ) {
-  fun asExecutionResult(): ExecutionResult {
+  fun asExecutionResult(): JvmExecutionResult {
     return when {
-      restriction != null -> ExecutionResult().apply { text = buildRestriction(restriction) }
-      exception != null -> ExecutionResult(exception = exception.toExceptionDescriptor())
-      standardOutput.isBlank() -> ExecutionResult()
+      restriction != null -> JvmExecutionResult().apply { text = buildRestriction(restriction) }
+      exception != null -> JvmExecutionResult(exception = exception.toExceptionDescriptor())
+      standardOutput.isBlank() -> JvmExecutionResult()
       else -> {
         try {
-          outputMapper.readValue(standardOutput, ExecutionResult::class.java)
+          outputMapper.readValue(standardOutput, JvmExecutionResult::class.java)
         } catch (e: Exception) {
-          ExecutionResult(exception = e.toExceptionDescriptor())
+          JvmExecutionResult(exception = e.toExceptionDescriptor())
         }
       }
     }
