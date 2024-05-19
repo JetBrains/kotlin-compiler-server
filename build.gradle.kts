@@ -188,6 +188,20 @@ tasks.withType<BootJar> {
     requiresUnpack("**/kotlinx-*.jar")
 }
 
+fun buildRunFile() {
+    rootDir.resolve("src/main/resources/run.sh").apply {
+        println("Generate properties into run.sh")
+        parentFile.mkdirs()
+        writeText(
+            // language=bash
+            """
+                #!/bin/sh
+                exec java -noverify -XX:+UseParallelGC -XX:-UseCompressedOops -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
+            """.trimIndent()
+        )
+    }
+}
+
 val prepareComposeWasmResources by tasks.registering(Sync::class) {
     from(composeWasmStaticResources)
     into(layout.buildDirectory.dir("compose-wasm-resources"))
@@ -216,8 +230,8 @@ val buildLambda by tasks.creating(Zip::class) {
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
-
     dependsOn(prepareComposeWasmResources)
+    buildRunFile()
 }
 
 tasks.named<Copy>("processResources") {
