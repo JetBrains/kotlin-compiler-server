@@ -62,8 +62,12 @@ val resourceDependency: Configuration by configurations.creating {
 dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.3")
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude(group="org.springframework.boot", module="spring-boot-starter-tomcat")
+        exclude("tomcat-embed-*")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-jetty")
+    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.4")
     implementation("junit:junit:4.13.2")
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
     implementation("org.jetbrains.intellij.deps:trove4j:1.0.20221201")
