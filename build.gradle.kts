@@ -180,6 +180,20 @@ tasks.withType<BootJar> {
     requiresUnpack("**/kotlinx-*.jar")
 }
 
+fun buildRunFile() {
+    rootDir.resolve("src/main/resources/run.sh").apply {
+        println("Generate properties into run.sh")
+        parentFile.mkdirs()
+        writeText(
+            // language=bash
+            """
+                #!/bin/sh
+                exec java -noverify -XX:+UseParallelGC -XX:-UseCompressedOops -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
+            """.trimIndent()
+        )
+    }
+}
+
 val buildLambda by tasks.creating(Zip::class) {
     val propertyFile = propertyFile
     val propertyFileContent = generateProperties(lambdaPrefix)
@@ -207,6 +221,8 @@ val buildLambda by tasks.creating(Zip::class) {
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
+
+    buildRunFile()
 }
 
 tasks.named<Copy>("processResources") {
