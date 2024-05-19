@@ -159,6 +159,7 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.compiler-plugins=${prefix + compilerPluginsForJVM}
     caches.folder.compose-wasm=${prefix + cachesComposeWasm}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
+    spring.main.banner-mode=off
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
 """.trimIndent()
