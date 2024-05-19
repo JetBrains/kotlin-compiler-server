@@ -61,7 +61,11 @@ val resourceDependency: Configuration by configurations.creating {
 dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        exclude(group="org.springframework.boot", module="spring-boot-starter-tomcat")
+        exclude("tomcat-embed-*")
+    }
+    implementation("org.springframework.boot:spring-boot-starter-jetty")
     implementation(libs.springfox.boot.starter)
     implementation(libs.aws.springboot.container)
     implementation(libs.junit)
