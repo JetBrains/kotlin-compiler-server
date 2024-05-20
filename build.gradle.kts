@@ -152,9 +152,9 @@ fun buildRunFile() {
         println("Generate properties into run.sh")
         parentFile.mkdirs()
         writeText(
-            // language=bash
+            /* language=sh */
             """
-                #!/bin/sh
+                #!/usr/bin/env sh
                 exec java -noverify -XX:+UseParallelGC -XX:-UseCompressedOops -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
             """.trimIndent()
         )
@@ -181,7 +181,6 @@ val buildLambda by tasks.creating(Zip::class) {
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
-
     buildRunFile()
 }
 

@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  kotlin-compose-compiler-server
+
+  SAM Template for Kotlin Compose Compiler Server
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  ComposeServerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [ 'x86_64' ]
+      AutoPublishAlias: live
+      AutoPublishAliasAllProperties: true
+      DeploymentPreference:
+        Type: AllAtOnce
+        Enabled: true
+      MemorySize: 4096
+      Handler: run.sh
+      CodeUri: ./kotlin-compiler-server.zip
+      Runtime: java21
+      Timeout: 120
+      SnapStart:
+        ApplyOn: PublishedVersions
+      Environment:
+        Variables:
+          AWS_LAMBDA_EXEC_WRAPPER: /opt/bootstrap
+          AWS_LWA_INVOKE_MODE: response_stream
+          MAIN_CLASS: com.compiler.server.CompilerApplicationKt
+          READINESS_CHECK_PATH: /health
+          REMOVE_BASE_PATH: /v1
+          RUST_LOG: info
+          SPRING_PROFILES_ACTIVE: prod
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:753240598075:layer:LambdaAdapterLayerX86:22
+      FunctionUrlConfig:
+        AuthType: NONE
+        InvokeMode: RESPONSE_STREAM
+
+Outputs:
+  ComposeServerFunctionUrl:
+    Description: "Function URL for Kotlin Compose Compiler Server"
+    Value: !Sub '${ComposeServerFunctionUrl.FunctionUrl}'
+  ComposeServerFunction:
+    Description: "Kotlin Compose Compiler Server Lambda Function ARN"
+    Value: !GetAtt ComposeServerFunction.Arn
