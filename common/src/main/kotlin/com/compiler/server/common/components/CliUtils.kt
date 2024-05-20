@@ -9,11 +9,20 @@ import kotlin.io.path.*
 fun <T> usingTempDirectory(action: (path: Path) -> T): T {
   val path = getTempDirectory()
   path.createDirectories()
-  return try {
-    action(path)
-  } finally {
-    path.deleteRecursively()
-  }
+    return try {
+        action(path)
+    } finally {
+        path.deleteRecursively()
+
+        System.getenv("COMPILER_SERVER_TMP_PATH")?.let {
+            val directory = File(it)
+            if (directory.exists() && directory.isDirectory) {
+                directory.listFiles()?.forEach { file ->
+                    file.deleteRecursively()
+                }
+            }
+        }
+    }
 }
 
 private fun getTempDirectory(): Path {
