@@ -188,7 +188,13 @@ fun buildRunFile() {
             /* language=sh */
             """
                 #!/usr/bin/env sh
-                exec java -noverify -XX:+UseParallelGC -XX:-UseCompressedOops -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
+                
+                export COMPILER_SERVER_TMP_PATH="${'$'}(mktemp -d)"
+                
+                exec java -noverify \
+                    -XX:+UseParallelGC -XX:-UseCompressedOops \
+                    -Djava.io.tmpdir="${'$'}COMPILER_SERVER_TMP_PATH" \
+                    -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
             """.trimIndent()
         )
     }

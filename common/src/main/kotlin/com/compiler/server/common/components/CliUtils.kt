@@ -17,7 +17,12 @@ fun <T> usingTempDirectory(action: (path: Path) -> T): T {
 }
 
 private fun getTempDirectory(): Path {
-  val dir = System.getProperty("java.io.tmpdir")
+  val dir = System.getenv("COMPILER_SERVER_TMP_PATH").takeIf {
+    if (it.isNullOrBlank()) return false
+    val directory = File(it)
+    directory.exists() && directory.isDirectory
+  } ?: System.getProperty("java.io.tmpdir")
+
   val sessionId = UUID.randomUUID().toString().replace("-", "")
   return File(dir).canonicalFile.resolve(sessionId).toPath()
 }
