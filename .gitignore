@@ -5,6 +5,7 @@ build/
 !**/src/test/**
 src/main/resources/application.properties
 resource-server/src/main/resources/application.properties
+src/main/resources/run.sh
 
 # compile artifacts
 .kotlin/

@@ -193,9 +193,9 @@ fun buildRunFile() {
         println("Generate properties into run.sh")
         parentFile.mkdirs()
         writeText(
-            // language=bash
+            /* language=sh */
             """
-                #!/bin/sh
+                #!/usr/bin/env sh
                 exec java -noverify -XX:+UseParallelGC -XX:-UseCompressedOops -cp "./:lib/*" "com.compiler.server.CompilerApplicationKt"
             """.trimIndent()
         )
