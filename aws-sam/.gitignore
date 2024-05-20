@@ -1,17 +1,8 @@
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**
-!**/src/test/**
-src/main/resources/application.properties
-src/main/resources/run.sh
-
-# compile artifacts
-.kotlin/
-1.9.*/
-2.*/
-indexes*.json
-*.log
+HELP.md
+target/
+!app/.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 ### STS ###
 .apt_generated
@@ -21,13 +12,13 @@ indexes*.json
 .settings
 .springBeans
 .sts4-cache
+.DS_Store
 
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
-out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -35,6 +26,15 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/
+
+.mvn
+.aws-sam
+samconfig.toml
+
+kotlin-compiler-server.zip
