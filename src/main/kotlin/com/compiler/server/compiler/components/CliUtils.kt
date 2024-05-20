@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.psi.KtFile
+import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.*
@@ -112,6 +113,15 @@ fun <T> usingTempDirectory(action: (path: Path) -> T): T {
     action(path)
   } finally {
     path.deleteRecursively()
+
+    System.getenv("COMPILER_SERVER_TMP_PATH")?.let {
+      val directory = File(it)
+      if (directory.exists() && directory.isDirectory) {
+        directory.listFiles()?.forEach { file ->
+          file.deleteRecursively()
+        }
+      }
+    }
   }
 }
 
