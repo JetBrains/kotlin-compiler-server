@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":9},"end":{"line":0,"ch":13}},"message":"Parameter 'args' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>'in' was found in 'Kotlin'\nKotlin\n    ^\n</outStream>"}

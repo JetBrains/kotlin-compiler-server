@@ -179,6 +179,25 @@ class CoroutinesRunnerTest : BaseExecutorTest() {
     )
   }
 
+  @Test
+  fun `IO coroutine out order`() {
+    run(
+      //language=kotlin
+      code = """
+        import kotlinx.coroutines.*
+
+        fun main() = runBlocking {
+            CoroutineScope(Dispatchers.IO).launch {
+                delay(1000)
+                println("A")
+            }
+            println("B")
+            delay(2000)
+        }
+      """.trimIndent(),
+      contains = "<outStream>B\nA\n</outStream>"
+    )
+  }
 
   @Test
   @Disabled

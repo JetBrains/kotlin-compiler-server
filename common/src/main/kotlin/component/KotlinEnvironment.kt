@@ -47,6 +47,7 @@ class KotlinEnvironment(
       "-opt-in=kotlin.contracts.ExperimentalContracts",
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-Xcontext-receivers",
+      "-XXLanguage:+ExplicitBackingFields"
     )
   }
 
@@ -107,7 +108,7 @@ class KotlinEnvironment(
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    parentDisposable = Disposer.newDisposable(),
+    projectDisposable = Disposer.newDisposable(),
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )

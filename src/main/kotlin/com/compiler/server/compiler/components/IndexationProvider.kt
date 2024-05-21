@@ -17,7 +17,7 @@ class IndexationProvider(
   @Value("\${indexesComposeWasm.file}") private val indexesComposeWasmFileName: String,
 ) {
   companion object {
-    const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
+    const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference "
     private val log = LogFactory.getLog(IndexationProvider::class.java)
   }
 
