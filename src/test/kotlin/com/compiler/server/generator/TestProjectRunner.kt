@@ -63,6 +63,11 @@ class TestProjectRunner {
     )
   }
 
+  fun translateToSwift(code: String): SwiftExportResult {
+    val project = generateSingleProject(text = code, projectType = ProjectType.SWIFT_EXPORT)
+    return kotlinProjectExecutor.convertToSwift(project)
+  }
+
   fun runWithException(code: String, contains: String, message: String? = null): ExecutionResult {
     val project = generateSingleProject(text = code)
     val result = kotlinProjectExecutor.run(project)

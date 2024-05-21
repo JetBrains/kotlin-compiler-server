@@ -60,6 +60,8 @@ class BaseExecutorTest {
 
   fun translateToJsIr(code: String) = testRunner.translateToJsIr(code)
 
+  fun translateToSwift(code: String) = testRunner.translateToSwift(code)
+
   fun runWithException(code: String, contains: String, message: String? = null) = testRunner.runWithException(code, contains, message)
 
   fun version() = testRunner.getVersion()
