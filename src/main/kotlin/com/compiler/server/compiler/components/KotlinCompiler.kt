@@ -2,7 +2,7 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.model.ExecutionResult
+import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
@@ -16,9 +16,12 @@ import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes.*
+import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -38,18 +41,36 @@ class KotlinCompiler(
     val mainClasses: Set<String> = emptySet()
   )
 
-  fun run(files: List<KtFile>, args: String): ExecutionResult {
-    return execute(files) { output, compiled ->
+  private fun ByteArray.asHumanReadable(): String {
+    val classReader = ClassReader(this)
+    val stringWriter = StringWriter()
+    val printWriter = PrintWriter(stringWriter)
+    val traceClassVisitor = TraceClassVisitor(printWriter)
+
+    classReader.accept(traceClassVisitor, 0)
+
+    return stringWriter.toString()
+  }
+  
+  private fun JvmExecutionResult.addByteCode(compiled: JvmClasses) {
+    jvmByteCode = compiled.files
+      .mapNotNull { (_, bytes) -> runCatching { bytes.asHumanReadable() }.getOrNull() }
+      .takeUnless { it.isEmpty() }
+      ?.joinToString("\n\n")
+  }
+
+  fun run(files: List<KtFile>, addByteCode: Boolean, args: String): JvmExecutionResult {
+    return execute(files, addByteCode) { output, compiled ->
       val mainClass = JavaRunnerExecutor::class.java.name
       val compiledMainClass = when (compiled.mainClasses.size) {
-        0 -> return@execute ExecutionResult(
+        0 -> return@execute JvmExecutionResult(
           exception = IllegalArgumentException("No main method found in project").toExceptionDescriptor()
         )
 
         1 -> compiled.mainClasses.single()
-        else -> return@execute ExecutionResult(
+        else -> return@execute JvmExecutionResult(
           exception = IllegalArgumentException(
-            "Multiple classes in project contain main methods found: ${compiled.mainClasses.joinToString()}"
+            "Multiple classes in project contain main methods found: ${compiled.mainClasses.sorted().joinToString()}"
           ).toExceptionDescriptor()
         )
       }
@@ -59,8 +80,8 @@ class KotlinCompiler(
     }
   }
 
-  fun test(files: List<KtFile>): ExecutionResult {
-    return execute(files) { output, _ ->
+  fun test(files: List<KtFile>, addByteCode: Boolean): JvmExecutionResult {
+    return execute(files, addByteCode) { output, _ ->
       val mainClass = JUnitExecutors::class.java.name
       javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
         .asJUnitExecutionResult()
@@ -117,22 +138,26 @@ class KotlinCompiler(
 
   private fun execute(
     files: List<KtFile>,
-    block: (output: OutputDirectory, compilation: JvmClasses) -> ExecutionResult
-  ): ExecutionResult = try {
+    addByteCode: Boolean,
+    block: (output: OutputDirectory, compilation: JvmClasses) -> JvmExecutionResult
+  ): JvmExecutionResult = try {
     when (val compilationResult = compile(files)) {
       is Compiled<JvmClasses> -> {
         usingTempDirectory { outputDir ->
           val output = write(compilationResult.result, outputDir)
           block(output, compilationResult.result).also {
             it.addWarnings(compilationResult.compilerDiagnostics)
+            if (addByteCode) {
+              it.addByteCode(compilationResult.result)
+            }
           }
         }
       }
 
-      is NotCompiled -> ExecutionResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
+      is NotCompiled -> JvmExecutionResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
     }
   } catch (e: Exception) {
-    ExecutionResult(exception = e.toExceptionDescriptor())
+    JvmExecutionResult(exception = e.toExceptionDescriptor())
   }
 
   private fun write(classes: JvmClasses, outputDir: Path): OutputDirectory {

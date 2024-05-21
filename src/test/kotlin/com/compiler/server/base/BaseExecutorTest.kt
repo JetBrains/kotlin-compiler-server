@@ -1,6 +1,7 @@
 package com.compiler.server.base
 
 import com.compiler.server.generator.TestProjectRunner
+import org.intellij.lang.annotations.Language
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -10,6 +11,7 @@ class BaseExecutorTest {
   private lateinit var testRunner: TestProjectRunner
 
   fun complete(
+    @Language("kotlin")
     code: String,
     line: Int,
     character: Int,
@@ -18,23 +20,25 @@ class BaseExecutorTest {
   ) = testRunner.complete(code, line, character, completions, isJs)
 
   fun getCompletions(
+    @Language("kotlin")
     code: String,
     line: Int,
     character: Int,
     isJs: Boolean = false
   ) = testRunner.getCompletions(code, line, character, isJs)
 
-  fun highlight(code: String) = testRunner.highlight(code)
+  fun highlight(@Language("kotlin") code: String) = testRunner.highlight(code)
 
-  fun highlightJS(code: String) = testRunner.highlightJS(code)
+  fun highlightJS(@Language("kotlin") code: String) = testRunner.highlightJS(code)
 
-  fun highlightWasm(code: String) = testRunner.highlightWasm(code)
+  fun highlightWasm(@Language("kotlin") code: String) = testRunner.highlightWasm(code)
 
-  fun run(code: String, contains: String, args: String = "") = testRunner.run(code, contains, args)
+  fun run(@Language("kotlin") code: String, contains: String, args: String = "", addByteCode: Boolean = false) = testRunner.run(code, contains, args, addByteCode)
 
-  fun run(code: List<String>, contains: String) = testRunner.multiRun(code, contains)
+  fun run(code: List<String>, contains: String, addByteCode: Boolean = false) = testRunner.multiRun(code, contains, addByteCode)
 
   fun runJsIr(
+    @Language("kotlin")
     code: String,
     contains: String,
     args: String = ""
@@ -54,13 +58,15 @@ class BaseExecutorTest {
   }
 
   fun runWasm(
+    @Language("kotlin")
     code: String,
     contains: String
   ) = testRunner.runWasm(code, contains)
 
-  fun translateToJsIr(code: String) = testRunner.translateToJsIr(code)
+  fun translateToJsIr(@Language("kotlin") code: String) = testRunner.translateToJsIr(code)
 
-  fun runWithException(code: String, contains: String, message: String? = null) = testRunner.runWithException(code, contains, message)
+  fun runWithException(@Language("kotlin") code: String, contains: String, message: String? = null, addByteCode: Boolean = false) =
+    testRunner.runWithException(code, contains, message, addByteCode)
 
   fun version() = testRunner.getVersion()
 }
