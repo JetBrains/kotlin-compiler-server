@@ -37,6 +37,7 @@ COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-serve
 COPY --from=build /kotlin-compiler-server/indexes.json /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/indexesJs.json /kotlin-compiler-server/
 COPY --from=build /kotlin-compiler-server/indexesWasm.json /kotlin-compiler-server/
+COPY --from=build /kotlin-compiler-server/indexesComposeWasm.json /kotlin-compiler-server/
 
 ENV PORT=8080
 
