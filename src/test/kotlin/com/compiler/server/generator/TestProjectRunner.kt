@@ -208,10 +208,6 @@ class TestProjectRunner {
     val wasmMain = tmpDir.resolve("moduleId.wasm")
     wasmMain.writeBytes(result.wasm)
 
-    // It is necessary because wasm DCE leaves skiko references
-//    Path(this::class.java.classLoader.getResource("wasm-resources/skiko.mjs")!!.path)
-//      .copyTo(tmpDir.resolve("skiko.mjs"))
-
     val wat = result.wat
     val maxWatLengthInMessage = 97
     val formattedWat =
