@@ -82,7 +82,7 @@ dependencies {
     }
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
-    resourceDependency("org.jetbrains.skiko:skiko-js-wasm-runtime:0.7.90")
+    resourceDependency("org.jetbrains.skiko:skiko-js-wasm-runtime:0.8.4")
 }
 
 fun buildPropertyFile() {
