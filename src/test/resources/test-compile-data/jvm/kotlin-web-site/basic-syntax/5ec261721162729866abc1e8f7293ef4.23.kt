@@ -1,11 +1,12 @@
 fun main() {
 //sampleStart
-    for (x in 1..10 step 2) {
-        print(x)
+    val list = listOf("a", "b", "c")
+    
+    if (-1 !in 0..list.lastIndex) {
+        println("-1 is out of range")
     }
-    println()
-    for (x in 9 downTo 0 step 3) {
-        print(x)
+    if (list.size !in list.indices) {
+        println("list size is out of valid list indices range, too")
     }
 //sampleEnd
 }

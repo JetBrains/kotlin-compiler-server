@@ -1,7 +1,12 @@
-//sampleStart
-fun maxOf(a: Int, b: Int) = if (a > b) a else b
-//sampleEnd
-
 fun main() {
-    println("max of 0 and 42 is ${maxOf(0, 42)}")
+//sampleStart
+    var a = 1
+    // simple name in template:
+    val s1 = "a is $a" 
+    
+    a = 2
+    // arbitrary expression in template:
+    val s2 = "${s1.replace("is", "was")}, but now is $a"
+//sampleEnd
+    println(s2)
 }

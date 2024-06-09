@@ -1,11 +1,10 @@
 //sampleStart
 fun getStringLength(obj: Any): Int? {
-    if (obj is String) {
-        // `obj` is automatically cast to `String` in this branch
+    // `obj` is automatically cast to `String` on the right-hand side of `&&`
+    if (obj is String && obj.length > 0) {
         return obj.length
     }
 
-    // `obj` is still of type `Any` outside of the type-checked branch
     return null
 }
 //sampleEnd
@@ -15,6 +14,6 @@ fun main() {
         println("Getting the length of '$obj'. Result: ${getStringLength(obj) ?: "Error: The object is not a string"} ")
     }
     printLength("Incomprehensibilities")
+    printLength("")
     printLength(1000)
-    printLength(listOf(Any()))
 }

@@ -1,7 +1,9 @@
 fun main() {
 //sampleStart
-    for (x in 1..5) {
-        print(x)
+    val x = 10
+    val y = 9
+    if (x in 1..y+1) {
+        println("fits in range")
     }
 //sampleEnd
 }

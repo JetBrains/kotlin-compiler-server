@@ -1,12 +1,18 @@
-fun main() {
 //sampleStart
-    var a = 1
-    // simple name in template:
-    val s1 = "a is $a" 
-    
-    a = 2
-    // arbitrary expression in template:
-    val s2 = "${s1.replace("is", "was")}, but now is $a"
+val PI = 3.14
+var x = 0
+
+fun incrementX() {
+    x += 1
+}
+// x = 0; PI = 3.14
+// incrementX()
+// x = 1; PI = 3.14
 //sampleEnd
-    println(s2)
+
+fun main() {
+    println("x = $x; PI = $PI")
+    incrementX()
+    println("incrementX()")
+    println("x = $x; PI = $PI")
 }
