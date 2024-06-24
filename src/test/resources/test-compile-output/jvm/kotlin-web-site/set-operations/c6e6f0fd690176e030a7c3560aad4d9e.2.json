@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>[1, 2, 3, 5]\n[1, 2, 3, 5, 8, -1]\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[one, two]\n[one, two]\n[one, two]\n</outStream>"}
