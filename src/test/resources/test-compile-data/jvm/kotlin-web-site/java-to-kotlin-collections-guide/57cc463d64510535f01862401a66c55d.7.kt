@@ -1,4 +1,4 @@
-class Request(
+data class Request(
     val url: String,
     val responseCode: Int
 )

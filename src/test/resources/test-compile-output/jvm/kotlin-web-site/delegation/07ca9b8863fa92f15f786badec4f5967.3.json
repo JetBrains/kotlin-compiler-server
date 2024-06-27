@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"text":"<outStream>BaseImpl: x = 10\nMessage of Derived\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>BaseImpl: x = 10\nMessage of Derived\n</outStream>"}

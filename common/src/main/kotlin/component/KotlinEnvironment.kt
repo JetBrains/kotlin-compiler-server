@@ -48,7 +48,9 @@ class KotlinEnvironment(
       "-opt-in=kotlin.contracts.ExperimentalContracts",
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-Xcontext-receivers",
-      "-XXLanguage:+ExplicitBackingFields"
+      "-Xreport-all-warnings",
+      "-Xuse-fir-extended-checkers",
+      "-XXLanguage:+ExplicitBackingFields",
     )
   }
 

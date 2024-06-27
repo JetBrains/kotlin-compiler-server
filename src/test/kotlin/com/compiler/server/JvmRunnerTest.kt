@@ -107,4 +107,33 @@ class JvmRunnerTest : BaseExecutorTest() {
       result.compilerDiagnostics[0].message
     )
   }
+
+  @Test
+  fun `warnings after exception`() {
+    // language=kotlin
+    val result = run(
+      """
+        fun main() {
+          println("")g
+          var someVar = 1
+        }
+      """.trimIndent(), ""
+    )
+
+    assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
+  }
+
+  @Test
+  fun `warnings without exception`() {
+    // language=kotlin
+    val result = run(
+      """
+        fun main() {
+          println("")
+          var someVar = 1
+        }
+      """.trimIndent(), "")
+
+    assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
+  }
 }
