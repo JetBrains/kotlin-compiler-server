@@ -1,10 +1,8 @@
 package com.compiler.server
 
 import com.compiler.server.generator.generateSingleProject
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.ProjectType
+import com.compiler.server.model.*
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,15 +32,21 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
             generateSingleProject(code, projectType = platform)
         )
 
+        val resultClass = when (platform) {
+            ProjectType.JUNIT -> JunitExecutionResult::class.java
+            ProjectType.JAVA -> JvmExecutionResult::class.java
+            ProjectType.JS, ProjectType.CANVAS, ProjectType.JS_IR -> TranslationJSResult::class.java
+            ProjectType.WASM, ProjectType.COMPOSE_WASM -> TranslationWasmResult::class.java
+        }
         val result = RestTemplate().postForObject(
-            "${getHost()}$url", HttpEntity(body, headers), ExecutionResult::class.java
+            "${getHost()}$url", HttpEntity(body, headers), resultClass
         )
 
         return result ?:
             throw IllegalStateException("Result is null")
     }
 
-    @Test @Disabled
+    @Test
     fun `http requests from resource folder`() {
         checkResourceExamples(listOf(testDirJVM, testDirJS)) { result, file ->
             val json = jacksonObjectMapper().writeValueAsString(result)
@@ -89,5 +93,6 @@ private fun File.isInconsistentOutput(): Boolean {
         ".inWholeNanoseconds",
         " measureTime {",
         " measureTimedValue {",
+        "LocalDate.now()",
     ).any { code.contains(it) }
 }

@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":4,"ch":9},"end":{"line":4,"ch":13}},"message":"Parameter 'args' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>getResult() returns Result(value=42, status=ok)\nstatus is 'ok'\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>getResult() returns Result(value=42, status=ok)\nstatus is 'ok'\n</outStream>"}

@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":9},"end":{"line":0,"ch":13}},"message":"Parameter 'args' is never used","severity":"WARNING","className":"WARNING"}]},"exception":null,"text":"<outStream>[Ljava.lang.String;@b1bc7ed\n[a, b, c]\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[Ljava.lang.String;\n[a, b, c]\n</outStream>"}
