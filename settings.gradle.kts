@@ -6,8 +6,8 @@ include(":dependencies")
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         mavenCentral()
+        gradlePluginPortal()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
     }
 }
