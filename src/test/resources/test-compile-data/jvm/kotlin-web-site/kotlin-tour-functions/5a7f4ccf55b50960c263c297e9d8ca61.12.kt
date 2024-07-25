@@ -1,4 +1,4 @@
-val upperCaseString: (String) -> String = { string -> string.uppercase() }
+val upperCaseString: (String) -> String = { text -> text.uppercase() }
 
 fun main() {
     println(upperCaseString("hello"))

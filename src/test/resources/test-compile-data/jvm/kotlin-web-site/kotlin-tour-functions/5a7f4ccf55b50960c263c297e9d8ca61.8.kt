@@ -1,4 +1,4 @@
 fun main() {
-    println({ string: String -> string.uppercase() }("hello"))
+    println({ text: String -> text.uppercase() }("hello"))
     // HELLO
 }

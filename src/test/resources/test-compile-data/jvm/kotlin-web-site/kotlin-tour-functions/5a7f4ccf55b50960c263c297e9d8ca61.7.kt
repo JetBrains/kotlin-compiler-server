@@ -1,5 +1,5 @@
-fun uppercaseString(string: String): String {
-    return string.uppercase()
+fun uppercaseString(text: String): String {
+    return text.uppercase()
 }
 fun main() {
     println(uppercaseString("hello"))

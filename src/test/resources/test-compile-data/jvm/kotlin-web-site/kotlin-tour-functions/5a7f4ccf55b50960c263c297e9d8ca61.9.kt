@@ -1,5 +1,5 @@
 fun main() {
-    val upperCaseString = { string: String -> string.uppercase() }
+    val upperCaseString = { text: String -> text.uppercase() }
     println(upperCaseString("hello"))
     // HELLO
 }

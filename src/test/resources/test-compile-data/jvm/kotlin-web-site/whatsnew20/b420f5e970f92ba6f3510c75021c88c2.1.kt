@@ -16,12 +16,16 @@ fun testString() {
         if (2 > 1) throw Exception()
         stringInput = ""
     } catch (exception: Exception) {
-        // The compiler knows stringInput can be null
-        // so stringInput stays nullable.
+        // In Kotlin 2.0.0, the compiler knows stringInput 
+        // can be null, so stringInput stays nullable.
         println(stringInput?.length)
         // null
+
+        // In Kotlin 1.9.20, the compiler says that a safe call isn't
+        // needed, but this is incorrect.
     }
 }
+
 //sampleEnd
 fun main() {
     testString()
