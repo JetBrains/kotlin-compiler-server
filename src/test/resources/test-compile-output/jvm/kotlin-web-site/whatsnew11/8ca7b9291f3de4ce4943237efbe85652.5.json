@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>one!\ntwo!\n</outStream>"}
+{"errors":{"File.kt":[{"interval":{"start":{"line":4,"ch":18},"end":{"line":4,"ch":19}},"message":"Parameter '<unused var>: Int' is never used, could be renamed to '_'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>one!\ntwo!\n</outStream>"}
