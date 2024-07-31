@@ -6,7 +6,6 @@ import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.TextInterval
 import org.jetbrains.kotlin.cli.common.CLICompiler
-import org.jetbrains.kotlin.cli.common.CLITool
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
@@ -56,7 +55,7 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
     inputFiles.forEach { put(it.outputFilePathString(), mutableListOf()) }
   }
   val defaultFileName = inputFiles.singleOrNull()?.outputFilePathString() ?: ""
-  val exitCode = CLITool.doMainNoExit(this, arguments.toTypedArray(), object : MessageRenderer {
+  val exitCode = CLICompiler.doMainNoExit(this, arguments.toTypedArray(), object : MessageRenderer {
     override fun renderPreamble(): String = ""
 
     override fun render(

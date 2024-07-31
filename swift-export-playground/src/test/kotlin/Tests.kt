@@ -39,9 +39,14 @@ class SwiftExportTests {
         """.trimIndent(),
         """
             import KotlinRuntime
-
+            
             public class A : KotlinRuntime.KotlinBase {
                 public override init() {
+                    stub()
+                }
+                public override init(
+                    __externalRCRef: Swift.UInt
+                ) {
                     stub()
                 }
             }
@@ -55,7 +60,7 @@ class SwiftExportTests {
         """.trimIndent(),
         """
             import KotlinRuntime
-
+            
             public class O : KotlinRuntime.KotlinBase {
                 public static var shared: Playground.O {
                     get {
@@ -63,6 +68,11 @@ class SwiftExportTests {
                     }
                 }
                 private override init() {
+                    stub()
+                }
+                public override init(
+                    __externalRCRef: Swift.UInt
+                ) {
                     stub()
                 }
             }
@@ -76,6 +86,25 @@ class SwiftExportTests {
         """.trimIndent(),
         """
             public typealias MyInt = Swift.Int32
+        """.trimIndent()
+    )
+
+    @Test
+    fun `strings and chars`() = testSources(
+        """
+            fun produceString(): String = "hello"
+            
+            fun firstChar(str: String): Char = str.first()
+        """.trimIndent(),
+        """
+            public func firstChar(
+                str: Swift.String
+            ) -> Swift.Unicode.UTF16.CodeUnit {
+                stub()
+            }
+            public func produceString() -> Swift.String {
+                stub()
+            }
         """.trimIndent()
     )
 }

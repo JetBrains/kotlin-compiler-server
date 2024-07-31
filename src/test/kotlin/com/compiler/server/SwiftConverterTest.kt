@@ -4,7 +4,6 @@ import com.compiler.server.base.BaseExecutorTest
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class SwiftConverterTest : BaseExecutorTest() {
 
@@ -16,11 +15,6 @@ class SwiftConverterTest : BaseExecutorTest() {
     private fun containsTest(input: String, expected: String) {
         val actual = translateToSwift(input)
         assertContains(actual.swiftCode.trimEnd(), expected)
-    }
-
-    private fun shouldFailTest(input: String) {
-        val actual = translateToSwift(input)
-        assertTrue(actual.hasErrors())
     }
 
     @Test
@@ -46,9 +40,14 @@ class SwiftConverterTest : BaseExecutorTest() {
         input = "public class MyClass { public fun A() {}}",
         expected = """
         import KotlinRuntime
-
+        
         public class MyClass : KotlinRuntime.KotlinBase {
             public override init() {
+                stub()
+            }
+            public override init(
+                __externalRCRef: Swift.UInt
+            ) {
                 stub()
             }
             public func A() -> Swift.Void {
@@ -66,15 +65,13 @@ class SwiftConverterTest : BaseExecutorTest() {
             val myProperty: Int = 42
         """.trimIndent(),
         expected = """
-            public extension Playground.foo.bar {
+            @_exported import pkg
+            
+            public extension pkg.foo.bar {
                 public static var myProperty: Swift.Int32 {
                     get {
                         stub()
                     }
-                }
-            }
-            public enum foo {
-                public enum bar {
                 }
             }
         """.trimIndent()
@@ -92,6 +89,20 @@ class SwiftConverterTest : BaseExecutorTest() {
         input = "fun foo(): Bar = error()",
         expected = """
             public func foo() -> ERROR_TYPE {
+                stub()
+            }
+        """.trimIndent()
+    )
+
+    @Test
+    fun `unsupported type declaration`() = exactTest(
+        input = """
+            interface Foo
+            
+            fun produceFoo(): Foo = TODO()
+        """.trimIndent(),
+        expected = """
+            public func produceFoo() -> Swift.Never {
                 stub()
             }
         """.trimIndent()
