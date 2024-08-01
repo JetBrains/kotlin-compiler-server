@@ -1,9 +1,13 @@
 fun main() {
-//sampleStart
-    for (number in 1..5) { 
-        // number is the iterator and 1..5 is the range
-        print(number)
+    val trafficLightState = "Red" // This can be "Green", "Yellow", or "Red"
+
+    val trafficAction = when (trafficLightState) {
+        "Green" -> "Go"
+        "Yellow" -> "Slow down"
+        "Red" -> "Stop"
+        else -> "Malfunction"
     }
-    // 12345
-//sampleEnd
+
+    println(trafficAction)  
+    // Stop
 }
