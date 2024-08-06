@@ -59,6 +59,7 @@ dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("io.springfox:springfox-boot-starter:3.0.0")
     implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.3")
     implementation("junit:junit:4.13.2")
     implementation("net.logstash.logback:logstash-logback-encoder:7.3")
