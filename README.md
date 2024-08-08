@@ -163,7 +163,7 @@ task called `kotlinDependency`:
 NOTE: If the library you're adding uses reflection, accesses the file system, or performs any other type of
 security-sensitive operations, don't forget to
 configure
-the [executors.policy](https://github.com/AlexanderPrednota/kotlin-compiler-server/blob/master/executors.policy)
+the [executor.policy](https://github.com/JetBrains/kotlin-compiler-server/blob/master/executor.policy)
 . [Click here](https://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html) for more information
 about *Java Security Policy*.
 
