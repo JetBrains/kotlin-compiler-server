@@ -1,19 +1,27 @@
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.kotlin.dsl.the
 
-val kotlinVersion: String by System.getProperties()
-val kotlinIdeVersion: String by System.getProperties()
-val kotlinIdeVersionSuffix: String by System.getProperties()
 val indexes: String by System.getProperties()
 val indexesJs: String by System.getProperties()
 val indexesWasm: String by System.getProperties()
 val indexesComposeWasm: String by System.getProperties()
 
-val libJS = "$kotlinVersion-js"
-val libWasm = "$kotlinVersion-wasm"
-val libComposeWasm = "$kotlinVersion-compose-wasm"
-val libComposeWasmCompilerPlugins = "$kotlinVersion-compose-wasm-compiler-plugins"
-val libJVM = kotlinVersion
+// workaround to pass libs into conventions (see https://github.com/gradle/gradle/issues/15383)
+val Project.kotlinVersion
+    get() = the<LibrariesForLibs>().versions.kotlin.get()
+
+val Project.libJS
+    get() = "$kotlinVersion-js"
+val Project.libWasm
+    get() = "$kotlinVersion-wasm"
+val Project.libComposeWasm
+    get() = "$kotlinVersion-compose-wasm"
+val Project.libComposeWasmCompilerPlugins
+    get() = "$kotlinVersion-compose-wasm-compiler-plugins"
+val Project.libJVM
+    get() = kotlinVersion
 
 val Project.libJSFolder
     get() = rootProject.layout.projectDirectory.dir(libJS)

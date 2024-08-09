@@ -7,16 +7,15 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 val policy: String by System.getProperties()
 
 group = "com.compiler.server"
-version = "$kotlinVersion-SNAPSHOT"
+version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 
 val propertyFile = "application.properties"
 
 plugins {
-    id("org.springframework.boot") version "2.7.10"
-    id("io.spring.dependency-management") version "1.1.3"
-    val kotlinVersion by System.getProperties()
-    kotlin("jvm") version "$kotlinVersion"
-    kotlin("plugin.spring") version "$kotlinVersion"
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.plugin.spring)
 }
 
 kotlin.jvmToolchain {
@@ -46,7 +45,7 @@ allprojects {
         dependencies {
             dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
-                implementation("org.jetbrains.kotlin:idea:231-$kotlinIdeVersion-$kotlinIdeVersionSuffix") {
+                implementation(libs.kotlin.idea) {
                     isTransitive = false
                 }
             }
@@ -63,31 +62,29 @@ dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("io.springfox:springfox-boot-starter:3.0.0")
-    implementation("com.amazonaws.serverless:aws-serverless-java-container-springboot2:1.9.3")
-    implementation("junit:junit:4.13.2")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.3")
-    implementation("org.jetbrains.intellij.deps:trove4j:1.0.20221201")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion") {
+    implementation(libs.springfox.boot.starter)
+    implementation(libs.aws.springboot.container)
+    implementation(libs.junit)
+    implementation(libs.logback.logstash.encoder)
+    implementation(libs.intellij.trove4j)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.bundles.kotlin.stdlib)
+    implementation(libs.kotlin.test)
+    implementation(libs.kotlin.compiler)
+    implementation(libs.kotlin.script.runtime)
+    implementation(libs.kotlin.compiler.ide) {
         isTransitive = false
     }
-    implementation("org.jetbrains.kotlin:core:231-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
+    implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(libs.kotlinx.coroutines.test)
 
-    resourceDependency("org.jetbrains.skiko:skiko-js-wasm-runtime:0.7.90")
+    resourceDependency(libs.skiko.js.wasm.runtime)
 }
 
 fun buildPropertyFile() {
@@ -129,7 +126,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(":indexation:run")
     buildPropertyFile()
 }
-println("Using Kotlin compiler $kotlinVersion")
+println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
 
 tasks.withType<BootJar> {
     requiresUnpack("**/kotlin-*.jar")
