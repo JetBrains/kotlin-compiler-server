@@ -11,3 +11,14 @@ pluginManagement {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
     }
 }
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        val kotlinVersion = providers.gradleProperty("kotlinVersion")
+        if (kotlinVersion.isPresent) {
+            create("libs") {
+                version("kotlin", kotlinVersion.get())
+            }
+        }
+    }
+}
