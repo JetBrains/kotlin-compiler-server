@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adopt'
+          distribution: 'temurin'
       - name: Run a verifier
         uses: AlexanderPrendota/kotlin-samples-verifier@master
         with:
