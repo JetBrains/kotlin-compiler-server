@@ -8,7 +8,6 @@ val policy: String by System.getProperties()
 
 group = "com.compiler.server"
 version = "$kotlinVersion-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
 
 val propertyFile = "application.properties"
 
@@ -18,6 +17,11 @@ plugins {
     val kotlinVersion by System.getProperties()
     kotlin("jvm") version "$kotlinVersion"
     kotlin("plugin.spring") version "$kotlinVersion"
+}
+
+kotlin.jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
 }
 
 apply<NodeJsRootPlugin>()
@@ -71,7 +75,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-compiler:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion"){
+    implementation("org.jetbrains.kotlin:kotlin-compiler-for-ide:$kotlinIdeVersion") {
         isTransitive = false
     }
     implementation("org.jetbrains.kotlin:core:231-$kotlinIdeVersion-$kotlinIdeVersionSuffix")
@@ -112,16 +116,9 @@ fun generateProperties(prefix: String = "") = """
     server.compression.mime-types=application/json,text/javascript,application/wasm
 """.trimIndent()
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of("17"))
-    }
-}
-
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+    compilerOptions {
+        freeCompilerArgs.set(listOf("-Xjsr305=strict"))
     }
     dependsOn(":dependencies:copyDependencies")
     dependsOn(":dependencies:copyJSDependencies")
@@ -144,7 +141,9 @@ val buildLambda by tasks.creating(Zip::class) {
     from(tasks.compileKotlin)
     from(tasks.processResources) {
         eachFile {
-            if (name == propertyFile) { file.writeText(generateProperties(lambdaWorkDirectoryPath)) }
+            if (name == propertyFile) {
+                file.writeText(generateProperties(lambdaWorkDirectoryPath))
+            }
         }
     }
     from(policy)
