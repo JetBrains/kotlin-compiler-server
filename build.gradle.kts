@@ -13,7 +13,7 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 val propertyFile = "application.properties"
 
 plugins {
-    id("org.springframework.boot") version "2.7.10"
+    id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
     val kotlinVersion by System.getProperties()
     kotlin("jvm") version "$kotlinVersion"
