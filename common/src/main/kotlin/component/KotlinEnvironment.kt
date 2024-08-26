@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
 import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
 import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
+import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
 import java.io.File
 
 class KotlinEnvironment(
@@ -47,6 +48,9 @@ class KotlinEnvironment(
       "-opt-in=kotlin.contracts.ExperimentalContracts",
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-Xcontext-receivers",
+      "-Xreport-all-warnings",
+      "-Xuse-fir-extended-checkers",
+      "-XXLanguage:+ExplicitBackingFields",
     )
   }
 
@@ -88,15 +92,15 @@ class KotlinEnvironment(
   val wasmConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
     put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
-    put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
-    put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
+    put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
+    put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
 
   val composeWasmConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
     put(JSConfigurationKeys.LIBRARIES, COMPOSE_WASM_LIBRARIES)
-    put(JSConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
-    put(JSConfigurationKeys.WASM_ENABLE_ASSERTS, false)
+    put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
+    put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
 
     PluginCliParser.loadPluginsSafe(
       COMPOSE_WASM_COMPILER_PLUGINS,
@@ -107,7 +111,7 @@ class KotlinEnvironment(
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    parentDisposable = Disposer.newDisposable(),
+    projectDisposable = Disposer.newDisposable(),
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )

@@ -12,8 +12,8 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.psi.KtFile
+import java.io.File
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.*
 import kotlin.io.path.*
 
@@ -64,17 +64,25 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
       message: String,
       location: CompilerMessageSourceLocation?
     ): String {
+      when {
+        // suppress -XXLanguage:+ExplicitBackingFields
+        severity == STRONG_WARNING && message.contains("ExplicitBackingFields") ->
+          return ""
+      }
+
+      val messageSeverity: ProjectSeveriry = when (severity) {
+        EXCEPTION, ERROR -> ProjectSeveriry.ERROR
+        STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
+        INFO, LOGGING, OUTPUT -> return ""
+      }
+
       val textInterval = location?.let {
         TextInterval(
           start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
           end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
         )
       }
-      val messageSeverity: ProjectSeveriry = when (severity) {
-        EXCEPTION, ERROR -> ProjectSeveriry.ERROR
-        STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
-        INFO, LOGGING, OUTPUT -> return ""
-      }
+
       val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
 
       val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
@@ -118,7 +126,7 @@ fun <T> usingTempDirectory(action: (path: Path) -> T): T {
 private fun getTempDirectory(): Path {
   val dir = System.getProperty("java.io.tmpdir")
   val sessionId = UUID.randomUUID().toString().replace("-", "")
-  return Paths.get(dir, sessionId)
+  return File(dir).canonicalFile.resolve(sessionId).toPath()
 }
 
 fun List<KtFile>.writeToIoFiles(inputDir: Path): List<Path> {
@@ -129,4 +137,4 @@ fun List<KtFile>.writeToIoFiles(inputDir: Path): List<Path> {
   return ioFiles
 }
 
-val PATH_SEPARATOR: String = java.io.File.pathSeparator
+val PATH_SEPARATOR: String = File.pathSeparator

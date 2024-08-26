@@ -1,13 +1,18 @@
 rootProject.name = "kotlin-compiler-server"
-include(":executors")
-include(":indexation")
-include(":common")
-include(":dependencies")
-
 pluginManagement {
+    includeBuild("build-settings-logic")
     repositories {
         gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
     }
 }
+plugins {
+    id("kotlin-compiler-server-version-catalog")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
+
+include(":executors")
+include(":indexation")
+include(":common")
+include(":dependencies")

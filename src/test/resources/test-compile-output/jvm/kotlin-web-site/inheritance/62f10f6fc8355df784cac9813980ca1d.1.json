@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Constructing the derived class(\"hello\", \"world\")\nArgument for the base class: Hello\nInitializing a base class\nInitializing size in the base class: 5\nInitializing a derived class\nInitializing size in the derived class: 10\n</outStream>"}

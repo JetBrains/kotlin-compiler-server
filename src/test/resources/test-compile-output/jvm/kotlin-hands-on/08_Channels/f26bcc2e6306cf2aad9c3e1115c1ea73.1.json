@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[main @coroutine#4] A1\n[main @coroutine#4] B1\n[main @coroutine#2] A done\n[main @coroutine#3] B done\n[main @coroutine#4] A2\n</outStream>"}

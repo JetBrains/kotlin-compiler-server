@@ -58,8 +58,7 @@ val composeWasmCompilerPlugins: Configuration by configurations.creating {
     isTransitive = false
 }
 
-
-val jacksonVersionKotlinDependencyJar = "2.14.0" // don't forget to update version in `executor.policy` file.
+val composeRuntimeVersion = "1.6.0"
 
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
@@ -90,32 +89,23 @@ plugins {
 }
 
 dependencies {
-    kotlinDependency("junit:junit:4.13.2")
-    kotlinDependency("org.hamcrest:hamcrest:2.2")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-databind:$jacksonVersionKotlinDependencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-core:$jacksonVersionKotlinDependencyJar")
-    kotlinDependency("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersionKotlinDependencyJar")
+    kotlinDependency(libs.junit)
+    kotlinDependency(libs.hamcrest)
+    kotlinDependency(libs.bundles.jackson)
     // Kotlin libraries
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0-RC")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0-RC")
-    kotlinDependency("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
-    kotlinJsDependency("org.jetbrains.kotlin:kotlin-stdlib-js:$kotlinVersion")
-    kotlinJsDependency("org.jetbrains.kotlin:kotlin-dom-api-compat:$kotlinVersion")
-    kotlinWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
+    kotlinDependency(libs.bundles.kotlin.stdlib)
+    kotlinDependency(libs.kotlin.test)
+    kotlinDependency(libs.kotlinx.coroutines.core.jvm)
+    kotlinDependency(libs.kotlinx.coroutines.test)
+    kotlinDependency(libs.kotlinx.io.core)
+    kotlinDependency(libs.kotlinx.datetime)
+    kotlinJsDependency(libs.kotlin.stdlib.js)
+    kotlinJsDependency(libs.kotlin.dom.api.compat)
+    kotlinWasmDependency(libs.kotlin.stdlib.wasm.js)
 
     // compose
-    kotlinComposeWasmDependency("org.jetbrains.kotlin:kotlin-stdlib-wasm-js:$kotlinVersion")
-    kotlinComposeWasmDependency("org.jetbrains.compose.runtime:runtime:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.ui:ui:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.animation:animation-graphics:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.foundation:foundation:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.material:material:1.6.0")
-    kotlinComposeWasmDependency("org.jetbrains.compose.components:components-resources:1.6.0")
+    kotlinComposeWasmDependency(libs.kotlin.stdlib.wasm.js)
+    kotlinComposeWasmDependency(libs.bundles.compose)
 
-    composeWasmCompilerPlugins("org.jetbrains.compose.compiler:compiler-hosted:1.5.10")
+    composeWasmCompilerPlugins(libs.kotlin.compose.compiler.plugin)
 }

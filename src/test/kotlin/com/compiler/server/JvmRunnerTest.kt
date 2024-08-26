@@ -103,8 +103,37 @@ class JvmRunnerTest : BaseExecutorTest() {
     assertEquals(1, result.compilerDiagnostics[0].interval?.start?.line)
     assertEquals(19, result.compilerDiagnostics[0].interval?.start?.ch)
     assertEquals(
-      "'toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.",
+      "'fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.",
       result.compilerDiagnostics[0].message
     )
+  }
+
+  @Test
+  fun `warnings after exception`() {
+    // language=kotlin
+    val result = run(
+      """
+        fun main() {
+          println("")g
+          var someVar = 1
+        }
+      """.trimIndent(), ""
+    )
+
+    assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
+  }
+
+  @Test
+  fun `warnings without exception`() {
+    // language=kotlin
+    val result = run(
+      """
+        fun main() {
+          println("")
+          var someVar = 1
+        }
+      """.trimIndent(), "")
+
+    assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
   }
 }

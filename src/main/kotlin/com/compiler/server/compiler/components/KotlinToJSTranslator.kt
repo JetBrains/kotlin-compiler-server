@@ -94,6 +94,8 @@ class KotlinToJSTranslator(
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
         val additionalCompilerArgumentsForKLib = listOf(
+          "-Xreport-all-warnings",
+          "-Xuse-fir-extended-checkers",
           "-Xir-only",
           "-Xir-produce-klib-dir",
           "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
@@ -103,6 +105,8 @@ class KotlinToJSTranslator(
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+              "-Xreport-all-warnings",
+              "-Xuse-fir-extended-checkers",
               "-Xir-only",
               "-Xir-produce-js",
               "-Xir-dce",
@@ -113,7 +117,7 @@ class KotlinToJSTranslator(
             ))
           }
           .map { (outputDir / "js" / "$moduleName.js").readText() }
-          .map { it.withMainArgumentsIr(arguments, moduleName) }
+          .map { it.withMainArgumentsIr(arguments) }
           .map(::redirectOutput)
       }
     }
@@ -152,6 +156,8 @@ class KotlinToJSTranslator(
                   }
               } ?: emptyList()
           val additionalCompilerArgumentsForKLib: List<String> = listOf(
+            "-Xreport-all-warnings",
+          "-Xuse-fir-extended-checkers",
           "-Xwasm",
           "-Xir-produce-klib-dir",
           "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
@@ -162,6 +168,8 @@ class KotlinToJSTranslator(
         k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
             k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+              "-Xreport-all-warnings",
+              "-Xuse-fir-extended-checkers",
               "-Xwasm",
               "-Xwasm-generate-wat",
               "-Xir-produce-js",
@@ -184,17 +192,17 @@ class KotlinToJSTranslator(
     }
 }
 
-private fun String.withMainArgumentsIr(arguments: List<String>, moduleName: String): String {
-  val postfix = """|  main([]);
-                   |  return _;
-                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
-                   |""".trimMargin()
-  if (!endsWith(postfix)) return this
-  val objectMapper = ObjectMapper()
-  return this.removeSuffix(postfix) + """|  main([${arguments.joinToString { objectMapper.writeValueAsString(it) }}]);
-                   |  return _;
-                   |}(typeof $moduleName === 'undefined' ? {} : $moduleName);
-                   |""".trimMargin()
+private fun String.withMainArgumentsIr(arguments: List<String>): String {
+  val mainIrFunction = """
+    |  function mainWrapper() {
+    |    main([%s]);
+    |  }
+  """.trimMargin()
+
+  return replace(
+    String.format(mainIrFunction, ""),
+    String.format(mainIrFunction, arguments.joinToString { ObjectMapper().writeValueAsString(it) })
+  )
 }
 
 data class WasmTranslationSuccessfulOutput(

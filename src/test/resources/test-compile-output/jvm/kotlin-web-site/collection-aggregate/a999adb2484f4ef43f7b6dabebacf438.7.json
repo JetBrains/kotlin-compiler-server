@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Sum of first N elements with runningReduce:\nN = 1: 0\nN = 2: 1\nN = 3: 3\nN = 4: 6\nN = 5: 10\nN = 6: 15\nSum of first N elements with runningFold:\nN = 1: 10\nN = 2: 10\nN = 3: 11\nN = 4: 13\nN = 5: 16\nN = 6: 20\nN = 7: 25\n</outStream>"}

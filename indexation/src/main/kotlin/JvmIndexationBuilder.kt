@@ -11,8 +11,8 @@ import org.jetbrains.kotlin.resolve.lazy.declarations.FileBasedDeclarationProvid
 class JvmIndexationBuilder(private val kotlinEnvironment: KotlinEnvironment): IndexationBuilder() {
   override fun getAllIndexes(): List<ImportInfo> =
     kotlinEnvironment.environment { coreEnvironment ->
-      val trace = CliBindingTrace()
       val project = coreEnvironment.project
+      val trace = CliBindingTrace(project)
       val componentProvider = TopDownAnalyzerFacadeForJVM.createContainer(
         project = project,
         files = emptyList(),
