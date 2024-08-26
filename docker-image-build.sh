@@ -1,5 +1,7 @@
 #!/bin/sh
 
-kotlin_version=$(awk '{ if ($1=="systemProp.kotlinVersion") { print $2; } }' FS='=' ./gradle.properties)
+kotlinVersion=$(awk '{ if ($1 == "kotlin") { gsub(/"/, "", $2); print $2; } }' FS=' = ' ./gradle/libs.versions.toml)
 
-docker build . --file Dockerfile --tag my-image-name:$(date +%s) --build-arg KOTLIN_VERSION=$kotlin_version
+echo "Kotlin Version for the docker: $kotlinVersion"
+
+docker build . --file Dockerfile --tag my-image-name:$(date +%s) --build-arg KOTLIN_VERSION=$kotlinVersion
