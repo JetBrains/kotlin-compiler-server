@@ -165,10 +165,8 @@ tasks.named<Copy>("processResources") {
 tasks.withType<Test> {
     dependsOn(rootProject.the<NodeJsRootExtension>().nodeJsSetupTaskProvider)
     useJUnitPlatform()
+    val executablePath = rootProject.the<NodeJsRootExtension>().requireConfigured().executable
     doFirst {
-        this@withType.environment(
-            "kotlin.wasm.node.path",
-            rootProject.the<NodeJsRootExtension>().requireConfigured().executable
-        )
+        this@withType.environment("kotlin.wasm.node.path", executablePath)
     }
 }
