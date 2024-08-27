@@ -117,11 +117,6 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.set(listOf("-Xjsr305=strict"))
     }
-    dependsOn(":dependencies:copyDependencies")
-    dependsOn(":dependencies:copyJSDependencies")
-    dependsOn(":dependencies:copyWasmDependencies")
-    dependsOn(":dependencies:copyComposeWasmDependencies")
-    dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     buildPropertyFile()

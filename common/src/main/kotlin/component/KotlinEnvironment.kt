@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
 import java.io.File
 
+// NOTE: if new class paths are added, please add them to `JavaExec` task's inputs in build.gradle.kts as well
 class KotlinEnvironment(
   val classpath: List<File>,
   additionalJsClasspath: List<File>,
