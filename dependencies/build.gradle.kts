@@ -6,6 +6,12 @@ val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false
 }
 
+val kotlinCompilerPluginDependency: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
 val kotlinJsDependency: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -64,6 +70,12 @@ val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
     into(libJVMFolder)
 }
+
+val copyCompilerPluginDependencies by tasks.creating(Copy::class) {
+    from(kotlinCompilerPluginDependency)
+    into(compilerPluginsForJVMFolder)
+}
+
 val copyJSDependencies by tasks.creating(Copy::class) {
     from(kotlinJsDependency)
     into(libJSFolder)
@@ -97,8 +109,11 @@ dependencies {
     kotlinDependency(libs.kotlin.test)
     kotlinDependency(libs.kotlinx.coroutines.core.jvm)
     kotlinDependency(libs.kotlinx.coroutines.test)
-    kotlinDependency(libs.kotlinx.io.core)
     kotlinDependency(libs.kotlinx.datetime)
+    kotlinDependency(libs.kotlinx.io.core)
+    kotlinDependency(libs.kotlinx.serialization.json.jvm)
+    kotlinDependency(libs.kotlinx.serialization.core.jvm)
+    kotlinCompilerPluginDependency(libs.kotlin.serialization.plugin)
     kotlinJsDependency(libs.kotlin.stdlib.js)
     kotlinJsDependency(libs.kotlin.dom.api.compat)
     kotlinWasmDependency(libs.kotlin.stdlib.wasm.js)

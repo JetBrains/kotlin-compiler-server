@@ -32,6 +32,7 @@ class KotlinEnvironmentConfiguration(
       additionalWasmClasspath,
       additionalComposeWasmClasspath,
       composeWasmCompilerPlugins,
+      emptyList(),
       listOf(
         CompilerPluginOption(
           "androidx.compose.compiler.plugins.kotlin",
