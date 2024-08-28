@@ -12,6 +12,11 @@ val indexesComposeWasm: String by System.getProperties()
 val Project.kotlinVersion
     get() = the<LibrariesForLibs>().versions.kotlin.get()
 
+
+val Project.libJVM
+    get() = kotlinVersion
+val Project.compilerPluginsForJVM
+    get() = "$kotlinVersion-compiler-plugins"
 val Project.libJS
     get() = "$kotlinVersion-js"
 val Project.libWasm
@@ -20,8 +25,12 @@ val Project.libComposeWasm
     get() = "$kotlinVersion-compose-wasm"
 val Project.libComposeWasmCompilerPlugins
     get() = "$kotlinVersion-compose-wasm-compiler-plugins"
-val Project.libJVM
-    get() = kotlinVersion
+
+val Project.libJVMFolder
+    get() = rootProject.layout.projectDirectory.dir(libJVM)
+
+val Project.compilerPluginsForJVMFolder
+    get() = rootProject.layout.projectDirectory.dir(compilerPluginsForJVM)
 
 val Project.libJSFolder
     get() = rootProject.layout.projectDirectory.dir(libJS)
@@ -34,6 +43,3 @@ val Project.libComposeWasmFolder
 
 val Project.libComposeWasmCompilerPluginsFolder
     get() = rootProject.layout.projectDirectory.dir(libComposeWasmCompilerPlugins)
-
-val Project.libJVMFolder
-    get() = rootProject.layout.projectDirectory.dir(libJVM)

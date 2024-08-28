@@ -17,6 +17,7 @@ application {
 tasks.withType<JavaExec> {
     dependsOn(":executors:jar")
     dependsOn(":dependencies:copyDependencies")
+    dependsOn(":dependencies:copyCompilerPluginDependencies")
     dependsOn(":dependencies:copyJSDependencies")
     dependsOn(":dependencies:copyWasmDependencies")
     dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
@@ -29,6 +30,7 @@ tasks.withType<JavaExec> {
 
     // Adding classpath directories as task input for up-to-date checks
     inputs.dir(libJVMFolder)
+    inputs.dir(compilerPluginsForJVMFolder)
     inputs.dir(libJSFolder)
     inputs.dir(libWasmFolder)
     inputs.dir(libComposeWasmFolder)

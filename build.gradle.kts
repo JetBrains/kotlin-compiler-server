@@ -108,6 +108,7 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.wasm=${prefix + libWasm}
     libraries.folder.compose-wasm=${prefix + libComposeWasm}
     libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPlugins}
+    libraries.folder.compiler-plugins=${prefix + compilerPluginsForJVM}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
@@ -147,6 +148,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libWasmFolder) { into(libWasm) }
     from(libComposeWasmFolder) { into(libComposeWasm) }
     from(libJVMFolder) { into(libJVM) }
+    from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }

@@ -7,5 +7,6 @@ class LibrariesFile(
   val js: File,
   val wasm: File,
   val composeWasm: File,
-  val composeWasmComposeCompiler: File
+  val composeWasmComposeCompiler: File,
+  val compilerPlugins: File
 )

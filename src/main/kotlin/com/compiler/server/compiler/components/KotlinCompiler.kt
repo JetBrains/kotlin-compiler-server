@@ -97,8 +97,8 @@ class KotlinCompiler(
         "-module-name", "web-module",
         "-no-stdlib", "-no-reflect",
         "-progressive",
-        "-d", outputDir.absolutePathString()
-      )
+        "-d", outputDir.absolutePathString(),
+      ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
       K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
         val outputFiles = buildMap {
           outputDir.visitFileTree {

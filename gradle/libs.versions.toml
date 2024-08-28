@@ -11,13 +11,14 @@ logstash-logback-encoder = "7.3"
 trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
 kotlinx-coroutines-test = "1.6.4"
+kotlinx-datetime = "0.6.0-RC.2"
+kotlinx-io-core = "0.5.1"
+kotlinx-serialization = "1.7.1"
 skiko = "0.7.90"
 # don't forget to update jackson version in `executor.policy` file.
 jackson = "2.14.0"
 hamcrest = "2.2"
 compose = "1.6.0"
-kotlinx-datetime = "0.6.0-RC.2"
-kotlinx-io-core = "0.5.1"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -40,6 +41,8 @@ kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io-core" }
+kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
 springfox-boot-starter = { group = "io.springfox", name = "springfox-boot-starter", version.ref = "springfox-boot-starter" }
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot2", version.ref = "aws-serverless-java-container-springboot2" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -57,7 +60,7 @@ compose-animation-graphics = { group = "org.jetbrains.compose.animation", name =
 compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "compose" }
 compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "compose" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
-
+kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class KotlinEnvironmentConfiguration(
-  val versionInfo: VersionInfo,
   val librariesFile: LibrariesFile
 ) {
   @Bean
@@ -25,6 +24,7 @@ class KotlinEnvironmentConfiguration(
     val additionalWasmClasspath = librariesFile.wasm.listFiles()?.toList() ?: emptyList()
     val additionalComposeWasmClasspath = librariesFile.composeWasm.listFiles()?.toList() ?: emptyList()
     val composeWasmCompilerPlugins = librariesFile.composeWasmComposeCompiler.listFiles()?.toList() ?: emptyList()
+    val compilerPlugins = librariesFile.compilerPlugins.listFiles()?.toList() ?: emptyList()
 
     return KotlinEnvironment(
       classPath,
@@ -32,6 +32,7 @@ class KotlinEnvironmentConfiguration(
       additionalWasmClasspath,
       additionalComposeWasmClasspath,
       composeWasmCompilerPlugins,
+      compilerPlugins,
       listOf(
         CompilerPluginOption(
           "androidx.compose.compiler.plugins.kotlin",
