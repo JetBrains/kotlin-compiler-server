@@ -64,5 +64,21 @@ class KotlinFeatureSince180 : BaseExecutorTest() {
             contains = "true"
         )
     }
+
+
+    @Test
+    fun `Support Experimental Encoding Api`() {
+        run(
+            // language=kotlin
+            code = """
+            import kotlin.io.encoding.Base64
+
+            fun main() {   
+               println(Base64.encode(byteArrayOf(1, 2, 3)))   
+            }
+            """.trimIndent(),
+            contains = "AQID"
+        )
+    }
 }
 
