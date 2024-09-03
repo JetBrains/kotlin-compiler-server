@@ -33,7 +33,8 @@ class ApplicationConfiguration(
     File(librariesFolderProperties.js),
     File(librariesFolderProperties.wasm),
     File(librariesFolderProperties.composeWasm),
-    File(librariesFolderProperties.composeWasmCompilerPlugins)
+    File(librariesFolderProperties.composeWasmCompilerPlugins),
+    File(librariesFolderProperties.compilerPlugins)
   )
 }
 
@@ -44,4 +45,5 @@ class LibrariesFolderProperties {
   lateinit var wasm: String
   lateinit var composeWasm: String
   lateinit var composeWasmCompilerPlugins: String
+  lateinit var compilerPlugins: String
 }

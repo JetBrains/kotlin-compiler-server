@@ -24,13 +24,15 @@ import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
 import java.io.File
 
+// NOTE: if new class paths are added, please add them to `JavaExec` task's inputs in build.gradle.kts as well
 class KotlinEnvironment(
   val classpath: List<File>,
   additionalJsClasspath: List<File>,
   additionalWasmClasspath: List<File>,
   additionalComposeWasmClasspath: List<File>,
   composeWasmCompilerPlugins: List<File>,
-  composeWasmCompilerPluginsOptions: List<CompilerPluginOption>
+  val compilerPlugins: List<File> = emptyList(),
+  composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
 ) {
   companion object {
     /**
