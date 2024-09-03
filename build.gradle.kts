@@ -130,12 +130,14 @@ tasks.withType<BootJar> {
 }
 
 val buildLambda by tasks.creating(Zip::class) {
-    val lambdaWorkDirectoryPath = "/var/task/"
+    val propertyFile = propertyFile
+    val propertyFileContent = generateProperties("/var/task/")
+
     from(tasks.compileKotlin)
     from(tasks.processResources) {
         eachFile {
             if (name == propertyFile) {
-                file.writeText(generateProperties(lambdaWorkDirectoryPath))
+                file.writeText(propertyFileContent)
             }
         }
     }
