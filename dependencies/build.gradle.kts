@@ -110,6 +110,7 @@ dependencies {
     kotlinDependency(libs.kotlinx.coroutines.core.jvm)
     kotlinDependency(libs.kotlinx.coroutines.test)
     kotlinDependency(libs.kotlinx.datetime)
+    kotlinDependency(libs.kotlinx.io.bytestring)
     kotlinDependency(libs.kotlinx.io.core)
     kotlinDependency(libs.kotlinx.serialization.json.jvm)
     kotlinDependency(libs.kotlinx.serialization.core.jvm)

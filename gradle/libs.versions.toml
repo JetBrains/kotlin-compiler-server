@@ -12,7 +12,7 @@ trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
 kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.6.0-RC.2"
-kotlinx-io-core = "0.5.1"
+kotlinx-io = "0.5.1"
 kotlinx-serialization = "1.7.1"
 skiko = "0.7.90"
 # don't forget to update jackson version in `executor.policy` file.
@@ -40,7 +40,8 @@ kotlin-core = { group = "org.jetbrains.kotlin", name = "core", version.ref = "ko
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
-kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io-core" }
+kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-io" }
+kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
 springfox-boot-starter = { group = "io.springfox", name = "springfox-boot-starter", version.ref = "springfox-boot-starter" }
