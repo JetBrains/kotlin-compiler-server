@@ -21,4 +21,21 @@ class IORunnerTest : BaseExecutorTest() {
             contains = "<outStream>Hello world"
         )
     }
+
+    @Test
+    fun `kotlinx io bytestring test`() {
+        run (
+            code = """
+                import kotlinx.io.*
+                import kotlinx.io.bytestring.*
+                
+                fun main() {
+                    val str = ByteString("Hello world".encodeToByteArray())
+                    val buffer = Buffer().also { it.write(str) }
+                    println(buffer.readString())
+                }
+            """.trimIndent(),
+            contains = "<outStream>Hello world"
+        )
+    }
 }
