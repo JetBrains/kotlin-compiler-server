@@ -4,7 +4,7 @@ plugins {
 
 kotlin.jvmToolchain {
   languageVersion.set(JavaLanguageVersion.of(17))
-  vendor.set(JvmVendorSpec.ADOPTIUM)
+  vendor.set(JvmVendorSpec.AMAZON)
 }
 
 dependencies {

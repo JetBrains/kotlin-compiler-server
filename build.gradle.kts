@@ -169,6 +169,10 @@ tasks.named<Copy>("processResources") {
 tasks.withType<Test> {
     dependsOn(rootProject.the<NodeJsRootExtension>().nodeJsSetupTaskProvider)
     useJUnitPlatform()
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.AMAZON)
+    })
     val executablePath = rootProject.the<NodeJsRootExtension>().requireConfigured().executable
     doFirst {
         this@withType.environment("kotlin.wasm.node.path", executablePath)
