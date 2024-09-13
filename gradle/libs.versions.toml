@@ -19,6 +19,7 @@ skiko = "0.7.90"
 jackson = "2.14.0"
 hamcrest = "2.2"
 compose = "1.6.0"
+gradle-develocity = "3.17.5"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -62,6 +63,7 @@ compose-foundation = { group = "org.jetbrains.compose.foundation", name = "found
 compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "compose" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
+gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
 
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]

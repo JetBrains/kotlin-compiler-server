@@ -129,3 +129,24 @@ $ ./gradlew build
 
 3) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
 4) Bump version on GitHub [releases](https://github.com/JetBrains/kotlin-compiler-server/releases) (optional)
+
+### Gradle Build Scans
+
+[Gradle Build Scans](https://scans.gradle.com/) can provide insights into an Kotlin Compiler Server Build.
+JetBrains runs a [Gradle Develocity server](https://ge.jetbrains.com/scans?search.rootProjectNames=kotlinx-atomicfu).
+that can be used to automatically upload reports.
+
+To automatically opt in add the following to `$GRADLE_USER_HOME/gradle.properties`.
+
+```properties
+org.jetbrains.kotlin.compiler.server.build.scan.enabled=true
+# optionally provide a username that will be attached to each report
+org.jetbrains..kotlin.compiler.server.build.scan.username=John Wick
+```
+
+Also you need to create an access key:
+```bash
+./gradlew provisionDevelocityAccessKey
+```
+
+A Build Scan may contain identifiable information. See the Terms of Use https://gradle.com/legal/terms-of-use/.
