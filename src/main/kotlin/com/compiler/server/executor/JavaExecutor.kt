@@ -7,6 +7,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -103,20 +104,31 @@ class JavaExecutor {
 }
 
 class CommandLineArgument(
-  val classPaths: String,
-  val mainClass: String?,
-  val policy: Path,
-  val memoryLimit: Int,
-  val arguments: List<String>
+    val classPaths: String,
+    val mainClass: String?,
+    val policy: Path,
+    val memoryLimit: Int,
+    val arguments: List<String>,
 ) {
-  fun toList(): List<String> {
-    return (listOf(
-      "java",
-      "-Xmx" + memoryLimit + "M",
-      "-Djava.security.manager",
-      "-Djava.security.policy=$policy",
-      "-ea",
-      "-classpath"
-    ) + classPaths + mainClass + arguments).filterNotNull()
-  }
+    fun toList(): List<String> {
+        return (listOf(
+            getJavaPath(),
+            "-Xmx" + memoryLimit + "M",
+            "-Djava.security.manager",
+            "-Djava.security.policy=$policy",
+            "-ea",
+            "-classpath"
+        ) + classPaths + mainClass + arguments).filterNotNull()
+    }
+}
+
+fun getJavaPath(): String {
+    // Determine the Java executable path based on the OS
+    val javaHome = System.getProperty("java.home") ?: return "java"
+    val javaBinPath = if (System.getProperty("os.name")?.lowercase()?.contains("win") == true) {
+        Paths.get(javaHome, "bin", "java.exe").toString()
+    } else {
+        Paths.get(javaHome, "bin", "java").toString()
+    }
+    return javaBinPath
 }
