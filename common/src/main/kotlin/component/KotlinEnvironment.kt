@@ -126,7 +126,7 @@ class KotlinEnvironment(
     return CompilerConfiguration().apply {
       addJvmClasspathRoots(classpath.filter { it.exists() && it.isFile && it.extension == "jar" })
       val messageCollector = MessageCollector.NONE
-      put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
+      put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
       put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
       put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)

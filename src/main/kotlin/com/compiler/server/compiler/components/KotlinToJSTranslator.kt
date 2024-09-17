@@ -3,7 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import component.KotlinEnvironment
-import org.jetbrains.kotlin.cli.js.K2JsIrCompiler
+import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
 import kotlin.io.path.div
@@ -90,7 +90,7 @@ class KotlinToJSTranslator(
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
-        val k2JsIrCompiler = K2JsIrCompiler()
+        val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
         val additionalCompilerArgumentsForKLib = listOf(
@@ -102,9 +102,9 @@ class KotlinToJSTranslator(
           "-ir-output-dir=$klibPath",
           "-ir-output-name=$moduleName",
         )
-        k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+        k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
-            k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+            k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
               "-Xreport-all-warnings",
               "-Xuse-fir-extended-checkers",
               "-Xir-only",
@@ -143,7 +143,7 @@ class KotlinToJSTranslator(
       val moduleName = "moduleId"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
-        val k2JsIrCompiler = K2JsIrCompiler()
+        val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
           val compilerPluginsArgs: List<String> = compilerPlugins
@@ -165,9 +165,9 @@ class KotlinToJSTranslator(
           "-ir-output-name=$moduleName",
         ) + compilerPluginsArgs
 
-        k2JsIrCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+        k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
-            k2JsIrCompiler.tryCompilation(inputDir, ioFiles, listOf(
+            k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
               "-Xreport-all-warnings",
               "-Xuse-fir-extended-checkers",
               "-Xwasm",
