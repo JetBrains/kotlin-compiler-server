@@ -1,5 +1,5 @@
 fun main() {
-    // SampleStart
+//sampleStart
     // Declares a list containing some null and non-null integer values
     val nullableList: List<Int?> = listOf(1, 2, null, 4)
 
@@ -8,5 +8,5 @@ fun main() {
   
     println(intList)
     // [1, 2, 4]
-    // SampleEnd
+//sampleEnd
 }

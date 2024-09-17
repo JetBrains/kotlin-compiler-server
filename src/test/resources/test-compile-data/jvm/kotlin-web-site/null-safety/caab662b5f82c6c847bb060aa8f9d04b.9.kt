@@ -1,4 +1,4 @@
-// SampleStart
+//sampleStart
 fun main() {
     // Assigns a nullable Person object to a variable
     val person1: Person? = null
@@ -13,4 +13,4 @@ fun main() {
 
 // Defines a Person class
 data class Person(val name: String)
-// SampleEnd
+//sampleEnd

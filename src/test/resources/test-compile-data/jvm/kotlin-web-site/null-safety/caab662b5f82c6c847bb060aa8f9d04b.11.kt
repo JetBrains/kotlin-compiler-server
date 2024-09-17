@@ -1,5 +1,5 @@
 fun main() {
-// SampleStart
+//sampleStart
     // Declares a variable of type Any, which can hold any type of value
     val a: Any = "Hello, Kotlin!"
 
@@ -12,5 +12,5 @@ fun main() {
     // null
     println(aString)
     // "Hello, Kotlin!"
-// SampleEnd
+//sampleEnd
 }
