@@ -141,7 +141,7 @@ To automatically opt in add the following to `$GRADLE_USER_HOME/gradle.propertie
 ```properties
 org.jetbrains.kotlin.compiler.server.build.scan.enabled=true
 # optionally provide a username that will be attached to each report
-org.jetbrains..kotlin.compiler.server.build.scan.username=John Wick
+org.jetbrains.kotlin.compiler.server.build.scan.username=John Wick
 ```
 
 Also you need to create an access key:
