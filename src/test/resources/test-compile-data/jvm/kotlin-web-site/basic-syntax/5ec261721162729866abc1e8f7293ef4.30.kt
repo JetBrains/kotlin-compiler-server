@@ -5,7 +5,7 @@ fun parseInt(str: String): Int? {
 fun printProduct(arg1: String, arg2: String) {
     val x = parseInt(arg1)
     val y = parseInt(arg2)
-
+    
 //sampleStart
     // ...
     if (x == null) {
