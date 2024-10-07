@@ -1,12 +1,6 @@
-object MyObject {
-    override fun toString(): String {
-        val superString = super.toString()
-        // MyObject@hashcode
-        return superString.substringBefore('@')
-    }
-}
+object MyObject
 
 fun main() {
-    println(MyObject)
-    // MyObject
+    println(MyObject) 
+    // MyObject@hashcode
 }
