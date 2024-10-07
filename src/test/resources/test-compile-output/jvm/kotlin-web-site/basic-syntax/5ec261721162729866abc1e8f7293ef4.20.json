@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>fits in range\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>item at 0 is apple\nitem at 1 is banana\nitem at 2 is kiwifruit\n</outStream>"}

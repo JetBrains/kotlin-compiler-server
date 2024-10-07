@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>33\n87\n</outStream>"}
+{"errors":{"File.kt":[{"interval":{"start":{"line":4,"ch":8},"end":{"line":4,"ch":11}},"message":"The 'var' property is never written to, so it can be declared as 'val'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>23\n30\n</outStream>"}
