@@ -1,12 +1,18 @@
-fun main() {
 //sampleStart
-    val list = listOf("a", "b", "c")
-    
-    if (-1 !in 0..list.lastIndex) {
-        println("-1 is out of range")
-    }
-    if (list.size !in list.indices) {
-        println("list size is out of valid list indices range, too")
+fun describe(obj: Any): String =
+    when (obj) {
+        1          -> "One"
+        "Hello"    -> "Greeting"
+        is Long    -> "Long"
+        !is String -> "Not a string"
+        else       -> "Unknown"
     }
 //sampleEnd
+
+fun main() {
+    println(describe(1))
+    println(describe("Hello"))
+    println(describe(1000L))
+    println(describe(2))
+    println(describe("other"))
 }

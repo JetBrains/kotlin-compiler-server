@@ -1,10 +1,10 @@
 fun main() {
 //sampleStart
-    val b: String? = "Kotlin"
-    if (b != null && b.length > 0) {
-        print("String of length ${b.length}")
-    } else {
-        print("Empty string")
-    }
+    // Assigns null to a nullable variable
+    val b: String? = null
+    // Checks for nullability first and then accesses length
+    val l = if (b != null) b.length else -1
+    print(l)
+    // -1
 //sampleEnd
 }

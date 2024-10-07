@@ -1,15 +1,8 @@
-//sampleStart
-val PI = 3.14
-var x = 0
-
-fun incrementX() { 
-    x += 1 
-}
-//sampleEnd
-
 fun main() {
-    println("x = $x; PI = $PI")
-    incrementX()
-    println("incrementX()")
-    println("x = $x; PI = $PI")
+//sampleStart
+    // Declares the variable x with the value of 5;`Int` type is inferred
+    val x = 5
+    // 5
+//sampleEnd
+    println(x)
 }

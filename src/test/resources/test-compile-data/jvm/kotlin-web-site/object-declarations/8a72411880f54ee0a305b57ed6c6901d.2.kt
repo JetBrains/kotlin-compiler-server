@@ -1,9 +1,12 @@
-sealed interface ReadResult
-data class Number(val number: Int) : ReadResult
-data class Text(val text: String) : ReadResult
-data object EndOfFile : ReadResult
+object MyObject {
+    override fun toString(): String {
+        val superString = super.toString()
+        // MyObject@hashcode
+        return superString.substringBefore('@')
+    }
+}
 
 fun main() {
-  println(Number(7)) // Number(number=7)
-  println(EndOfFile) // EndOfFile
+    println(MyObject)
+    // MyObject
 }

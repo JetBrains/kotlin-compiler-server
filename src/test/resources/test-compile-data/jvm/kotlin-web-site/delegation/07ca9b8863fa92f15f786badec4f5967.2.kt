@@ -13,7 +13,7 @@ class Derived(b: Base) : Base by b {
 }
 
 fun main() {
-    val b = BaseImpl(10)
-    Derived(b).printMessage()
-    Derived(b).printMessageLine()
+    val base = BaseImpl(10)
+    Derived(base).printMessage()
+    Derived(base).printMessageLine()
 }

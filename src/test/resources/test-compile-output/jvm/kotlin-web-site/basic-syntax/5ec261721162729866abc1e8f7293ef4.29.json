@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Getting the length of 'Incomprehensibilities'. Result: 21 \nGetting the length of '1000'. Result: Error: The object is not a string \nGetting the length of '[Some]'. Result: Error: The object is not a string \n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>42\n'a' or '7' is not a number\n'a' or 'b' is not a number\n</outStream>"}

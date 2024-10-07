@@ -1,13 +1,7 @@
-//sampleStart
-fun maxOf(a: Int, b: Int): Int {
-    if (a > b) {
-        return a
-    } else {
-        return b
-    }
+class Rectangle(val height: Double, val length: Double) {
+    val perimeter = (height + length) * 2 
 }
-//sampleEnd
-
 fun main() {
-    println("max of 0 and 42 is ${maxOf(0, 42)}")
+    val rectangle = Rectangle(5.0, 2.0)
+    println("The perimeter is ${rectangle.perimeter}")
 }

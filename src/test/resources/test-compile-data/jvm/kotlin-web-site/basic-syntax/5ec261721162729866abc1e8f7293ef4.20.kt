@@ -1,9 +1,10 @@
 fun main() {
 //sampleStart
-    val x = 10
-    val y = 9
-    if (x in 1..y+1) {
-        println("fits in range")
+    val items = listOf("apple", "banana", "kiwifruit")
+    var index = 0
+    while (index < items.size) {
+        println("item at $index is ${items[index]}")
+        index++
     }
 //sampleEnd
 }

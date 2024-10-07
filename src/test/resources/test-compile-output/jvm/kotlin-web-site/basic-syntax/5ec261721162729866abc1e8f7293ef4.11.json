@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>x = 0; PI = 3.14\nincrementX()\nx = 1; PI = 3.14\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>5\n</outStream>"}

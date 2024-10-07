@@ -1,4 +1,7 @@
+fun uppercaseString(text: String): String {
+    return text.uppercase()
+}
 fun main() {
-    println({ string: String -> string.uppercase() }("hello"))
+    println(uppercaseString("hello"))
     // HELLO
 }

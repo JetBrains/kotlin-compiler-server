@@ -1,24 +1,28 @@
 //sampleStart
-inline fun <reified A, reified B> Pair<*, *>.asPairOf(): Pair<A, B>? {
-    if (first !is A || second !is B) return null
-    return first as A to second as B
+fun testString() {
+    var stringInput: String? = null
+    // stringInput is smart-cast to String type
+    stringInput = ""
+    try {
+        // The compiler knows that stringInput isn't null
+        println(stringInput.length)
+        // 0
+
+        // The compiler rejects previous smart cast information for 
+        // stringInput. Now stringInput has the String? type.
+        stringInput = null
+
+        // Trigger an exception
+        if (2 > 1) throw Exception()
+        stringInput = ""
+    } catch (exception: Exception) {
+        // The compiler knows stringInput can be null
+        // so stringInput stays nullable.
+        println(stringInput?.length)
+        // null
+    }
 }
-
-val somePair: Pair<Any?, Any?> = "items" to listOf(1, 2, 3)
-
-
-val stringToSomething = somePair.asPairOf<String, Any>()
-val stringToInt = somePair.asPairOf<String, Int>()
-val stringToList = somePair.asPairOf<String, List<*>>()
-val stringToStringList = somePair.asPairOf<String, List<String>>() // Compiles but breaks type safety!
-// Expand the sample for more details
-
 //sampleEnd
-
 fun main() {
-    println("stringToSomething = " + stringToSomething)
-    println("stringToInt = " + stringToInt)
-    println("stringToList = " + stringToList)
-    println("stringToStringList = " + stringToStringList)
-    //println(stringToStringList?.second?.forEach() {it.length}) // This will throw ClassCastException as list items are not String
+    testString()
 }

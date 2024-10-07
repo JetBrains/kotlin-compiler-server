@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>{apple=100, kiwi=190, orange=100, coconut=150}\n{apple=100, kiwi=190, coconut=150}\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>{apple=100, kiwi=190}\n</outStream>"}

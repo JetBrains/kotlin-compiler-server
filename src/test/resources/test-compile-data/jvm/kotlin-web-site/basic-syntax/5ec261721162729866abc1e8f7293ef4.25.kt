@@ -1,9 +1,11 @@
 fun main() {
-    val items = setOf("apple", "banana", "kiwifruit")
 //sampleStart
-    when {
-        "orange" in items -> println("juicy")
-        "apple" in items -> println("apple is fine too")
+    for (x in 1..10 step 2) {
+        print(x)
+    }
+    println()
+    for (x in 9 downTo 0 step 3) {
+        print(x)
     }
 //sampleEnd
 }

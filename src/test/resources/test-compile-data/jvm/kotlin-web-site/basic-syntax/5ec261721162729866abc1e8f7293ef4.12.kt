@@ -1,9 +1,14 @@
-class Rectangle(val height: Double, val length: Double) {
-    val perimeter = (height + length) * 2 
-}
 fun main() {
 //sampleStart
-    val rectangle = Rectangle(5.0, 2.0)
-    println("The perimeter is ${rectangle.perimeter}")
+    // Initializes the variable x at the moment of declaration; type is not required
+    val x = 5
+    // Declares the variable c without initialization; type is required
+    val c: Int
+    // Initializes the variable c after declaration 
+    c = 3
+    // 5 
+    // 3
 //sampleEnd
+    println(x)
+    println(c)
 }
