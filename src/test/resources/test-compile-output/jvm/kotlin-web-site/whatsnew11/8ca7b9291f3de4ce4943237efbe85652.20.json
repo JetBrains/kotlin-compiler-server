@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[Ljava.lang.String;@7cd84586\n[a, b, c]\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[Ljava.lang.String;\n[a, b, c]\n</outStream>"}
