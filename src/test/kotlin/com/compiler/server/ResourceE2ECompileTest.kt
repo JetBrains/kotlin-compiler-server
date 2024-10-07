@@ -64,6 +64,8 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
                         """.trimIndent()
                     }
 
+                    // TODO(Dmitrii Krasnov): this code ignores some of errors,
+                    //  it would be nice to rewrite it.
                     println("!!! file: ${file.path} not equals but it's random code")
                 }
             } else {
