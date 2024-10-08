@@ -47,7 +47,7 @@ class KotlinToJSTranslator(
     files: List<KtFile>,
     debugInfo: Boolean,
     projectType: ProjectType,
-    translate: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    translate: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
       val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
@@ -67,7 +67,8 @@ class KotlinToJSTranslator(
         files,
         dependencies,
         compilerPlugins,
-        compilerPluginOptions
+        compilerPluginOptions,
+        debugInfo
       )
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -138,6 +139,7 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
+    debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
       val moduleName = "moduleId"
@@ -167,25 +169,24 @@ class KotlinToJSTranslator(
 
         k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
-            k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
+            k2JSCompiler.tryCompilation(inputDir, ioFiles, mutableListOf(
               "-Xreport-all-warnings",
               "-Xuse-fir-extended-checkers",
               "-Xwasm",
-              "-Xwasm-generate-wat",
               "-Xir-produce-js",
               "-Xir-dce",
               "-Xinclude=$klibPath",
               "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
               "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
               "-ir-output-name=$moduleName",
-            ))
+            ).also { if (debugInfo) it.add("-Xwasm-generate-wat") })
           }
           .map {
             WasmTranslationSuccessfulOutput(
               jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
               jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
               wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-              wat = (outputDir / "wasm" / "$moduleName.wat").readText(),
+              wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
             )
           }
       }
