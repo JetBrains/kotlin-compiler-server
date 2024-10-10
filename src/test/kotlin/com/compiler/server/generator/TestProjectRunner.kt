@@ -156,14 +156,15 @@ class TestProjectRunner {
         Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
     }
 
-    private fun convertWasmAndTest(
-        project: Project,
-        contains: String,
-    ): ExecutionResult {
-        val result = kotlinProjectExecutor.convertToWasm(
-            project,
-            debugInfo = true,
-        )
+  private fun convertWasmAndTest(
+    project: Project,
+    contains: String,
+  ): ExecutionResult {
+    val result = kotlinProjectExecutor.convertToWasm(
+      project,
+      debugInfo = true,
+      multiModule = false,
+    )
 
         if (result !is TranslationWasmResult) {
             Assertions.assertFalse(result.hasErrors) {

@@ -87,7 +87,7 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
     fun `junit without explicit import test`() {
         @Language("kotlin")
         val testCode =
-            $$"""
+            """
             import kotlin.test.*
 
             class SampleTest {
@@ -95,7 +95,7 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
                 fun `test sum`() {
                     val a = 1
                     val b = 41
-                    assertEquals(42, sum(a, b), "Wrong result for sum($a, $b)")
+                    assertEquals(42, sum(a, b), "Wrong result for sum(${'$'}a, ${'$'}b)")
                 }
             
                 @Test

@@ -8,9 +8,12 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import java.io.File
+import org.jetbrains.kotlin.psi.KtFile
 import java.nio.file.Path
-import java.util.*
-import kotlin.io.path.*
+import kotlin.io.path.Path
+import kotlin.io.path.div
+import kotlin.io.path.pathString
+import kotlin.io.path.writeText
 
 private fun minusOne(value: Int) = if (value > 0) value - 1 else value
 
@@ -108,23 +111,6 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
   }
 }
 
-@OptIn(ExperimentalPathApi::class)
-fun <T> usingTempDirectory(action: (path: Path) -> T): T {
-  val path = getTempDirectory()
-  path.createDirectories()
-  return try {
-    action(path)
-  } finally {
-    path.deleteRecursively()
-  }
-}
-
-private fun getTempDirectory(): Path {
-  val dir = System.getProperty("java.io.tmpdir")
-  val sessionId = UUID.randomUUID().toString().replace("-", "")
-  return File(dir).canonicalFile.resolve(sessionId).toPath()
-}
-
 fun List<ProjectFile>.writeToIoFiles(inputDir: Path): List<Path> {
   val ioFiles = map { inputDir / it.name }
   for ((ioFile, projectFile) in ioFiles zip this) {
@@ -132,5 +118,3 @@ fun List<ProjectFile>.writeToIoFiles(inputDir: Path): List<Path> {
   }
   return ioFiles
 }
-
-val PATH_SEPARATOR: String = File.pathSeparator

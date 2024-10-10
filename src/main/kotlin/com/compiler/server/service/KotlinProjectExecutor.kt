@@ -1,11 +1,11 @@
 package com.compiler.server.service
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.compiler.components.*
 import com.compiler.server.compiler.components.WasmTranslationSuccessfulOutput
 import com.compiler.server.model.*
 import com.compiler.server.model.JsCompilerArguments
 import com.compiler.server.model.bean.VersionInfo
-import component.KotlinEnvironment
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -21,12 +21,25 @@ class KotlinProjectExecutor(
     private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
     fun run(project: Project, addByteCode: Boolean): ExecutionResult {
-        return environment.synchronize { kotlinCompiler.run(project.files, addByteCode, project.args, project.compilerArguments.getOrElse(0, { emptyMap() })) }
+        return environment.synchronize {
+            kotlinCompiler.run(
+                project.files,
+                addByteCode,
+                project.args,
+                project.compilerArguments.getOrElse(0, { emptyMap() })
+            )
+        }
             .also { logExecutionResult(project, it) }
     }
 
     fun test(project: Project, addByteCode: Boolean): ExecutionResult {
-        return environment.synchronize { kotlinCompiler.test(project.files, addByteCode, project.compilerArguments.getOrElse(0, { emptyMap() })) }
+        return environment.synchronize {
+            kotlinCompiler.test(
+                project.files,
+                addByteCode,
+                project.compilerArguments.getOrElse(0, { emptyMap() })
+            )
+        }
             .also { logExecutionResult(project, it) }
     }
 
@@ -35,12 +48,22 @@ class KotlinProjectExecutor(
     }
 
     fun compileToJvm(project: Project): CompilationResult<KotlinCompiler.JvmClasses> {
-        return kotlinCompiler.compile(project.files,  project.compilerArguments.getOrElse(0, { emptyMap() }))
+        return kotlinCompiler.compile(project.files, project.compilerArguments.getOrElse(0, { emptyMap() }))
     }
 
-    fun convertToWasm(project: Project, debugInfo: Boolean = false): TranslationResultWithJsCode {
-        return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
+    fun convertToWasm(
+        project: Project,
+        debugInfo: Boolean = false,
+        multiModule: Boolean,
+    ): TranslationResultWithJsCode {
+        return convertWasmWithConverter(
+            project,
+            debugInfo,
+            multiModule,
+            kotlinToJSTranslator::doTranslateWithWasm
+        )
     }
+
 
     fun highlight(project: Project): CompilerDiagnostics = try {
         when (project.confType) {
@@ -50,11 +73,17 @@ class KotlinProjectExecutor(
                     project,
                 ).compilerDiagnostics
 
-            ProjectType.WASM, ProjectType.COMPOSE_WASM ->
-                convertToWasm(
-                    project,
-                    debugInfo = false,
-                ).compilerDiagnostics
+            ProjectType.WASM -> convertToWasm(
+                project,
+                debugInfo = false,
+                multiModule = false,
+            ).compilerDiagnostics
+
+            ProjectType.COMPOSE_WASM -> convertToWasm(
+                project,
+                debugInfo = false,
+                multiModule = true,
+            ).compilerDiagnostics
         }
     } catch (e: Exception) {
         log.warn("Exception in getting highlight. Project: $project", e)
@@ -84,13 +113,21 @@ class KotlinProjectExecutor(
     private fun convertWasmWithConverter(
         project: Project,
         debugInfo: Boolean,
-        converter: (List<ProjectFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
+        multiModule: Boolean,
+        converter: (
+            List<ProjectFile>,
+            ProjectType,
+            Boolean,
+            Boolean,
+            JsCompilerArguments,
+        ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
 
         return environment.synchronize {
             kotlinToJSTranslator.translateWasm(
                 project.files,
                 debugInfo,
+                multiModule,
                 project.confType,
                 JsCompilerArguments(
                     project.compilerArguments.getOrElse(0, { emptyMap() }),
@@ -98,8 +135,7 @@ class KotlinProjectExecutor(
                 ),
                 converter
             )
-        }
-            .also { logExecutionResult(project, it) }
+        }.also { logExecutionResult(project, it) }
     }
 
     private fun logExecutionResult(project: Project, executionResult: ExecutionResult) {

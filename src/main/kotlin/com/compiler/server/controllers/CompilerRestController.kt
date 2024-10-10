@@ -128,8 +128,16 @@ class CompilerRestController(
     ): TranslationResultWithJsCode {
         return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
             KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
-            KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
-            KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(project, debugInfo)
+            KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(
+        project,
+        debugInfo,
+        multiModule = false,
+      )
+            KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
+        project,
+        debugInfo,
+        multiModule = true,
+      )
         }
     }
 }
