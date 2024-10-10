@@ -1,12 +1,12 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.model.*
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
-import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.backend.common.LoadedKlibs
