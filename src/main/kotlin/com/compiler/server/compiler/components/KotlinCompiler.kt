@@ -1,5 +1,8 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.KotlinEnvironment
+import com.compiler.server.common.components.PATH_SEPARATOR
+import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.CompilerDiagnostics

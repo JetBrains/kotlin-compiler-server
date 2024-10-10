@@ -1,5 +1,6 @@
-package component
+package com.compiler.server.common.components
 
+import component.CompilerPluginOption
 import org.jetbrains.kotlin.library.loader.KlibLoader
 import org.jetbrains.kotlin.library.loader.KlibPlatformChecker
 import java.io.File
@@ -13,6 +14,7 @@ class KotlinEnvironment(
   composeWasmCompilerPlugins: List<File>,
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
+  val dependenciesComposeWasm: String = "",
 ) {
   companion object {
     /**
