@@ -1,15 +1,16 @@
 package com.compiler.server.service
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
-import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.File
 
 @Component
 class KotlinProjectExecutor(
@@ -101,7 +102,14 @@ class KotlinProjectExecutor(
   private fun convertWasmWithConverter(
     project: Project,
     debugInfo: Boolean,
-    converter: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    converter: (
+      List<KtFile>,
+      List<String>,
+      List<String>,
+      List<String>,
+      File?,
+      Boolean,
+    ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }

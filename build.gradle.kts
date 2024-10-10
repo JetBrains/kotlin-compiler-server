@@ -41,9 +41,17 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
-    afterEvaluate {
-        dependencies {
-            dependencies {
+}
+
+setOf(
+    rootProject,
+    project(":common"),
+    project(":executors"),
+    project(":indexation"),
+).forEach { project ->
+    project.afterEvaluate {
+        project.dependencies {
+            project.dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
                 implementation(libs.kotlin.idea) {
                     isTransitive = false
@@ -56,6 +64,31 @@ allprojects {
 val resourceDependency: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
+}
+
+
+val kotlinComposeWasmIcLocalCache: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(
+            CacheAttribute.cacheAttribute,
+            CacheAttribute.LOCAL
+        )
+    }
+}
+
+val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(
+            CacheAttribute.cacheAttribute,
+            CacheAttribute.LAMBDA
+        )
+    }
 }
 
 dependencies {
@@ -85,6 +118,9 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 
     resourceDependency(libs.skiko.js.wasm.runtime)
+
+    kotlinComposeWasmIcLocalCache(project(":cache-maker"))
+    kotlinComposeWasmIcLambdaCache(project(":cache-maker"))
 }
 
 fun buildPropertyFile() {
@@ -109,6 +145,7 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.compose-wasm=${prefix + libComposeWasm}
     libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPlugins}
     libraries.folder.compiler-plugins=${prefix + compilerPluginsForJVM}
+    caches.folder.compose-wasm=${prefix + cachesComposeWasm}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
@@ -120,6 +157,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
+    dependsOn(kotlinComposeWasmIcLocalCache)
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
@@ -131,7 +169,7 @@ tasks.withType<BootJar> {
 
 val buildLambda by tasks.creating(Zip::class) {
     val propertyFile = propertyFile
-    val propertyFileContent = generateProperties("/var/task/")
+    val propertyFileContent = generateProperties(lambdaPrefix)
 
     from(tasks.compileKotlin)
     from(tasks.processResources) {
@@ -152,6 +190,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
+    from(kotlinComposeWasmIcLambdaCache)
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
