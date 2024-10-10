@@ -37,6 +37,16 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
     }
   }
 
+  @PostMapping("/generate-cache")
+  fun generateKotlinIncrementalCacheEndpoint(
+    @RequestParam(defaultValue = "compose-wasm") compiler: String
+  ): TranslationResultWithJsCode? {
+    return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
+      KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.generateWasmIncrementalCache(ProjectType.COMPOSE_WASM)
+      else -> null
+    }
+  }
+
   @PostMapping("/complete")
   fun getKotlinCompleteEndpoint(
     @RequestBody project: Project,

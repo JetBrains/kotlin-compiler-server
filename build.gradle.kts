@@ -41,9 +41,17 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
-    afterEvaluate {
-        dependencies {
-            dependencies {
+}
+
+setOf(
+    rootProject,
+    project(":common"),
+    project(":executors"),
+    project(":indexation"),
+).forEach { project ->
+    project.afterEvaluate {
+        project.dependencies {
+            project.dependencies {
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
                 implementation(libs.kotlin.idea) {
                     isTransitive = false
@@ -109,6 +117,7 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.compose-wasm=${prefix + libComposeWasm}
     libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPlugins}
     libraries.folder.compiler-plugins=${prefix + compilerPluginsForJVM}
+    caches.folder.compose-wasm=${prefix + cachesComposeWasm}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
