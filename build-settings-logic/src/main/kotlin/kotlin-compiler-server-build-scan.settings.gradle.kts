@@ -9,6 +9,10 @@ develocity {
         val overriddenName = buildScanUsername.orNull
         server = "https://ge.jetbrains.com/"
         buildScan {
+
+            termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+            termsOfUseAgree = "yes"
+
             publishing.onlyIf { true }
             capture {
                 fileFingerprints = true

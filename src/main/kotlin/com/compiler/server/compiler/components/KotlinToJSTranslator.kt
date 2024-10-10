@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.*
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JsCompilerArguments
 import com.compiler.server.model.ProjectFile
@@ -15,6 +16,8 @@ import com.compiler.server.utils.JS_DEFAULT_MODULE_NAME
 import com.compiler.server.utils.WASM_DEFAULT_MODULE_NAME
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
+import org.jetbrains.kotlin.psi.KtFile
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.io.encoding.Base64
 import kotlin.io.path.div
@@ -31,8 +34,10 @@ class KotlinToJSTranslator(
     private val wasmCompilerArguments: Set<ExtendedCompilerArgument>,
     private val composeWasmCompilerArguments: Set<ExtendedCompilerArgument>
 ) {
-    companion object {
-        internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
+    private val log = LoggerFactory.getLogger(KotlinToJSTranslator::class.java)
+
+  companion object {
+    internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
         internal val JS_IR_OUTPUT_REWRITE = """
         if (typeof get_output !== "undefined") {
@@ -64,15 +69,23 @@ class KotlinToJSTranslator(
     fun translateWasm(
         files: List<ProjectFile>,
         debugInfo: Boolean,
+        multiModule: Boolean,
         projectType: ProjectType,
         userCompilerArguments: JsCompilerArguments,
-        translate: (List<ProjectFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
+        translate: (
+            List<ProjectFile>,
+            ProjectType,
+            Boolean,
+            Boolean,
+            JsCompilerArguments
+                ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
             val compilationResult = translate(
                 files,
                 projectType,
                 debugInfo,
+                multiModule,
                 userCompilerArguments
             )
             val wasmCompilationOutput = when (compilationResult) {
@@ -223,6 +236,16 @@ class KotlinToJSTranslator(
                         "  })();"
             ) + "\n export const instantiate = () => Promise.resolve();"
     }
+
+    private fun String.fixWasmImports(): String = replace(
+        ".uninstantiated.mjs",
+        "-${kotlinEnvironment.dependenciesComposeWasm}.uninstantiated.mjs"
+    )
+
+    private fun String.fixSkikoImports(): String = replace(
+        "skiko.mjs",
+        "skiko-${kotlinEnvironment.dependenciesComposeWasm}.mjs"
+    )
 }
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
