@@ -1,5 +1,7 @@
 package indexation
 
+import com.compiler.server.common.components.KotlinEnvironmentConfiguration
+
 /**
  * First argument is path to folder with jars
  * Second argument is path to output file for jvm indexes

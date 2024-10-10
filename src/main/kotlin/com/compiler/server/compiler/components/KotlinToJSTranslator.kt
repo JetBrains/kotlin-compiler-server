@@ -1,14 +1,17 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.*
 import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
+import kotlin.time.measureTime
 
 @Service
 class KotlinToJSTranslator(
@@ -47,28 +50,38 @@ class KotlinToJSTranslator(
     files: List<KtFile>,
     debugInfo: Boolean,
     projectType: ProjectType,
-    translate: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    translate: (
+      List<KtFile>,
+      List<String>,
+      List<String>,
+      List<String>,
+      File?,
+      Boolean,
+    ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
-      val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
-        ProjectType.WASM -> listOf(
+      val parameters: WasmParameters = when (projectType) {
+        ProjectType.WASM -> WasmParameters(
           kotlinEnvironment.WASM_LIBRARIES,
           emptyList(),
-          emptyList()
+          emptyList(),
+          null
         )
-        ProjectType.COMPOSE_WASM -> listOf(
+        ProjectType.COMPOSE_WASM -> WasmParameters(
           kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
           kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS,
-          kotlinEnvironment.composeWasmCompilerPluginOptions
+          kotlinEnvironment.composeWasmCompilerPluginOptions,
+          kotlinEnvironment.composeWasmCache,
         )
         else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
       }
       val compilationResult = translate(
         files,
-        dependencies,
-        compilerPlugins,
-        compilerPluginOptions,
-        debugInfo
+        parameters.dependencies,
+        parameters.plugins,
+        parameters.pluginOptions,
+        parameters.cacheDir,
+        debugInfo,
       )
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -137,6 +150,7 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
+    cacheDir: File?,
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
@@ -146,47 +160,63 @@ class KotlinToJSTranslator(
         val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
-          val compilerPluginsArgs: List<String> = compilerPlugins
-              .takeIf { it.isNotEmpty() }
-              ?.let { plugins ->
-                  plugins.map {
-                      "-Xplugin=$it"
-                  } + compilerPluginOptions.map {
-                      "-P=$it"
-                  }
-              } ?: emptyList()
-          val additionalCompilerArgumentsForKLib: List<String> = listOf(
-            "-Xreport-all-warnings",
-            "-Wextra",
-          "-Xwasm",
-          "-Xir-produce-klib-dir",
-          "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-          "-ir-output-dir=$klibPath",
-          "-ir-output-name=$moduleName",
-        ) + compilerPluginsArgs
 
-        k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
-          .flatMap {
-            k2JSCompiler.tryCompilation(inputDir, ioFiles, mutableListOf(
-              "-Xreport-all-warnings",
-              "-Wextra",
-              "-Xwasm",
-              "-Xir-produce-js",
-              "-Xir-dce",
-              "-Xinclude=$klibPath",
-              "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-              "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
-              "-ir-output-name=$moduleName",
-            ).also { if (debugInfo) it.add("-Xwasm-generate-wat") })
-          }
-          .map {
-            WasmTranslationSuccessfulOutput(
-              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
-              jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
-              wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-              wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
+        val compileAction: (icDir: Path?) -> CompilationResult<WasmTranslationSuccessfulOutput> = { icDir ->
+          k2JSCompiler.tryCompilation(
+            inputDir,
+            ioFiles,
+            compileWasmArgs(
+              moduleName,
+              filePaths,
+              klibPath,
+              compilerPlugins,
+              compilerPluginOptions,
+              dependencies
             )
-          }
+          )
+            .flatMap {
+              k2JSCompiler.tryCompilation(
+                inputDir, ioFiles,
+                linkWasmArgs(
+                  moduleName,
+                  klibPath,
+                  dependencies,
+                  icDir,
+                  outputDir,
+                  debugInfo
+                )
+              )
+            }
+            .map {
+              WasmTranslationSuccessfulOutput(
+                jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
+                jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
+                wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
+                wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
+              )
+            }
+        }
+
+        val a: CompilationResult<WasmTranslationSuccessfulOutput>
+
+        val time = measureTime {
+          a = cacheDir?.let { dir ->
+            usingTempDirectory { tmpDir ->
+              val cachesDir = tmpDir.resolve("caches").normalize()
+              val originalCachesDirExists = dir.exists()
+              if (originalCachesDirExists) {
+                dir.copyRecursively(cachesDir.toFile())
+              }
+              val result = compileAction(cachesDir)
+              if (!originalCachesDirExists) {
+                cachesDir.toFile().copyRecursively(dir)
+              }
+              result
+            }
+          } ?: compileAction(null)
+        }
+        println("TIME: $time")
+        a
       }
     }
 }
