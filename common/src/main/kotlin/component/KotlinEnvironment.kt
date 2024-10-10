@@ -1,7 +1,6 @@
 package component
 
 import com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -33,6 +32,7 @@ class KotlinEnvironment(
   composeWasmCompilerPlugins: List<File>,
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
+  val composeWasmCache: File,
 ) {
   companion object {
     /**
@@ -128,7 +128,7 @@ class KotlinEnvironment(
       val messageCollector = MessageCollector.NONE
       put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
-      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
+//      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
       put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)
 
       languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
