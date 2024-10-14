@@ -75,7 +75,6 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
         STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
         INFO, LOGGING, OUTPUT -> return ""
       }
-
       val textInterval = location?.let {
         TextInterval(
           start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),

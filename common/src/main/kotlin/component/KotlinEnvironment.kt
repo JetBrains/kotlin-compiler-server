@@ -53,7 +53,7 @@ class KotlinEnvironment(
       "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
       "-Xcontext-receivers",
       "-Xreport-all-warnings",
-      "-Xuse-fir-extended-checkers",
+      "-Wextra",
       "-XXLanguage:+ExplicitBackingFields",
     )
   }
@@ -128,7 +128,6 @@ class KotlinEnvironment(
       val messageCollector = MessageCollector.NONE
       put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
-      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
       put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)
 
       languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)
