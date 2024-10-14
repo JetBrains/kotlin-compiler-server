@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":2,"ch":11},"end":{"line":2,"ch":14}},"message":"Redundant explicit type.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>true\ntrue\n</outStream>"}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>true\ntrue\n</outStream>"}
