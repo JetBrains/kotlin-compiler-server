@@ -95,8 +95,7 @@ class KotlinToJSTranslator(
         val klibPath = (outputDir / "klib").toFile().canonicalPath
         val additionalCompilerArgumentsForKLib = listOf(
           "-Xreport-all-warnings",
-          "-Xuse-fir-extended-checkers",
-          "-Xir-only",
+          "-Wextra",
           "-Xir-produce-klib-dir",
           "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
@@ -106,8 +105,7 @@ class KotlinToJSTranslator(
           .flatMap {
             k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
               "-Xreport-all-warnings",
-              "-Xuse-fir-extended-checkers",
-              "-Xir-only",
+              "-Wextra",
               "-Xir-produce-js",
               "-Xir-dce",
               "-Xinclude=$klibPath",
@@ -157,7 +155,7 @@ class KotlinToJSTranslator(
               } ?: emptyList()
           val additionalCompilerArgumentsForKLib: List<String> = listOf(
             "-Xreport-all-warnings",
-          "-Xuse-fir-extended-checkers",
+            "-Wextra",
           "-Xwasm",
           "-Xir-produce-klib-dir",
           "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
@@ -169,7 +167,7 @@ class KotlinToJSTranslator(
           .flatMap {
             k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
               "-Xreport-all-warnings",
-              "-Xuse-fir-extended-checkers",
+              "-Wextra",
               "-Xwasm",
               "-Xwasm-generate-wat",
               "-Xir-produce-js",
