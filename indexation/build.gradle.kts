@@ -22,7 +22,6 @@ tasks.withType<JavaExec> {
     dependsOn(":dependencies:copyWasmDependencies")
     dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
     dependsOn(":dependencies:copyComposeWasmDependencies")
-    dependsOn(":dependencies:copyComposeWasmIcCaches")
 
     val rootName = project.rootProject.projectDir.toString()
 
@@ -36,7 +35,6 @@ tasks.withType<JavaExec> {
     inputs.dir(libWasmFolder)
     inputs.dir(libComposeWasmFolder)
     inputs.dir(libComposeWasmCompilerPluginsFolder)
-    inputs.dir(cachesComposeWasmFolder)
 
     // Adding resulting index files as output for up-to-date checks
     val jvmIndicesJson = "$rootName${File.separator}$indexes"

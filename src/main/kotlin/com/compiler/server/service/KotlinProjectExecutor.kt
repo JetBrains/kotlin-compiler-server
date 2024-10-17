@@ -53,6 +53,26 @@ class KotlinProjectExecutor(
     return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
+  fun generateWasmIncrementalCache(confType: ProjectType): TranslationResultWithJsCode {
+    kotlinEnvironment.composeWasmCache.deleteRecursively()
+    return kotlinEnvironment.environment {
+      val cacheFileResource = when (confType) {
+        ProjectType.COMPOSE_WASM -> "com/compiler/server/services/compose-wasm-cache.kt"
+        else -> throw IllegalArgumentException("Not yet file to make a cache for $confType")
+      }
+      val cacheKtPath = this::class.java.classLoader.getResource(cacheFileResource)!!.path
+      kotlinToJSTranslator.translateWasm(
+        listOf(
+          KotlinFile.from(it.project, "File.kt", File(cacheKtPath).readText()).kotlinFile
+        ),
+        debugInfo = false,
+        generateIncrementalCache = true,
+        confType,
+        kotlinToJSTranslator::doTranslateWithWasm
+      )
+    }
+  }
+
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
     return kotlinEnvironment.environment {
       val file = getFilesFrom(project, it).first()
@@ -107,6 +127,7 @@ class KotlinProjectExecutor(
       List<String>,
       List<String>,
       List<String>,
+      Boolean,
       File?,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
@@ -116,6 +137,7 @@ class KotlinProjectExecutor(
       kotlinToJSTranslator.translateWasm(
         files,
         debugInfo,
+        generateIncrementalCache = false,
         project.confType,
         converter
       )

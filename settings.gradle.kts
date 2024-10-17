@@ -17,5 +17,3 @@ include(":executors")
 include(":indexation")
 include(":common")
 include(":dependencies")
-
-include(":cache-maker")

@@ -8,10 +8,9 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.div
-import kotlin.io.path.readBytes
-import kotlin.io.path.readText
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+import kotlin.io.path.*
 
 @Service
 class KotlinToJSTranslator(
@@ -49,12 +48,14 @@ class KotlinToJSTranslator(
   fun translateWasm(
     files: List<KtFile>,
     debugInfo: Boolean,
+    generateIncrementalCache: Boolean,
     projectType: ProjectType,
     translate: (
       List<KtFile>,
       List<String>,
       List<String>,
       List<String>,
+      Boolean,
       File?,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
@@ -80,6 +81,7 @@ class KotlinToJSTranslator(
         parameters.dependencies,
         parameters.plugins,
         parameters.pluginOptions,
+        generateIncrementalCache,
         parameters.cacheDir,
         debugInfo,
       )
@@ -152,6 +154,7 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
+    generateIncrementalCache: Boolean,
     cacheDir: File?,
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
@@ -190,13 +193,17 @@ class KotlinToJSTranslator(
                   "-Xuse-fir-extended-checkers",
                   "-Xwasm",
                   "-Xir-produce-js",
-                  "-Xir-dce",
                   "-Xinclude=$klibPath",
                   "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
                   "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
                   "-ir-output-name=$moduleName",).also {
                     if (debugInfo) it.add("-Xwasm-generate-wat")
-                  if (icDir != null) it.add("-Xcache-directory=${icDir.normalize().absolutePathString()}") }
+                    if (compileWithCacheDir(generateIncrementalCache, icDir)) {
+                      it.add("-Xcache-directory=${icDir.normalize().absolutePathString()}")
+                    } else {
+                      it.add("-Xir-dce")
+                    }
+                  }
               )
             }
             .map {
@@ -209,15 +216,30 @@ class KotlinToJSTranslator(
             }
         }
 
-        cacheDir?.let { dir ->
-          usingTempDirectory { tmpDir ->
-            val cachesDir = tmpDir.resolve("caches").normalize()
-            dir.copyRecursively(cachesDir.toFile())
+        if (generateIncrementalCache) {
+          compileAction(cacheDir!!.toPath())
+        } else {
+          val cacheDirPath = cacheDir?.toPath()
+          if (compileWithCacheDir(generateIncrementalCache = false, cacheDirPath)) {
+            usingTempDirectory { tmpDir ->
+              val cachesDir = tmpDir.resolve("caches").normalize()
+              cacheDirPath.toFile().copyRecursively(cachesDir.toFile())
+              compileAction(cachesDir)
+            }
+          } else {
             compileAction(null)
           }
-        } ?: compileAction(null)
+        }
       }
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+private fun compileWithCacheDir(generateIncrementalCache: Boolean, cacheDir: Path?): Boolean {
+  contract {
+    returns() implies (cacheDir != null)
+  }
+  return cacheDir != null && (generateIncrementalCache || cacheDir.exists())
 }
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
