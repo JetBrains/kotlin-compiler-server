@@ -15,7 +15,7 @@ class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
   companion object {
-    private const val JS_IR_CODE_BUFFER = "moduleId.output?.buffer_1;\n"
+    private const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
     private val JS_IR_OUTPUT_REWRITE = """
         if (typeof get_output !== "undefined") {
@@ -88,7 +88,7 @@ class KotlinToJSTranslator(
 
   fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>): CompilationResult<String> =
     usingTempDirectory { inputDir ->
-      val moduleName = "moduleId"
+      val moduleName = "playground"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
         val k2JSCompiler = K2JSCompiler()
@@ -142,7 +142,7 @@ class KotlinToJSTranslator(
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
-      val moduleName = "moduleId"
+      val moduleName = "playground"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
         val k2JSCompiler = K2JSCompiler()

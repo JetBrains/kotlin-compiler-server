@@ -201,11 +201,11 @@ class TestProjectRunner {
     Assertions.assertNotNull(result, "Test result should no be a null")
 
     val tmpDir = createTempDirectory()
-    val jsMain = tmpDir.resolve("moduleId.mjs")
+    val jsMain = tmpDir.resolve("playground.mjs")
     jsMain.writeText(result.jsInstantiated)
-    val jsUninstantiated = tmpDir.resolve("moduleId.uninstantiated.mjs")
+    val jsUninstantiated = tmpDir.resolve("playground.uninstantiated.mjs")
     jsUninstantiated.writeText(result.jsCode!!)
-    val wasmMain = tmpDir.resolve("moduleId.wasm")
+    val wasmMain = tmpDir.resolve("playground.wasm")
     wasmMain.writeBytes(result.wasm)
 
     val wat = result.wat

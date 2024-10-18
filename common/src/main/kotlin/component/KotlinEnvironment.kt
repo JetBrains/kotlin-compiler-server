@@ -1,7 +1,6 @@
 package component
 
 import com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -88,20 +87,20 @@ class KotlinEnvironment(
 
   private val configuration = createConfiguration()
   val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
   }
 
   val wasmConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
     put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
 
   val composeWasmConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.LIBRARIES, COMPOSE_WASM_LIBRARIES)
     put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
