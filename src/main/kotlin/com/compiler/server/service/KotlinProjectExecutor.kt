@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.File
 
 @Component
 class KotlinProjectExecutor(
@@ -50,6 +51,26 @@ class KotlinProjectExecutor(
 
   fun convertToWasm(project: Project, debugInfo: Boolean): TranslationResultWithJsCode {
     return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
+  }
+
+  fun generateWasmIncrementalCache(confType: ProjectType): TranslationResultWithJsCode {
+    kotlinEnvironment.composeWasmCache.deleteRecursively()
+    return kotlinEnvironment.environment {
+      val cacheFileResource = when (confType) {
+        ProjectType.COMPOSE_WASM -> "com/compiler/server/services/compose-wasm-cache.kt"
+        else -> throw IllegalArgumentException("Not yet file to make a cache for $confType")
+      }
+      val cacheKtPath = this::class.java.classLoader.getResource(cacheFileResource)!!.path
+      kotlinToJSTranslator.translateWasm(
+        listOf(
+          KotlinFile.from(it.project, "File.kt", File(cacheKtPath).readText()).kotlinFile
+        ),
+        debugInfo = false,
+        generateIncrementalCache = true,
+        confType,
+        kotlinToJSTranslator::doTranslateWithWasm
+      )
+    }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -101,13 +122,22 @@ class KotlinProjectExecutor(
   private fun convertWasmWithConverter(
     project: Project,
     debugInfo: Boolean,
-    converter: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    converter: (
+      List<KtFile>,
+      List<String>,
+      List<String>,
+      List<String>,
+      Boolean,
+      File?,
+      Boolean,
+    ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }
       kotlinToJSTranslator.translateWasm(
         files,
         debugInfo,
+        generateIncrementalCache = false,
         project.confType,
         converter
       )

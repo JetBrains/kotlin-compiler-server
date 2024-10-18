@@ -1,7 +1,7 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.model.bean.CachesFile
 import com.compiler.server.model.bean.LibrariesFile
-import com.compiler.server.model.bean.VersionInfo
 import component.CompilerPluginOption
 import component.KotlinEnvironment
 import org.springframework.context.annotation.Bean
@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class KotlinEnvironmentConfiguration(
-  val librariesFile: LibrariesFile
+  val librariesFile: LibrariesFile,
+  val cachesFile: CachesFile,
 ) {
   @Bean
   fun kotlinEnvironment(): KotlinEnvironment {
@@ -39,7 +40,8 @@ class KotlinEnvironmentConfiguration(
           "generateDecoys",
           "false"
         ),
-      )
+      ),
+      cachesFile.composeWasm
     )
   }
 }
