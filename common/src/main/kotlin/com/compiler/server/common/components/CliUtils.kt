@@ -41,7 +41,7 @@ fun compileWasmArgs(
     } ?: emptyList()
   val additionalCompilerArgumentsForKLib: List<String> = listOf(
     "-Xreport-all-warnings",
-    "-Xuse-fir-extended-checkers",
+    "-Wextra",
     "-Xwasm",
     "-Xir-produce-klib-dir",
     "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
@@ -62,7 +62,7 @@ fun linkWasmArgs(
 ): List<String> {
   return mutableListOf(
     "-Xreport-all-warnings",
-    "-Xuse-fir-extended-checkers",
+    "-Wextra",
     "-Xwasm",
     "-Xir-produce-js",
     "-Xinclude=$klibPath",
