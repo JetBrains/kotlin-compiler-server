@@ -12,7 +12,7 @@ class CacheBuilder(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
   fun compileCache(outputForCache: String) {
-    val moduleName = "moduleId"
+    val moduleName = "playground"
     usingTempDirectory { outputDir ->
       val resource = this::class.java.classLoader.getResource("File.kt")!!.path
 

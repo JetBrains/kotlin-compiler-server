@@ -71,13 +71,13 @@ class KotlinEnvironment(
     .map { it.absolutePath }
     .filter { isKotlinLibrary(File(it)) }
   val WASM_LIBRARIES = additionalWasmClasspath
-    .map { it.path }
+    .map { it.absolutePath }
     .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_LIBRARIES = additionalComposeWasmClasspath
-    .map { it.path }
+    .map { it.absolutePath }
     .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_COMPILER_PLUGINS = composeWasmCompilerPlugins
-    .map { it.path }
+    .map { it.absolutePath }
 
   val composeWasmCompilerPluginOptions = composeWasmCompilerPluginsOptions
     .map { "plugin:${it.id}:${it.option}=${it.value}" }

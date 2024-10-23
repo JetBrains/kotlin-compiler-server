@@ -31,13 +31,6 @@ tasks.withType<JavaExec> {
     val composeCacheComposeWasm = "$rootName${File.separator}$cachesComposeWasm"
     outputs.dir(cachesComposeWasmFolder)
 
-    debugOptions {
-        enabled = true
-        port = 5005
-        server = true
-        suspend = false
-    }
-
     args = listOf(
         kotlinVersion,
         libJVMFolder.asFile.absolutePath,
