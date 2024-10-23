@@ -60,6 +60,44 @@ val kotlinComposeWasmDependency: Configuration by configurations.creating {
     }
 }
 
+val kotlinComposeWasmIcCache: Configuration by configurations.creating {
+    isTransitive = false
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.wasm
+        )
+        attribute(
+            KotlinWasmTargetAttribute.wasmTargetAttribute,
+            KotlinWasmTargetAttribute.js
+        )
+        attribute(
+            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+            objects.named(LibraryElements::class.java, "compose-wasm-cache")
+        )
+    }
+}
+
+val kotlinComposeWasmCopied: Configuration by configurations.creating {
+    isCanBeResolved = false
+    isCanBeConsumed = true
+
+    attributes {
+        attribute(
+            KotlinPlatformType.attribute,
+            KotlinPlatformType.wasm
+        )
+        attribute(
+            KotlinWasmTargetAttribute.wasmTargetAttribute,
+            KotlinWasmTargetAttribute.js
+        )
+        attribute(
+            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+            objects.named(LibraryElements::class.java, "compose-wasm-copied")
+        )
+    }
+}
+
 val composeWasmCompilerPlugins: Configuration by configurations.creating {
     isTransitive = false
 }
@@ -96,6 +134,15 @@ val copyComposeWasmCompilerPlugins by tasks.creating(Copy::class) {
     into(libComposeWasmCompilerPluginsFolder)
 }
 
+//val copyComposeWasmIcCaches by tasks.creating(Copy::class) {
+//    from(kotlinComposeWasmIcCache)
+//    into(cachesComposeWasmFolder)
+//}
+
+artifacts.add(kotlinComposeWasmCopied.name, libComposeWasmFolder) {
+    builtBy(copyComposeWasmDependencies)
+}
+
 plugins {
     kotlin("jvm")
 }
@@ -124,4 +171,6 @@ dependencies {
     kotlinComposeWasmDependency(libs.bundles.compose)
 
     composeWasmCompilerPlugins(libs.kotlin.compose.compiler.plugin)
+
+    kotlinComposeWasmIcCache(project(":cache-maker"))
 }

@@ -1,16 +1,17 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.*
 import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Path
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
-import kotlin.io.path.*
+import kotlin.io.path.div
+import kotlin.io.path.readBytes
+import kotlin.io.path.readText
+import kotlin.time.measureTime
 
 @Service
 class KotlinToJSTranslator(
@@ -48,14 +49,12 @@ class KotlinToJSTranslator(
   fun translateWasm(
     files: List<KtFile>,
     debugInfo: Boolean,
-    generateIncrementalCache: Boolean,
     projectType: ProjectType,
     translate: (
       List<KtFile>,
       List<String>,
       List<String>,
       List<String>,
-      Boolean,
       File?,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
@@ -81,7 +80,6 @@ class KotlinToJSTranslator(
         parameters.dependencies,
         parameters.plugins,
         parameters.pluginOptions,
-        generateIncrementalCache,
         parameters.cacheDir,
         debugInfo,
       )
@@ -152,7 +150,6 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
-    generateIncrementalCache: Boolean,
     cacheDir: File?,
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
@@ -163,45 +160,31 @@ class KotlinToJSTranslator(
         val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
-          val compilerPluginsArgs: List<String> = compilerPlugins
-              .takeIf { it.isNotEmpty() }
-              ?.let { plugins ->
-                  plugins.map {
-                      "-Xplugin=$it"
-                  } + compilerPluginOptions.map {
-                      "-P=$it"
-                  }
-              } ?: emptyList()
-          val additionalCompilerArgumentsForKLib: List<String> = listOf(
-            "-Xreport-all-warnings",
-            "-Wextra",
-            "-Xwasm",
-            "-Xir-produce-klib-dir",
-            "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-            "-ir-output-dir=$klibPath",
-            "-ir-output-name=$moduleName",
-          ) + compilerPluginsArgs
 
         val compileAction: (icDir: Path?) -> CompilationResult<WasmTranslationSuccessfulOutput> = { icDir ->
-          k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+          k2JSCompiler.tryCompilation(
+            inputDir,
+            ioFiles,
+            compileWasmArgs(
+              moduleName,
+              filePaths,
+              klibPath,
+              compilerPlugins,
+              compilerPluginOptions,
+              dependencies
+            )
+          )
             .flatMap {
               k2JSCompiler.tryCompilation(
-                inputDir, ioFiles, mutableListOf(
-                  "-Xreport-all-warnings",
-                  "-Wextra",
-                  "-Xwasm",
-                  "-Xir-produce-js",
-                  "-Xinclude=$klibPath",
-                  "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-                  "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
-                  "-ir-output-name=$moduleName",).also {
-                    if (debugInfo) it.add("-Xwasm-generate-wat")
-                    if (compileWithCacheDir(generateIncrementalCache, icDir)) {
-                      it.add("-Xcache-directory=${icDir.normalize().absolutePathString()}")
-                    } else {
-                      it.add("-Xir-dce")
-                    }
-                  }
+                inputDir, ioFiles,
+                linkWasmArgs(
+                  moduleName,
+                  klibPath,
+                  dependencies,
+                  icDir,
+                  outputDir,
+                  debugInfo
+                )
               )
             }
             .map {
@@ -214,30 +197,28 @@ class KotlinToJSTranslator(
             }
         }
 
-        if (generateIncrementalCache) {
-          compileAction(cacheDir!!.toPath())
-        } else {
-          val cacheDirPath = cacheDir?.toPath()
-          if (compileWithCacheDir(generateIncrementalCache = false, cacheDirPath)) {
+        val a: CompilationResult<WasmTranslationSuccessfulOutput>
+
+        val time = measureTime {
+          a = cacheDir?.let { dir ->
             usingTempDirectory { tmpDir ->
               val cachesDir = tmpDir.resolve("caches").normalize()
-              cacheDirPath.toFile().copyRecursively(cachesDir.toFile())
-              compileAction(cachesDir)
+              val originalCachesDirExists = dir.exists()
+              if (originalCachesDirExists) {
+                dir.copyRecursively(cachesDir.toFile())
+              }
+              val result = compileAction(cachesDir)
+              if (!originalCachesDirExists) {
+                cachesDir.toFile().copyRecursively(dir)
+              }
+              result
             }
-          } else {
-            compileAction(null)
-          }
+          } ?: compileAction(null)
         }
+        println("TIME: $time")
+        a
       }
     }
-}
-
-@OptIn(ExperimentalContracts::class)
-private fun compileWithCacheDir(generateIncrementalCache: Boolean, cacheDir: Path?): Boolean {
-  contract {
-    returns() implies (cacheDir != null)
-  }
-  return cacheDir != null && (generateIncrementalCache || cacheDir.exists())
 }
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {

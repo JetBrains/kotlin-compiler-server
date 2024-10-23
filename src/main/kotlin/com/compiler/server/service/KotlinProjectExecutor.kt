@@ -1,10 +1,10 @@
 package com.compiler.server.service
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.compiler.KotlinFile
 import com.compiler.server.compiler.components.*
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
-import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
@@ -51,26 +51,6 @@ class KotlinProjectExecutor(
 
   fun convertToWasm(project: Project, debugInfo: Boolean): TranslationResultWithJsCode {
     return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
-  }
-
-  fun generateWasmIncrementalCache(confType: ProjectType): TranslationResultWithJsCode {
-    kotlinEnvironment.composeWasmCache.deleteRecursively()
-    return kotlinEnvironment.environment {
-      val cacheFileResource = when (confType) {
-        ProjectType.COMPOSE_WASM -> "com/compiler/server/services/compose-wasm-cache.kt"
-        else -> throw IllegalArgumentException("Not yet file to make a cache for $confType")
-      }
-      val cacheKtPath = this::class.java.classLoader.getResource(cacheFileResource)!!.path
-      kotlinToJSTranslator.translateWasm(
-        listOf(
-          KotlinFile.from(it.project, "File.kt", File(cacheKtPath).readText()).kotlinFile
-        ),
-        debugInfo = false,
-        generateIncrementalCache = true,
-        confType,
-        kotlinToJSTranslator::doTranslateWithWasm
-      )
-    }
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -127,7 +107,6 @@ class KotlinProjectExecutor(
       List<String>,
       List<String>,
       List<String>,
-      Boolean,
       File?,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
@@ -137,7 +116,6 @@ class KotlinProjectExecutor(
       kotlinToJSTranslator.translateWasm(
         files,
         debugInfo,
-        generateIncrementalCache = false,
         project.confType,
         converter
       )

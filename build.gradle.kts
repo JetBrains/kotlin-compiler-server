@@ -129,6 +129,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
+    dependsOn(":cache-maker:run")
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")

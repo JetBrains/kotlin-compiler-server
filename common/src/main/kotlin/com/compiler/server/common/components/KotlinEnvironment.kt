@@ -1,6 +1,7 @@
-package component
+package com.compiler.server.common.components
 
 import com.intellij.openapi.util.Disposer
+import component.CompilerPluginOption
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -70,13 +71,13 @@ class KotlinEnvironment(
     .map { it.absolutePath }
     .filter { isKotlinLibrary(File(it)) }
   val WASM_LIBRARIES = additionalWasmClasspath
-    .map { it.absolutePath }
+    .map { it.path }
     .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_LIBRARIES = additionalComposeWasmClasspath
-    .map { it.absolutePath }
+    .map { it.path }
     .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_COMPILER_PLUGINS = composeWasmCompilerPlugins
-    .map { it.absolutePath }
+    .map { it.path }
 
   val composeWasmCompilerPluginOptions = composeWasmCompilerPluginsOptions
     .map { "plugin:${it.id}:${it.option}=${it.value}" }

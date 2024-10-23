@@ -1,7 +1,7 @@
 package indexation
 
+import com.compiler.server.common.components.KotlinEnvironment
 import model.ImportInfo
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.container.getService

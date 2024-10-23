@@ -1,7 +1,6 @@
-package indexation
+package com.compiler.server.common.components
 
 import component.CompilerPluginOption
-import component.KotlinEnvironment
 import java.io.File
 
 class KotlinEnvironmentConfiguration(
