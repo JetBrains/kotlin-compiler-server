@@ -5,6 +5,8 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
+
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
     }
 }
 plugins {
@@ -16,3 +18,4 @@ include(":executors")
 include(":indexation")
 include(":common")
 include(":dependencies")
+include(":cache-maker")

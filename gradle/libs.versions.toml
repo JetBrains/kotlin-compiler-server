@@ -14,11 +14,11 @@ kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.6.0-RC.2"
 kotlinx-io = "0.5.3"
 kotlinx-serialization = "1.7.1"
-skiko = "0.7.90"
+skiko = "0.8.15"
 # don't forget to update jackson version in `executor.policy` file.
 jackson = "2.14.0"
 hamcrest = "2.2"
-compose = "1.6.0"
+compose = "1.7.0"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }

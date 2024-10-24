@@ -1,6 +1,6 @@
+import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.kotlin.dsl.the
 
 val indexes: String by System.getProperties()
@@ -25,6 +25,8 @@ val Project.libComposeWasm
     get() = "$kotlinVersion-compose-wasm"
 val Project.libComposeWasmCompilerPlugins
     get() = "$kotlinVersion-compose-wasm-compiler-plugins"
+val Project.cachesComposeWasm
+    get() = "$kotlinVersion-caches-compose-wasm"
 
 val Project.libJVMFolder
     get() = rootProject.layout.projectDirectory.dir(libJVM)
@@ -43,3 +45,6 @@ val Project.libComposeWasmFolder
 
 val Project.libComposeWasmCompilerPluginsFolder
     get() = rootProject.layout.projectDirectory.dir(libComposeWasmCompilerPlugins)
+
+val Project.cachesComposeWasmFolder
+    get() = rootProject.layout.projectDirectory.dir(cachesComposeWasm)
