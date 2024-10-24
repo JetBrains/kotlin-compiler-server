@@ -18,7 +18,7 @@ skiko = "0.8.15"
 # don't forget to update jackson version in `executor.policy` file.
 jackson = "2.14.0"
 hamcrest = "2.2"
-compose = "1.7.0-rc01"
+compose = "1.7.0"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
