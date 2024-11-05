@@ -11,7 +11,7 @@ echo "Target directory: $targetDir"
 
 image_tag=my-image-name:$(date +%s)
 
-docker build . --file cache-maker/Dockerfile --tag $image_tag --build-arg BASE_DIR=$baseDir
+docker build . --file cache-maker/Dockerfile --tag $image_tag --build-arg BASE_DIR=$baseDir --build-arg KOTLIN_VERSION=$kotlinVersion
 
 container=$(docker create $image_tag)
 

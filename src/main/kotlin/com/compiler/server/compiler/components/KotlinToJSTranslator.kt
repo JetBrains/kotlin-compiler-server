@@ -203,15 +203,10 @@ class KotlinToJSTranslator(
           a = cacheDir?.let { dir ->
             usingTempDirectory { tmpDir ->
               val cachesDir = tmpDir.resolve("caches").normalize()
-              val originalCachesDirExists = dir.exists()
-              if (originalCachesDirExists) {
+              if (dir.exists()) {
                 dir.copyRecursively(cachesDir.toFile())
               }
-              val result = compileAction(cachesDir)
-              if (!originalCachesDirExists) {
-                cachesDir.toFile().copyRecursively(dir)
-              }
-              result
+              compileAction(cachesDir)
             }
           } ?: compileAction(null)
         }
