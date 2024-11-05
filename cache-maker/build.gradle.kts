@@ -11,7 +11,7 @@ application {
     mainClass.set("cache.MainKt")
 }
 
-tasks.withType<JavaExec> {
+val runTask = tasks.named<JavaExec>("run") {
     dependsOn(":dependencies:copyDependencies")
     dependsOn(":dependencies:copyWasmDependencies")
     dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
@@ -39,15 +39,6 @@ tasks.withType<JavaExec> {
 }
 
 val outputLocalCacheDir = rootDir.resolve(cachesComposeWasm)
-val buildCacheLocal by tasks.registering(Exec::class) {
-    workingDir = rootDir
-    executable = "${project.name}/docker-build-incremental-cache.sh"
-    outputs.dir(outputLocalCacheDir)
-    args = listOf(
-        rootDir.normalize().absolutePath, // baseDir
-        rootDir.normalize().absolutePath // targetDir
-    )
-}
 
 val outputLambdaCacheDir: Provider<Directory> = layout.buildDirectory.dir("incremental-cache")
 val buildCacheForLambda by tasks.registering(Exec::class) {
@@ -91,7 +82,7 @@ val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
 }
 
 artifacts.add(kotlinComposeWasmIcLocalCache.name, outputLocalCacheDir) {
-    builtBy(buildCacheLocal)
+    builtBy(runTask)
 }
 
 artifacts.add(kotlinComposeWasmIcLambdaCache.name, outputLambdaCacheDir) {
