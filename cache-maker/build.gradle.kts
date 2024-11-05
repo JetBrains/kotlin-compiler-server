@@ -8,7 +8,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("cache.MainKt")
+    mainClass.set("com.compiler.server.cache.MainKt")
 }
 
 val runTask = tasks.named<JavaExec>("run") {
@@ -17,28 +17,21 @@ val runTask = tasks.named<JavaExec>("run") {
     dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
     dependsOn(":dependencies:copyComposeWasmDependencies")
 
-    val rootName = project.rootProject.projectDir.toString()
-
     val kotlinVersion = libs.versions.kotlin.get()
     inputs.property("kotlinVersion", kotlinVersion)
 
-    // Adding classpath directories as task input for up-to-date checks
     inputs.dir(libWasmFolder)
     inputs.dir(libComposeWasmFolder)
     inputs.dir(libComposeWasmCompilerPluginsFolder)
 
-    // Adding resulting index files as output for up-to-date checks
-    val composeCacheComposeWasm = "$rootName${File.separator}$cachesComposeWasm"
     outputs.dir(cachesComposeWasmFolder)
 
-    args = listOf(
+    args(
         kotlinVersion,
         libJVMFolder.asFile.absolutePath,
-        composeCacheComposeWasm,
+        cachesComposeWasmFolder,
     )
 }
-
-val outputLocalCacheDir = rootDir.resolve(cachesComposeWasm)
 
 val outputLambdaCacheDir: Provider<Directory> = layout.buildDirectory.dir("incremental-cache")
 val buildCacheForLambda by tasks.registering(Exec::class) {
@@ -49,8 +42,8 @@ val buildCacheForLambda by tasks.registering(Exec::class) {
 
     outputs.dir(outputDir.map { it.dir(cachesComposeWasm) })
 
-    doFirst {
-        args = listOf(
+    argumentProviders.add {
+        listOf(
             lambdaPrefix, // baseDir
             outputDir.get().asFile.normalize().absolutePath, // targetDir
         )
@@ -81,7 +74,7 @@ val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
     }
 }
 
-artifacts.add(kotlinComposeWasmIcLocalCache.name, outputLocalCacheDir) {
+artifacts.add(kotlinComposeWasmIcLocalCache.name, cachesComposeWasmFolder) {
     builtBy(runTask)
 }
 
