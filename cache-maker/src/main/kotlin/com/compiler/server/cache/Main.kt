@@ -1,6 +1,5 @@
-package cache
+package com.compiler.server.cache
 
-import CacheBuilder
 import com.compiler.server.common.components.KotlinEnvironmentConfiguration
 
 fun main(args: Array<String>) {

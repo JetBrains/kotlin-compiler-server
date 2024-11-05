@@ -1,3 +1,5 @@
+package com.compiler.server.cache
+
 import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.common.components.compileWasmArgs
 import com.compiler.server.common.components.linkWasmArgs
