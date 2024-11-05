@@ -20,3 +20,5 @@ docker cp $container:$baseDir/$kotlinVersion-caches-compose-wasm $targetDir
 docker start $container
 docker stop $container
 docker remove $container
+
+docker rmi $image_tag
