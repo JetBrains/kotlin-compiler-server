@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Temperature updated: 20.0°C -> 22.5°C\nWarning: Temperature is too high! (22.5°C -> 27.0°C)\n</outStream>"}

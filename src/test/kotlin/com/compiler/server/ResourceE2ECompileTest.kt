@@ -134,6 +134,7 @@ private fun File.isInconsistentOutput(): Boolean {
         " measureTime {",
         " measureTimedValue {",
         "LocalDate.now()",
+        "Clock.System.now()"
     ).any { code.contains(it) }
 }
 

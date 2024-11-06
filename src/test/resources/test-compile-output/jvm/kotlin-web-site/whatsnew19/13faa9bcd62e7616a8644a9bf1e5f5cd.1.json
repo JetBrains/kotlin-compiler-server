@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[{"interval":{"start":{"line":11,"ch":23},"end":{"line":11,"ch":26}},"message":"Recursive call is not a tail call.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>Hello from Kotlin/Wasm!\n\nack(3, 10) = 8189\nduration: 85.425458 ms\n</outStream>"}

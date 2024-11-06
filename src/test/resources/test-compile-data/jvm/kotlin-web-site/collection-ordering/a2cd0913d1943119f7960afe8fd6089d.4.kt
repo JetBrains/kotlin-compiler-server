@@ -1,8 +1,14 @@
 fun main() {
 //sampleStart
-    val numbers = listOf("one", "two", "three", "four")
+    val sortedStrings = listOf("aaa", "bb", "c", "b", "a", "aa", "ccc")
+        .sortedWith { a, b -> 
+           when (val compareLengths = a.length.compareTo(b.length)) {
+             0 -> a.compareTo(b)
+             else -> compareLengths
+           }
+         }
 
-    println("Sorted ascending: ${numbers.sorted()}")
-    println("Sorted descending: ${numbers.sortedDescending()}")
+    println(sortedStrings)
+    // [a, b, c, aa, bb, aaa, ccc]
 //sampleEnd
 }

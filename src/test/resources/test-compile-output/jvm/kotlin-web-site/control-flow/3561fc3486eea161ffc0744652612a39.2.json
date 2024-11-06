@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>1\n2\n3\n6\n4\n2\n0\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>x == 2</outStream>"}

@@ -1,0 +1,1 @@
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Shuffled items: [5, 2, 3, 1, 4]\nItems doubled: [10, 4, 6, 2, 8]\nItems filled with 5: [5, 5, 5, 5, 5]\n</outStream>"}

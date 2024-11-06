@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>Member function\nTop-level function\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"exception":null,"text":"<outStream>Member function\nLocal function\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

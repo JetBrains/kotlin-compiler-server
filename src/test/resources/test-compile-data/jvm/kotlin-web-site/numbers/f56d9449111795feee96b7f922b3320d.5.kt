@@ -1,6 +1,6 @@
 fun main() {
 //sampleStart
-    val x = 5L / 2
-    println(x == 2L)
+    val x = 5 / 2.toDouble()
+    println(x == 2.5)
 //sampleEnd
 }

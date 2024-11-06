@@ -1,10 +1,10 @@
 //sampleStart
 fun foo() {
-    listOf(1, 2, 3, 4, 5).forEach {
-        if (it == 3) return@forEach // local return to the caller of the lambda - the forEach loop
-        print(it)
-    }
-    print(" done with implicit label")
+    listOf(1, 2, 3, 4, 5).forEach(fun(value: Int) {
+        if (value == 3) return  // local return to the caller of the anonymous function - the forEach loop
+        print(value)
+    })
+    print(" done with anonymous function")
 }
 //sampleEnd
 

@@ -19,8 +19,10 @@ fun main() {
     // You can also use `else if` in expressions:
     val maxLimit = 1
     val maxOrLimit = if (maxLimit > a) maxLimit else if (a > b) a else b
-
-    //sampleEnd
+  
     println("max is $max")
+    // max is 3
     println("maxOrLimit is $maxOrLimit")
+    // maxOrLimit is 3
+    //sampleEnd
 }
