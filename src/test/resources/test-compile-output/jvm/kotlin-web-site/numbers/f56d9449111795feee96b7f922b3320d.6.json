@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>true\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>false\ntrue\ntrue\nfalse\n[-0.0, 0.0, Infinity, NaN]\n</outStream>"}

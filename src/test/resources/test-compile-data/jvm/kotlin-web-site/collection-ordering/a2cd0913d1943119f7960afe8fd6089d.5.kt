@@ -1,10 +1,9 @@
 fun main() {
 //sampleStart
-    val numbers = listOf("one", "two", "three", "four")
+    val sortedStrings = listOf("aaa", "bb", "c", "b", "a", "aa", "ccc")
+        .sortedWith(compareBy<String> { it.length }.thenBy { it })
 
-    val sortedNumbers = numbers.sortedBy { it.length }
-    println("Sorted by length ascending: $sortedNumbers")
-    val sortedByLast = numbers.sortedByDescending { it.last() }
-    println("Sorted by the last letter descending: $sortedByLast")
+    println(sortedStrings)
+    // [a, b, c, aa, bb, aaa, ccc]
 //sampleEnd
 }

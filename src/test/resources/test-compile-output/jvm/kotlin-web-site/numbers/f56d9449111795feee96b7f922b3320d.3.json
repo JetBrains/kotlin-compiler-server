@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>3\n2499999999\n8.5094\n3.3333333333333335\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[{"interval":{"start":{"line":3,"ch":12},"end":{"line":3,"ch":21}},"message":"Check for instance is always 'true'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>true\n</outStream>"}
