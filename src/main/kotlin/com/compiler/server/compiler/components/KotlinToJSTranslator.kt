@@ -184,7 +184,7 @@ class KotlinToJSTranslator(
                   icDir,
                   outputDir,
                   debugInfo
-                )
+                ) + "-Xwasm-ic-cache-readonly=true"
               )
             }
             .map {
@@ -201,13 +201,7 @@ class KotlinToJSTranslator(
 
         val time = measureTime {
           a = cacheDir?.let { dir ->
-            usingTempDirectory { tmpDir ->
-              val cachesDir = tmpDir.resolve("caches").normalize()
-              if (dir.exists()) {
-                dir.copyRecursively(cachesDir.toFile())
-              }
-              compileAction(cachesDir)
-            }
+            compileAction(dir.toPath())
           } ?: compileAction(null)
         }
         println("TIME: $time")
