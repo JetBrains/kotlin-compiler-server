@@ -11,7 +11,6 @@ import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
-import kotlin.time.measureTime
 
 @Service
 class KotlinToJSTranslator(
@@ -197,15 +196,9 @@ class KotlinToJSTranslator(
             }
         }
 
-        val a: CompilationResult<WasmTranslationSuccessfulOutput>
-
-        val time = measureTime {
-          a = cacheDir?.let { dir ->
-            compileAction(dir.toPath())
-          } ?: compileAction(null)
-        }
-        println("TIME: $time")
-        a
+        cacheDir?.let { dir ->
+          compileAction(dir.toPath())
+        } ?: compileAction(null)
       }
     }
 }
