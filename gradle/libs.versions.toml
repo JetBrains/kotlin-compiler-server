@@ -12,7 +12,7 @@ trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
 kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.6.0-RC.2"
-kotlinx-io = "0.5.3"
+kotlinx-io = "0.6.0"
 kotlinx-serialization = "1.7.1"
 skiko = "0.8.15"
 # don't forget to update jackson version in `executor.policy` file.
