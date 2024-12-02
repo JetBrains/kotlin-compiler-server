@@ -20,6 +20,7 @@ jackson = "2.14.0"
 hamcrest = "2.2"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
+caffeine = "2.9.3"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -38,6 +39,17 @@ kotlin-base-fe10-analysis = { group = "org.jetbrains.kotlin", name = "base-fe10-
 kotlin-compiler-ide = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-for-ide", version.ref = "kotlinIdeVersion" }
 kotlin-idea = { group = "org.jetbrains.kotlin", name = "idea", version.ref = "kotlinIdeVersionWithSuffix" }
 kotlin-core = { group = "org.jetbrains.kotlin", name = "core", version.ref = "kotlinIdeVersionWithSuffix" }
+analysis-api-standalone-for-ide = { group = "org.jetbrains.kotlin", name = "analysis-api-standalone-for-ide", version.ref = "kotlin" }
+high-level-api-for-ide = { group = "org.jetbrains.kotlin", name = "high-level-api-for-ide", version.ref = "kotlin" }
+high-level-api-fir-for-ide = { group = "org.jetbrains.kotlin", name = "high-level-api-fir-for-ide", version.ref = "kotlin" }
+high-level-api-impl-base-for-ide = { group = "org.jetbrains.kotlin", name = "high-level-api-impl-base-for-ide", version.ref = "kotlin" }
+low-level-api-fir-for-ide = { group = "org.jetbrains.kotlin", name = "low-level-api-fir-for-ide", version.ref = "kotlin" }
+symbol-light-classes-for-ide = { group = "org.jetbrains.kotlin", name = "symbol-light-classes-for-ide", version.ref = "kotlin" }
+analysis-api-platform-interface-for-ide = { group = "org.jetbrains.kotlin", name = "analysis-api-platform-interface-for-ide", version.ref = "kotlin" }
+sir = { group = "org.jetbrains.kotlin", name = "sir", version.ref = "kotlin" }
+sir-providers = { group = "org.jetbrains.kotlin", name = "sir-providers", version.ref = "kotlin" }
+sir-light-classes = { group = "org.jetbrains.kotlin", name = "sir-light-classes", version.ref = "kotlin" }
+sir-printer = { group = "org.jetbrains.kotlin", name = "sir-printer", version.ref = "kotlin" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -64,6 +76,8 @@ compose-material = { group = "org.jetbrains.compose.material", name = "material"
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+
 
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]
