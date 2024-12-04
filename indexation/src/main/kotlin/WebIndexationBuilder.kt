@@ -1,7 +1,7 @@
 package indexation
 
+import com.compiler.server.common.components.KotlinEnvironment
 import model.ImportInfo
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.config.CompilerConfiguration
