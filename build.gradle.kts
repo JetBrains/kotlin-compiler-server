@@ -45,6 +45,10 @@ val kotlinComposeWasmIcLocalCache: Configuration by configurations.creating {
     isCanBeConsumed = false
     attributes {
         attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCache
+        )
+        attribute(
             CacheAttribute.cacheAttribute,
             CacheAttribute.LOCAL
         )
@@ -56,6 +60,10 @@ val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
     attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCache
+        )
         attribute(
             CacheAttribute.cacheAttribute,
             CacheAttribute.LAMBDA
