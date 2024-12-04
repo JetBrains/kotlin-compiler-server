@@ -50,35 +50,42 @@ val buildCacheForLambda by tasks.registering(Exec::class) {
     }
 }
 
-val kotlinComposeWasmIcLocalCache: Configuration by configurations.creating {
+val kotlinComposeWasmIc: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
     isCanBeConsumed = true
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCache
+        )
+    }
+}
+
+kotlinComposeWasmIc.outgoing.variants.create("local") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
             CacheAttribute.LOCAL
         )
     }
+
+    artifact(cachesComposeWasmFolder) {
+        type = "directory"
+        builtBy(runTask)
+    }
 }
 
-val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
-    isTransitive = false
-    isCanBeResolved = false
-    isCanBeConsumed = true
+kotlinComposeWasmIc.outgoing.variants.create("lambda") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
             CacheAttribute.LAMBDA
         )
     }
-}
 
-artifacts.add(kotlinComposeWasmIcLocalCache.name, cachesComposeWasmFolder) {
-    builtBy(runTask)
+    artifact(outputLambdaCacheDir) {
+        type = "directory"
+        builtBy(buildCacheForLambda)
+    }
 }
-
-artifacts.add(kotlinComposeWasmIcLambdaCache.name, outputLambdaCacheDir) {
-    builtBy(buildCacheForLambda)
-}
-
