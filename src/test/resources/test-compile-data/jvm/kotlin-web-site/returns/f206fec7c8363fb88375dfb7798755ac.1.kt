@@ -1,10 +1,10 @@
 //sampleStart
 fun foo() {
-    listOf(1, 2, 3, 4, 5).forEach {
-        if (it == 3) return // non-local return directly to the caller of foo()
+    listOf(1, 2, 3, 4, 5).forEach lit@{
+        if (it == 3) return@lit // local return to the caller of the lambda - the forEach loop
         print(it)
     }
-    println("this point is unreachable")
+    print(" done with explicit label")
 }
 //sampleEnd
 

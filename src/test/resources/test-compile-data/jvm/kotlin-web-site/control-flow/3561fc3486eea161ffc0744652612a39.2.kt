@@ -1,10 +1,11 @@
 fun main() {
-//sampleStart
-    for (i in 1..3) {
-        println(i)
+    //sampleStart
+    val x = 2
+    when (x) {
+        1 -> print("x == 1")
+        2 -> print("x == 2")
+        else -> print("x is neither 1 nor 2")
     }
-    for (i in 6 downTo 0 step 2) {
-        println(i)
-    }
-//sampleEnd
+    // x == 2
+    //sampleEnd
 }
