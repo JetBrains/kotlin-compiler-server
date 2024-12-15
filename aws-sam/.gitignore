@@ -35,6 +35,5 @@ build/
 
 .mvn
 .aws-sam
-samconfig.toml
 
 kotlin-compiler-server.zip
