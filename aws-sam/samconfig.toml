@@ -1,0 +1,9 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "kotlin-compose-compiler"
+resolve_s3 = true
+s3_prefix = "kotlin-compose-compiler"
+region = "eu-west-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
