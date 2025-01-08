@@ -1,7 +1,6 @@
-package indexation
+package com.compiler.server.common.components
 
 import component.CompilerPluginOption
-import component.KotlinEnvironment
 import java.io.File
 
 class KotlinEnvironmentConfiguration(
@@ -14,6 +13,7 @@ class KotlinEnvironmentConfiguration(
     val wasmFile = File("$fileName-wasm")
     val composeWasmFile = File("$fileName-compose-wasm")
     val composeWasmCompilerPluginsFile = File("$fileName-compose-wasm-compiler-plugins")
+    val composeWasmCachesFile = File("$fileName-caches-compose-wasm")
     val classPath =
       listOfNotNull(jvmFile)
         .flatMap {
@@ -39,12 +39,8 @@ class KotlinEnvironmentConfiguration(
           "generateDecoys",
           "false"
         ),
-        CompilerPluginOption(
-          "androidx.compose.compiler.plugins.kotlin",
-          "suppressKotlinVersionCompatibilityCheck",
-          version
-        ),
-      )
+      ),
+      composeWasmCachesFile
     )
   }
 }
