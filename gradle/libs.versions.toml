@@ -61,6 +61,7 @@ compose-animation = { group = "org.jetbrains.compose.animation", name = "animati
 compose-animation-graphics = { group = "org.jetbrains.compose.animation", name = "animation-graphics", version.ref = "compose" }
 compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "compose" }
 compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "compose" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
@@ -68,7 +69,16 @@ gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", ver
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]
 jackson = ["jackson-databind", "jackson-core", "jackson-annotations"]
-compose = ["compose-runtime", "compose-ui", "compose-animation", "compose-animation-graphics", "compose-foundation", "compose-material", "compose-components-resources"]
+compose = [
+    "compose-runtime",
+    "compose-ui",
+    "compose-animation",
+    "compose-animation-graphics",
+    "compose-foundation",
+    "compose-material",
+    "compose-material3",
+    "compose-components-resources",
+]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
