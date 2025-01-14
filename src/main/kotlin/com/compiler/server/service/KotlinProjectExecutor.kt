@@ -17,6 +17,7 @@ class KotlinProjectExecutor(
   private val completionProvider: CompletionProvider,
   private val version: VersionInfo,
   private val kotlinToJSTranslator: KotlinToJSTranslator,
+  private val swiftExportTranslator: SwiftExportTranslator,
   private val kotlinEnvironment: KotlinEnvironment,
   private val loggerDetailsStreamer: LoggerDetailsStreamer? = null,
 ) {
@@ -52,6 +53,10 @@ class KotlinProjectExecutor(
     return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
   }
 
+  fun convertToSwift(project: Project): SwiftExportResult {
+    return convertSwiftWithConverter(project)
+  }
+
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
     return kotlinEnvironment.environment {
       val file = getFilesFrom(project, it).first()
@@ -76,6 +81,7 @@ class KotlinProjectExecutor(
           project,
           debugInfo = false,
         ).compilerDiagnostics
+      ProjectType.SWIFT_EXPORT -> convertToSwift(project).compilerDiagnostics
     }
   } catch (e: Exception) {
     log.warn("Exception in getting highlight. Project: $project", e)
@@ -111,6 +117,15 @@ class KotlinProjectExecutor(
         project.confType,
         converter
       )
+    }.also { logExecutionResult(project, it) }
+  }
+
+  private fun convertSwiftWithConverter(
+    project: Project,
+  ): SwiftExportResult {
+    return kotlinEnvironment.environment { environment ->
+      val files = getFilesFrom(project, environment).map { it.kotlinFile }
+      swiftExportTranslator.translate(files)
     }.also { logExecutionResult(project, it) }
   }
 
