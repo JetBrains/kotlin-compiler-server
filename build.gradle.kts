@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import java.io.FileInputStream
+import java.util.Properties
 
 val policy: String by System.getProperties()
 
@@ -166,7 +168,10 @@ val buildLambda by tasks.creating(Zip::class) {
     from(tasks.processResources) {
         eachFile {
             if (name == propertyFile) {
+                val properties = Properties().apply { load(FileInputStream(file)) }
+                val composeWasmHash = properties.get("dependencies.compose.wasm")
                 file.writeText(propertyFileContent)
+                file.appendText("\ndependencies.compose.wasm=$composeWasmHash")
             }
         }
     }
