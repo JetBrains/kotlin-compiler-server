@@ -26,7 +26,7 @@ abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
 
     @TaskAction
     fun updateProperties() {
-        val file = File(propertiesPath.get())
+        val file = updatedPropertiesFile.get().asFile
 
         propertiesMap.get().let {
             if (it.isNotEmpty()) {
