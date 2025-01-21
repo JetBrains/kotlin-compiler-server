@@ -71,11 +71,6 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
     propertiesMap.put("skiko.version", libs.versions.skiko.get())
 
     val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
-//
-//    if (!applicationPropertiesPath.exists()) {
-//        applicationPropertiesPath.parentFile.mkdirs()
-//        applicationPropertiesPath.createNewFile()
-//    }
 
     propertiesPath.set(applicationPropertiesPath.normalize().absolutePath)
 
