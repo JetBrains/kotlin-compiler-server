@@ -1,6 +1,8 @@
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.nio.file.Files
+import kotlin.io.path.createFile
 
 plugins {
     alias(libs.plugins.spring.dependency.management)
@@ -68,9 +70,13 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
     propertiesMap.put("server.port", "8081")
     propertiesMap.put("skiko.version", libs.versions.skiko.get())
 
-    val applicationPropertiesFile = projectDir.resolve("src/main/resources/application.properties")
-    val applicationProperties = applicationPropertiesFile.absolutePath
-    propertiesPath.set(applicationProperties)
+    val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
+
+    if (!applicationPropertiesPath.exists()) {
+        applicationPropertiesPath.createNewFile()
+    }
+
+    propertiesPath.set(applicationPropertiesPath.normalize().absolutePath)
 
     val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibTypeInfo
 
@@ -79,10 +85,6 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
             composeWasmStdlibTypeInfo.singleFile
         }
     )
-
-    if (!applicationPropertiesFile.exists()) {
-        applicationPropertiesFile.createNewFile()
-    }
 }
 
 tasks.withType<KotlinCompile> {
