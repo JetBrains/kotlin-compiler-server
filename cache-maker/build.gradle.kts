@@ -22,25 +22,23 @@ kotlin {
     }
 }
 
-val composeWasmStdlibTypeInfo: Provider<RegularFile> = layout.buildDirectory
-    .file("compose-wasm-stdlib-output/stdlib.typeinfo.bin")
+val composeWasmStdlib: Provider<Directory> = layout.buildDirectory
+    .dir("compose-wasm-stdlib-output")
+val composeWasmStdlibTypeInfo: Provider<RegularFile> = composeWasmStdlib
+    .map { it.file("compose-wasm-stdlib-output/stdlib.typeinfo.bin") }
 
 val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
+
     workingDir = rootDir
     executable = "${project.name}/docker-build-incremental-cache.sh"
 
-    val outputDir = composeWasmStdlibTypeInfo.map { it.asFile.parentFile }
+    val outputDir = composeWasmStdlib
 
     inputs.file(layout.projectDirectory.file("Dockerfile"))
     inputs.file(layout.projectDirectory.file("docker-build-incremental-cache.sh"))
     outputs.dir(outputDir)
 
-    argumentProviders.add {
-        listOf(
-            lambdaPrefix, // baseDir
-            outputDir.get().normalize().absolutePath, // targetDir
-        )
-    }
+    args(lambdaPrefix, outputDir.get().asFile.normalize().absolutePath)
 }
 
 val prepareTypeInfoIntoComposeWasmCache by tasks.registering(Sync::class) {
@@ -65,12 +63,24 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("stdlib") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.STDLIB
+            CacheAttribute.FULL
         )
     }
 
-    artifact(cachesComposeWasmFolder) {
-        type = "directory"
+    artifact(composeWasmStdlib) {
+        builtBy(prepareTypeInfoIntoComposeWasmCache)
+    }
+}
+
+kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
+    attributes {
+        attribute(
+            CacheAttribute.cacheAttribute,
+            CacheAttribute.TYPEINFO
+        )
+    }
+
+    artifact(cachesComposeWasmFolder.file("stdlib.typeinfo.bin")) {
         builtBy(prepareTypeInfoIntoComposeWasmCache)
     }
 }

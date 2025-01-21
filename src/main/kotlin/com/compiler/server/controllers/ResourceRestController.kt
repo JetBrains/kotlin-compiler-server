@@ -4,15 +4,25 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.*
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.concurrent.TimeUnit
 
 
 @RestController
 @RequestMapping(value = ["/api/resource", "/api/**/resource"])
-class ResourceRestController {
+class ResourceRestController(
+    @Value("\${skiko.version}") private val skikoVersion: String,
+    @Value("\${dependencies.compose.wasm}") private val dependenciesComposeWasm: String,
+) {
+
+    @Suppress("unused")
+    @GetMapping("/skiko")
+    fun getVersionedSkikoMjs(): String {
+        return skikoVersion
+    }
+
   @GetMapping("/skiko.mjs")
   fun getSkikoMjs(): ResponseEntity<Resource> {
     return nonCacheableResource("/com/compiler/server/skiko.mjs", MediaType("text", "javascript"))
@@ -48,6 +58,11 @@ class ResourceRestController {
 
     return ResponseEntity(resource, headers, HttpStatus.OK)
   }
+
+    @GetMapping("/stdlib")
+    fun getStdlib(): String {
+        return dependenciesComposeWasm
+    }
 
   @GetMapping("/stdlib.wasm")
   fun getStdlibWasm(): ResponseEntity<Resource> {
