@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -61,11 +60,6 @@ setOf(
     }
 }
 
-val resourceDependency: Configuration by configurations.creating {
-    isCanBeResolved = true
-    isCanBeConsumed = false
-}
-
 
 val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     isTransitive = false
@@ -78,7 +72,7 @@ val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
         )
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.STDLIB
+            CacheAttribute.TYPEINFO
         )
     }
 }
@@ -109,8 +103,6 @@ dependencies {
     }
     testImplementation(libs.kotlinx.coroutines.test)
 
-    resourceDependency(libs.skiko.js.wasm.runtime)
-
     kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
 }
 
@@ -140,7 +132,14 @@ fun generateProperties(prefix: String = "") = """
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
+    skiko.version=${libs.versions.skiko.get()}
 """.trimIndent()
+
+val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdater::class) {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    propertiesPath.set(rootDir.resolve("src/main/resources/${propertyFile}").absolutePath)
+    typeInfoFile.set(kotlinComposeWasmStdlibTypeInfo.singleFile)
+}
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
@@ -149,6 +148,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    dependsOn(composeWasmPropertiesUpdater)
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
@@ -188,12 +188,7 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.named<Copy>("processResources") {
-    val archiveOperation = project.serviceOf<ArchiveOperations>()
-    from(resourceDependency.map {
-        archiveOperation.zipTree(it)
-    }) {
-        into("com/compiler/server")
-    }
+    dependsOn(composeWasmPropertiesUpdater)
 }
 
 tasks.withType<Test> {
