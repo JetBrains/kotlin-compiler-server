@@ -73,7 +73,7 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
     val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
 
     if (!applicationPropertiesPath.exists()) {
-        applicationPropertiesPath.createNewFile()
+//        applicationPropertiesPath.createNewFile()
     }
 
 //    propertiesPath.set(applicationPropertiesPath.normalize().absolutePath)
