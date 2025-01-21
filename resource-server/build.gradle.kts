@@ -53,27 +53,9 @@ val kotlinComposeWasmStdlib: Configuration by configurations.creating {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-//    implementation(libs.springfox.boot.starter)
-//    implementation(libs.aws.springboot.container)
-//    implementation(libs.junit)
-//    implementation(libs.logback.logstash.encoder)
-//    implementation(libs.intellij.trove4j)
-//    implementation(libs.kotlin.reflect)
-//    implementation(libs.bundles.kotlin.stdlib)
-//    implementation(libs.kotlin.test)
-//    implementation(libs.kotlin.compiler)
-//    implementation(libs.kotlin.script.runtime)
-//    implementation(libs.kotlin.compiler.ide) {
-//        isTransitive = false
-//    }
-//    implementation(libs.kotlin.core)
-//    implementation(project(":executors", configuration = "default"))
-//    implementation(project(":common", configuration = "default"))
-//
-//    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-//        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-//    }
-//    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
 
     resourceDependency(libs.skiko.js.wasm.runtime)
     kotlinComposeWasmStdlib(project(":cache-maker"))
@@ -112,4 +94,12 @@ tasks.named<Copy>("processResources") {
     from(kotlinComposeWasmStdlib) {
         into("com/compiler/server")
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.AMAZON)
+    })
 }
