@@ -5,6 +5,7 @@ import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Path
@@ -16,6 +17,8 @@ import kotlin.io.path.readText
 class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
+  private val log = LoggerFactory.getLogger(KotlinToJSTranslator::class.java)
+
   companion object {
     internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
@@ -170,7 +173,9 @@ class KotlinToJSTranslator(
               klibPath,
               compilerPlugins,
               compilerPluginOptions,
-              dependencies
+              dependencies,
+              icDir,
+              log::warn,
             )
           )
             .flatMap {
@@ -182,8 +187,9 @@ class KotlinToJSTranslator(
                   dependencies,
                   icDir,
                   outputDir,
-                  debugInfo
-                ) + "-Xwasm-ic-cache-readonly=true"
+                  debugInfo,
+                  log::warn,
+                )
               )
             }
             .map {
@@ -196,9 +202,7 @@ class KotlinToJSTranslator(
             }
         }
 
-        cacheDir?.let { dir ->
-          compileAction(dir.toPath())
-        } ?: compileAction(null)
+        compileAction(cacheDir?.toPath())
       }
     }
 }
@@ -221,4 +225,27 @@ data class WasmTranslationSuccessfulOutput(
   val jsInstantiated: String,
   val wasm: ByteArray,
   val wat: String?,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WasmTranslationSuccessfulOutput
+
+        if (jsCode != other.jsCode) return false
+        if (jsInstantiated != other.jsInstantiated) return false
+        if (!wasm.contentEquals(other.wasm)) return false
+        if (wat != other.wat) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = jsCode.hashCode()
+        result = 31 * result + jsInstantiated.hashCode()
+        result = 31 * result + wasm.contentHashCode()
+        result = 31 * result + (wat?.hashCode() ?: 0)
+        return result
+    }
+
+}

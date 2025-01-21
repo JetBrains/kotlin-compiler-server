@@ -1,56 +1,55 @@
 plugins {
-    kotlin("jvm")
-    application
+    kotlin("multiplatform")
 }
 
-dependencies {
-    implementation(project(":common", configuration = "default"))
+kotlin {
+    wasmJs {
+        outputModuleName.set("stdlib")
+        binaries.executable().forEach {
+            it.linkTask.configure {
+                compilerOptions.freeCompilerArgs.add("-Xir-dce=false")
+            }
+        }
+    }
+
+    sourceSets {
+        wasmJsMain {
+            dependencies {
+                implementation(libs.bundles.compose)
+                implementation(libs.kotlinx.coroutines.core.compose.wasm)
+            }
+        }
+    }
 }
 
-application {
-    mainClass.set("com.compiler.server.cache.MainKt")
-}
+val composeWasmStdlibTypeInfo: Provider<RegularFile> = layout.buildDirectory
+    .file("compose-wasm-stdlib-output/stdlib.typeinfo.bin")
 
-val runTask = tasks.named<JavaExec>("run") {
-    dependsOn(":dependencies:copyDependencies")
-    dependsOn(":dependencies:copyWasmDependencies")
-    dependsOn(":dependencies:copyComposeWasmCompilerPlugins")
-    dependsOn(":dependencies:copyComposeWasmDependencies")
-
-    val kotlinVersion = libs.versions.kotlin.get()
-    inputs.property("kotlinVersion", kotlinVersion)
-
-    inputs.dir(libWasmFolder)
-    inputs.dir(libComposeWasmFolder)
-    inputs.dir(libComposeWasmCompilerPluginsFolder)
-
-    outputs.dir(cachesComposeWasmFolder)
-
-    args(
-        kotlinVersion,
-        libJVMFolder.asFile.absolutePath,
-        cachesComposeWasmFolder,
-    )
-}
-
-val outputLambdaCacheDir: Provider<Directory> = layout.buildDirectory.dir("incremental-cache")
-val buildCacheForLambda by tasks.registering(Exec::class) {
+val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
     workingDir = rootDir
     executable = "${project.name}/docker-build-incremental-cache.sh"
 
-    val outputDir = outputLambdaCacheDir
+    val outputDir = composeWasmStdlibTypeInfo.map { it.asFile.parentFile }
 
-    outputs.dir(outputDir.map { it.dir(cachesComposeWasm) })
+    inputs.file(layout.projectDirectory.file("Dockerfile"))
+    inputs.file(layout.projectDirectory.file("docker-build-incremental-cache.sh"))
+    outputs.dir(outputDir)
 
     argumentProviders.add {
         listOf(
             lambdaPrefix, // baseDir
-            outputDir.get().asFile.normalize().absolutePath, // targetDir
+            outputDir.get().normalize().absolutePath, // targetDir
         )
     }
 }
 
-val kotlinComposeWasmIc: Configuration by configurations.creating {
+val prepareTypeInfoIntoComposeWasmCache by tasks.registering(Sync::class) {
+    dependsOn(buildComposeWasmStdlibModule)
+    from(composeWasmStdlibTypeInfo)
+    into(cachesComposeWasmFolder)
+}
+
+val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
     isCanBeConsumed = true
@@ -62,30 +61,16 @@ val kotlinComposeWasmIc: Configuration by configurations.creating {
     }
 }
 
-kotlinComposeWasmIc.outgoing.variants.create("local") {
+kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("stdlib") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.LOCAL
+            CacheAttribute.STDLIB
         )
     }
 
     artifact(cachesComposeWasmFolder) {
         type = "directory"
-        builtBy(runTask)
-    }
-}
-
-kotlinComposeWasmIc.outgoing.variants.create("lambda") {
-    attributes {
-        attribute(
-            CacheAttribute.cacheAttribute,
-            CacheAttribute.LAMBDA
-        )
-    }
-
-    artifact(outputLambdaCacheDir) {
-        type = "directory"
-        builtBy(buildCacheForLambda)
+        builtBy(prepareTypeInfoIntoComposeWasmCache)
     }
 }
