@@ -39,6 +39,26 @@ class ResourceRestController {
     return cacheableResource("/com/compiler/server/skiko.wasm", MediaType("application", "wasm"))
   }
 
+  @GetMapping("/stdlib.mjs")
+  fun getStdlibMjs(): ResponseEntity<Resource> {
+    val resource = FileSystemResource("/Users/ilya.goncharov/repos/kotlin-compiler-server/COMPOSE/stdlib.uninstantiated.mjs")
+    val headers = HttpHeaders().apply {
+      contentType = MediaType("text", "javascript")
+    }
+
+    return ResponseEntity(resource, headers, HttpStatus.OK)
+  }
+
+  @GetMapping("/stdlib.wasm")
+  fun getStdlibWasm(): ResponseEntity<Resource> {
+    val resource = FileSystemResource("/Users/ilya.goncharov/repos/kotlin-compiler-server/COMPOSE/stdlib.wasm")
+    val headers = HttpHeaders().apply {
+      contentType = MediaType("application", "wasm")
+    }
+
+    return ResponseEntity(resource, headers, HttpStatus.OK)
+  }
+
   private fun cacheableResource(path: String, mediaType: MediaType): ResponseEntity<Resource> {
     return resource(path, mediaType) {
       cacheControl = CacheControl.maxAge(365, TimeUnit.DAYS).headerValue

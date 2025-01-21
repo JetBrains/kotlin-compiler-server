@@ -1,6 +1,6 @@
 #!/bin/sh
 
-kotlinVersion=$(awk '{ if ($1 == "kotlin") { gsub(/"/, "", $2); print $2; } }' FS=' = ' ./gradle/libs.versions.toml)
+kotlinVersion=$(awk '{ if ($1 == "kotlinWasmStdlibCompiler") { gsub(/"/, "", $2); print $2; } }' FS=' = ' ./gradle/libs.versions.toml)
 
 baseDir=$1
 targetDir=$2
@@ -15,7 +15,7 @@ docker build . --file cache-maker/Dockerfile --tag $image_tag --build-arg BASE_D
 
 container=$(docker create $image_tag)
 
-docker cp $container:$baseDir/$kotlinVersion-caches-compose-wasm $targetDir
+docker cp $container:$baseDir/cache-maker/build/compileSync/wasmJs/main/productionExecutable/kotlin/. $targetDir
 
 docker start $container
 docker stop $container
