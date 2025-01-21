@@ -12,7 +12,7 @@ import java.security.MessageDigest
 
 abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
 
-    @get:InputFile
+    @get:Input
     abstract val propertiesPath: Property<String>
 
     @get:InputFile
