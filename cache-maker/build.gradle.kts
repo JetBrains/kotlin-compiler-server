@@ -25,9 +25,11 @@ kotlin {
 val composeWasmStdlib: Provider<Directory> = layout.buildDirectory
     .dir("compose-wasm-stdlib-output")
 val composeWasmStdlibTypeInfo: Provider<RegularFile> = composeWasmStdlib
-    .map { it.file("compose-wasm-stdlib-output/stdlib.typeinfo.bin") }
+    .map { it.file("stdlib.typeinfo.bin") }
 
 val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
+
+    inputs.files(configurations.named("wasmJsRuntimeClasspath"))
 
     workingDir = rootDir
     executable = "${project.name}/docker-build-incremental-cache.sh"
