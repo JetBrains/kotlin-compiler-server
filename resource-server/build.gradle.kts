@@ -72,7 +72,13 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
     val applicationProperties = applicationPropertiesFile.absolutePath
     propertiesPath.set(applicationProperties)
 
-    typeInfoFile.set(kotlinComposeWasmStdlibTypeInfo.singleFile)
+    val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibTypeInfo
+
+    typeInfoFile.fileProvider(
+        provider {
+            composeWasmStdlibTypeInfo.singleFile
+        }
+    )
 
     if (!applicationPropertiesFile.exists()) {
         applicationPropertiesFile.createNewFile()

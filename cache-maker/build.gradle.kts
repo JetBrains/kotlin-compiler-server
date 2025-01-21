@@ -86,3 +86,8 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
         builtBy(prepareTypeInfoIntoComposeWasmCache)
     }
 }
+
+// we don't need to build cache-maker
+tasks.named("build") {
+    dependsOn.clear()
+}
