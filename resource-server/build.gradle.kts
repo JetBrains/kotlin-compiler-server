@@ -70,12 +70,12 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
     propertiesMap.put("server.port", "8081")
     propertiesMap.put("skiko.version", libs.versions.skiko.get())
 
-//    val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
-//
-//    if (!applicationPropertiesPath.exists()) {
-//        applicationPropertiesPath.createNewFile()
-//    }
-//
+    val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
+
+    if (!applicationPropertiesPath.exists()) {
+        applicationPropertiesPath.createNewFile()
+    }
+
 //    propertiesPath.set(applicationPropertiesPath.normalize().absolutePath)
 //
 //    val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibTypeInfo
