@@ -1,5 +1,6 @@
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -33,11 +34,6 @@ allprojects {
     }
 }
 
-val resourceDependency: Configuration by configurations.creating {
-    isCanBeResolved = true
-    isCanBeConsumed = false
-}
-
 
 val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     isTransitive = false
@@ -50,7 +46,7 @@ val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
         )
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.STDLIB
+            CacheAttribute.TYPEINFO
         )
     }
 }
@@ -80,8 +76,6 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(libs.kotlinx.coroutines.test)
-
-    resourceDependency(libs.skiko.js.wasm.runtime)
 
     kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
 }
@@ -113,7 +107,14 @@ fun generateProperties(prefix: String = "") = """
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
     springdoc.swagger-ui.path: /api-docs/swagger-ui.html
+    skiko.version=${libs.versions.skiko.get()}
 """.trimIndent()
+
+val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdater::class) {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    propertiesPath.set(rootDir.resolve("src/main/resources/${propertyFile}").absolutePath)
+    typeInfoFile.set(kotlinComposeWasmStdlibTypeInfo.singleFile)
+}
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
@@ -122,6 +123,7 @@ tasks.withType<KotlinCompile> {
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
     dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    dependsOn(composeWasmPropertiesUpdater)
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
@@ -161,12 +163,7 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.named<Copy>("processResources") {
-    val archiveOperation = project.serviceOf<ArchiveOperations>()
-    from(resourceDependency.map {
-        archiveOperation.zipTree(it)
-    }) {
-        into("com/compiler/server")
-    }
+    dependsOn(composeWasmPropertiesUpdater)
 }
 
 tasks.withType<Test> {

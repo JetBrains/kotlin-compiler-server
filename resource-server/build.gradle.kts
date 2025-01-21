@@ -1,0 +1,115 @@
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.plugin.spring)
+}
+
+kotlin.jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+    vendor.set(JvmVendorSpec.AMAZON)
+}
+
+val resourceDependency: Configuration by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+}
+
+val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCache
+        )
+        attribute(
+            CacheAttribute.cacheAttribute,
+            CacheAttribute.TYPEINFO
+        )
+    }
+}
+
+val kotlinComposeWasmStdlib: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCache
+        )
+        attribute(
+            CacheAttribute.cacheAttribute,
+            CacheAttribute.FULL
+        )
+    }
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
+//    implementation(libs.springfox.boot.starter)
+//    implementation(libs.aws.springboot.container)
+//    implementation(libs.junit)
+//    implementation(libs.logback.logstash.encoder)
+//    implementation(libs.intellij.trove4j)
+//    implementation(libs.kotlin.reflect)
+//    implementation(libs.bundles.kotlin.stdlib)
+//    implementation(libs.kotlin.test)
+//    implementation(libs.kotlin.compiler)
+//    implementation(libs.kotlin.script.runtime)
+//    implementation(libs.kotlin.compiler.ide) {
+//        isTransitive = false
+//    }
+//    implementation(libs.kotlin.core)
+//    implementation(project(":executors", configuration = "default"))
+//    implementation(project(":common", configuration = "default"))
+//
+//    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+//        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+//    }
+//    testImplementation(libs.kotlinx.coroutines.test)
+
+    resourceDependency(libs.skiko.js.wasm.runtime)
+    kotlinComposeWasmStdlib(project(":cache-maker"))
+    kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
+}
+
+val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdater::class) {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    propertiesMap.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher")
+    propertiesMap.put("server.port", "8081")
+    propertiesMap.put("skiko.version", libs.versions.skiko.get())
+
+    val applicationPropertiesFile = projectDir.resolve("src/main/resources/application.properties")
+    val applicationProperties = applicationPropertiesFile.absolutePath
+    propertiesPath.set(applicationProperties)
+
+    typeInfoFile.set(kotlinComposeWasmStdlibTypeInfo.singleFile)
+
+    if (!applicationPropertiesFile.exists()) {
+        applicationPropertiesFile.createNewFile()
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    dependsOn(composeWasmPropertiesUpdater)
+}
+
+tasks.named<Copy>("processResources") {
+    dependsOn(composeWasmPropertiesUpdater)
+    val archiveOperation = project.serviceOf<ArchiveOperations>()
+    from(resourceDependency.map {
+        archiveOperation.zipTree(it)
+    }) {
+        into("com/compiler/server")
+    }
+    from(kotlinComposeWasmStdlib) {
+        into("com/compiler/server")
+    }
+}
