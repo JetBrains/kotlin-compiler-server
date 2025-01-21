@@ -122,6 +122,7 @@ dependencies {
     // compose
     kotlinComposeWasmDependency(libs.kotlin.stdlib.wasm.js)
     kotlinComposeWasmDependency(libs.bundles.compose)
+    kotlinComposeWasmDependency(libs.kotlinx.coroutines.core.compose.wasm)
 
     composeWasmCompilerPlugins(libs.kotlin.compose.compiler.plugin)
 }

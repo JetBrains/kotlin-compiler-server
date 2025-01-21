@@ -1,5 +1,6 @@
 [versions]
-kotlin = "2.1.20-dev-5634"
+kotlin = "2.2.0-dev-1011"
+kotlinWasmStdlibCompiler = "2.2.0-dev-1010"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "2.7.10"
@@ -10,6 +11,7 @@ junit = "4.13.2"
 logstash-logback-encoder = "7.3"
 trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
+kotlinx-coroutines-compose-wasm = "1.8.1"
 kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.6.0-RC.2"
 kotlinx-io = "0.6.0"
@@ -39,6 +41,7 @@ kotlin-compiler-ide = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-
 kotlin-idea = { group = "org.jetbrains.kotlin", name = "idea", version.ref = "kotlinIdeVersionWithSuffix" }
 kotlin-core = { group = "org.jetbrains.kotlin", name = "core", version.ref = "kotlinIdeVersionWithSuffix" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core-compose-wasm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-wasm-js", version.ref = "kotlinx-coroutines-compose-wasm" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-io" }

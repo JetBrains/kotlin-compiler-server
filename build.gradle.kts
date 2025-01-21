@@ -67,7 +67,7 @@ val resourceDependency: Configuration by configurations.creating {
 }
 
 
-val kotlinComposeWasmIcLocalCache: Configuration by configurations.creating {
+val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -78,23 +78,7 @@ val kotlinComposeWasmIcLocalCache: Configuration by configurations.creating {
         )
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.LOCAL
-        )
-    }
-}
-
-val kotlinComposeWasmIcLambdaCache: Configuration by configurations.creating {
-    isTransitive = false
-    isCanBeResolved = true
-    isCanBeConsumed = false
-    attributes {
-        attribute(
-            Category.CATEGORY_ATTRIBUTE,
-            objects.categoryComposeCache
-        )
-        attribute(
-            CacheAttribute.cacheAttribute,
-            CacheAttribute.LAMBDA
+            CacheAttribute.STDLIB
         )
     }
 }
@@ -127,8 +111,7 @@ dependencies {
 
     resourceDependency(libs.skiko.js.wasm.runtime)
 
-    kotlinComposeWasmIcLocalCache(project(":cache-maker"))
-    kotlinComposeWasmIcLambdaCache(project(":cache-maker"))
+    kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
 }
 
 fun buildPropertyFile() {
@@ -165,7 +148,7 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
-    dependsOn(kotlinComposeWasmIcLocalCache)
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
@@ -198,7 +181,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
-    from(kotlinComposeWasmIcLambdaCache)
+    from(kotlinComposeWasmStdlibTypeInfo) { into(cachesComposeWasm) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
