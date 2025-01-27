@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.10-RC2"
+kotlin = "2.1.10"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "2.7.10"
