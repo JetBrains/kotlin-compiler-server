@@ -80,21 +80,13 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
           fun info(message: String) = println(message)
         }
 
-        interface LoggingContext {
-          val log: Logger
-        }
-
-        context(LoggingContext)
+        context(log: Logger)
         fun executeTask() {
           log.info("Complete")
         }
 
         fun main() {
-          val loggingContext = object: LoggingContext {
-            override val log = Logger()
-          }
-            
-          with(loggingContext) {
+          with(Logger()) {
             executeTask()
           }
         }
