@@ -2,6 +2,10 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsCompilerAttribute
 import org.jetbrains.kotlin.gradle.targets.js.KotlinWasmTargetAttribute
 
+plugins {
+    id("base-kotlin-jvm-conventions")
+}
+
 val kotlinDependency: Configuration by configurations.creating {
     isTransitive = false
 }
@@ -94,10 +98,6 @@ val copyComposeWasmDependencies by tasks.creating(Copy::class) {
 val copyComposeWasmCompilerPlugins by tasks.creating(Copy::class) {
     from(composeWasmCompilerPlugins)
     into(libComposeWasmCompilerPluginsFolder)
-}
-
-plugins {
-    kotlin("jvm")
 }
 
 dependencies {
