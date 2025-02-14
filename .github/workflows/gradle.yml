@@ -1,6 +1,9 @@
 name: Java CI
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - kotlin-community/dev
 
 jobs:
   build:
