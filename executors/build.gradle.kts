@@ -1,10 +1,5 @@
 plugins {
-  kotlin("jvm")
-}
-
-kotlin.jvmToolchain {
-  languageVersion.set(JavaLanguageVersion.of(17))
-  vendor.set(JvmVendorSpec.AMAZON)
+  id("base-kotlin-jvm-conventions")
 }
 
 dependencies {
