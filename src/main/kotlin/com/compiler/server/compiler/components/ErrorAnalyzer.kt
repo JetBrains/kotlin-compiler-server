@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.container.*
@@ -114,13 +115,6 @@ class ErrorAnalyzer(
 
   fun analyzeFileForJs(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
     val project = coreEnvironment.project
-    val configuration = JsConfig(
-      project,
-      kotlinEnvironment.jsConfiguration,
-      CompilerEnvironment,
-      kotlinEnvironment.JS_METADATA_CACHE,
-      kotlinEnvironment.JS_LIBRARIES.toSet()
-    )
 
     val mainModule = MainModule.SourceFiles(files)
     val sourceModule = ModulesStructure(
@@ -150,10 +144,11 @@ class ErrorAnalyzer(
       customBuiltInsModule = builtInModuleDescriptor
     )
 
+    val moduleName = kotlinEnvironment.jsConfiguration[CommonConfigurationKeys.MODULE_NAME]!!
     val context = ContextForNewModule(
-      projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
-      moduleName = Name.special("<" + configuration.moduleId + ">"),
-      builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
+        projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
+        moduleName = Name.special("<$moduleName>"),
+        builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
     )
     val dependencies = mutableSetOf(context.module) + mds + JsPlatformAnalyzerServices.builtIns.builtInsModule
     context.module.setDependencies(dependencies.toList())
