@@ -100,6 +100,8 @@ class KotlinEnvironment(
     put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
 
+  val rootDisposable = Disposer.newDisposable()
+
   val composeWasmConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.LIBRARIES, COMPOSE_WASM_LIBRARIES)
@@ -109,13 +111,14 @@ class KotlinEnvironment(
     PluginCliParser.loadPluginsSafe(
       COMPOSE_WASM_COMPILER_PLUGINS,
       composeWasmCompilerPluginOptions,
-      emptyList(),
-      this
+      emptyList<String>(),
+      this,
+      rootDisposable
     )
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    projectDisposable = Disposer.newDisposable(),
+    projectDisposable = rootDisposable,
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )

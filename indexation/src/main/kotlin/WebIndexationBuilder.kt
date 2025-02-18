@@ -28,8 +28,9 @@ class WebIndexationBuilder(
         PluginCliParser.loadPluginsSafe(
           compilerPlugins,
           compilerPluginOptions,
-          emptyList(),
-          configuration
+          emptyList<String>(),
+          configuration,
+          kotlinEnvironment.rootDisposable
         )
       }
       val sourceModule = prepareAnalyzedSourceModule(
