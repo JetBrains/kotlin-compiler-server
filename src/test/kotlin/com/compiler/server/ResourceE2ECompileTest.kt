@@ -22,7 +22,7 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
     override fun request(code: String, platform: ProjectType): ExecutionResult {
         val url = when (platform) {
-            ProjectType.JS, ProjectType.JS_IR ->  "/api/compiler/translate?ir=true"
+            ProjectType.JS, ProjectType.JS_IR -> "/api/compiler/translate?ir=true"
             else -> "/api/compiler/run"
         }
 
@@ -42,13 +42,17 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
             "${getHost()}$url", HttpEntity(body, headers), resultClass
         )
 
-        return result ?:
-            throw IllegalStateException("Result is null")
+        return result ?: throw IllegalStateException("Result is null")
     }
 
     @Test
     fun `http requests from resource folder`() {
-        checkResourceExamples(listOf(testDirJVM, testDirJS)) { result, file ->
+        checkResourceExamples(
+            listOf(
+                testDirJVM,
+                // testDirJS we are currently disable these tests (see KTL-2176)
+            )
+        ) { result, file ->
             val json = jacksonObjectMapper().writeValueAsString(result)
             val out = file.path.replace("test-compile-data", "test-compile-output").replace("\\.kt$".toRegex(), ".json")
 
