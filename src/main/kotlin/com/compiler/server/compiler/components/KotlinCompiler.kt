@@ -96,7 +96,6 @@ class KotlinCompiler(
         "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
         "-module-name", "web-module",
         "-no-stdlib", "-no-reflect",
-        "-progressive",
         "-d", outputDir.absolutePathString(),
       ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
       K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {

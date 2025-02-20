@@ -16,6 +16,14 @@ class CompilerRestController(private val kotlinProjectExecutor: KotlinProjectExe
     return kotlinProjectExecutor.run(project, addByteCode)
   }
 
+  @PostMapping("/compile")
+  fun compileKotlinProjectEndpoint(
+      @RequestBody project: Project,
+      @RequestParam outputDir: String
+  ): CompilationResponse {
+      return kotlinProjectExecutor.compile(project, outputDir)
+  }
+
   @PostMapping("/test")
   fun testKotlinProjectEndpoint(
     @RequestBody project: Project,

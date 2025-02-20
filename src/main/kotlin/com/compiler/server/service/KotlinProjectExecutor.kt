@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.File
 
 @Component
 class KotlinProjectExecutor(
@@ -82,7 +83,35 @@ class KotlinProjectExecutor(
     CompilerDiagnostics(emptyMap())
   }
 
+  fun compile(project: Project, outputDir: String): CompilationResponse {
+      return when (val result = compileToJvm(project)) {
+          is Compiled -> {
+              saveClassesToDirectory(result.result.files, outputDir)
+              CompilationResponse(
+                  success = true,
+                  errors = result.compilerDiagnostics
+              )
+          }
+          is NotCompiled -> {
+              CompilationResponse(
+                  success = false,
+                  errors = result.compilerDiagnostics
+              )
+          }
+      }
+  }
+
   fun getVersion() = version
+
+  private fun saveClassesToDirectory(files: Map<String, ByteArray>, outputDirPath: String) {
+      val outputDir = File(outputDirPath).apply { mkdirs() }
+      files.forEach { (relativePath, bytes) ->
+          File(outputDir, relativePath).apply {
+              parentFile.mkdirs()
+              writeBytes(bytes)
+          }
+      }
+  }
 
   private fun convertJsWithConverter(
     project: Project,
