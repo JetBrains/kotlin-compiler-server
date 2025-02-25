@@ -1,5 +1,5 @@
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -147,13 +147,15 @@ tasks.named<Copy>("processResources") {
 }
 
 tasks.withType<Test> {
-    dependsOn(rootProject.the<NodeJsRootExtension>().nodeJsSetupTaskProvider)
+    with(rootProject.kotlinNodeJsEnvSpec) {
+        dependsOn(rootProject.nodeJsSetupTaskProvider)
+    }
     useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)
     })
-    val executablePath = rootProject.the<NodeJsRootExtension>().requireConfigured().executable
+    val executablePath = rootProject.kotlinNodeJsEnvSpec.executable.get()
     doFirst {
         this@withType.environment("kotlin.wasm.node.path", executablePath)
     }
