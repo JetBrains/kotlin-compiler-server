@@ -1,8 +1,8 @@
 version = 0.1
 [default.deploy.parameters]
-stack_name = "kotlin-compose-compiler"
+stack_name = "kotlin-compose-ic"
 resolve_s3 = true
-s3_prefix = "kotlin-compose-compiler"
+s3_prefix = "kotlin-compose-ic"
 region = "eu-west-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"

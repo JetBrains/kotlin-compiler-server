@@ -18,6 +18,13 @@ plugins {
     alias(libs.plugins.kotlin.plugin.spring)
 }
 
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+    }
+}
+
 kotlin.jvmToolchain {
     languageVersion.set(JavaLanguageVersion.of(17))
     vendor.set(JvmVendorSpec.AMAZON)
@@ -188,9 +195,9 @@ fun buildRunFile() {
             /* language=sh */
             """
                 #!/usr/bin/env sh
-                
+
                 export COMPILER_SERVER_TMP_PATH="${'$'}(mktemp -d)"
-                
+
                 exec java -noverify \
                     -XX:+UseParallelGC -XX:-UseCompressedOops \
                     -Djava.io.tmpdir="${'$'}COMPILER_SERVER_TMP_PATH" \
