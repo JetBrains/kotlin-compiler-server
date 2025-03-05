@@ -18,7 +18,7 @@ fun <T> usingTempDirectory(action: (path: Path) -> T): T {
 
 private fun getTempDirectory(): Path {
   val dir = System.getenv("COMPILER_SERVER_TMP_PATH").takeIf {
-    if (it.isNullOrBlank()) return false
+    if (it.isNullOrBlank()) return@takeIf false
     val directory = File(it)
     directory.exists() && directory.isDirectory
   } ?: System.getProperty("java.io.tmpdir")

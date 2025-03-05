@@ -13,7 +13,7 @@ Resources:
   ComposeServerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Architectures: [ 'x86_64' ]
+      Architectures: [ 'arm' ]
       AutoPublishAlias: live
       AutoPublishAliasAllProperties: true
       DeploymentPreference:
