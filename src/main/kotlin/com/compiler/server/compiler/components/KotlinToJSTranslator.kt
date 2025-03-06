@@ -51,13 +51,14 @@ class KotlinToJSTranslator(
   fun translateWasm(
     files: List<KtFile>,
     debugInfo: Boolean,
+    multiModule: Boolean,
     projectType: ProjectType,
     translate: (
       List<KtFile>,
       List<String>,
       List<String>,
       List<String>,
-      File?,
+      Boolean,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
@@ -67,13 +68,11 @@ class KotlinToJSTranslator(
           kotlinEnvironment.WASM_LIBRARIES,
           emptyList(),
           emptyList(),
-          null
         )
         ProjectType.COMPOSE_WASM -> WasmParameters(
           kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
           kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS,
           kotlinEnvironment.composeWasmCompilerPluginOptions,
-          kotlinEnvironment.composeWasmCache,
         )
         else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
       }
@@ -82,7 +81,7 @@ class KotlinToJSTranslator(
         parameters.dependencies,
         parameters.plugins,
         parameters.pluginOptions,
-        parameters.cacheDir,
+        multiModule,
         debugInfo,
       )
       val wasmCompilationOutput = when (compilationResult) {
@@ -152,7 +151,7 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
-    cacheDir: File?,
+    multiModule: Boolean,
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
@@ -163,45 +162,39 @@ class KotlinToJSTranslator(
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
 
-        val compileAction: (icDir: Path?) -> CompilationResult<WasmTranslationSuccessfulOutput> = { icDir ->
-          k2JSCompiler.tryCompilation(
-            inputDir,
-            ioFiles,
-            compileWasmArgs(
-              moduleName,
-              filePaths,
-              klibPath,
-              compilerPlugins,
-              compilerPluginOptions,
-              dependencies,
-              icDir,
-              log::warn,
-            )
+        k2JSCompiler.tryCompilation(
+          inputDir,
+          ioFiles,
+          compileWasmArgs(
+            moduleName,
+            filePaths,
+            klibPath,
+            compilerPlugins,
+            compilerPluginOptions,
+            dependencies,
           )
-            .flatMap {
-              k2JSCompiler.tryCompilation(
-                inputDir, ioFiles,
-                linkWasmArgs(
-                  moduleName,
-                  klibPath,
-                  dependencies,
-                  icDir,
-                  outputDir,
-                  debugInfo,
-                )
+        )
+          .flatMap {
+            k2JSCompiler.tryCompilation(
+              inputDir, ioFiles,
+              linkWasmArgs(
+                moduleName,
+                klibPath,
+                dependencies,
+                multiModule,
+                outputDir,
+                debugInfo,
               )
-            }
-            .map {
-              WasmTranslationSuccessfulOutput(
-                jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
-                jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
-                wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-                wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
-              )
-            }
-        }
-
-        compileAction(cacheDir?.toPath())
+            )
+          }
+          .map {
+            WasmTranslationSuccessfulOutput(
+              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
+              jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
+              wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
+              wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
+            )
+          }
       }
     }
 }

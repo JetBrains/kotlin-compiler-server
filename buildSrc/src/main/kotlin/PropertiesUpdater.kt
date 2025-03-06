@@ -16,7 +16,7 @@ abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
     abstract val propertiesPath: Property<String>
 
     @get:InputFile
-    abstract val typeInfoFile: RegularFileProperty
+    abstract val hashableFile: RegularFileProperty
 
     @get:Input
     abstract val propertiesMap: MapProperty<String, String>
@@ -38,7 +38,7 @@ abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
         }
 
         file.appendText(
-            "\ndependencies.compose.wasm=${hashFileContent(typeInfoFile.get().asFile.absolutePath)}"
+            "\ndependencies.compose.wasm=${hashFileContent(hashableFile.get().asFile.absolutePath)}"
         )
     }
 }

@@ -37,7 +37,7 @@ allprojects {
 }
 
 
-val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
+val kotlinComposeWasmStdlibWasmFile: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -48,7 +48,7 @@ val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
         )
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.TYPEINFO
+            CacheAttribute.WASM
         )
     }
 }
@@ -79,7 +79,7 @@ dependencies {
     }
     testImplementation(libs.kotlinx.coroutines.test)
 
-    kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
+    kotlinComposeWasmStdlibWasmFile(project(":cache-maker"))
 }
 
 fun buildPropertyFile() {
@@ -104,7 +104,6 @@ fun generateProperties(prefix: String = "") = """
     libraries.folder.compose-wasm=${prefix + libComposeWasm}
     libraries.folder.compose-wasm-compiler-plugins=${prefix + libComposeWasmCompilerPlugins}
     libraries.folder.compiler-plugins=${prefix + compilerPluginsForJVM}
-    caches.folder.compose-wasm=${prefix + cachesComposeWasm}
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
@@ -113,9 +112,9 @@ fun generateProperties(prefix: String = "") = """
 """.trimIndent()
 
 val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdater::class) {
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
+    dependsOn(kotlinComposeWasmStdlibWasmFile)
     propertiesPath.set(rootDir.resolve("src/main/resources/${propertyFile}").absolutePath)
-    typeInfoFile.set(kotlinComposeWasmStdlibTypeInfo.singleFile)
+    hashableFile.set(kotlinComposeWasmStdlibWasmFile.singleFile)
 }
 
 tasks.withType<KotlinCompile> {
@@ -124,7 +123,6 @@ tasks.withType<KotlinCompile> {
     }
     dependsOn(":executors:jar")
     dependsOn(":indexation:run")
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
     buildPropertyFile()
 }
@@ -161,15 +159,13 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
-    from(kotlinComposeWasmStdlibTypeInfo) { into(cachesComposeWasm) }
+    dependsOn(kotlinComposeWasmStdlibWasmFile)
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
 }
 
 tasks.named<Copy>("processResources") {
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
 }
 
