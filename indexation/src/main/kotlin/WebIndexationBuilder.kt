@@ -30,7 +30,7 @@ class WebIndexationBuilder(
           compilerPluginOptions,
           emptyList<String>(),
           configuration,
-          kotlinEnvironment.rootDisposable
+          kotlinEnvironment.disposable
         )
       }
 

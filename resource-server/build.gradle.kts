@@ -84,10 +84,12 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
 }
 
 tasks.withType<KotlinCompile> {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
 }
 
 tasks.named<Copy>("processResources") {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
     val archiveOperation = project.serviceOf<ArchiveOperations>()
     from(resourceDependency.map {

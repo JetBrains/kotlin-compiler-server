@@ -90,6 +90,8 @@ class KotlinEnvironment(
     return f(environment)
   }
 
+  val disposable = Disposer.newDisposable()
+
   private val configuration = createConfiguration()
   val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "playground")
@@ -117,12 +119,12 @@ class KotlinEnvironment(
       composeWasmCompilerPluginOptions,
       emptyList<String>(),
       this,
-      rootDisposable
+        disposable
     )
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    projectDisposable = rootDisposable,
+    projectDisposable = disposable,
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )
