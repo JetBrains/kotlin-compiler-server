@@ -8,6 +8,7 @@ kotlin {
         binaries.executable().forEach {
             it.linkTask.configure {
                 compilerOptions.freeCompilerArgs.add("-Xir-dce=false")
+                compilerOptions.freeCompilerArgs.add("-Xwasm-multimodule-mode=master")
             }
         }
     }
@@ -25,7 +26,7 @@ kotlin {
 val composeWasmStdlib: Provider<Directory> = layout.buildDirectory
     .dir("compose-wasm-stdlib-output")
 val composeWasmStdlibTypeInfo: Provider<RegularFile> = composeWasmStdlib
-    .map { it.file("stdlib.typeinfo.bin") }
+    .map { it.file("stdlib_master.wasm") }
 
 val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
 
@@ -70,7 +71,7 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("stdlib") {
     }
 
     artifact(composeWasmStdlib) {
-        builtBy(prepareTypeInfoIntoComposeWasmCache)
+        builtBy(buildComposeWasmStdlibModule)
     }
 }
 
@@ -82,7 +83,7 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
         )
     }
 
-    artifact(cachesComposeWasmFolder.file("stdlib.typeinfo.bin")) {
+    artifact(composeWasmStdlibTypeInfo) {
         builtBy(prepareTypeInfoIntoComposeWasmCache)
     }
 }

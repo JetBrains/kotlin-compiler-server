@@ -33,6 +33,7 @@ allprojects {
         maven("https://repo.spring.io/snapshot")
         maven("https://repo.spring.io/milestone")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
+        maven("https://packages.jetbrains.team/maven/p/kt/dev/")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
         maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
         maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
@@ -186,6 +187,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     from(kotlinComposeWasmStdlibTypeInfo) { into(cachesComposeWasm) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
@@ -193,6 +195,7 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.named<Copy>("processResources") {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
 }
 

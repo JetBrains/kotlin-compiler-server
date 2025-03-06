@@ -51,9 +51,7 @@ fun compileWasmArgs(
     "-ir-output-name=$moduleName",
   ).also {
       if (icDir != null) {
-          typeInfoArg(icDir, log)?.let { stdlibTypeInfoArg ->
-              it.add(stdlibTypeInfoArg)
-          }
+          it.add("-Xwasm-multimodule-mode=slave")
       }
   } + compilerPluginsArgs
 
@@ -67,7 +65,6 @@ fun linkWasmArgs(
     icDir: Path?,
     outputDir: Path,
     debugInfo: Boolean,
-    log: (String) -> Unit,
 ): List<String> {
   return mutableListOf(
     "-Xreport-all-warnings",
@@ -82,37 +79,11 @@ fun linkWasmArgs(
     if (debugInfo) it.add("-Xwasm-generate-wat")
 
     if (icDir != null) {
-        typeInfoArg(icDir, log)?.let { stdlibTypeInfoArg ->
-            it.add(stdlibTypeInfoArg)
-        }
+        it.add("-Xwasm-multimodule-mode=slave")
     } else {
       it.add("-Xir-dce")
     }
   }
-}
-
-private fun typeInfoArg(
-    icDir: Path,
-    log: (String) -> Unit,
-): String? {
-    val allTypeInfoFiles = icDir.toFile().listFiles() ?: run {
-        log("No typeinfo files in $icDir, probably you need to run :cache-maker:prepareTypeInfoIntoComposeWasmCache task")
-        return null
-    }
-
-    val stdlibTypeInfo = allTypeInfoFiles
-        .firstOrNull { file -> file.name.endsWith(".typeinfo.bin") }
-
-    if (stdlibTypeInfo == null) {
-        log("No typeinfo files in $icDir, probably you need to run :cache-maker:prepareTypeInfoIntoComposeWasmCache task")
-        return null
-    }
-
-    if (allTypeInfoFiles.size > 1) {
-        log("There are more than 1 typeinfo files in $icDir: ${allTypeInfoFiles.joinToString(", ") { it.name }}")
-    }
-
-    return "-Xwasm-typeinfo-file=${stdlibTypeInfo.normalize().absolutePath}"
 }
 
 val PATH_SEPARATOR: String = File.pathSeparator

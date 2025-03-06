@@ -40,7 +40,7 @@ class ResourceRestController(
     if (hash != dependenciesComposeWasm) {
       throw IllegalArgumentException("Unexpected stdlib")
     }
-    return cacheableResource("/com/compiler/server/stdlib.uninstantiated.mjs", MediaType("text", "javascript"))
+    return cacheableResource("/com/compiler/server/stdlib_master.uninstantiated.mjs", MediaType("text", "javascript"))
   }
 
   @GetMapping("/stdlib-{hash}.wasm")
@@ -48,7 +48,7 @@ class ResourceRestController(
     if (hash != dependenciesComposeWasm) {
       throw IllegalArgumentException("Unexpected stdlib")
     }
-    return cacheableResource("/com/compiler/server/stdlib.wasm", MediaType("application", "wasm"))
+    return cacheableResource("/com/compiler/server/stdlib_master.wasm", MediaType("application", "wasm"))
   }
 
   private fun cacheableResource(path: String, mediaType: MediaType): ResponseEntity<Resource> {

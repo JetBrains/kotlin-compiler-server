@@ -188,7 +188,6 @@ class KotlinToJSTranslator(
                   icDir,
                   outputDir,
                   debugInfo,
-                  log::warn,
                 )
               )
             }
