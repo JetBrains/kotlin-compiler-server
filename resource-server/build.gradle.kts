@@ -1,8 +1,7 @@
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileInputStream
-import java.util.Properties
+import java.util.*
 
 plugins {
     alias(libs.plugins.spring.dependency.management)
@@ -21,7 +20,7 @@ val resourceDependency: Configuration by configurations.creating {
     isCanBeConsumed = false
 }
 
-val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
+val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -61,20 +60,20 @@ dependencies {
 
     resourceDependency(libs.skiko.js.wasm.runtime)
     kotlinComposeWasmStdlib(project(":cache-maker"))
-    kotlinComposeWasmStdlibTypeInfo(project(":cache-maker"))
+    kotlinComposeWasmStdlibFile(project(":cache-maker"))
 }
 
-val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdater::class) {
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
+val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
+    dependsOn(kotlinComposeWasmStdlibFile)
     propertiesMap.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher")
     propertiesMap.put("server.port", "8081")
     propertiesMap.put("skiko.version", libs.versions.skiko.get())
 
     val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
 
-    propertiesPath.set(applicationPropertiesPath.normalize().absolutePath)
+    propertiesFile.fileValue(applicationPropertiesPath)
 
-    val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibTypeInfo
+    val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibFile
 
     hashableFile.fileProvider(
         provider {
@@ -84,15 +83,15 @@ val composeWasmPropertiesUpdater by tasks.registering(ComposeWasmPropertiesUpdat
 }
 
 tasks.withType<KotlinCompile> {
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
-    dependsOn(composeWasmPropertiesUpdater)
+    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(propertiesGenerator)
 }
 
 val skikoVersion = libs.versions.skiko
 
 tasks.named<Copy>("processResources") {
-    dependsOn(kotlinComposeWasmStdlibTypeInfo)
-    dependsOn(composeWasmPropertiesUpdater)
+    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(propertiesGenerator)
     val archiveOperation = project.serviceOf<ArchiveOperations>()
     from(resourceDependency.map {
         archiveOperation.zipTree(it)
@@ -101,17 +100,23 @@ tasks.named<Copy>("processResources") {
         rename("skiko\\.(.*)", "skiko-${skikoVersion.get()}.\$1")
     }
 
-    val propertiesFile = composeWasmPropertiesUpdater.flatMap { it.updatedPropertiesFile }
+    val propertiesFile = propertiesGenerator.flatMap { it.propertiesFile }
 
     from(kotlinComposeWasmStdlib) {
         into("com/compiler/server")
-        val properties = FileInputStream(propertiesFile.get().asFile).use {
-            Properties().apply {
-                load(it)
-            }
-        }
 
-        rename("stdlib_master\\.(.*)", "stdlib-${properties["dependencies.compose.wasm"]}.\$1")
+        rename { original ->
+            val properties = FileInputStream(propertiesFile.get().asFile).use {
+                Properties().apply {
+                    load(it)
+                }
+            }
+            val regex = Regex("stdlib_master\\.(.*)")
+            regex.find(original)?.groupValues?.get(1)?.let { extension ->
+                "stdlib-${properties["dependencies.compose.wasm"]}.$extension"
+            } ?: original
+
+        }
     }
 }
 
