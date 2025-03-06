@@ -41,6 +41,20 @@ Resources:
         AuthType: NONE
         InvokeMode: RESPONSE_STREAM
 
+  ComposeStaticBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+            AllowedOrigins:
+              - "*"
+
 Outputs:
   ComposeServerFunctionUrl:
     Description: "Function URL for Kotlin Compose Compiler Server"
@@ -48,3 +62,6 @@ Outputs:
   ComposeServerFunction:
     Description: "Kotlin Compose Compiler Server Lambda Function ARN"
     Value: !GetAtt ComposeServerFunction.Arn
+  ComposeStaticBucketName:
+    Description: "S3 bucket for compose static uploads"
+    Value: !Ref 'ComposeStaticBucket'
