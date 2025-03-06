@@ -44,12 +44,6 @@ val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
     args(lambdaPrefix, outputDir.get().asFile.normalize().absolutePath)
 }
 
-val prepareTypeInfoIntoComposeWasmCache by tasks.registering(Sync::class) {
-    dependsOn(buildComposeWasmStdlibModule)
-    from(composeWasmStdlibTypeInfo)
-    into(cachesComposeWasmFolder)
-}
-
 val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
@@ -79,12 +73,12 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
-            CacheAttribute.TYPEINFO
+            CacheAttribute.WASM
         )
     }
 
     artifact(composeWasmStdlibTypeInfo) {
-        builtBy(prepareTypeInfoIntoComposeWasmCache)
+        builtBy(buildComposeWasmStdlibModule)
     }
 }
 

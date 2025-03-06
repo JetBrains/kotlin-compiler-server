@@ -20,35 +20,23 @@ class ResourceRestController(
   @Suppress("unused")
   @GetMapping("/skiko-{version}.mjs")
   fun getSkikoMjs(@PathVariable version: String): ResponseEntity<Resource> {
-    if (version != skikoVersion) {
-      throw IllegalArgumentException("Unexpected skiko version")
-    }
-    return cacheableResource("/com/compiler/server/skiko.mjs", MediaType("text", "javascript"))
+    return cacheableResource("/com/compiler/server/skiko-$version.mjs", MediaType("text", "javascript"))
   }
 
   @Suppress("unused")
   @GetMapping("/skiko-{version}.wasm")
   fun getSkikoWasm(@PathVariable version: String): ResponseEntity<Resource> {
-    if (version != skikoVersion) {
-      throw IllegalArgumentException("Unexpected skiko version")
-    }
-    return cacheableResource("/com/compiler/server/skiko.wasm", MediaType("application", "wasm"))
+    return cacheableResource("/com/compiler/server/skiko-$version.wasm", MediaType("application", "wasm"))
   }
 
   @GetMapping("/stdlib-{hash}.mjs")
   fun getStdlibMjs(@PathVariable hash: String): ResponseEntity<Resource> {
-    if (hash != dependenciesComposeWasm) {
-      throw IllegalArgumentException("Unexpected stdlib")
-    }
-    return cacheableResource("/com/compiler/server/stdlib_master.uninstantiated.mjs", MediaType("text", "javascript"))
+    return cacheableResource("/com/compiler/server/stdlib-$hash.uninstantiated.mjs", MediaType("text", "javascript"))
   }
 
   @GetMapping("/stdlib-{hash}.wasm")
   fun getStdlibWasm(@PathVariable hash: String): ResponseEntity<Resource> {
-    if (hash != dependenciesComposeWasm) {
-      throw IllegalArgumentException("Unexpected stdlib")
-    }
-    return cacheableResource("/com/compiler/server/stdlib_master.wasm", MediaType("application", "wasm"))
+    return cacheableResource("/com/compiler/server/stdlib-$hash.wasm", MediaType("application", "wasm"))
   }
 
   private fun cacheableResource(path: String, mediaType: MediaType): ResponseEntity<Resource> {
