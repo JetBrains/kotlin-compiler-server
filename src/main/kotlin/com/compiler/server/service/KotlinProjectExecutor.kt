@@ -49,8 +49,17 @@ class KotlinProjectExecutor(
     return kotlinCompiler.compile(files)
   }
 
-  fun convertToWasm(project: Project, debugInfo: Boolean): TranslationResultWithJsCode {
-    return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
+  fun convertToWasm(
+    project: Project,
+    debugInfo: Boolean,
+    multiModule: Boolean,
+  ): TranslationResultWithJsCode {
+    return convertWasmWithConverter(
+      project,
+      debugInfo,
+      multiModule,
+      kotlinToJSTranslator::doTranslateWithWasm
+    )
   }
 
   fun complete(project: Project, line: Int, character: Int): List<Completion> {
@@ -72,11 +81,16 @@ class KotlinProjectExecutor(
         convertToJsIr(
           project,
         ).compilerDiagnostics
-      ProjectType.WASM, ProjectType.COMPOSE_WASM ->
-        convertToWasm(
-          project,
-          debugInfo = false,
-        ).compilerDiagnostics
+      ProjectType.WASM -> convertToWasm(
+        project,
+        debugInfo = false,
+        multiModule = false,
+      ).compilerDiagnostics
+      ProjectType.COMPOSE_WASM -> convertToWasm(
+        project,
+        debugInfo = false,
+        multiModule = true,
+      ).compilerDiagnostics
     }
   } catch (e: Exception) {
     log.warn("Exception in getting highlight. Project: $project", e)
@@ -102,12 +116,13 @@ class KotlinProjectExecutor(
   private fun convertWasmWithConverter(
     project: Project,
     debugInfo: Boolean,
+    multiModule: Boolean,
     converter: (
       List<KtFile>,
       List<String>,
       List<String>,
       List<String>,
-      File?,
+      Boolean,
       Boolean,
     ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
@@ -116,6 +131,7 @@ class KotlinProjectExecutor(
       kotlinToJSTranslator.translateWasm(
         files,
         debugInfo,
+        multiModule,
         project.confType,
         converter
       )

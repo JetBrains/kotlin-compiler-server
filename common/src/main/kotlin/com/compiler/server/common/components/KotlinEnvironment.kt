@@ -33,7 +33,6 @@ class KotlinEnvironment(
   composeWasmCompilerPlugins: List<File>,
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
-  val composeWasmCache: File,
 ) {
   companion object {
     /**

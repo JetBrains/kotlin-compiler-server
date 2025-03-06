@@ -29,8 +29,6 @@ fun compileWasmArgs(
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
     dependencies: List<String>,
-    icDir: Path?,
-    log: (String) -> Unit,
 ): List<String> {
   val compilerPluginsArgs: List<String> = compilerPlugins
     .takeIf { it.isNotEmpty() }
@@ -49,11 +47,7 @@ fun compileWasmArgs(
     "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
     "-ir-output-dir=$klibPath",
     "-ir-output-name=$moduleName",
-  ).also {
-      if (icDir != null) {
-          it.add("-Xwasm-multimodule-mode=slave")
-      }
-  } + compilerPluginsArgs
+  ) + compilerPluginsArgs
 
   return filePaths + additionalCompilerArgumentsForKLib
 }
@@ -62,7 +56,7 @@ fun linkWasmArgs(
     moduleName: String,
     klibPath: String,
     dependencies: List<String>,
-    icDir: Path?,
+    multiModule: Boolean,
     outputDir: Path,
     debugInfo: Boolean,
 ): List<String> {
@@ -78,7 +72,7 @@ fun linkWasmArgs(
   ).also {
     if (debugInfo) it.add("-Xwasm-generate-wat")
 
-    if (icDir != null) {
+    if (multiModule) {
         it.add("-Xwasm-multimodule-mode=slave")
     } else {
       it.add("-Xir-dce")
