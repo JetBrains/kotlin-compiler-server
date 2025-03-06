@@ -161,6 +161,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) {into(compilerPluginsForJVM)}
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     from(kotlinComposeWasmStdlibTypeInfo) { into(cachesComposeWasm) }
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
@@ -168,6 +169,7 @@ val buildLambda by tasks.creating(Zip::class) {
 }
 
 tasks.named<Copy>("processResources") {
+    dependsOn(kotlinComposeWasmStdlibTypeInfo)
     dependsOn(composeWasmPropertiesUpdater)
 }
 
