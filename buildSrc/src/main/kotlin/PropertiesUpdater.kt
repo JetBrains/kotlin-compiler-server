@@ -1,7 +1,6 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
@@ -10,10 +9,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
 
-abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
-
-    @get:Input
-    abstract val propertiesPath: Property<String>
+abstract class PropertiesGenerator : DefaultTask() {
 
     @get:InputFile
     abstract val hashableFile: RegularFileProperty
@@ -22,11 +18,11 @@ abstract class ComposeWasmPropertiesUpdater : DefaultTask() {
     abstract val propertiesMap: MapProperty<String, String>
 
     @get:OutputFile
-    val updatedPropertiesFile: RegularFileProperty = project.objects.fileProperty().fileProvider(propertiesPath.map { File(it) })
+    abstract val propertiesFile: RegularFileProperty
 
     @TaskAction
     fun updateProperties() {
-        val file = updatedPropertiesFile.get().asFile
+        val file = propertiesFile.get().asFile
 
         propertiesMap.get().let {
             if (it.isNotEmpty()) {
