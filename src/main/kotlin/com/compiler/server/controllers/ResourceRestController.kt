@@ -13,13 +13,11 @@ class ResourceRestController(
     @Value("\${dependencies.compose.wasm}") private val dependenciesComposeWasm: String,
 ) {
     @Suppress("unused")
-    @GetMapping("/skiko")
-    fun getVersionedSkikoMjs(): String {
-        return skikoVersion
-    }
-
-    @GetMapping("/stdlib")
-    fun getStdlibMjs(): String {
-        return dependenciesComposeWasm
+    @GetMapping("/compose-wasm-versions")
+    fun getVersions(): Map<String, String> {
+        return mapOf(
+            "skiko" to skikoVersion,
+            "stdlib" to dependenciesComposeWasm
+        )
     }
 }
