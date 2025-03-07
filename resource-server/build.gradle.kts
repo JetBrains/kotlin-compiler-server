@@ -114,8 +114,8 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
                     load(it)
                 }
             }
-            val regex = Regex("stdlib_master\\.uninstantiated\\.(.*)")
-            regex.find(original)?.groupValues?.get(1)?.let { extension ->
+            val regex = Regex("stdlib_master(\\.uninstantiated)*\\.(.*)")
+            regex.find(original)?.groupValues?.get(2)?.let { extension ->
                 "stdlib-${properties["dependencies.compose.wasm"]}.$extension"
             } ?: original
 
