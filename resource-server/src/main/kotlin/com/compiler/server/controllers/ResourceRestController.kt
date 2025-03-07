@@ -31,7 +31,7 @@ class ResourceRestController(
 
   @GetMapping("/stdlib-{hash}.mjs")
   fun getStdlibMjs(@PathVariable hash: String): ResponseEntity<Resource> {
-    return cacheableResource("/com/compiler/server/stdlib-$hash.uninstantiated.mjs", MediaType("text", "javascript"))
+    return cacheableResource("/com/compiler/server/stdlib-$hash.mjs", MediaType("text", "javascript"))
   }
 
   @GetMapping("/stdlib-{hash}.wasm")
