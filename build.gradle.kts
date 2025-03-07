@@ -156,6 +156,11 @@ tasks.withType<BootJar> {
     requiresUnpack("**/kotlinx-*.jar")
 }
 
+val prepareComposeWasmResources by tasks.registering(Sync::class) {
+    from(composeWasmStaticResources)
+    into(layout.buildDirectory.dir("compose-wasm-resources"))
+}
+
 val buildLambda by tasks.creating(Zip::class) {
     val propertyFile = propertyFile
 
@@ -181,11 +186,6 @@ val buildLambda by tasks.creating(Zip::class) {
     }
 
     dependsOn(prepareComposeWasmResources)
-}
-
-val prepareComposeWasmResources by tasks.registering(Sync::class) {
-    from(composeWasmStaticResources)
-    into(layout.buildDirectory.dir("compose-wasm-resources"))
 }
 
 tasks.named<Copy>("processResources") {
