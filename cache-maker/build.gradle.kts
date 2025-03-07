@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec
 import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
+import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink
 import org.jetbrains.kotlin.gradle.targets.js.ir.WasmBinary
 
 plugins {
@@ -40,11 +41,11 @@ kotlin {
     }
 }
 
-val compileProductionExecutableKotlinWasmJsOptimize: TaskProvider<BinaryenExec> by tasks.existing(BinaryenExec::class) {
+val compileProductionExecutableKotlinWasmJs: TaskProvider<KotlinJsIrLink> by tasks.existing(KotlinJsIrLink::class) {
 }
 
-val composeWasmStdlib: Provider<Directory> = compileProductionExecutableKotlinWasmJsOptimize
-    .flatMap { it.outputDirectory.locationOnly }
+val composeWasmStdlib: Provider<Directory> = compileProductionExecutableKotlinWasmJs
+    .flatMap { it.destinationDirectory.locationOnly }
 val composeWasmStdlibFile: Provider<RegularFile> = composeWasmStdlib
     .map { it.file("stdlib_master.wasm") }
 
@@ -73,7 +74,7 @@ kotlinComposeWasmStdlibFile.outgoing.variants.create("stdlib") {
     }
 
     artifact(composeWasmStdlib) {
-        builtBy(compileProductionExecutableKotlinWasmJsOptimize)
+        builtBy(compileProductionExecutableKotlinWasmJs)
     }
 }
 
@@ -86,7 +87,7 @@ kotlinComposeWasmStdlibFile.outgoing.variants.create("wasm-file") {
     }
 
     artifact(composeWasmStdlibFile) {
-        builtBy(compileProductionExecutableKotlinWasmJsOptimize)
+        builtBy(compileProductionExecutableKotlinWasmJs)
     }
 }
 
