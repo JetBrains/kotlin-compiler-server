@@ -147,7 +147,6 @@ fun Project.generateProperties(
     "libraries.folder.compiler-plugins" to prefix + compilerPluginsForJVM,
     "spring.mvc.pathmatch.matching-strategy" to "ant_path_matcher",
     "spring.main.banner-mode" to "off",
-    "spring.main.banner-mode" to "off",
     "server.compression.enabled" to "true",
     "server.compression.mime-types" to "application/json,text/javascript,application/wasm",
     "skiko.version" to libs.versions.skiko.get(),
