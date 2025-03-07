@@ -1,3 +1,11 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenExec
+import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootEnvSpec
+import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
+import org.jetbrains.kotlin.gradle.targets.js.ir.WasmBinary
+
 plugins {
     kotlin("multiplatform")
 }
@@ -5,10 +13,19 @@ plugins {
 kotlin {
     wasmJs {
         outputModuleName.set("stdlib")
-        binaries.executable().forEach {
-            it.linkTask.configure {
+        binaries.executable().forEach { binary: JsIrBinary ->
+            binary.linkTask.configure {
                 compilerOptions.freeCompilerArgs.add("-Xir-dce=false")
                 compilerOptions.freeCompilerArgs.add("-Xwasm-multimodule-mode=master")
+            }
+
+            (binary as WasmBinary).optimizeTask.configure {
+                inputFileProperty.fileProvider(
+                    binary.mainFile.map {
+                        val file = it.asFile
+                        file.resolveSibling("${file.nameWithoutExtension}_master.wasm")
+                    }
+                )
             }
         }
     }
@@ -23,28 +40,19 @@ kotlin {
     }
 }
 
-val composeWasmStdlib: Provider<Directory> = layout.buildDirectory
-    .dir("compose-wasm-stdlib-output")
-val composeWasmStdlibTypeInfo: Provider<RegularFile> = composeWasmStdlib
-    .map { it.file("stdlib_master.wasm") }
-
-val buildComposeWasmStdlibModule by tasks.registering(Exec::class) {
-
-    inputs.files(configurations.named("wasmJsRuntimeClasspath"))
-
-    workingDir = rootDir
-    executable = "${project.name}/docker-build-incremental-cache.sh"
-
-    val outputDir = composeWasmStdlib
-
-    inputs.file(layout.projectDirectory.file("Dockerfile"))
-    inputs.file(layout.projectDirectory.file("docker-build-incremental-cache.sh"))
-    outputs.dir(outputDir)
-
-    args(lambdaPrefix, outputDir.get().asFile.normalize().absolutePath)
+val compileProductionExecutableKotlinWasmJsOptimize: TaskProvider<BinaryenExec> by tasks.existing(BinaryenExec::class) {
 }
 
-val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
+val composeWasmStdlib: Provider<Directory> = compileProductionExecutableKotlinWasmJsOptimize
+    .flatMap { it.outputDirectory.locationOnly }
+val composeWasmStdlibFile: Provider<RegularFile> = composeWasmStdlib
+    .map { it.file("stdlib_master.wasm") }
+
+rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootPlugin> {
+    rootProject.the<BinaryenRootEnvSpec>().version = "122"
+}
+
+val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
     isCanBeConsumed = true
@@ -56,7 +64,7 @@ val kotlinComposeWasmStdlibTypeInfo: Configuration by configurations.creating {
     }
 }
 
-kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("stdlib") {
+kotlinComposeWasmStdlibFile.outgoing.variants.create("stdlib") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
@@ -65,11 +73,11 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("stdlib") {
     }
 
     artifact(composeWasmStdlib) {
-        builtBy(buildComposeWasmStdlibModule)
+        builtBy(compileProductionExecutableKotlinWasmJsOptimize)
     }
 }
 
-kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
+kotlinComposeWasmStdlibFile.outgoing.variants.create("wasm-file") {
     attributes {
         attribute(
             CacheAttribute.cacheAttribute,
@@ -77,8 +85,8 @@ kotlinComposeWasmStdlibTypeInfo.outgoing.variants.create("typeinfo") {
         )
     }
 
-    artifact(composeWasmStdlibTypeInfo) {
-        builtBy(buildComposeWasmStdlibModule)
+    artifact(composeWasmStdlibFile) {
+        builtBy(compileProductionExecutableKotlinWasmJsOptimize)
     }
 }
 

@@ -1,6 +1,5 @@
 [versions]
 kotlin = "2.2.0-dev-8507"
-kotlinWasmStdlibCompiler = "2.2.0-dev-8507"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "2.7.10"

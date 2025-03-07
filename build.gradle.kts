@@ -77,6 +77,18 @@ val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
     }
 }
 
+val composeWasmStaticResources: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeWasmResources
+        )
+    }
+}
+
 dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
@@ -104,6 +116,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 
     kotlinComposeWasmStdlibFile(project(":cache-maker"))
+    composeWasmStaticResources(project(":resource-server"))
 }
 
 fun Project.generateProperties(
@@ -130,7 +143,11 @@ fun Project.generateProperties(
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmStdlibFile)
     propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
-    hashableFile.set(kotlinComposeWasmStdlibFile.singleFile)
+    hashableFile.fileProvider(
+        provider {
+            kotlinComposeWasmStdlibFile.singleFile
+        }
+    )
     generateProperties().forEach { (name, value) ->
         propertiesMap.put(name, value)
     }
@@ -139,7 +156,12 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmStdlibFile)
     propertiesFile.set(layout.buildDirectory.file("tmp/propertiesGenerator/${propertyFile}"))
-    hashableFile.set(kotlinComposeWasmStdlibFile.singleFile)
+    hashableFile.fileProvider(
+        provider {
+            kotlinComposeWasmStdlibFile.singleFile
+        }
+    )
+
     generateProperties(lambdaPrefix).forEach { (name, value) ->
         propertiesMap.put(name, value)
     }
@@ -183,6 +205,11 @@ val buildLambda by tasks.creating(Zip::class) {
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
+}
+
+val prepareComposeWasmResources by tasks.registering(Sync::class) {
+    from(composeWasmStaticResources)
+    into(layout.buildDirectory.dir("compose-wasm-resources"))
 }
 
 tasks.named<Copy>("processResources") {

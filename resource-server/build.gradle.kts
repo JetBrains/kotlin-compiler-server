@@ -73,11 +73,11 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 
     propertiesFile.fileValue(applicationPropertiesPath)
 
-    val composeWasmStdlibTypeInfo: FileCollection = kotlinComposeWasmStdlibFile
+    val composeWasmStdlibFile: FileCollection = kotlinComposeWasmStdlibFile
 
     hashableFile.fileProvider(
         provider {
-            composeWasmStdlibTypeInfo.singleFile
+            composeWasmStdlibFile.singleFile
         }
     )
 }
@@ -89,21 +89,24 @@ tasks.withType<KotlinCompile> {
 
 val skikoVersion = libs.versions.skiko
 
-tasks.named<Copy>("processResources") {
+val prepareComposeWasmResources by tasks.registering(Sync::class) {
     dependsOn(kotlinComposeWasmStdlibFile)
     dependsOn(propertiesGenerator)
     val archiveOperation = project.serviceOf<ArchiveOperations>()
+
+    into(layout.buildDirectory.dir("tmp/prepareResources"))
+
     from(resourceDependency.map {
         archiveOperation.zipTree(it)
     }) {
-        into("com/compiler/server")
         rename("skiko\\.(.*)", "skiko-${skikoVersion.get()}.\$1")
+        include("skiko.mjs", "skiko.wasm")
     }
 
     val propertiesFile = propertiesGenerator.flatMap { it.propertiesFile }
 
     from(kotlinComposeWasmStdlib) {
-        into("com/compiler/server")
+        include("stdlib_master.uninstantiated.mjs", "stdlib_master.wasm")
 
         rename { original ->
             val properties = FileInputStream(propertiesFile.get().asFile).use {
@@ -111,12 +114,19 @@ tasks.named<Copy>("processResources") {
                     load(it)
                 }
             }
-            val regex = Regex("stdlib_master\\.(.*)")
+            val regex = Regex("stdlib_master\\.uninstantiated\\.(.*)")
             regex.find(original)?.groupValues?.get(1)?.let { extension ->
                 "stdlib-${properties["dependencies.compose.wasm"]}.$extension"
             } ?: original
 
         }
+    }
+}
+
+tasks.named<Copy>("processResources") {
+    dependsOn(prepareComposeWasmResources)
+    from(prepareComposeWasmResources) {
+        into("com/compiler/server")
     }
 }
 
@@ -126,4 +136,20 @@ tasks.withType<Test> {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)
     })
+}
+
+val composeWasmStaticResources: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = false
+    isCanBeConsumed = true
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeWasmResources
+        )
+    }
+
+    outgoing.artifact(prepareComposeWasmResources) {
+        builtBy(prepareComposeWasmResources)
+    }
 }
