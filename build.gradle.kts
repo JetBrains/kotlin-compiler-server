@@ -17,6 +17,13 @@ plugins {
     alias(libs.plugins.kotlin.plugin.spring)
 }
 
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+        termsOfUseAgree = "yes"
+    }
+}
+
 kotlin.jvmToolchain {
     languageVersion.set(JavaLanguageVersion.of(17))
     vendor.set(JvmVendorSpec.AMAZON)
