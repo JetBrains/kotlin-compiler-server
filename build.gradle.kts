@@ -205,6 +205,8 @@ val buildLambda by tasks.creating(Zip::class) {
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }
+
+    dependsOn(prepareComposeWasmResources)
 }
 
 val prepareComposeWasmResources by tasks.registering(Sync::class) {
