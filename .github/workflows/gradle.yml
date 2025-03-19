@@ -1,9 +1,12 @@
 name: Java CI
 
 on:
-  pull_request:
+  push:
     branches:
       - '**'
+  pull_request:
+    branches:
+      - 'master'
   workflow_dispatch:
 
 jobs:
