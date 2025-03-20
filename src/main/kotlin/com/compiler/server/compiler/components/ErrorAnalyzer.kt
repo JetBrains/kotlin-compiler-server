@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
+import org.jetbrains.kotlin.config.moduleName
 import org.jetbrains.kotlin.container.*
 import org.jetbrains.kotlin.context.ContextForNewModule
 import org.jetbrains.kotlin.context.ModuleContext
@@ -32,7 +33,6 @@ import org.jetbrains.kotlin.incremental.components.InlineConstTracker
 import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
-import org.jetbrains.kotlin.js.config.JsConfig
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.platform.TargetPlatform
@@ -114,14 +114,6 @@ class ErrorAnalyzer(
 
   fun analyzeFileForJs(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
     val project = coreEnvironment.project
-    val configuration = JsConfig(
-      project,
-      kotlinEnvironment.jsConfiguration,
-      CompilerEnvironment,
-      kotlinEnvironment.JS_METADATA_CACHE,
-      kotlinEnvironment.JS_LIBRARIES.toSet()
-    )
-
     val mainModule = MainModule.SourceFiles(files)
     val sourceModule = ModulesStructure(
       project,
@@ -152,7 +144,7 @@ class ErrorAnalyzer(
 
     val context = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
-      moduleName = Name.special("<" + configuration.moduleId + ">"),
+      moduleName = Name.special("<" + kotlinEnvironment.jsConfiguration.moduleName + ">"),
       builtIns = JsPlatformAnalyzerServices.builtIns, platform = null
     )
     val dependencies = mutableSetOf(context.module) + mds + JsPlatformAnalyzerServices.builtIns.builtInsModule
@@ -199,14 +191,6 @@ class ErrorAnalyzer(
     coreEnvironment: KotlinCoreEnvironment
   ): Analysis {
     val project = coreEnvironment.project
-    val configuration = JsConfig(
-      project,
-      environmentConfiguration,
-      CompilerEnvironment,
-      emptyList(),
-      dependencies.toSet()
-    )
-
     val mainModule = MainModule.SourceFiles(files)
     val sourceModule = ModulesStructure(
       project,
@@ -237,7 +221,7 @@ class ErrorAnalyzer(
 
     val context = ContextForNewModule(
       projectContext = ProjectContext(project, "COMPILER-SERVER-JS"),
-      moduleName = Name.special("<" + configuration.moduleId + ">"),
+      moduleName = Name.special("<" + kotlinEnvironment.jsConfiguration.moduleName + ">"),
       builtIns = WasmPlatformAnalyzerServices.builtIns, platform = null
     )
     val dependenciesDescriptors = mutableSetOf(context.module) + mds + WasmPlatformAnalyzerServices.builtIns.builtInsModule
