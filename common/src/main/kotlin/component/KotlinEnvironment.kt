@@ -50,6 +50,7 @@ class KotlinEnvironment(
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-opt-in=kotlin.uuid.ExperimentalUuidApi",
       "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
+      "-opt-in=kotlin.concurrent.atomics.ExperimentalAtomicApi",
       "-Xcontext-receivers",
       "-Xreport-all-warnings",
       "-Wextra",
