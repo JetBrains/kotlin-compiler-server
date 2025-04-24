@@ -1,5 +1,5 @@
 //sampleStart
-// Creates an abstract class as the base for an exception hierarchy for account-related errors
+// Creates a sealed class as the base for an exception hierarchy for account-related errors
 sealed class AccountException(message: String, cause: Throwable? = null):
 Exception(message, cause)
 
