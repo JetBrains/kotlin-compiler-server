@@ -2,7 +2,6 @@ fun main() {
     //sampleStart
     val numbers = listOf(1, -2, 3, -4, 5, -6)
     
-    
     val positives = numbers.filter ({ x -> x > 0 })
     
     val isNegative = { x: Int -> x < 0 }
