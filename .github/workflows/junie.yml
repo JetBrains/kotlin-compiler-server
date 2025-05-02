@@ -23,3 +23,4 @@ jobs:
     uses: jetbrains-junie/junie-workflows/.github/workflows/ej-issue.yml@devcontainer2
     with:
       workflow_params: ${{ inputs.workflow_params }}
+      runs-on: sergeich
