@@ -37,6 +37,7 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
             ProjectType.JAVA -> JvmExecutionResult::class.java
             ProjectType.JS, ProjectType.CANVAS, ProjectType.JS_IR -> TranslationJSResult::class.java
             ProjectType.WASM, ProjectType.COMPOSE_WASM -> TranslationWasmResult::class.java
+            ProjectType.SWIFT_EXPORT -> SwiftExportResult::class.java
         }
         val result = RestTemplate().postForObject(
             "${getHost()}$url", HttpEntity(body, headers), resultClass
