@@ -13,10 +13,5 @@ fun main() {
     }
     printLength("Incomprehensibilities")
     printLength(1000)
-    val any = object : Any() {
-        override fun toString(): String {
-            return "Any"
-        }
-    }
-    printLength(listOf(any))
+    printLength(listOf(Any()))
 }
