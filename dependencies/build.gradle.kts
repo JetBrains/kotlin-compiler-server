@@ -107,6 +107,7 @@ dependencies {
     // Kotlin libraries
     kotlinDependency(libs.bundles.kotlin.stdlib)
     kotlinDependency(libs.kotlin.test)
+    kotlinDependency(libs.kotlin.test.junit)
     kotlinDependency(libs.kotlinx.coroutines.core.jvm)
     kotlinDependency(libs.kotlinx.coroutines.test)
     kotlinDependency(libs.kotlinx.datetime)
