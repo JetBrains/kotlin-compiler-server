@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.kotlin.stdlib)
-    implementation(libs.kotlin.test)
     implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(libs.kotlin.compiler.ide) {
@@ -79,6 +78,7 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
+    testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
