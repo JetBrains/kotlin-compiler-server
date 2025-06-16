@@ -26,3 +26,24 @@ kotlin {
         vendor.set(JvmVendorSpec.AMAZON)
     }
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+
+        freeCompilerArgs.addAll(
+            "-Xreport-all-warnings",
+            "-Xrender-internal-diagnostic-names",
+            "-Xuse-fir-experimental-checkers"
+        )
+
+        allWarningsAsErrors.set(false)
+        extraWarnings.set(true)
+
+        // Adding additional cli options for testing purpose
+        project.providers.gradleProperty("kotlin_additional_cli_options").orNull?.let { options ->
+            options.split(" ").filter { it.isNotBlank() }.forEach {
+                freeCompilerArgs.add(it)
+            }
+        }
+    }
+}
