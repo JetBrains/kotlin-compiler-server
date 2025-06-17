@@ -1,7 +1,6 @@
 package com.compiler.server.executor
 
 import com.compiler.server.model.ProgramOutput
-import com.compiler.server.utils.escapeString
 import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
@@ -85,7 +84,7 @@ class JavaExecutor {
     try {
       while (output.length < limit) {
         val line = standardOut.readLine() ?: break
-        output.appendLine(escapeString(line))
+        output.appendLine(line)
       }
     } catch (_: Exception) {
       // something happened with the stream. Just return what we've collected so far

@@ -52,7 +52,7 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
       //sampleEnd
       }
       """.trimIndent(),
-      contains = "<outStream>brown&amp;blue\n</outStream>"
+      contains = "<outStream>brown&blue\n</outStream>"
     )
   }
 
