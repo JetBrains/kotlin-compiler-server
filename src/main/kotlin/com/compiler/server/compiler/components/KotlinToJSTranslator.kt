@@ -15,9 +15,9 @@ class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
   companion object {
-    private const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
+    internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
-    private val JS_IR_OUTPUT_REWRITE = """
+    internal val JS_IR_OUTPUT_REWRITE = """
         if (typeof get_output !== "undefined") {
           get_output();
           output = new BufferedOutput();
