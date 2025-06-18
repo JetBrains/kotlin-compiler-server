@@ -11,6 +11,8 @@ on:
 
 jobs:
   build:
+    # Skip duplicate job for pull requests from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
 
     runs-on: ubuntu-latest
 
