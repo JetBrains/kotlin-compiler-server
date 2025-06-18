@@ -20,6 +20,7 @@ jackson = "2.14.0"
 hamcrest = "2.2"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
+graalvm = "24.2.1"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -67,6 +68,8 @@ compose-material3 = { group = "org.jetbrains.compose.material3", name = "materia
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
+graalvm-polyglot = {group = "org.graalvm.polyglot", name= "polyglot", version.ref = "graalvm"}
+graalvm-js = {group = "org.graalvm.polyglot", name= "js", version.ref = "graalvm"}
 
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]
