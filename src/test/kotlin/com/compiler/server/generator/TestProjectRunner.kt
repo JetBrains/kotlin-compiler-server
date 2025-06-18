@@ -3,6 +3,7 @@ package com.compiler.server.generator
 import com.compiler.server.base.filterOnlyErrors
 import com.compiler.server.base.hasErrors
 import com.compiler.server.base.renderErrorDescriptors
+import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
@@ -226,18 +227,5 @@ class TestProjectRunner {
 
     Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
     return result
-  }
-
-  @Throws(IOException::class, InterruptedException::class)
-  fun startNodeJsApp(
-    pathToBinNode: String?,
-    pathToAppScript: String?
-  ): String {
-    val processBuilder = ProcessBuilder()
-    processBuilder.command(pathToBinNode, pathToAppScript)
-    val process = processBuilder.start()
-    val inputStream = process.inputStream
-    process.waitFor()
-    return inputStream.reader().readText()
   }
 }
