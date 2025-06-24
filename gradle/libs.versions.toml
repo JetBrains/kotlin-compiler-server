@@ -7,6 +7,7 @@ spring-dependency-managment = "1.1.7"
 springfox-boot-starter = "3.0.0"
 aws-serverless-java-container-springboot2 = "1.9.3"
 junit = "4.13.2"
+junit-jupiter = "5.10.1"
 logstash-logback-encoder = "7.3"
 trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
@@ -29,7 +30,7 @@ kotlin-stdlib-jdk8 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk
 kotlin-stdlib-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-js", version.ref = "kotlin" }
 kotlin-stdlib-wasm-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-wasm-js", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
-kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit5", version.ref = "kotlin" }
 kotlin-compiler = { group = "org.jetbrains.kotlin", name = "kotlin-compiler", version.ref = "kotlin" }
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -50,6 +51,8 @@ kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotl
 springfox-boot-starter = { group = "io.springfox", name = "springfox-boot-starter", version.ref = "springfox-boot-starter" }
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot2", version.ref = "aws-serverless-java-container-springboot2" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
 logback-logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 intellij-trove4j = { group = "org.jetbrains.intellij.deps", name = "trove4j", version.ref = "trove4j" }
 skiko-js-wasm-runtime = { group = "org.jetbrains.skiko", name = "skiko-js-wasm-runtime", version.ref = "skiko" }
