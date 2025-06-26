@@ -56,6 +56,7 @@ skiko-js-wasm-runtime = { group = "org.jetbrains.skiko", name = "skiko-js-wasm-r
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
+jackson-module-kotlin = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
 hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest" }
 compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "compose" }
 compose-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "compose" }
