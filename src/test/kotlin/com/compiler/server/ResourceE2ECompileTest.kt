@@ -10,8 +10,10 @@ import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.ProjectType
 import com.compiler.server.model.TranslationJSResult
 import com.compiler.server.model.TranslationWasmResult
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpEntity
@@ -26,6 +28,10 @@ import kotlin.io.path.writeText
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ResourceE2ECompileTest : BaseResourceCompileTest {
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     @Value("\${local.server.port}")
     private var port = 0
     private val host: String = InetAddress.getLocalHost().hostAddress
@@ -64,13 +70,8 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
                 testDirJS
             )
         ) { result, file ->
-            val (actualResult, extension) = when (result) {
-                // For the JS it has no sense to compare compiled code,
-                // because it differs with each new compiler version,
-                // but it makes sense to compare the results of the execution such code.
-                is TranslationJSResult -> Pair(executeCompiledJsCode(result), ".txt")
-                else -> Pair(jacksonObjectMapper().writeValueAsString(result), ".json")
-            }
+            val (actualResult, extension, compareExpectedAndActualResultFunction) =
+                prepareStrategyBasedOnTestResult(result)
             val out =
                 file.path.replace("test-compile-data", "test-compile-output").replace("\\.kt$".toRegex(), extension)
 
@@ -78,7 +79,7 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
             if (outFile.exists()) {
                 val text = outFile.readText()
-                if (text != actualResult) {
+                if (!compareExpectedAndActualResultFunction(text, actualResult)) {
                     if (!file.isInconsistentOutput()) {
                         return@checkResourceExamples """
                             Expected: $text
@@ -98,6 +99,21 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
             null
         }
+    }
+
+    private fun prepareStrategyBasedOnTestResult(result: ExecutionResult): Triple<String, String, (String, String) -> Boolean> = when (result) {
+        // For the JS it has no sense to compare compiled code,
+        // because it differs with each new compiler version,
+        // but it makes sense to compare the results of the execution such code.
+        is TranslationJSResult -> Triple(
+            executeCompiledJsCode(result),
+            ".txt",
+            { expected: String, actual: String -> expected == actual })
+
+        else -> Triple(
+            objectMapper.writeValueAsString(result),
+            ".json",
+            { expected: String, actual: String -> objectMapper.readTree(expected) == objectMapper.readTree(actual) })
     }
 }
 
