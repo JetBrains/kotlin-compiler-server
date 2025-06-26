@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
+    implementation(project(":swift-export-playground", configuration = "default"))
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
