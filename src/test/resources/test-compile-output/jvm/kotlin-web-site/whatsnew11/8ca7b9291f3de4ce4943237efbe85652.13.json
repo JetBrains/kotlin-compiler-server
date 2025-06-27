@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>'in' was found in 'Kotlin'\nKotlin\n    ^\n</outStream>"}
+{"exception":null,"text":"<outStream>'in' was found in 'Kotlin'\nKotlin\n    ^\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

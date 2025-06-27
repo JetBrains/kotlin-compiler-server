@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>'with' is called with argument [one, two, three]\nIt contains 3 elements\n</outStream>"}
+{"exception":null,"text":"<outStream>'with' is called with argument [one, two, three]\nIt contains 3 elements\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

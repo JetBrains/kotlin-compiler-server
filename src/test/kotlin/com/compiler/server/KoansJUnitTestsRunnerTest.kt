@@ -24,7 +24,7 @@ class KoansJUnitTestsRunnerTest : BaseJUnitTest() {
   @Test
   fun `koans test Default arguments`() {
     runKoanTest(
-      "fun foo(name: String, number: Int = 42, toUpperCase: Boolean = false) =\n        (if (toUpperCase) name.toUpperCase() else name) + number\n\nfun useFoo() = listOf(\n        foo(\"a\"),\n        foo(\"b\", number = 1),\n        foo(\"c\", toUpperCase = true),\n        foo(name = \"d\", number = 2, toUpperCase = true)\n)",
+      "fun foo(name: String, number: Int = 42, toUpperCase: Boolean = false) =\n        (if (toUpperCase) name.uppercase() else name) + number\n\nfun useFoo() = listOf(\n        foo(\"a\"),\n        foo(\"b\", number = 1),\n        foo(\"c\", toUpperCase = true),\n        foo(name = \"d\", number = 2, toUpperCase = true)\n)",
       "import org.junit.Test\nimport org.junit.Assert\n\nclass TestDefaultAndNamedParams() {\n\n    @Test fun testDefaultAndNamedParams() {\n        Assert.assertEquals(listOf(\"a42\", \"b1\", \"C42\", \"D2\"), useFoo())\n    }\n}"
     )
   }

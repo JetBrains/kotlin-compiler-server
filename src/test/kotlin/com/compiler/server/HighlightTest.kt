@@ -84,7 +84,7 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight Type inference failed`() {
     val highlights = highlight("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 2)
-    errorContains(highlights, "Cannot infer type for this parameter. Please specify it explicitly.")
+    errorContains(highlights, "Cannot infer type for this parameter. Specify it explicitly.")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
@@ -92,7 +92,7 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight js Type inference failed`() {
     val highlights = highlightJS("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 2)
-    errorContains(highlights, "Cannot infer type for this parameter. Please specify it explicitly.")
+    errorContains(highlights, "Cannot infer type for this parameter. Specify it explicitly.")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 
@@ -100,7 +100,7 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight wasm Type inference failed`() {
     val highlights = highlightWasm("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 2)
-    errorContains(highlights, "Cannot infer type for this parameter. Please specify it explicitly.")
+    errorContains(highlights, "Cannot infer type for this parameter. Specify it explicitly.")
     errorContains(highlights, "Function invocation 'to(...)' expected")
   }
 }

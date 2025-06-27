@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>mario@example.com\ndomain.com@username\nfoo@bar.com\npepe@frog.com\n</outStream>"}
+{"exception":null,"text":"<outStream>mario@example.com\ndomain.com@username\nfoo@bar.com\npepe@frog.com\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

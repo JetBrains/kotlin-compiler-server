@@ -3,6 +3,7 @@ package com.compiler.server.generator
 import com.compiler.server.base.filterOnlyErrors
 import com.compiler.server.base.hasErrors
 import com.compiler.server.base.renderErrorDescriptors
+import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
 import model.Completion
@@ -201,11 +202,11 @@ class TestProjectRunner {
     Assertions.assertNotNull(result, "Test result should no be a null")
 
     val tmpDir = createTempDirectory()
-    val jsMain = tmpDir.resolve("moduleId.mjs")
+    val jsMain = tmpDir.resolve("playground.mjs")
     jsMain.writeText(result.jsInstantiated)
-    val jsUninstantiated = tmpDir.resolve("moduleId.uninstantiated.mjs")
+    val jsUninstantiated = tmpDir.resolve("playground.uninstantiated.mjs")
     jsUninstantiated.writeText(result.jsCode!!)
-    val wasmMain = tmpDir.resolve("moduleId.wasm")
+    val wasmMain = tmpDir.resolve("playground.wasm")
     wasmMain.writeBytes(result.wasm)
 
     val wat = result.wat
@@ -226,18 +227,5 @@ class TestProjectRunner {
 
     Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
     return result
-  }
-
-  @Throws(IOException::class, InterruptedException::class)
-  fun startNodeJsApp(
-    pathToBinNode: String?,
-    pathToAppScript: String?
-  ): String {
-    val processBuilder = ProcessBuilder()
-    processBuilder.command(pathToBinNode, pathToAppScript)
-    val process = processBuilder.start()
-    val inputStream = process.inputStream
-    process.waitFor()
-    return inputStream.reader().readText()
   }
 }

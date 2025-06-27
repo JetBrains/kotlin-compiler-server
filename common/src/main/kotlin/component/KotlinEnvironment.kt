@@ -1,9 +1,9 @@
 package component
 
 import com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
+import org.jetbrains.kotlin.cli.common.arguments.toLanguageVersionSettings
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -51,9 +51,11 @@ class KotlinEnvironment(
       "-opt-in=kotlin.experimental.ExperimentalTypeInference",
       "-opt-in=kotlin.uuid.ExperimentalUuidApi",
       "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
-      "-Xcontext-receivers",
+      "-opt-in=kotlin.concurrent.atomics.ExperimentalAtomicApi",
+      "-Xcontext-parameters",
+      "-Xnested-type-aliases",
       "-Xreport-all-warnings",
-      "-Xuse-fir-extended-checkers",
+      "-Wextra",
       "-XXLanguage:+ExplicitBackingFields",
     )
   }
@@ -88,20 +90,22 @@ class KotlinEnvironment(
 
   private val configuration = createConfiguration()
   val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.MODULE_KIND, ModuleKind.PLAIN)
     put(JSConfigurationKeys.LIBRARIES, JS_LIBRARIES)
   }
 
   val wasmConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.LIBRARIES, WASM_LIBRARIES)
     put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
   }
 
+  val rootDisposable = Disposer.newDisposable()
+
   val composeWasmConfiguration: CompilerConfiguration = configuration.copy().apply {
-    put(CommonConfigurationKeys.MODULE_NAME, "moduleId")
+    put(CommonConfigurationKeys.MODULE_NAME, "playground")
     put(JSConfigurationKeys.LIBRARIES, COMPOSE_WASM_LIBRARIES)
     put(WasmConfigurationKeys.WASM_ENABLE_ARRAY_RANGE_CHECKS, false)
     put(WasmConfigurationKeys.WASM_ENABLE_ASSERTS, false)
@@ -109,13 +113,14 @@ class KotlinEnvironment(
     PluginCliParser.loadPluginsSafe(
       COMPOSE_WASM_COMPILER_PLUGINS,
       composeWasmCompilerPluginOptions,
-      emptyList(),
-      this
+      emptyList<String>(),
+      this,
+      rootDisposable
     )
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    projectDisposable = Disposer.newDisposable(),
+    projectDisposable = rootDisposable,
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )
@@ -128,7 +133,6 @@ class KotlinEnvironment(
       val messageCollector = MessageCollector.NONE
       put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
       put(CommonConfigurationKeys.MODULE_NAME, "web-module")
-      put(JSConfigurationKeys.TYPED_ARRAYS_ENABLED, true)
       put(JSConfigurationKeys.PROPERTY_LAZY_INITIALIZATION, true)
 
       languageVersionSettings = arguments.toLanguageVersionSettings(messageCollector)

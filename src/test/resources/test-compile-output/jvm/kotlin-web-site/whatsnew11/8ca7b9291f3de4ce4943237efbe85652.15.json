@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Counting first letters: {o=1, t=3, f=2, s=2, e=1, n=1}.\nComparing the result with using 'groupBy': true.\n</outStream>"}
+{"exception":null,"text":"<outStream>Counting first letters: {o=1, t=3, f=2, s=2, e=1, n=1}.\nComparing the result with using 'groupBy': true.\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

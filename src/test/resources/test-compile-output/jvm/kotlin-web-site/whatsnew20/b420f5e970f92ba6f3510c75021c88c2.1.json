@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":2,"ch":31},"end":{"line":2,"ch":35}},"message":"Initializer is redundant.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>0\nnull\n</outStream>"}
+{"exception":null,"text":"<outStream>0\nnull\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[{"interval":{"start":{"line":2,"ch":31},"end":{"line":2,"ch":35}},"message":"Initializer is redundant.","severity":"WARNING","className":"WARNING"}]}}

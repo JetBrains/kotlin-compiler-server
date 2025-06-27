@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>0031416\n+3.1416\nHELLO WORLD\n(31416) means -31416\n</outStream>"}
+{"exception":null,"text":"<outStream>0031416\n+3.1416\nHELLO WORLD\n(31416) means -31416\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

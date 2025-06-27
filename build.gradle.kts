@@ -1,5 +1,5 @@
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -14,37 +14,17 @@ val propertyFile = "application.properties"
 plugins {
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.spring.boot)
-    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.spring)
-}
-
-kotlin.jvmToolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-    vendor.set(JvmVendorSpec.AMAZON)
+    id("base-kotlin-jvm-conventions")
 }
 
 apply<NodeJsRootPlugin>()
 
 allprojects {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-        maven("https://repo.spring.io/snapshot")
-        maven("https://repo.spring.io/milestone")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
-        maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
-        maven("https://www.myget.org/F/rd-snapshots/maven/")
-        maven("https://kotlin.jetbrains.space/p/kotlin/packages/maven/kotlin-ide")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    }
     afterEvaluate {
         dependencies {
             dependencies {
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+                implementation(libs.jackson.module.kotlin)
                 implementation(libs.kotlin.idea) {
                     isTransitive = false
                 }
@@ -69,7 +49,6 @@ dependencies {
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.kotlin.stdlib)
-    implementation(libs.kotlin.test)
     implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(libs.kotlin.compiler.ide) {
@@ -79,6 +58,7 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
 
+    testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
@@ -167,13 +147,15 @@ tasks.named<Copy>("processResources") {
 }
 
 tasks.withType<Test> {
-    dependsOn(rootProject.the<NodeJsRootExtension>().nodeJsSetupTaskProvider)
+    with(rootProject.kotlinNodeJsEnvSpec) {
+        dependsOn(rootProject.nodeJsSetupTaskProvider)
+    }
     useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)
     })
-    val executablePath = rootProject.the<NodeJsRootExtension>().requireConfigured().executable
+    val executablePath = rootProject.kotlinNodeJsEnvSpec.executable.get()
     doFirst {
         this@withType.environment("kotlin.wasm.node.path", executablePath)
     }

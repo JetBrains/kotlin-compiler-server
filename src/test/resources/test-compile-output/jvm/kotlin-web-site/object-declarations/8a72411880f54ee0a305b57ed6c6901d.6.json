@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>User1's Named Companion Object\nUser2's Companion Object\n</outStream>"}
+{"exception":null,"text":"<outStream>User1's Named Companion Object\nUser2's Companion Object\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

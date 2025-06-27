@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Initial input: 'login: Pokemon5, password: 1q2w3e4r5t'\nAnonymized input: 'login: xxx, password: xxx'\n</outStream>"}
+{"exception":null,"text":"<outStream>Initial input: 'login: Pokemon5, password: 1q2w3e4r5t'\nAnonymized input: 'login: xxx, password: xxx'\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

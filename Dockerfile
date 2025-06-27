@@ -1,12 +1,14 @@
 FROM amazoncorretto:17 as build
 
 ARG KOTLIN_VERSION
+ARG DEVELOCITY_ACCESS_KEY
 
 RUN if [ -z "$KOTLIN_VERSION" ]; then \
         echo "Error: KOTLIN_VERSION argument is not set. Use docker-image-build.sh to build the image." >&2; \
         exit 1; \
     fi
 
+ENV DEVELOCITY_ACCESS_KEY=$DEVELOCITY_ACCESS_KEY
 ENV KOTLIN_LIB=$KOTLIN_VERSION
 ENV KOTLIN_LIB_JS=${KOTLIN_VERSION}-js
 ENV KOTLIN_LIB_WASM=${KOTLIN_VERSION}-wasm

@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>[(red, fox), (brown, bear), (grey, wolf)]\n[(red, fox), (brown, bear)]\n</outStream>"}
+{"exception":null,"text":"<outStream>[(red, fox), (brown, bear), (grey, wolf)]\n[(red, fox), (brown, bear)]\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

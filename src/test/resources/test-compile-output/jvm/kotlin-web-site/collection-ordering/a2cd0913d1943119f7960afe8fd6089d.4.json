@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Sorted ascending: [four, one, three, two]\nSorted descending: [two, three, one, four]\n</outStream>"}
+{"exception":null,"text":"<outStream>Sorted ascending: [four, one, three, two]\nSorted descending: [two, three, one, four]\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

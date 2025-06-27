@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":0},"end":{"line":0,"ch":6}},"message":"'inline' modifier is deprecated. Use 'value' instead.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>Kotlin\n</outStream>"}
+{"exception":null,"text":"<outStream>Kotlin\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[{"interval":{"start":{"line":0,"ch":0},"end":{"line":0,"ch":6}},"message":"'inline' modifier is deprecated. Use 'value' instead.","severity":"WARNING","className":"WARNING"}]}}

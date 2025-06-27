@@ -101,7 +101,7 @@ class KotlinProjectExecutor(
   private fun convertWasmWithConverter(
     project: Project,
     debugInfo: Boolean,
-    converter: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    converter: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return kotlinEnvironment.environment { environment ->
       val files = getFilesFrom(project, environment).map { it.kotlinFile }

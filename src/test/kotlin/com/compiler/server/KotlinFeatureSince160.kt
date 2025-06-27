@@ -52,7 +52,7 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
       //sampleEnd
       }
       """.trimIndent(),
-      contains = "<outStream>brown&amp;blue\n</outStream>"
+      contains = "<outStream>brown&blue\n</outStream>"
     )
   }
 
@@ -69,37 +69,6 @@ class KotlinFeatureSince160 : BaseExecutorTest() {
       }
       """.trimIndent(),
       contains = "<outStream>[1, 2, 3, 5]\n</outStream>"
-    )
-  }
-
-  @Test
-  fun `Prototype of context receivers`() {
-    run(
-      code = """
-        class Logger {
-          fun info(message: String) = println(message)
-        }
-
-        interface LoggingContext {
-          val log: Logger
-        }
-
-        context(LoggingContext)
-        fun executeTask() {
-          log.info("Complete")
-        }
-
-        fun main() {
-          val loggingContext = object: LoggingContext {
-            override val log = Logger()
-          }
-            
-          with(loggingContext) {
-            executeTask()
-          }
-        }
-      """.trimIndent(),
-      contains = "Complete"
     )
   }
 }

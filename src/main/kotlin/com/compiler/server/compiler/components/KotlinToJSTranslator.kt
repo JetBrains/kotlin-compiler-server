@@ -15,9 +15,9 @@ class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
   companion object {
-    private const val JS_IR_CODE_BUFFER = "moduleId.output?.buffer_1;\n"
+    internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
-    private val JS_IR_OUTPUT_REWRITE = """
+    internal val JS_IR_OUTPUT_REWRITE = """
         if (typeof get_output !== "undefined") {
           get_output();
           output = new BufferedOutput();
@@ -47,7 +47,7 @@ class KotlinToJSTranslator(
     files: List<KtFile>,
     debugInfo: Boolean,
     projectType: ProjectType,
-    translate: (List<KtFile>, List<String>, List<String>, List<String>) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    translate: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
       val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
@@ -67,7 +67,8 @@ class KotlinToJSTranslator(
         files,
         dependencies,
         compilerPlugins,
-        compilerPluginOptions
+        compilerPluginOptions,
+        debugInfo
       )
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -87,7 +88,7 @@ class KotlinToJSTranslator(
 
   fun doTranslateWithIr(files: List<KtFile>, arguments: List<String>): CompilationResult<String> =
     usingTempDirectory { inputDir ->
-      val moduleName = "moduleId"
+      val moduleName = "playground"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
         val k2JSCompiler = K2JSCompiler()
@@ -95,8 +96,7 @@ class KotlinToJSTranslator(
         val klibPath = (outputDir / "klib").toFile().canonicalPath
         val additionalCompilerArgumentsForKLib = listOf(
           "-Xreport-all-warnings",
-          "-Xuse-fir-extended-checkers",
-          "-Xir-only",
+          "-Wextra",
           "-Xir-produce-klib-dir",
           "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
           "-ir-output-dir=$klibPath",
@@ -106,8 +106,7 @@ class KotlinToJSTranslator(
           .flatMap {
             k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
               "-Xreport-all-warnings",
-              "-Xuse-fir-extended-checkers",
-              "-Xir-only",
+              "-Wextra",
               "-Xir-produce-js",
               "-Xir-dce",
               "-Xinclude=$klibPath",
@@ -138,9 +137,10 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
+    debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
-      val moduleName = "moduleId"
+      val moduleName = "playground"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
         val k2JSCompiler = K2JSCompiler()
@@ -157,7 +157,7 @@ class KotlinToJSTranslator(
               } ?: emptyList()
           val additionalCompilerArgumentsForKLib: List<String> = listOf(
             "-Xreport-all-warnings",
-          "-Xuse-fir-extended-checkers",
+            "-Wextra",
           "-Xwasm",
           "-Xir-produce-klib-dir",
           "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
@@ -167,25 +167,24 @@ class KotlinToJSTranslator(
 
         k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
           .flatMap {
-            k2JSCompiler.tryCompilation(inputDir, ioFiles, listOf(
+            k2JSCompiler.tryCompilation(inputDir, ioFiles, mutableListOf(
               "-Xreport-all-warnings",
-              "-Xuse-fir-extended-checkers",
+              "-Wextra",
               "-Xwasm",
-              "-Xwasm-generate-wat",
               "-Xir-produce-js",
               "-Xir-dce",
               "-Xinclude=$klibPath",
               "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
               "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
               "-ir-output-name=$moduleName",
-            ))
+            ).also { if (debugInfo) it.add("-Xwasm-generate-wat") })
           }
           .map {
             WasmTranslationSuccessfulOutput(
               jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
               jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
               wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-              wat = (outputDir / "wasm" / "$moduleName.wat").readText(),
+              wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
             )
           }
       }
