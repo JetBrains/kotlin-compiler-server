@@ -2,7 +2,7 @@
 kotlin = "2.2.0"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
-spring-boot = "2.7.10"
+spring-boot = "3.5.3"
 spring-dependency-managment = "1.1.7"
 springfox-boot-starter = "3.0.0"
 aws-serverless-java-container-springboot2 = "1.9.3"
