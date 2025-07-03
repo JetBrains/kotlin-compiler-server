@@ -1,16 +1,15 @@
 fun main() {
 //sampleStart
-    // Prices of items in a shopping cart
-    val itemPrices = listOf(20, 35, 15, 40, 10)
+    data class User(val name: String?, val age: Int?)
 
-    // Calculate the total price using the reduceOrNull() function
-    val totalPrice = itemPrices.reduceOrNull { runningTotal, price -> runningTotal + price }
-    println("Total price of items in the cart: ${totalPrice ?: "No items"}")
-    // Total price of items in the cart: 120
+    val users = listOf(
+        User(null, 25),
+        User("Alice", null),
+        User("Bob", 30)
+    )
 
-    val emptyCart = listOf<Int>()
-    val emptyTotalPrice = emptyCart.reduceOrNull { runningTotal, price -> runningTotal + price }
-    println("Total price of items in the empty cart: ${emptyTotalPrice ?: "No items"}")
-    // Total price of items in the empty cart: No items
+    val firstNonNullName = users.firstNotNullOfOrNull { it.name }
+    println(firstNonNullName)
+    // Alice
 //sampleEnd
 }
