@@ -42,7 +42,7 @@ dependencies {
     annotationProcessor("org.springframework:spring-context-indexer")
     implementation("com.google.code.gson:gson")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation(libs.springfox.boot.starter)
+    implementation(libs.springdoc)
     implementation(libs.aws.springboot.container)
     implementation(libs.junit)
     implementation(libs.logback.logstash.encoder)
@@ -92,6 +92,7 @@ fun generateProperties(prefix: String = "") = """
     spring.mvc.pathmatch.matching-strategy=ant_path_matcher
     server.compression.enabled=true
     server.compression.mime-types=application/json,text/javascript,application/wasm
+    springdoc.swagger-ui.path: /api-docs/swagger-ui.html
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {
