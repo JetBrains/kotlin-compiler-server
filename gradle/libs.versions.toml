@@ -4,7 +4,7 @@ kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "3.5.3"
 spring-dependency-managment = "1.1.7"
-springfox-boot-starter = "3.0.0"
+springdoc = "2.8.9"
 aws-serverless-java-container-springboot2 = "1.9.3"
 junit = "4.13.2"
 junit-jupiter = "5.10.1"
@@ -48,7 +48,7 @@ kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-by
 kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io" }
 kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
-springfox-boot-starter = { group = "io.springfox", name = "springfox-boot-starter", version.ref = "springfox-boot-starter" }
+springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot2", version.ref = "aws-serverless-java-container-springboot2" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
