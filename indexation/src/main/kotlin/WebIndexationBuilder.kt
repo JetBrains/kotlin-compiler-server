@@ -28,7 +28,7 @@ class WebIndexationBuilder(
         PluginCliParser.loadPluginsSafe(
           compilerPlugins,
           compilerPluginOptions,
-          emptyList<String>(),
+          emptyList(),
           configuration,
           kotlinEnvironment.disposable
         )

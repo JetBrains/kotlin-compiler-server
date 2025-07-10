@@ -1,7 +1,14 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.common.components.KotlinEnvironment
-import com.compiler.server.model.*
+import com.compiler.server.model.Analysis
+import com.compiler.server.model.AnalysisJs
+import com.compiler.server.model.AnalysisJvm
+import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.model.ProjectType
+import com.compiler.server.model.TextInterval
 import com.intellij.openapi.util.Pair
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
@@ -19,7 +26,11 @@ import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.config.moduleName
-import org.jetbrains.kotlin.container.*
+import org.jetbrains.kotlin.container.ComponentProvider
+import org.jetbrains.kotlin.container.composeContainer
+import org.jetbrains.kotlin.container.getService
+import org.jetbrains.kotlin.container.registerSingleton
+import org.jetbrains.kotlin.container.useInstance
 import org.jetbrains.kotlin.context.ContextForNewModule
 import org.jetbrains.kotlin.context.ModuleContext
 import org.jetbrains.kotlin.context.ProjectContext
@@ -42,7 +53,12 @@ import org.jetbrains.kotlin.platform.TargetPlatform
 import org.jetbrains.kotlin.platform.js.JsPlatforms
 import org.jetbrains.kotlin.platform.wasm.WasmPlatforms
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.resolve.*
+import org.jetbrains.kotlin.resolve.AnnotationResolverImpl
+import org.jetbrains.kotlin.resolve.BindingTrace
+import org.jetbrains.kotlin.resolve.CompilerEnvironment
+import org.jetbrains.kotlin.resolve.LazyTopDownAnalyzer
+import org.jetbrains.kotlin.resolve.PlatformDependentAnalyzerServices
+import org.jetbrains.kotlin.resolve.TopDownAnalysisMode
 import org.jetbrains.kotlin.resolve.jvm.extensions.AnalysisHandlerExtension
 import org.jetbrains.kotlin.resolve.lazy.FileScopeProviderImpl
 import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer
