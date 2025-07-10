@@ -6,13 +6,8 @@ import java.util.*
 plugins {
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.spring.boot)
-    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.spring)
-}
-
-kotlin.jvmToolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-    vendor.set(JvmVendorSpec.AMAZON)
+    id("base-kotlin-jvm-conventions")
 }
 
 val resourceDependency: Configuration by configurations.creating {
