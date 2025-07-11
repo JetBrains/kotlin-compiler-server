@@ -19,7 +19,7 @@ skiko = "0.8.15"
 # don't forget to update jackson version in `executor.policy` file.
 jackson = "2.19.1"
 hamcrest = "3.0"
-compose = "1.7.0"
+compose = "1.8.2"
 gradle-develocity = "3.17.5"
 
 [libraries]
