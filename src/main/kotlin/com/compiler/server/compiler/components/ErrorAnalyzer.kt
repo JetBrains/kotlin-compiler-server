@@ -9,13 +9,13 @@ import com.intellij.psi.PsiFile
 import component.KotlinEnvironment
 import model.Completion
 import org.jetbrains.kotlin.analyzer.AnalysisResult
-import org.jetbrains.kotlin.backend.common.LoadedKlibs
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForJSIR
 import org.jetbrains.kotlin.cli.js.klib.TopDownAnalyzerFacadeForWasmJs
 import org.jetbrains.kotlin.cli.jvm.compiler.CliBindingTrace
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.TopDownAnalyzerFacadeForJVM
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
 import org.jetbrains.kotlin.config.moduleName
@@ -35,8 +35,6 @@ import org.jetbrains.kotlin.incremental.components.LookupTracker
 import org.jetbrains.kotlin.ir.backend.js.MainModule
 import org.jetbrains.kotlin.ir.backend.js.ModulesStructure
 import org.jetbrains.kotlin.js.resolve.JsPlatformAnalyzerServices
-import org.jetbrains.kotlin.library.loader.KlibLoader
-import org.jetbrains.kotlin.library.loader.KlibPlatformChecker
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.platform.TargetPlatform
 import org.jetbrains.kotlin.platform.js.JsPlatforms
@@ -118,22 +116,15 @@ class ErrorAnalyzer(
   fun analyzeFileForJs(files: List<KtFile>, coreEnvironment: KotlinCoreEnvironment): Analysis {
     val project = coreEnvironment.project
     val mainModule = MainModule.SourceFiles(files)
-
-    val jsKlibs = LoadedKlibs(
-      all = KlibLoader {
-        libraryPaths(kotlinEnvironment.JS_LIBRARIES)
-        platformChecker(KlibPlatformChecker.JS)
-      }.load().librariesStdlibFirst
-    )
-
     val sourceModule = ModulesStructure(
       project,
       mainModule,
       kotlinEnvironment.jsConfiguration,
-      jsKlibs,
+      kotlinEnvironment.JS_LIBRARIES,
+      emptyList()
     )
 
-    val mds = sourceModule.klibs.all.map {
+    val mds = sourceModule.allDependencies.map {
       sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
     }
 
@@ -202,22 +193,15 @@ class ErrorAnalyzer(
   ): Analysis {
     val project = coreEnvironment.project
     val mainModule = MainModule.SourceFiles(files)
-
-    val wasmKlibs = LoadedKlibs(
-      all = KlibLoader {
-        libraryPaths(dependencies)
-        platformChecker(KlibPlatformChecker.Wasm())
-      }.load().librariesStdlibFirst
-    )
-
     val sourceModule = ModulesStructure(
       project,
       mainModule,
       environmentConfiguration,
-      wasmKlibs,
+      dependencies,
+      emptyList()
     )
 
-    val mds = sourceModule.klibs.all.map {
+    val mds = sourceModule.allDependencies.map {
       sourceModule.getModuleDescriptor(it) as ModuleDescriptorImpl
     }
 

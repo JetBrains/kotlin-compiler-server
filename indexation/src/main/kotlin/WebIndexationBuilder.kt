@@ -2,12 +2,12 @@ package indexation
 
 import model.ImportInfo
 import component.KotlinEnvironment
-import org.jetbrains.kotlin.backend.common.LoadedKlibs
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.ir.backend.js.prepareAnalyzedSourceModule
-import org.jetbrains.kotlin.library.loader.KlibLoader
+import org.jetbrains.kotlin.library.impl.isKotlinLibrary
+import java.io.File
 
 class WebIndexationBuilder(
   private val kotlinEnvironment: KotlinEnvironment,
@@ -33,22 +33,16 @@ class WebIndexationBuilder(
           kotlinEnvironment.rootDisposable
         )
       }
-
-      val klibs = LoadedKlibs(
-        all = KlibLoader {
-          libraryPaths(libraries)
-        }.load().librariesStdlibFirst
-      )
-
       val sourceModule = prepareAnalyzedSourceModule(
         project,
         coreEnvironment.getSourceFiles(),
         configuration,
-        klibs,
+        libraries.filter { isKotlinLibrary(File(it)) },
+        friendDependencies = emptyList(),
         analyzer = AnalyzerWithCompilerReport(platformConfiguration),
       )
 
-      val mds = sourceModule.klibs.all.map {
+      val mds = sourceModule.allDependencies.map {
         sourceModule.getModuleDescriptor(it)
       }
 
