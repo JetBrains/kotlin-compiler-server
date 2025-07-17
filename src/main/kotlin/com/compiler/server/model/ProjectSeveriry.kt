@@ -12,7 +12,7 @@ enum class ProjectSeveriry {
       return when (severity) {
         Severity.ERROR -> ERROR
         Severity.INFO -> INFO
-        Severity.WARNING, Severity.FIXED_WARNING -> WARNING
+        Severity.WARNING -> WARNING
         else -> WARNING
       }
     }

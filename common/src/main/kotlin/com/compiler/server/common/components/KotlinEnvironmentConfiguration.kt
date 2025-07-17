@@ -1,7 +1,6 @@
-package indexation
+package com.compiler.server.common.components
 
 import component.CompilerPluginOption
-import component.KotlinEnvironment
 import java.io.File
 
 class KotlinEnvironmentConfiguration(
@@ -39,12 +38,7 @@ class KotlinEnvironmentConfiguration(
           "generateDecoys",
           "false"
         ),
-        CompilerPluginOption(
-          "androidx.compose.compiler.plugins.kotlin",
-          "suppressKotlinVersionCompatibilityCheck",
-          version
-        ),
-      )
+      ),
     )
   }
 }

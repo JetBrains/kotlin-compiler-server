@@ -15,7 +15,7 @@ import java.io.File
 @EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
 class ApplicationConfiguration(
   @Value("\${kotlin.version}") private val version: String,
-  private val librariesFolderProperties: LibrariesFolderProperties
+  private val librariesFolderProperties: LibrariesFolderProperties,
 ) : WebMvcConfigurer {
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ProjectConverter())

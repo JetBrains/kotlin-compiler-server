@@ -1,11 +1,14 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.*
 import com.compiler.server.model.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
@@ -14,6 +17,8 @@ import kotlin.io.path.readText
 class KotlinToJSTranslator(
   private val kotlinEnvironment: KotlinEnvironment,
 ) {
+  private val log = LoggerFactory.getLogger(KotlinToJSTranslator::class.java)
+
   companion object {
     internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
 
@@ -46,29 +51,38 @@ class KotlinToJSTranslator(
   fun translateWasm(
     files: List<KtFile>,
     debugInfo: Boolean,
+    multiModule: Boolean,
     projectType: ProjectType,
-    translate: (List<KtFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+    translate: (
+      List<KtFile>,
+      List<String>,
+      List<String>,
+      List<String>,
+      Boolean,
+      Boolean,
+    ) -> CompilationResult<WasmTranslationSuccessfulOutput>
   ): TranslationResultWithJsCode {
     return try {
-      val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
-        ProjectType.WASM -> listOf(
+      val parameters: WasmParameters = when (projectType) {
+        ProjectType.WASM -> WasmParameters(
           kotlinEnvironment.WASM_LIBRARIES,
           emptyList(),
-          emptyList()
+          emptyList(),
         )
-        ProjectType.COMPOSE_WASM -> listOf(
+        ProjectType.COMPOSE_WASM -> WasmParameters(
           kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
           kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS,
-          kotlinEnvironment.composeWasmCompilerPluginOptions
+          kotlinEnvironment.composeWasmCompilerPluginOptions,
         )
         else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
       }
       val compilationResult = translate(
         files,
-        dependencies,
-        compilerPlugins,
-        compilerPluginOptions,
-        debugInfo
+        parameters.dependencies,
+        parameters.plugins,
+        parameters.pluginOptions,
+        multiModule,
+        debugInfo,
       )
       val wasmCompilationOutput = when (compilationResult) {
         is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -137,6 +151,7 @@ class KotlinToJSTranslator(
     dependencies: List<String>,
     compilerPlugins: List<String>,
     compilerPluginOptions: List<String>,
+    multiModule: Boolean,
     debugInfo: Boolean,
   ): CompilationResult<WasmTranslationSuccessfulOutput> =
     usingTempDirectory { inputDir ->
@@ -146,38 +161,31 @@ class KotlinToJSTranslator(
         val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
-          val compilerPluginsArgs: List<String> = compilerPlugins
-              .takeIf { it.isNotEmpty() }
-              ?.let { plugins ->
-                  plugins.map {
-                      "-Xplugin=$it"
-                  } + compilerPluginOptions.map {
-                      "-P=$it"
-                  }
-              } ?: emptyList()
-          val additionalCompilerArgumentsForKLib: List<String> = listOf(
-            "-Xreport-all-warnings",
-            "-Wextra",
-          "-Xwasm",
-          "-Xir-produce-klib-dir",
-          "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-          "-ir-output-dir=$klibPath",
-          "-ir-output-name=$moduleName",
-        ) + compilerPluginsArgs
 
-        k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
+        k2JSCompiler.tryCompilation(
+          inputDir,
+          ioFiles,
+          compileWasmArgs(
+            moduleName,
+            filePaths,
+            klibPath,
+            compilerPlugins,
+            compilerPluginOptions,
+            dependencies,
+          )
+        )
           .flatMap {
-            k2JSCompiler.tryCompilation(inputDir, ioFiles, mutableListOf(
-              "-Xreport-all-warnings",
-              "-Wextra",
-              "-Xwasm",
-              "-Xir-produce-js",
-              "-Xir-dce",
-              "-Xinclude=$klibPath",
-              "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-              "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
-              "-ir-output-name=$moduleName",
-            ).also { if (debugInfo) it.add("-Xwasm-generate-wat") })
+            k2JSCompiler.tryCompilation(
+              inputDir, ioFiles,
+              linkWasmArgs(
+                moduleName,
+                klibPath,
+                dependencies,
+                multiModule,
+                outputDir,
+                debugInfo,
+              )
+            )
           }
           .map {
             WasmTranslationSuccessfulOutput(
@@ -209,4 +217,27 @@ data class WasmTranslationSuccessfulOutput(
   val jsInstantiated: String,
   val wasm: ByteArray,
   val wat: String?,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as WasmTranslationSuccessfulOutput
+
+        if (jsCode != other.jsCode) return false
+        if (jsInstantiated != other.jsInstantiated) return false
+        if (!wasm.contentEquals(other.wasm)) return false
+        if (wat != other.wat) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = jsCode.hashCode()
+        result = 31 * result + jsInstantiated.hashCode()
+        result = 31 * result + wasm.contentHashCode()
+        result = 31 * result + (wat?.hashCode() ?: 0)
+        return result
+    }
+
+}

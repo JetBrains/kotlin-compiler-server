@@ -1,9 +1,9 @@
-package component
+package com.compiler.server.common.components
 
 import com.intellij.openapi.util.Disposer
+import component.CompilerPluginOption
 import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
-import org.jetbrains.kotlin.cli.common.arguments.toLanguageVersionSettings
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
@@ -88,6 +88,8 @@ class KotlinEnvironment(
     return f(environment)
   }
 
+  val disposable = Disposer.newDisposable()
+
   private val configuration = createConfiguration()
   val jsConfiguration: CompilerConfiguration = configuration.copy().apply {
     put(CommonConfigurationKeys.MODULE_NAME, "playground")
@@ -115,12 +117,12 @@ class KotlinEnvironment(
       composeWasmCompilerPluginOptions,
       emptyList<String>(),
       this,
-      rootDisposable
+        disposable
     )
   }
 
   private val environment = KotlinCoreEnvironment.createForProduction(
-    projectDisposable = rootDisposable,
+    projectDisposable = disposable,
     configuration = configuration.copy(),
     configFiles = EnvironmentConfigFiles.JVM_CONFIG_FILES
   )

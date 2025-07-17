@@ -1,4 +1,4 @@
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
     id("base-kotlin-conventions")
 }
