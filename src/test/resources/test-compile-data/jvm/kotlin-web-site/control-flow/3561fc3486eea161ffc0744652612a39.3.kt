@@ -1,10 +1,11 @@
 fun main() {
     //sampleStart
-    val x = 3
-    when (x) {
-        // Not all cases are covered
-        1 -> print("x == 1")
-        2 -> print("x == 2")
+    val userRole = "Editor"
+    when (userRole) {
+        "Viewer" -> print("User has read-only access")
+        "Editor" -> print("User can edit content")
+        else -> print("User role is not recognized")
     }
+    // User can edit content
     //sampleEnd
 }

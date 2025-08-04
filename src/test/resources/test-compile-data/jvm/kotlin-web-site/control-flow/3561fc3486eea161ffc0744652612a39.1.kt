@@ -1,28 +1,28 @@
 fun main() {
-    val a = 2
-    val b = 3
+    val heightAlice = 160
+    val heightBob = 175
 
     //sampleStart
-    var max = a
-    if (a < b) max = b
+    var taller = heightAlice
+    if (heightAlice < heightBob) taller = heightBob
 
-    // With else
-    if (a > b) {
-      max = a
+    // Uses an else branch
+    if (heightAlice > heightBob) {
+        taller = heightAlice
     } else {
-      max = b
+        taller = heightBob
     }
 
-    // As expression
-    max = if (a > b) a else b
+    // Uses if as an expression
+    taller = if (heightAlice > heightBob) heightAlice else heightBob
 
-    // You can also use `else if` in expressions:
-    val maxLimit = 1
-    val maxOrLimit = if (maxLimit > a) maxLimit else if (a > b) a else b
-  
-    println("max is $max")
-    // max is 3
-    println("maxOrLimit is $maxOrLimit")
-    // maxOrLimit is 3
+    // Uses else if as an expression:
+    val heightLimit = 150
+    val heightOrLimit = if (heightLimit > heightAlice) heightLimit else if (heightAlice > heightBob) heightAlice else heightBob
+
+    println("Taller height is $taller")
+    // Taller height is 175
+    println("Height or limit is $heightOrLimit")
+    // Height or limit is 175
     //sampleEnd
 }

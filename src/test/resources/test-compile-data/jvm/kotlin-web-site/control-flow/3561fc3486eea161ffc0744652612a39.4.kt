@@ -1,11 +1,10 @@
 fun main() {
-//sampleStart
-    for (i in 1..3) {
-        print(i)
+    //sampleStart
+    val deliveryStatus = "OutForDelivery"
+    when (deliveryStatus) {
+        // Not all cases are covered
+        "Pending" -> print("Your order is being prepared")
+        "Shipped" -> print("Your order is on the way")
     }
-    for (i in 6 downTo 0 step 2) {
-        print(i)
-    }
-    // 1236420
-//sampleEnd
+    //sampleEnd
 }
