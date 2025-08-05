@@ -13,6 +13,7 @@ jobs:
       - uses: hmarr/auto-approve-action@v4
         with:
           github-token: "${{ secrets.AUTOMERGE_TOKEN }}"
+          pull-request-number: ${{ github.event.workflow_run.pull_requests[0].number }}
   automerge:
     needs: auto-approve
     runs-on: ubuntu-latest
@@ -20,4 +21,5 @@ jobs:
     steps:
       - uses: pascalgn/automerge-action@v0.16.4
         env:
+          PULL_REQUEST: ${{ github.event.workflow_run.pull_requests[0].number }}
           GITHUB_TOKEN: "${{ secrets.AUTOMERGE_TOKEN }}"
