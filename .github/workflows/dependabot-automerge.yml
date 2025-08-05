@@ -1,5 +1,9 @@
 name: Dependabot auto merge
-on: pull_request_target
+on:
+  workflow_run:
+    workflows: ["Build compiler server with tests"]
+    types:
+      - completed
 
 jobs:
   auto-approve:

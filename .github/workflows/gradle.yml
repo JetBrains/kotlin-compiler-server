@@ -1,4 +1,4 @@
-name: Java CI
+name: Build compiler server with tests
 
 on:
   push:
