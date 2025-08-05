@@ -1,16 +1,15 @@
-import kotlin.random.Random
-
 fun main() {
-    var roll: Int
+    var carsInGarage = 0
+    val maxCapacity = 3
 //sampleStart
-    do {
-        roll = Random.nextInt(1, 7)
-        println("Rolled a $roll")
-    } while (roll != 6)
-    // Rolled a 2
-    // Rolled a 6
-    
-    println("Got a 6! Game over.")
-    // Got a 6! Game over.
+    while (carsInGarage < maxCapacity) {
+        println("Car entered. Cars now in garage: ${++carsInGarage}")
+    }
+    // Car entered. Cars now in garage: 1
+    // Car entered. Cars now in garage: 2
+    // Car entered. Cars now in garage: 3
+
+    println("Garage is full!")
+    // Garage is full!
 //sampleEnd
 }

@@ -1,20 +1,12 @@
-//sampleStart
-class Booklet(val totalPages: Int) {
-    operator fun iterator(): Iterator<Int> {
-        return object {
+class Booklet(val totalPages: Int) : Iterable<Int> {
+    override fun iterator(): Iterator<Int> {
+        return object : Iterator<Int> {
             var current = 1
-
-            operator fun hasNext() = current <= totalPages
-            operator fun next() = current++
-        }.let {
-            object : Iterator<Int> {
-                override fun hasNext() = it.hasNext()
-                override fun next() = it.next()
-            }
+            override fun hasNext() = current <= totalPages
+            override fun next() = current++
         }
     }
 }
-//sampleEnd
 
 fun main() {
     val booklet = Booklet(3)
