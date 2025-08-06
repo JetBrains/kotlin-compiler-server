@@ -7,7 +7,7 @@ on:
 
 jobs:
   auto-approve:
-    if: github.actor == 'dependabot[bot]'
+    if: github.actor == 'dependabot[bot]' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: hmarr/auto-approve-action@v4
@@ -17,7 +17,7 @@ jobs:
   automerge:
     needs: auto-approve
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: github.actor == 'dependabot[bot]' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: pascalgn/automerge-action@v0.16.4
         env:
