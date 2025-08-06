@@ -25,6 +25,17 @@ interface BaseResourceCompileTest {
             assertTrue(testFiles.isNotEmpty(), "No files in test directory")
 
             testFiles.forEach { file ->
+                val baseFileName = file.nameWithoutExtension
+                val workaroundFileName = "$baseFileName-workaround.kt"
+                val workaroundFile = File(file.parent, workaroundFileName)
+
+                // Some examples are needed to be rewritten,
+                // but it leads to new pull requests from verifier bot.
+                // That is why we added files `*-workaround.kt` to override the logic.
+                if (workaroundFile.exists() ) {
+                    return@forEach
+                }
+
                 val code = file.readText()
 
                 val platform: ProjectType = when (folder) {

@@ -1,11 +1,16 @@
 fun main() {
     //sampleStart
-    val x = 2
-    when (x) {
-        1 -> print("x == 1")
-        2 -> print("x == 2")
-        else -> print("x is neither 1 nor 2")
+    val heightAlice = 160
+    val heightBob = 175
+
+    val taller = if (heightAlice > heightBob) {
+        print("Choose Alice\n")
+        heightAlice
+    } else {
+        print("Choose Bob\n")
+        heightBob
     }
-    // x == 2
+
+    println("Taller height is $taller")
     //sampleEnd
 }

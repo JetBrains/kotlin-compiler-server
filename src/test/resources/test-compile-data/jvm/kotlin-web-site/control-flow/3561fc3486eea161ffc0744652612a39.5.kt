@@ -1,9 +1,21 @@
-fun main() {
-val array = arrayOf("a", "b", "c")
+import kotlin.random.Random
 //sampleStart
-    for (i in array.indices) {
-        print(array[i])
+enum class Bit {
+    ZERO, ONE
+}
+
+fun getRandomBit(): Bit {
+    return if (Random.nextBoolean()) Bit.ONE else Bit.ZERO
+}
+
+fun main() {
+    val numericValue = when (getRandomBit()) {
+        // No else branch is needed because all cases are covered
+        Bit.ZERO -> 0
+        Bit.ONE -> 1
     }
-    // abc
-//sampleEnd
+
+    println("Random bit as number: $numericValue")
+    // Random bit as number: 0
+    //sampleEnd
 }
