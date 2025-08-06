@@ -102,8 +102,6 @@ val copyComposeWasmCompilerPlugins by tasks.creating(Copy::class) {
 
 dependencies {
     kotlinDependency(libs.junit)
-    kotlinDependency(libs.junit.jupiter)
-    kotlinDependency(libs.junit.jupiter.api)
     kotlinDependency(libs.hamcrest)
     kotlinDependency(libs.bundles.jackson)
     // Kotlin libraries
