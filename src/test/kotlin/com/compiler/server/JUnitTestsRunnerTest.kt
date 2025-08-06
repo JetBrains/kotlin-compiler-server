@@ -112,6 +112,7 @@ class JUnitTestsRunnerTest : BaseJUnitTest() {
             fun compute() = true
             """.trimIndent()
         val testResults = test(testCode)
+        assertEquals(2, testResults.size)
         testResults.forEach { testResult ->
             assertEquals(testResult.status, TestStatus.OK)
         }
