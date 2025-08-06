@@ -23,3 +23,5 @@ jobs:
         env:
           PULL_REQUEST: ${{ github.event.workflow_run.pull_requests[0].number }}
           GITHUB_TOKEN: "${{ secrets.AUTOMERGE_TOKEN }}"
+          MERGE_METHOD: rebase
+          MERGE_LABELS: ""
