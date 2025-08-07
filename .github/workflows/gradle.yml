@@ -30,5 +30,9 @@ jobs:
       run: chmod +x gradlew
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
-    - name: Build with Gradle
+    - name: Build with Gradle (kotlin-community)
+      if: startsWith(github.ref, 'refs/heads/kotlin-community/')
+      run: ./gradlew build -Pkotlin_repo_url=https://redirector.kotlinlang.org/maven/dev
+    - name: Build with Gradle (default)
+      if: "!startsWith(github.ref, 'refs/heads/kotlin-community/')"
       run: ./gradlew build
