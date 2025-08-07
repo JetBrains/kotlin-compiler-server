@@ -68,8 +68,6 @@ val composeWasmCompilerPlugins: Configuration by configurations.creating {
     isTransitive = false
 }
 
-val composeRuntimeVersion = "1.6.0"
-
 val copyDependencies by tasks.creating(Copy::class) {
     from(kotlinDependency)
     into(libJVMFolder)
@@ -125,4 +123,13 @@ dependencies {
     kotlinComposeWasmDependency(libs.bundles.compose)
 
     composeWasmCompilerPlugins(libs.kotlin.compose.compiler.plugin)
+}
+
+project.tasks.jar.configure {
+    dependsOn(copyDependencies)
+    dependsOn(copyCompilerPluginDependencies)
+    dependsOn(copyJSDependencies)
+    dependsOn(copyWasmDependencies)
+    dependsOn(copyComposeWasmDependencies)
+    dependsOn(copyComposeWasmCompilerPlugins)
 }
