@@ -12,7 +12,6 @@ pluginManagement {
         }
         maven("https://redirector.kotlinlang.org/maven/dev")
         mavenLocal()
-        maven("https://redirector.kotlinlang.org/maven/dev")
     }
 }
 
