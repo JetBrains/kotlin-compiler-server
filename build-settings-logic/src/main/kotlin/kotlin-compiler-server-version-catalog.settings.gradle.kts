@@ -2,7 +2,6 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
-        mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
         if (additionalRepositoryProperty.isPresent) {
@@ -11,9 +10,7 @@ pluginManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
-
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
-        maven("https://redirector.kotlinlang.org/maven/dev")
+        mavenLocal()
     }
 }
 
@@ -22,7 +19,6 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
         if (additionalRepositoryProperty.isPresent) {
@@ -31,14 +27,7 @@ dependencyResolutionManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
-
-        maven("https://repo.spring.io/snapshot")
-        maven("https://repo.spring.io/milestone")
-        maven("https://redirector.kotlinlang.org/maven/dev")
-        maven("https://www.myget.org/F/rd-snapshots/maven/")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        mavenLocal()
     }
 
     versionCatalogs {
