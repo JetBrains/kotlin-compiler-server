@@ -13,7 +13,6 @@ enum class ProjectSeveriry {
         Severity.ERROR -> ERROR
         Severity.INFO -> INFO
         Severity.WARNING, Severity.FIXED_WARNING -> WARNING
-        else -> WARNING
       }
     }
   }

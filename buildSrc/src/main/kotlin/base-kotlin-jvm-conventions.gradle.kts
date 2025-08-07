@@ -33,7 +33,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
         freeCompilerArgs.addAll(
             "-Xreport-all-warnings",
             "-Xrender-internal-diagnostic-names",
-            "-Xuse-fir-experimental-checkers"
+            "-Xuse-fir-experimental-checkers",
+            "-Xannotation-default-target=param-property"
         )
 
         allWarningsAsErrors.set(false)
