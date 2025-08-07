@@ -36,10 +36,6 @@ COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_WASM} /kotlin-compiler-se
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_COMPOSE_WASM} /kotlin-compiler-server/${KOTLIN_LIB_COMPOSE_WASM}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_COMPOSE_WASM_COMPILER_PLUGINS} /kotlin-compiler-server/${KOTLIN_COMPOSE_WASM_COMPILER_PLUGINS}
 COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
-COPY --from=build /kotlin-compiler-server/indexes.json /kotlin-compiler-server/
-COPY --from=build /kotlin-compiler-server/indexesJs.json /kotlin-compiler-server/
-COPY --from=build /kotlin-compiler-server/indexesWasm.json /kotlin-compiler-server/
-COPY --from=build /kotlin-compiler-server/indexesComposeWasm.json /kotlin-compiler-server/
 
 ENV PORT=8080
 
