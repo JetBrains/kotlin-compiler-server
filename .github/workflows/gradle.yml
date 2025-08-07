@@ -31,4 +31,9 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
     - name: Build with Gradle
-      run: ./gradlew build
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/kotlin-community/*" ]]; then
+          ./gradlew build -Pkotlin_repo_url=https://redirector.kotlinlang.org/maven/dev
+        else
+          ./gradlew build
+        fi
