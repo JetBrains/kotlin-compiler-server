@@ -1,14 +1,11 @@
 [versions]
 kotlin = "2.3.0-dev-9317"
-kotlinIdeVersion = "1.9.20-506"
-kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "3.5.6"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.13"
 aws-serverless-java-container-springboot3 = "2.1.5"
 junit = "4.13.2"
 logstash-logback-encoder = "8.1"
-trove4j = "1.0.20221201"
 kotlinx-coroutines = "1.7.3"
 kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
@@ -33,13 +30,8 @@ kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit"
 kotlin-compiler = { group = "org.jetbrains.kotlin", name = "kotlin-compiler", version.ref = "kotlin" }
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-gradle-plugin-idea = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin-idea", version.ref = "kotlin" }
 kotlin-dom-api-compat = { group = "org.jetbrains.kotlin", name = "kotlin-dom-api-compat", version.ref = "kotlin" }
 kotlin-compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-compose-compiler-plugin", version.ref = "kotlin" }
-kotlin-base-fe10-analysis = { group = "org.jetbrains.kotlin", name = "base-fe10-analysis", version.ref = "kotlinIdeVersionWithSuffix" }
-kotlin-compiler-ide = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-for-ide", version.ref = "kotlinIdeVersion" }
-kotlin-idea = { group = "org.jetbrains.kotlin", name = "idea", version.ref = "kotlinIdeVersionWithSuffix" }
-kotlin-core = { group = "org.jetbrains.kotlin", name = "core", version.ref = "kotlinIdeVersionWithSuffix" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -51,7 +43,6 @@ springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 logback-logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
-intellij-trove4j = { group = "org.jetbrains.intellij.deps", name = "trove4j", version.ref = "trove4j" }
 skiko-js-wasm-runtime = { group = "org.jetbrains.skiko", name = "skiko-js-wasm-runtime", version.ref = "skiko" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson" }
@@ -84,7 +75,6 @@ compose = [
 ]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-managment" }
