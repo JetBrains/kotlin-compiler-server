@@ -103,7 +103,7 @@ dependencies {
     kotlinDependency(libs.hamcrest)
     kotlinDependency(libs.bundles.jackson)
     // Kotlin libraries
-    kotlinDependency(libs.bundles.kotlin.stdlib)
+    kotlinDependency(libs.kotlin.stdlib)
     kotlinDependency(libs.kotlin.test)
     kotlinDependency(libs.kotlin.test.junit)
     kotlinDependency(libs.kotlinx.coroutines.core.jvm)

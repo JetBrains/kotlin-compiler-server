@@ -44,7 +44,7 @@ dependencies {
     implementation(libs.junit)
     implementation(libs.logback.logstash.encoder)
     implementation(libs.kotlin.reflect)
-    implementation(libs.bundles.kotlin.stdlib)
+    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(project(":executors", configuration = "default"))
