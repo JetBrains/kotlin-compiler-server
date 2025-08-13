@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.logback.logstash.encoder)
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
-    implementation(libs.bundles.kotlin.stdlib)
+    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(libs.kotlin.compiler.ide) {
