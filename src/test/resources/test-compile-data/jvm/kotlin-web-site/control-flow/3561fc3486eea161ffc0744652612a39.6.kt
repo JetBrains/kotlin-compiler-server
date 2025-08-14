@@ -1,11 +1,15 @@
 fun main() {
-    val array = arrayOf("a", "b", "c")
-//sampleStart
-    for ((index, value) in array.withIndex()) {
-        println("the element at $index is $value")
+    //sampleStart
+    val localFileSize = 1200
+    val remoteFileSize = 1200
+
+    val message = when {
+        localFileSize > remoteFileSize -> "Local file is larger than remote file"
+        localFileSize < remoteFileSize -> "Local file is smaller than remote file"
+        else -> "Local and remote files are the same size"
     }
-    // the element at 0 is a
-    // the element at 1 is b
-    // the element at 2 is c
-//sampleEnd
+
+    println(message)
+    // Local and remote files are the same size
+    //sampleEnd
 }

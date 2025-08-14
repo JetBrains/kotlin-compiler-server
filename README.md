@@ -52,7 +52,7 @@ remove [aws-serverless-container](https://github.com/awslabs/aws-serverless-java
 
 ## API Documentation :page_with_curl:
 
-Swagger url: http://localhost:8080/swagger-ui/
+Swagger url: http://localhost:8080/api-docs/swagger-ui/index.html
 
 ## How to add your dependencies to kotlin compiler :books:
 

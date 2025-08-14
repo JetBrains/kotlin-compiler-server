@@ -1,0 +1,27 @@
+name: Dependabot auto merge
+on:
+  workflow_run:
+    workflows: ["Build compiler server with tests"]
+    types:
+      - completed
+
+jobs:
+  auto-approve:
+    if: github.actor == 'dependabot[bot]' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: "${{ secrets.AUTOMERGE_TOKEN }}"
+          pull-request-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+  automerge:
+    needs: auto-approve
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: pascalgn/automerge-action@v0.16.4
+        env:
+          PULL_REQUEST: ${{ github.event.workflow_run.pull_requests[0].number }}
+          GITHUB_TOKEN: "${{ secrets.AUTOMERGE_TOKEN }}"
+          MERGE_METHOD: rebase
+          MERGE_LABELS: ""
