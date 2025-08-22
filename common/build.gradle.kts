@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.compiler)
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
 }

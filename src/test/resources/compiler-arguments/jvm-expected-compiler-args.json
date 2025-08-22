@@ -1299,7 +1299,7 @@
     {
       "name": "jvm-target",
       "shortName": null,
-      "description": "The target version of the generated JVM bytecode (1.8 and 9–24), with 1.8 as the default.",
+      "description": "The target version of the generated JVM bytecode (1.8 and 9–25), with 1.8 as the default.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1779,7 +1779,7 @@
     {
       "name": "Xjdk-release",
       "shortName": null,
-      "description": "Compile against the specified JDK API version, similarly to javac's '-release'. This requires JDK 9 or newer.\nThe supported versions depend on the JDK used; for JDK 17+, the supported versions are 1.8 and 9–24.\nThis also sets the value of '-jvm-target' to be equal to the selected JDK version.",
+      "description": "Compile against the specified JDK API version, similarly to javac's '-release'. This requires JDK 9 or newer.\nThe supported versions depend on the JDK used; for JDK 17+, the supported versions are 1.8 and 9–25.\nThis also sets the value of '-jvm-target' to be equal to the selected JDK version.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,

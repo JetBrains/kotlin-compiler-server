@@ -1,6 +1,6 @@
 package com.compiler.server.model
 
-import com.intellij.openapi.editor.Document
+import org.jetbrains.kotlin.com.intellij.openapi.editor.Document
 
 data class TextInterval(val start: TextPosition, val end: TextPosition) {
   data class TextPosition(val line: Int, val ch: Int) : Comparable<TextPosition> {

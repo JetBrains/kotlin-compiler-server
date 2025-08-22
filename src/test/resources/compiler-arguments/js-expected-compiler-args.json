@@ -1386,8 +1386,8 @@
       "description": "Use an updated version of the exception proposal with try_table.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
+        "isNullable": true,
+        "defaultValue": null
       },
       "disabled": false,
       "predefinedValues": null

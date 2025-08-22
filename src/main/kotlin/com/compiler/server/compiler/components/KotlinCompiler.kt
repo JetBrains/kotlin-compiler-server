@@ -2,6 +2,7 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
@@ -12,7 +13,9 @@ import com.compiler.server.utils.CompilerArgumentsUtil
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
-import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
+import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -74,9 +77,7 @@ class KotlinCompiler(
                 1 -> compiled.mainClasses.single()
                 else -> return@execute JvmExecutionResult(
                     exception = IllegalArgumentException(
-                        "Multiple classes in project contain main methods found: ${
-                            compiled.mainClasses.sorted().joinToString()
-                        }"
+                        "Multiple classes in project contain main methods found: ${compiled.mainClasses.sorted().joinToString()}"
                     ).toExceptionDescriptor()
                 )
             }
@@ -99,9 +100,41 @@ class KotlinCompiler(
         val ioFiles = files.writeToIoFiles(inputDir)
         usingTempDirectory { outputDir ->
             val arguments = ioFiles.map { it.absolutePathString() } +
-                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
-                    listOf("-d", outputDir.absolutePathString())
-            K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments)
+            val result = compileWithToolchain(inputDir, outputDir, arguments)
+            return@usingTempDirectory result
+        }
+    }
+
+    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class, ExperimentalBuildToolsApi::class)
+    private fun compileWithToolchain(
+        inputDir: Path,
+        outputDir: Path,
+        arguments: List<String>
+    ): CompilationResult<JvmClasses> {
+        System.setProperty("org.jetbrains.kotlin.buildtools.logger.extendedLocation", "true")
+        val sources = inputDir.listDirectoryEntries()
+
+        val logger = CompilationLogger()
+        logger.compilationLogs = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
+
+        val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
+        val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
+        val operation = jvmToolchain.createJvmCompilationOperation(sources, outputDir)
+        operation.compilerArguments.applyArgumentStrings(arguments)
+        val session = toolchains.createBuildSession()
+
+        val result = try {
+            session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
+        } catch (_: Exception) {
+            null
+        }
+
+        try {
+            return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
+                val cd = CompilerDiagnostics(logger.compilationLogs)
                 val outputFiles = buildMap {
                     outputDir.visitFileTree {
                         onVisitFile { file, _ ->
@@ -110,12 +143,18 @@ class KotlinCompiler(
                         }
                     }
                 }
-                val mainClasses = findMainClasses(outputFiles)
-                JvmClasses(
-                    files = outputFiles,
-                    mainClasses = mainClasses,
+                Compiled(
+                    compilerDiagnostics = cd,
+                    result = JvmClasses(
+                        files = outputFiles,
+                        mainClasses = findMainClasses(outputFiles),
+                    )
                 )
+            } else {
+                NotCompiled(CompilerDiagnostics(logger.compilationLogs))
             }
+        } finally {
+            session.close()
         }
     }
 
