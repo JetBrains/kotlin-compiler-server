@@ -5,13 +5,16 @@ import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
-import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
+import org.jetbrains.kotlin.buildtools.api.arguments.JvmCompilerArguments
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
@@ -63,13 +66,13 @@ class KotlinCompiler(
       ?.joinToString("\n\n")
   }
 
-  fun run(files: List<KtFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
-    return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
-      val mainClass = JavaRunnerExecutor::class.java.name
-      val compiledMainClass = when (compiled.mainClasses.size) {
-        0 -> return@execute JvmExecutionResult(
-          exception = IllegalArgumentException("No main method found in project").toExceptionDescriptor()
-        )
+    fun run(files: List<KtFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+        return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
+            val mainClass = JavaRunnerExecutor::class.java.name
+            val compiledMainClass = when (compiled.mainClasses.size) {
+                0 -> return@execute JvmExecutionResult(
+                    exception = IllegalArgumentException("No main method found in project").toExceptionDescriptor()
+                )
 
         1 -> compiled.mainClasses.single()
         else -> return@execute JvmExecutionResult(
@@ -84,11 +87,71 @@ class KotlinCompiler(
     }
   }
 
-  fun test(files: List<KtFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
-    return execute(files, addByteCode, userCompilerArguments) { output, _ ->
-      val mainClass = JUnitExecutors::class.java.name
-      javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
-        .asJUnitExecutionResult()
+    fun test(files: List<KtFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+        return execute(files, addByteCode, userCompilerArguments) { output, _ ->
+            val mainClass = JUnitExecutors::class.java.name
+            javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
+                .asJUnitExecutionResult()
+        }
+    }
+
+  @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
+  private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
+    try {
+
+      val sources = inputDir.listDirectoryEntries()
+      val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
+      val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
+      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
+      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
+      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
+
+    val session = toolchain.createBuildSession()
+
+        try {
+          val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy())
+
+          // Process output files
+          val outputFiles = buildMap {
+            outputDir.visitFileTree {
+              onVisitFile { file, _ ->
+                put(file.relativeTo(outputDir).pathString, file.readBytes())
+                FileVisitResult.CONTINUE
+              }
+            }
+          }
+
+          val mainClasses = findMainClasses(outputFiles)
+
+          return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
+            Compiled(
+              compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
+              result = JvmClasses(
+                files = outputFiles,
+                mainClasses = mainClasses,
+              )
+            )
+          } else {
+            NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
+          }
+        }
+        finally {
+          /* TODO: Deal with NoSuchMethodError
+          Possible reasons:
+          - something is wrong in kotlin-build-tools-api/impl
+          - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
+           */
+          try{
+            session.close()
+          }catch (_: NoSuchMethodError){}
+        }
+    } catch (e: Exception) {
+      // Log the exception for debugging
+      println("Error using kotlin-build-tools-api: ${e.message}")
+      e.printStackTrace()
+
+      // Return null to indicate that we should fall back to the old approach
+      return null
     }
   }
 
@@ -100,7 +163,19 @@ class KotlinCompiler(
               compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
               listOf("-d", outputDir.absolutePathString())
 
-      K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
+      // Try the new approach first, fall back to the old one if it fails
+      val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
+      val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
+
+      // If the new approach succeeded, return its result
+      if (newApiResult != null) {
+        println("Successfully compiled with kotlin-build-tools-api")
+        return@usingTempDirectory newApiResult
+      }
+
+      // Fall back to the old approach
+      println("Falling back to K2JVMCompiler for compilation")
+      org.jetbrains.kotlin.cli.jvm.K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
         val outputFiles = buildMap {
           outputDir.visitFileTree {
             onVisitFile { file, _ ->
@@ -117,6 +192,7 @@ class KotlinCompiler(
       }
     }
   }
+
 
   private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
     outputFiles.mapNotNull { (name, bytes) ->
@@ -137,24 +213,24 @@ class KotlinCompiler(
       if (hasMain) name.removeSuffix(".class").replace(File.separatorChar, '.') else null
     }.toSet()
 
-  private fun execute(
-      files: List<KtFile>,
-      addByteCode: Boolean,
-      userCompilerArguments: Map<String, Any>,
-      block: (output: OutputDirectory, compilation: JvmClasses) -> JvmExecutionResult
-  ): JvmExecutionResult = try {
-    when (val compilationResult = compile(files, userCompilerArguments)) {
-      is Compiled<JvmClasses> -> {
-        usingTempDirectory { outputDir ->
-          val output = write(compilationResult.result, outputDir)
-          block(output, compilationResult.result).also {
-            it.addWarnings(compilationResult.compilerDiagnostics)
-            if (addByteCode) {
-              it.addByteCode(compilationResult.result)
+    private fun execute(
+        files: List<KtFile>,
+        addByteCode: Boolean,
+        userCompilerArguments: Map<String, Any>,
+        block: (output: OutputDirectory, compilation: JvmClasses) -> JvmExecutionResult
+    ): JvmExecutionResult = try {
+        when (val compilationResult = compile(files, userCompilerArguments)) {
+            is Compiled<JvmClasses> -> {
+                usingTempDirectory { outputDir ->
+                    val output = write(compilationResult.result, outputDir)
+                    block(output, compilationResult.result).also {
+                        it.addWarnings(compilationResult.compilerDiagnostics)
+                        if (addByteCode) {
+                            it.addByteCode(compilationResult.result)
+                        }
+                    }
+                }
             }
-          }
-        }
-      }
 
       is NotCompiled -> JvmExecutionResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
     }
