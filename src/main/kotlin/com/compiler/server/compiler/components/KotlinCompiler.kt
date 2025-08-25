@@ -2,9 +2,11 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
+import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
@@ -96,7 +98,6 @@ class KotlinCompiler(
   @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
   private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
     try {
-
       val sources = inputDir.listDirectoryEntries()
       val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
       val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
@@ -139,9 +140,9 @@ class KotlinCompiler(
           - something is wrong in kotlin-build-tools-api/impl
           - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
            */
-          try{
+//          try{
             session.close()
-          }catch (_: NoSuchMethodError){}
+//          }catch (_: NoSuchMethodError){}
         }
     } catch (e: Exception) {
       // Log the exception for debugging
