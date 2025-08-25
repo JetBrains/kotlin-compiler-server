@@ -1,27 +1,9 @@
 package component
 
-import com.intellij.openapi.util.Disposer
-import org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments
-import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
-import org.jetbrains.kotlin.cli.common.arguments.toLanguageVersionSettings
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
-import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
-import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoots
-import org.jetbrains.kotlin.cli.jvm.config.configureJdkClasspathRoots
-import org.jetbrains.kotlin.cli.jvm.configureAdvancedJvmOptions
-import org.jetbrains.kotlin.cli.jvm.plugins.PluginCliParser
-import org.jetbrains.kotlin.config.CommonConfigurationKeys
-import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlin.config.JVMConfigurationKeys
-import org.jetbrains.kotlin.config.languageVersionSettings
-import org.jetbrains.kotlin.js.config.JSConfigurationKeys
-import org.jetbrains.kotlin.library.impl.isKotlinLibrary
-import org.jetbrains.kotlin.serialization.js.JsModuleDescriptor
-import org.jetbrains.kotlin.serialization.js.KotlinJavascriptSerializationUtil
 import org.jetbrains.kotlin.serialization.js.ModuleKind
 import org.jetbrains.kotlin.utils.KotlinJavascriptMetadataUtils
 import org.jetbrains.kotlin.wasm.config.WasmConfigurationKeys
+//import org.jetbrains.kotlin.library.impl.isKotlinLibrary
 import java.io.File
 
 // NOTE: if new class paths are added, please add them to `JavaExec` task's inputs in build.gradle.kts as well
@@ -70,13 +52,13 @@ class KotlinEnvironment(
 
   val JS_LIBRARIES = additionalJsClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+//    .filter { isKotlinLibrary(File(it)) }
   val WASM_LIBRARIES = additionalWasmClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+//    .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_LIBRARIES = additionalComposeWasmClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+//    .filter { isKotlinLibrary(File(it)) }
   val COMPOSE_WASM_COMPILER_PLUGINS = composeWasmCompilerPlugins
     .map { it.absolutePath }
 

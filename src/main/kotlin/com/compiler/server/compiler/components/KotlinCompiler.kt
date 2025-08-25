@@ -5,6 +5,7 @@ import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
@@ -101,64 +102,63 @@ class KotlinCompiler(
         }
     }
 
-  @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
-  private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
-    try {
-      val sources = inputDir.listDirectoryEntries()
-      val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
-      val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
-      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
-      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
-      operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
-
-    val session = toolchain.createBuildSession()
-
+    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
+    private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
         try {
-          val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy())
+            val sources = inputDir.listDirectoryEntries()
+            val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
+            val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
 
-          // Process output files
-          val outputFiles = buildMap {
-            outputDir.visitFileTree {
-              onVisitFile { file, _ ->
-                put(file.relativeTo(outputDir).pathString, file.readBytes())
-                FileVisitResult.CONTINUE
-              }
-            }
-          }
+            val session = toolchain.createBuildSession()
+
+            try {
+                val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy())
+
+                // Process output files
+                val outputFiles = buildMap {
+                    outputDir.visitFileTree {
+                        onVisitFile { file, _ ->
+                            put(file.relativeTo(outputDir).pathString, file.readBytes())
+                            FileVisitResult.CONTINUE
+                        }
+                    }
+                }
 
 //          val mainClasses = findMainClasses(outputFiles)
 
-          return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
-            Compiled(
-              compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
-              result = JvmClasses(
-                files = outputFiles,
+                return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
+                    Compiled(
+                        compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
+                        result = JvmClasses(
+                            files = outputFiles,
 //                mainClasses = mainClasses,
-              )
-            )
-          } else {
-            NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
-          }
-        }
-        finally {
-          /* TODO: Deal with NoSuchMethodError
-          Possible reasons:
-          - something is wrong in kotlin-build-tools-api/impl
-          - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
-           */
+                        )
+                    )
+                } else {
+                    NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
+                }
+            } finally {
+                /* TODO: Deal with NoSuchMethodError
+                Possible reasons:
+                - something is wrong in kotlin-build-tools-api/impl
+                - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
+                 */
 //          try{
-            session.close()
+                session.close()
 //          }catch (_: NoSuchMethodError){}
-        }
-    } catch (e: Exception) {
-      // Log the exception for debugging
-      println("Error using kotlin-build-tools-api: ${e.message}")
-      e.printStackTrace()
+            }
+        } catch (e: Exception) {
+            // Log the exception for debugging
+            println("Error using kotlin-build-tools-api: ${e.message}")
+            e.printStackTrace()
 
-      // Return null to indicate that we should fall back to the old approach
-      return null
+            // Return null to indicate that we should fall back to the old approach
+            return null
+        }
     }
-  }
 
   @OptIn(ExperimentalPathApi::class)
   fun compile(files: List<KtFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
@@ -168,15 +168,15 @@ class KotlinCompiler(
               compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
               listOf("-d", outputDir.absolutePathString())
 
-      // Try the new approach first, fall back to the old one if it fails
-      val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-      val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
+            // Try the new approach first, fall back to the old one if it fails
+            val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
+            val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
 
-      // If the new approach succeeded, return its result
-      if (newApiResult != null) {
-        println("Successfully compiled with kotlin-build-tools-api")
-        return@usingTempDirectory newApiResult
-      }
+            // If the new approach succeeded, return its result
+            if (newApiResult != null) {
+                println("Successfully compiled with kotlin-build-tools-api")
+                return@usingTempDirectory newApiResult
+            }
 
       // Fall back to the old approach
       println("Falling back to K2JVMCompiler for compilation")

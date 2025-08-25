@@ -52,7 +52,6 @@ dependencies {
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(libs.kotlin.compiler.ide) {
         isTransitive = false
