@@ -51,10 +51,10 @@ dependencies {
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
 
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-4315")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-4315")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-4315")
-//    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:2.3.0-dev-4315")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-4627")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-4627")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-4627")
+//    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:2.3.0-dev-4627")
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
@@ -152,3 +152,7 @@ tasks.withType<Test> {
         this@withType.environment("kotlin.wasm.node.path", executablePath)
     }
 }
+//
+//configurations.all {
+//    exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler")
+//}
