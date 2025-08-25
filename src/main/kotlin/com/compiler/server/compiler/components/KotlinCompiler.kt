@@ -29,7 +29,14 @@ import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.div
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
+import kotlin.io.path.relativeTo
+import kotlin.io.path.visitFileTree
 
 @Component
 class KotlinCompiler(
@@ -119,14 +126,14 @@ class KotlinCompiler(
             }
           }
 
-          val mainClasses = findMainClasses(outputFiles)
+//          val mainClasses = findMainClasses(outputFiles)
 
           return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
             Compiled(
               compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
               result = JvmClasses(
                 files = outputFiles,
-                mainClasses = mainClasses,
+//                mainClasses = mainClasses,
               )
             )
           } else {
