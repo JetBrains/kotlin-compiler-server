@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.0-dev-4315"
+kotlin = "2.3.0-dev-4627"
 spring-boot = "3.5.3"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.9"
@@ -25,7 +25,6 @@ kotlin-stdlib-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-js", 
 kotlin-stdlib-wasm-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-wasm-js", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlin-compiler = { group = "org.jetbrains.kotlin", name = "kotlin-compiler", version.ref = "kotlin" }
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-dom-api-compat = { group = "org.jetbrains.kotlin", name = "kotlin-dom-api-compat", version.ref = "kotlin" }
