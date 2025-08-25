@@ -2,7 +2,6 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
@@ -16,12 +15,6 @@ import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
 import org.jetbrains.kotlin.buildtools.api.arguments.JvmCompilerArguments
 import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.org.objectweb.asm.ClassReader
-import org.jetbrains.org.objectweb.asm.ClassReader.*
-import org.jetbrains.org.objectweb.asm.ClassVisitor
-import org.jetbrains.org.objectweb.asm.MethodVisitor
-import org.jetbrains.org.objectweb.asm.Opcodes.*
-import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
@@ -30,7 +23,14 @@ import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.div
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
+import kotlin.io.path.relativeTo
+import kotlin.io.path.visitFileTree
 
 @Component
 class KotlinCompiler(
@@ -120,14 +120,14 @@ class KotlinCompiler(
             }
           }
 
-          val mainClasses = findMainClasses(outputFiles)
+//          val mainClasses = findMainClasses(outputFiles)
 
           return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
             Compiled(
               compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
               result = JvmClasses(
                 files = outputFiles,
-                mainClasses = mainClasses,
+//                mainClasses = mainClasses,
               )
             )
           } else {
@@ -192,7 +192,7 @@ class KotlinCompiler(
             files = outputFiles,
             mainClasses = mainClasses,
         )
-      }
+      )
     }
   }
     @OptIn(ExperimentalPathApi::class)
