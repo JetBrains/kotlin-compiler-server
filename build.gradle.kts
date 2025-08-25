@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.logback.logstash.encoder)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
