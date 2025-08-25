@@ -2,8 +2,10 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
@@ -93,7 +95,6 @@ class KotlinCompiler(
   @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
   private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
     try {
-
       val sources = inputDir.listDirectoryEntries()
       val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
       val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
@@ -136,9 +137,9 @@ class KotlinCompiler(
           - something is wrong in kotlin-build-tools-api/impl
           - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
            */
-          try{
+//          try{
             session.close()
-          }catch (_: NoSuchMethodError){}
+//          }catch (_: NoSuchMethodError){}
         }
     } catch (e: Exception) {
       // Log the exception for debugging
@@ -164,16 +165,21 @@ class KotlinCompiler(
 
       // Try the new approach first, fall back to the old one if it fails
       val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-      val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
-      
-      // If the new approach succeeded, return its result
-      if (newApiResult != null) {
-        println("Successfully compiled with kotlin-build-tools-api")
-        return@usingTempDirectory newApiResult
-      }
-      
-      // Fall back to the old approach
-      println("Falling back to K2JVMCompiler for compilation")
+//      val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
+
+//      // If the new approach succeeded, return its result
+//      if (newApiResult != null) {
+//        println("Successfully compiled with kotlin-build-tools-api")
+//        return@usingTempDirectory newApiResult
+//      }
+//
+//      // Fall back to the old approach
+//      return@usingTempDirectory NotCompiled(
+//        com.compiler.server.model.CompilerDiagnostics(
+//          mapOf("null" to listOf(ErrorDescriptor(null, "Failed to compile using kotlin-build-tools-api",
+//            ProjectSeveriry.ERROR, null)))
+//        )
+//      )
       org.jetbrains.kotlin.cli.jvm.K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
         val outputFiles = buildMap {
           outputDir.visitFileTree {
