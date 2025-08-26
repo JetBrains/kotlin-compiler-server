@@ -195,16 +195,22 @@ class KotlinCompiler(
 
                 val mainClasses = findMainClasses(outputFiles)
 
-                return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
-                    Compiled(
-                        compilerDiagnostics = CompilerDiagnostics(logger.warnings),
-                        result = JvmClasses(
-                            files = outputFiles,
-                            mainClasses = mainClasses,
+                return when (result) {
+                    org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+                        val lw = logger.warnings
+                        val cd = CompilerDiagnostics(lw)
+                        Compiled(
+                            compilerDiagnostics = cd,
+                            result = JvmClasses(
+                                files = outputFiles,
+                                mainClasses = mainClasses,
+                            )
                         )
-                    )
-                } else {
-                    NotCompiled(CompilerDiagnostics(emptyMap()))
+                    }
+
+                    else -> {
+                        NotCompiled(CompilerDiagnostics(emptyMap()))
+                    }
                 }
             } finally {
                 session.close()
