@@ -13,7 +13,11 @@ import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
 import org.jetbrains.kotlin.buildtools.api.arguments.JvmCompilerArguments
-import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.org.objectweb.asm.ClassReader
+import org.jetbrains.org.objectweb.asm.ClassReader.*
+import org.jetbrains.org.objectweb.asm.ClassVisitor
+import org.jetbrains.org.objectweb.asm.MethodVisitor
+import org.jetbrains.org.objectweb.asm.Opcodes.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
@@ -119,28 +123,22 @@ class KotlinCompiler(
                     }
                 }
 
-//          val mainClasses = findMainClasses(outputFiles)
+          val mainClasses = findMainClasses(outputFiles)
+//          val mainClasses:Set<String> = emptySet()
 
                 return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
                     Compiled(
                         compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
                         result = JvmClasses(
                             files = outputFiles,
-//                mainClasses = mainClasses,
+                            mainClasses = mainClasses,
                         )
                     )
                 } else {
                     NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
                 }
             } finally {
-                /* TODO: Deal with NoSuchMethodError
-                Possible reasons:
-                - something is wrong in kotlin-build-tools-api/impl
-                - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
-                 */
-//          try{
                 session.close()
-//          }catch (_: NoSuchMethodError){}
             }
         } catch (e: Exception) {
             // Log the exception for debugging
@@ -165,7 +163,6 @@ class KotlinCompiler(
                     "-d", outputDir.absolutePathString(),
                 ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
-            // Try the new approach first, fall back to the old one if it fails
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
             val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
 
@@ -175,7 +172,6 @@ class KotlinCompiler(
                 return@usingTempDirectory newApiResult
             }
 
-            // Fall back to the old approach
             return@usingTempDirectory NotCompiled(
                 com.compiler.server.model.CompilerDiagnostics(
 //          mapOf("null" to listOf(ErrorDescriptor(null, "Failed to compile using kotlin-build-tools-api",
@@ -185,24 +181,24 @@ class KotlinCompiler(
         }
     }
 
-//  private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
-//    outputFiles.mapNotNull { (name, bytes) ->
-//      if (!name.endsWith(".class")) return@mapNotNull null
-//      val reader = ClassReader(bytes)
-//      var hasMain = false
-//      val visitor = object : ClassVisitor(ASM9) {
-//        override fun visitMethod(
-//          access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?
-//        ): MethodVisitor? {
-//          if (name == "main" && descriptor == "([Ljava/lang/String;)V" && (access and ACC_PUBLIC != 0) && (access and ACC_STATIC != 0)) {
-//            hasMain = true
-//          }
-//          return null
-//        }
-//      }
-//      reader.accept(visitor, SKIP_CODE or SKIP_DEBUG or SKIP_FRAMES)
-//      if (hasMain) name.removeSuffix(".class").replace(File.separatorChar, '.') else null
-//    }.toSet()
+  private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
+    outputFiles.mapNotNull { (name, bytes) ->
+      if (!name.endsWith(".class")) return@mapNotNull null
+      val reader = ClassReader(bytes)
+      var hasMain = false
+      val visitor = object : ClassVisitor(ASM9) {
+        override fun visitMethod(
+          access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?
+        ): MethodVisitor? {
+          if (name == "main" && descriptor == "([Ljava/lang/String;)V" && (access and ACC_PUBLIC != 0) && (access and ACC_STATIC != 0)) {
+            hasMain = true
+          }
+          return null
+        }
+      }
+      reader.accept(visitor, SKIP_CODE or SKIP_DEBUG or SKIP_FRAMES)
+      if (hasMain) name.removeSuffix(".class").replace(File.separatorChar, '.') else null
+    }.toSet()
 
     private fun execute(
         files: List<ProjectFile>,
