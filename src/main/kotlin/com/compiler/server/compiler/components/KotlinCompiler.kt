@@ -127,28 +127,22 @@ class KotlinCompiler(
                     }
                 }
 
-//          val mainClasses = findMainClasses(outputFiles)
+          val mainClasses = findMainClasses(outputFiles)
+//          val mainClasses:Set<String> = emptySet()
 
                 return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
                     Compiled(
                         compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
                         result = JvmClasses(
                             files = outputFiles,
-//                mainClasses = mainClasses,
+                            mainClasses = mainClasses,
                         )
                     )
                 } else {
                     NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
                 }
             } finally {
-                /* TODO: Deal with NoSuchMethodError
-                Possible reasons:
-                - something is wrong in kotlin-build-tools-api/impl
-                - there is a conflict between compiler-kotlin (which is often used in this project) and compiler-kotlin-embeddable (which should be used by impl)
-                 */
-//          try{
                 session.close()
-//          }catch (_: NoSuchMethodError){}
             }
         } catch (e: Exception) {
             // Log the exception for debugging
@@ -168,7 +162,6 @@ class KotlinCompiler(
               compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
               listOf("-d", outputDir.absolutePathString())
 
-            // Try the new approach first, fall back to the old one if it fails
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
             val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
 
@@ -178,25 +171,14 @@ class KotlinCompiler(
                 return@usingTempDirectory newApiResult
             }
 
-      // Fall back to the old approach
-      println("Falling back to K2JVMCompiler for compilation")
-      org.jetbrains.kotlin.cli.jvm.K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
-        val outputFiles = buildMap {
-          outputDir.visitFileTree {
-            onVisitFile { file, _ ->
-              put(file.relativeTo(outputDir).pathString, file.readBytes())
-              FileVisitResult.CONTINUE
-            }
-          }
+            return@usingTempDirectory NotCompiled(
+                com.compiler.server.model.CompilerDiagnostics(
+//          mapOf("null" to listOf(ErrorDescriptor(null, "Failed to compile using kotlin-build-tools-api",
+//            ProjectSeveriry.ERROR, null)))
+                )
+            )
         }
-        val mainClasses = findMainClasses(outputFiles)
-        JvmClasses(
-            files = outputFiles,
-            mainClasses = mainClasses,
-        )
-      }
     }
-  }
 
 
   private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
