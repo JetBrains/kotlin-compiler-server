@@ -3,9 +3,12 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.ExtendedCompilerArgument
+import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
+import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
@@ -102,6 +105,68 @@ class KotlinCompiler(
         }
     }
 
+//    fun getDiagnostics(inputDirectory: Path, inputFiles: List<Path>, arguments: List<String>): CompilationResult{
+//        fun Path.outputFilePathString() = inputDirectory.relativize(this).pathString
+//
+//        val diagnosticsMap = mutableMapOf<String, MutableList<ErrorDescriptor>>().apply {
+//            inputFiles.forEach { put(it.outputFilePathString(), mutableListOf()) }
+//        }
+//        val defaultFileName = inputFiles.singleOrNull()?.outputFilePathString() ?: ""
+//        val exitCode = doMainNoExit(this, arguments.toTypedArray(), object : MessageRenderer {
+//            override fun renderPreamble(): String = ""
+//
+//            override fun render(
+//                severity: CompilerMessageSeverity,
+//                message: String,
+//                location: CompilerMessageSourceLocation?
+//            ): String {
+//                when {
+//                    // suppress -XXLanguage:+ExplicitBackingFields
+//                    severity == STRONG_WARNING && message.contains("ExplicitBackingFields") ->
+//                        return ""
+//                }
+//
+//                val messageSeverity: ProjectSeveriry = when (severity) {
+//                    EXCEPTION, ERROR -> ProjectSeveriry.ERROR
+//                    STRONG_WARNING, WARNING, FIXED_WARNING -> ProjectSeveriry.WARNING
+//                    INFO, LOGGING, OUTPUT -> return ""
+//                }
+//                val textInterval = location?.let {
+//                    TextInterval(
+//                        start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
+//                        end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
+//                    )
+//                }
+//
+//                val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
+//
+//                val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
+//                val errorDescriptor = ErrorDescriptor(textInterval, message, messageSeverity, className)
+//
+//                diagnosticsMap.getOrPut(errorFilePath) { mutableListOf() }.add(errorDescriptor)
+//                return ""
+//            }
+//
+//            override fun renderUsage(usage: String): String =
+//                render(STRONG_WARNING, usage, null)
+//
+//            override fun renderConclusion(): String = ""
+//
+//            override fun getName(): String = "Redirector"
+//        })
+//        val diagnostics = CompilerDiagnostics(diagnosticsMap)
+//        return when {
+//            diagnostics.any { it.severity == ProjectSeveriry.ERROR } -> NotCompiled(diagnostics)
+//            exitCode.code != 0 -> ErrorDescriptor(
+//                severity = ProjectSeveriry.ERROR,
+//                message = "Compiler finished with non-null exit code ${exitCode.code}: ${exitCode.name}",
+//                interval = null
+//            ).let { NotCompiled(CompilerDiagnostics(mapOf(defaultFileName to listOf(it)))) }
+//
+//            else -> Compiled(result = onSuccess(), compilerDiagnostics = diagnostics)
+//        }
+//    }
+
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
     private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
         try {
@@ -111,11 +176,12 @@ class KotlinCompiler(
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
+            val logger = CompilationLogger()
 
             val session = toolchain.createBuildSession()
 
             try {
-                val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy())
+                val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy(), logger)
 
                 // Process output files
                 val outputFiles = buildMap {
@@ -127,19 +193,18 @@ class KotlinCompiler(
                     }
                 }
 
-          val mainClasses = findMainClasses(outputFiles)
-//          val mainClasses:Set<String> = emptySet()
+                val mainClasses = findMainClasses(outputFiles)
 
                 return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
                     Compiled(
-                        compilerDiagnostics = com.compiler.server.model.CompilerDiagnostics(emptyMap()),
+                        compilerDiagnostics = CompilerDiagnostics(logger.warnings),
                         result = JvmClasses(
                             files = outputFiles,
                             mainClasses = mainClasses,
                         )
                     )
                 } else {
-                    NotCompiled(com.compiler.server.model.CompilerDiagnostics(emptyMap()))
+                    NotCompiled(CompilerDiagnostics(emptyMap()))
                 }
             } finally {
                 session.close()
