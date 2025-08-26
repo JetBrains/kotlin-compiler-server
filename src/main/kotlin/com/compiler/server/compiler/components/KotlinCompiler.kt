@@ -21,6 +21,7 @@ import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes.*
+import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
@@ -53,12 +54,12 @@ class KotlinCompiler(
     )
 
     private fun ByteArray.asHumanReadable(): String {
-//    val classReader = ClassReader(this)
+    val classReader = ClassReader(this)
         val stringWriter = StringWriter()
         val printWriter = PrintWriter(stringWriter)
-//    val traceClassVisitor = TraceClassVisitor(printWriter)
+    val traceClassVisitor = TraceClassVisitor(printWriter)
 
-//    classReader.accept(traceClassVisitor, 0)
+    classReader.accept(traceClassVisitor, 0)
 
         return stringWriter.toString()
     }
@@ -191,16 +192,22 @@ class KotlinCompiler(
 
                 val mainClasses = findMainClasses(outputFiles)
 
-                return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
-                    Compiled(
-                        compilerDiagnostics = CompilerDiagnostics(logger.warnings),
-                        result = JvmClasses(
-                            files = outputFiles,
-                            mainClasses = mainClasses,
+                return when (result) {
+                    org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+                        val lw = logger.warnings
+                        val cd = CompilerDiagnostics(lw)
+                        Compiled(
+                            compilerDiagnostics = cd,
+                            result = JvmClasses(
+                                files = outputFiles,
+                                mainClasses = mainClasses,
+                            )
                         )
-                    )
-                } else {
-                    NotCompiled(CompilerDiagnostics(emptyMap()))
+                    }
+
+                    else -> {
+                        NotCompiled(CompilerDiagnostics(emptyMap()))
+                    }
                 }
             } finally {
                 session.close()
