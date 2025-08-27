@@ -3,11 +3,9 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.CompilerDiagnostics
-import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
-import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
@@ -173,6 +171,8 @@ class KotlinCompiler(
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_Reflect")] = true
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("PROGRESSIVE")] = true
             val logger = CompilationLogger()
 
             val session = toolchain.createBuildSession()
@@ -245,7 +245,7 @@ class KotlinCompiler(
             }
 
             return@usingTempDirectory NotCompiled(
-                com.compiler.server.model.CompilerDiagnostics(
+                CompilerDiagnostics(
 //          mapOf("null" to listOf(ErrorDescriptor(null, "Failed to compile using kotlin-build-tools-api",
 //            ProjectSeveriry.ERROR, null)))
                 )
