@@ -29,7 +29,6 @@ import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.div
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
@@ -100,68 +99,6 @@ class KotlinCompiler(
         }
     }
 
-//    fun getDiagnostics(inputDirectory: Path, inputFiles: List<Path>, arguments: List<String>): CompilationResult{
-//        fun Path.outputFilePathString() = inputDirectory.relativize(this).pathString
-//
-//        val diagnosticsMap = mutableMapOf<String, MutableList<ErrorDescriptor>>().apply {
-//            inputFiles.forEach { put(it.outputFilePathString(), mutableListOf()) }
-//        }
-//        val defaultFileName = inputFiles.singleOrNull()?.outputFilePathString() ?: ""
-//        val exitCode = doMainNoExit(this, arguments.toTypedArray(), object : MessageRenderer {
-//            override fun renderPreamble(): String = ""
-//
-//            override fun render(
-//                severity: CompilerMessageSeverity,
-//                message: String,
-//                location: CompilerMessageSourceLocation?
-//            ): String {
-//                when {
-//                    // suppress -XXLanguage:+ExplicitBackingFields
-//                    severity == STRONG_WARNING && message.contains("ExplicitBackingFields") ->
-//                        return ""
-//                }
-//
-//                val messageSeverity: ProjectSeveriry = when (severity) {
-//                    EXCEPTION, ERROR -> ProjectSeveriry.ERROR
-//                    STRONG_WARNING, WARNING, FIXED_WARNING -> ProjectSeveriry.WARNING
-//                    INFO, LOGGING, OUTPUT -> return ""
-//                }
-//                val textInterval = location?.let {
-//                    TextInterval(
-//                        start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
-//                        end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
-//                    )
-//                }
-//
-//                val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
-//
-//                val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
-//                val errorDescriptor = ErrorDescriptor(textInterval, message, messageSeverity, className)
-//
-//                diagnosticsMap.getOrPut(errorFilePath) { mutableListOf() }.add(errorDescriptor)
-//                return ""
-//            }
-//
-//            override fun renderUsage(usage: String): String =
-//                render(STRONG_WARNING, usage, null)
-//
-//            override fun renderConclusion(): String = ""
-//
-//            override fun getName(): String = "Redirector"
-//        })
-//        val diagnostics = CompilerDiagnostics(diagnosticsMap)
-//        return when {
-//            diagnostics.any { it.severity == ProjectSeveriry.ERROR } -> NotCompiled(diagnostics)
-//            exitCode.code != 0 -> ErrorDescriptor(
-//                severity = ProjectSeveriry.ERROR,
-//                message = "Compiler finished with non-null exit code ${exitCode.code}: ${exitCode.name}",
-//                interval = null
-//            ).let { NotCompiled(CompilerDiagnostics(mapOf(defaultFileName to listOf(it)))) }
-//
-//            else -> Compiled(result = onSuccess(), compilerDiagnostics = diagnostics)
-//        }
-//    }
-
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
     private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
         try {
@@ -173,6 +110,29 @@ class KotlinCompiler(
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_Reflect")] = true
             operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("PROGRESSIVE")] = true
+
+            val optIns = listOf(
+                "kotlin.ExperimentalStdlibApi",
+                "kotlin.time.ExperimentalTime",
+                "kotlin.RequiresOptIn",
+                "kotlin.ExperimentalUnsignedTypes",
+                "kotlin.contracts.ExperimentalContracts",
+                "kotlin.experimental.ExperimentalTypeInference",
+                "kotlin.uuid.ExperimentalUuidApi",
+                "kotlin.io.encoding.ExperimentalEncodingApi",
+                "kotlin.concurrent.atomics.ExperimentalAtomicApi",
+            )
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<List<String>>("OPT_IN")] = optIns
+
+            // --- -X... przełączniki (bez wartości -> boolean) ---
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_CONTEXT_PARAMETERS")] = true
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_NESTED_TYPE_ALIASES")] = true
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_REPORT_ALL_WARNINGS")] = true
+            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_EXPLICIT_BACKING_FIELDS")] = true
+
+//            "-Wextra",
+//            "-XPlugin=kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }"
+
             val logger = CompilationLogger()
 
             val session = toolchain.createBuildSession()
@@ -206,7 +166,7 @@ class KotlinCompiler(
                     }
 
                     else -> {
-                        NotCompiled(CompilerDiagnostics(emptyMap()))
+                        NotCompiled(CompilerDiagnostics(logger.warnings))
                     }
                 }
             } finally {
@@ -224,16 +184,10 @@ class KotlinCompiler(
 
     @OptIn(ExperimentalPathApi::class)
     fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        val ioFiles = files.writeToIoFiles(inputDir)
+
+
+        files.writeToIoFiles(inputDir)
         usingTempDirectory { outputDir ->
-            val arguments =
-                ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
-                    "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
-                    "-module-name", "web-module",
-                    "-no-stdlib", "-no-reflect",
-                    "-progressive",
-                    "-d", outputDir.absolutePathString(),
-                ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
             val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)

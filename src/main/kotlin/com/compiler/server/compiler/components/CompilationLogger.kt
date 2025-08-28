@@ -15,7 +15,14 @@ class CompilationLogger : KotlinLogger{
     }
 
     override fun error(msg: String, throwable: Throwable?) {
-
+        val path = msg.split(" ")[0]
+        val className = path.split("/").last().split(".").first()
+        val message = msg.split(path)[1].drop(1)
+        val splitPath = path.split(":")
+        val line = splitPath[splitPath.size - 2].toInt() -1
+        val ch = splitPath[splitPath.size - 1].toInt() -1
+        val ed = ErrorDescriptor(TextInterval(TextInterval.TextPosition(line, ch), TextInterval.TextPosition(line, ch)), message, ProjectSeveriry.ERROR, className)
+        warnings = warnings + (path to (warnings[path] ?: emptyList()) + ed)
     }
 
     override fun info(msg: String) {
