@@ -25,9 +25,6 @@ allprojects {
         dependencies {
             dependencies {
                 implementation(libs.jackson.module.kotlin)
-                implementation(libs.kotlin.idea) {
-                    isTransitive = false
-                }
             }
         }
     }
@@ -53,17 +50,13 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.script.runtime)
-    implementation(libs.kotlin.compiler.ide) {
-        isTransitive = false
-    }
-    implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
+    implementation(project(":dependencies"))
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-5126")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-5126")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-5126")
 
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-4967")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-4967")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-4967")
-//    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:2.3.0-dev-4627")
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
