@@ -1,7 +1,9 @@
 package com.compiler.server.service
 
 import com.compiler.server.compiler.components.*
+import com.compiler.server.compiler.components.WasmTranslationSuccessfulOutput
 import com.compiler.server.model.*
+import com.compiler.server.model.JsCompilerArguments
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
@@ -21,12 +23,12 @@ class KotlinProjectExecutor(
     private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
     fun run(project: Project, addByteCode: Boolean): ExecutionResult {
-        return environment.synchronize { kotlinCompiler.run(project.files, addByteCode, project.args) }
+        return environment.synchronize { kotlinCompiler.run(project.files, addByteCode, project.args, project.compilerArguments.getOrElse(0, { emptyMap() })) }
             .also { logExecutionResult(project, it) }
     }
 
     fun test(project: Project, addByteCode: Boolean): ExecutionResult {
-        return environment.synchronize { kotlinCompiler.test(project.files, addByteCode) }
+        return environment.synchronize { kotlinCompiler.test(project.files, addByteCode, project.compilerArguments.getOrElse(0, { emptyMap() })) }
             .also { logExecutionResult(project, it) }
     }
 
@@ -35,10 +37,10 @@ class KotlinProjectExecutor(
     }
 
     fun compileToJvm(project: Project): CompilationResult<KotlinCompiler.JvmClasses> {
-        return kotlinCompiler.compile(project.files)
+        return kotlinCompiler.compile(project.files,  project.compilerArguments.getOrElse(0, { emptyMap() }))
     }
 
-    fun convertToWasm(project: Project, debugInfo: Boolean): TranslationResultWithJsCode {
+    fun convertToWasm(project: Project, debugInfo: Boolean = false): TranslationResultWithJsCode {
         return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
     }
 
@@ -71,12 +73,16 @@ class KotlinProjectExecutor(
 
     private fun convertJsWithConverter(
         project: Project,
-        converter: (List<ProjectFile>, List<String>) -> CompilationResult<String>
+        converter: (List<ProjectFile>, List<String>, JsCompilerArguments) -> CompilationResult<String>
     ): TranslationJSResult {
         return environment.synchronize {
             kotlinToJSTranslator.translateJs(
                 project.files,
                 project.args.split(" "),
+                JsCompilerArguments(
+                    project.compilerArguments.getOrElse(0, { emptyMap() }),
+                    project.compilerArguments.getOrElse(1, { emptyMap() })
+                ),
                 converter
             )
         }
@@ -86,7 +92,7 @@ class KotlinProjectExecutor(
     private fun convertWasmWithConverter(
         project: Project,
         debugInfo: Boolean,
-        converter: (List<ProjectFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+        converter: (List<ProjectFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
 
         return environment.synchronize {
@@ -94,6 +100,10 @@ class KotlinProjectExecutor(
                 project.files,
                 debugInfo,
                 project.confType,
+                JsCompilerArguments(
+                    project.compilerArguments.getOrElse(0, { emptyMap() }),
+                    project.compilerArguments.getOrElse(1, { emptyMap() })
+                ),
                 converter
             )
         }
