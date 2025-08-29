@@ -3,16 +3,21 @@ package com.compiler.server.compiler.components
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ErrorDescriptor
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
+import com.compiler.server.model.ProjectSeveriry
+import com.compiler.server.model.TextInterval
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
+import org.jetbrains.kotlin.buildtools.api.CompilationService
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
+import org.jetbrains.kotlin.buildtools.api.ProjectId
 import org.jetbrains.kotlin.buildtools.api.arguments.JvmCompilerArguments
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
@@ -22,13 +27,17 @@ import org.jetbrains.org.objectweb.asm.Opcodes.*
 import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.PrintStream
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.collections.plus
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.div
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
@@ -51,12 +60,12 @@ class KotlinCompiler(
     )
 
     private fun ByteArray.asHumanReadable(): String {
-    val classReader = ClassReader(this)
+        val classReader = ClassReader(this)
         val stringWriter = StringWriter()
         val printWriter = PrintWriter(stringWriter)
-    val traceClassVisitor = TraceClassVisitor(printWriter)
+        val traceClassVisitor = TraceClassVisitor(printWriter)
 
-    classReader.accept(traceClassVisitor, 0)
+        classReader.accept(traceClassVisitor, 0)
 
         return stringWriter.toString()
     }
@@ -100,7 +109,7 @@ class KotlinCompiler(
     }
 
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
-    private fun compileWithBuildToolsApi(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
+    private fun compileWithToolchain(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
         try {
             val sources = inputDir.listDirectoryEntries()
             val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
@@ -182,6 +191,161 @@ class KotlinCompiler(
         }
     }
 
+    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
+    private fun compileWithCompilationService(
+        files: List<ProjectFile>,
+        inputDir: Path,
+        outputDir: Path,
+        cp: String
+    ): CompilationResult<JvmClasses>? {
+        try {
+            val service = CompilationService.loadImplementation(ClassLoader.getSystemClassLoader())
+            val projectId = ProjectId.RandomProjectUUID()
+            val strategyConfig = service.makeCompilerExecutionStrategyConfiguration().useInProcessStrategy()
+            val compilationConfig = service.makeJvmCompilationConfiguration()
+
+            val ioFiles = files.writeToIoFiles(inputDir)
+
+            val arguments =
+                ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
+                    "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
+                    "-module-name", "web-module",
+                    "-no-stdlib", "-no-reflect",
+                    "-progressive",
+                    "-d", outputDir.absolutePathString(),
+                ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
+
+            val sources = inputDir.listDirectoryEntries().map { it.toFile() }
+            var warnings : Map<String, List<ErrorDescriptor>> = emptyMap()
+
+            val outputStream = ByteArrayOutputStream()
+            val printStream = PrintStream(outputStream)
+            val originalOut = System.out
+            val originalErr = System.err
+            System.setOut(printStream)
+            System.setErr(printStream)
+            try {
+                val result = service.compileJvm(projectId, strategyConfig, compilationConfig, sources, arguments)
+                val rawOutput = outputStream.toString()
+                val output = rawOutput.replace(
+                    Regex(
+                        """w: ATTENTION![\s\S]*?Use it at your own risk!\n\nw: Following manually enabled features will force generation of pre-release binaries: ExplicitBackingFields\nw: Duplicate source root: [^\n]*\n"""
+                    ),
+                    ""
+                )
+
+                // Parse diagnostics that may span multiple lines. Only consider blocks starting with "e:" or "w:".
+                val lines = output.lines()
+                val blocks = mutableListOf<String>()
+                val current = StringBuilder()
+                fun flush() {
+                    if (current.isNotEmpty()) {
+                        blocks += current.toString().trimEnd()
+                        current.setLength(0)
+                    }
+                }
+                for (line in lines) {
+                    if (line.startsWith("e: ") || line.startsWith("w: ")) {
+                        flush()
+                        current.append(line)
+                    } else {
+                        // Append continuation lines to the current block if any
+                        if (current.isNotEmpty()) {
+                            current.append('\n').append(line)
+                        }
+                    }
+                }
+                flush()
+
+                for (block in blocks) {
+                    try {
+                        // First token is severity symbol; next token should be a path with line:col, but message may contain spaces/newlines
+                        val firstSpace = block.indexOf(' ')
+                        if (firstSpace == -1) continue
+                        val typeSymbol = block.substring(0, firstSpace)
+                        val severity = when (typeSymbol) {
+                            "e:" -> ProjectSeveriry.ERROR
+                            "w:" -> ProjectSeveriry.WARNING
+                            else -> ProjectSeveriry.INFO
+                        }
+                        if (severity == ProjectSeveriry.INFO) continue // ignore anything not starting with e:/w:
+
+                        val rest = block.substring(firstSpace + 1)
+                        // Path is the first whitespace-separated token in rest
+                        val secondSpace = rest.indexOf(' ')
+                        if (secondSpace == -1) continue
+                        val path = rest.substring(0, secondSpace)
+                        val message = rest.substring(secondSpace + 1).trimStart()
+
+                        val className = when (typeSymbol) {
+                            "w:" -> "WARNING"
+                            else -> path.substringAfterLast('/').substringBeforeLast('.')
+                        }
+
+                        val splitPath = path.split(":")
+                        if (splitPath.size < 3) continue
+                        val line = splitPath[splitPath.size - 2].toIntOrNull()?.minus(1) ?: continue
+                        val ch = splitPath[splitPath.size - 1].toIntOrNull()?.minus(1) ?: 0
+
+                        val ed = ErrorDescriptor(
+                            TextInterval(
+                                TextInterval.TextPosition(line, ch),
+                                TextInterval.TextPosition(line, ch)
+                            ), message, severity, className
+                        )
+                        warnings = warnings + (path to ((warnings[path] ?: emptyList()) + ed))
+                    } catch (_: Exception) {
+                        // ignore malformed lines
+                    }
+                }
+
+                println("Test:$output")
+
+
+                // Process output files
+                val outputFiles = buildMap {
+                    outputDir.visitFileTree {
+                        onVisitFile { file, _ ->
+                            put(file.relativeTo(outputDir).pathString, file.readBytes())
+                            FileVisitResult.CONTINUE
+                        }
+                    }
+                }
+
+                val mainClasses = findMainClasses(outputFiles)
+
+                return when (result) {
+                    org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+                        val lw = warnings
+                        val cd = CompilerDiagnostics(lw)
+                        Compiled(
+                            compilerDiagnostics = cd,
+                            result = JvmClasses(
+                                files = outputFiles,
+                                mainClasses = mainClasses,
+                            )
+                        )
+                    }
+
+                    else -> {
+                        NotCompiled(CompilerDiagnostics(warnings))
+                    }
+                }
+            } finally {
+                System.setOut(originalOut)
+                System.setErr(originalErr)
+                service.finishProjectCompilation(projectId)
+            }
+        } catch (e: Exception) {
+            // Log the exception for debugging
+            println("Error using kotlin-build-tools-api: ${e.message}")
+            e.printStackTrace()
+
+            // Return null to indicate that we should fall back to the old approach
+            return null
+        }
+    }
+
     @OptIn(ExperimentalPathApi::class)
     fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
 
@@ -190,7 +354,8 @@ class KotlinCompiler(
         usingTempDirectory { outputDir ->
 
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-            val newApiResult = compileWithBuildToolsApi(inputDir, outputDir, classpath)
+//            val newApiResult = compileWithToolchain(inputDir, outputDir, classpath)
+            val newApiResult = compileWithCompilationService(files, inputDir, outputDir, classpath)
 
             // If the new approach succeeded, return its result
             if (newApiResult != null) {
