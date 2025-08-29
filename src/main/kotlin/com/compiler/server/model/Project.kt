@@ -7,8 +7,12 @@ import com.fasterxml.jackson.annotation.JsonValue
 data class Project(
   val args: String = "",
   val files: List<ProjectFile> = listOf(),
-  val confType: ProjectType = ProjectType.JAVA
+  val confType: ProjectType = ProjectType.JAVA,
+  val compilerArguments: List<Map<String, Any>> = emptyList()
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class CompilerArgument(val name: String = "", val value: String = "")
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ProjectFile(val text: String = "", val name: String = "")
