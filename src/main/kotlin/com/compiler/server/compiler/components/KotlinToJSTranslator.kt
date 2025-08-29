@@ -1,8 +1,10 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.model.*
+import com.compiler.server.utils.CompilerArgumentsUtil
+import com.compiler.server.utils.JS_DEFAULT_MODULE_NAME
+import com.compiler.server.utils.WASM_DEFAULT_MODULE_NAME
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.springframework.stereotype.Service
 import kotlin.io.path.div
@@ -11,7 +13,10 @@ import kotlin.io.path.readText
 
 @Service
 class KotlinToJSTranslator(
-    private val kotlinEnvironment: KotlinEnvironment,
+    private val compilerArgumentsUtil: CompilerArgumentsUtil,
+    private val jsCompilerArguments: Set<ExtendedCompilerArgument>,
+    private val wasmCompilerArguments: Set<ExtendedCompilerArgument>,
+    private val composeWasmCompilerArguments: Set<ExtendedCompilerArgument>
 ) {
     companion object {
         internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
@@ -30,9 +35,10 @@ class KotlinToJSTranslator(
     fun translateJs(
         files: List<ProjectFile>,
         arguments: List<String>,
-        translate: (List<ProjectFile>, List<String>) -> CompilationResult<String>
+        jsCompilerArguments: JsCompilerArguments,
+        translate: (List<ProjectFile>, List<String>, JsCompilerArguments) -> CompilationResult<String>
     ): TranslationJSResult = try {
-        val compilationResult = translate(files, arguments)
+        val compilationResult = translate(files, arguments, jsCompilerArguments)
         val jsCode = when (compilationResult) {
             is Compiled<String> -> compilationResult.result
             is NotCompiled -> null
@@ -46,30 +52,15 @@ class KotlinToJSTranslator(
         files: List<ProjectFile>,
         debugInfo: Boolean,
         projectType: ProjectType,
-        translate: (List<ProjectFile>, List<String>, List<String>, List<String>, Boolean) -> CompilationResult<WasmTranslationSuccessfulOutput>
+        userCompilerArguments: JsCompilerArguments,
+        translate: (List<ProjectFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
-            val (dependencies, compilerPlugins, compilerPluginOptions) = when (projectType) {
-                ProjectType.WASM -> listOf(
-                    kotlinEnvironment.WASM_LIBRARIES,
-                    emptyList(),
-                    emptyList()
-                )
-
-                ProjectType.COMPOSE_WASM -> listOf(
-                    kotlinEnvironment.COMPOSE_WASM_LIBRARIES,
-                    kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS,
-                    kotlinEnvironment.composeWasmCompilerPluginOptions
-                )
-
-                else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
-            }
             val compilationResult = translate(
                 files,
-                dependencies,
-                compilerPlugins,
-                compilerPluginOptions,
-                debugInfo
+                projectType,
+                debugInfo,
+                userCompilerArguments
             )
             val wasmCompilationOutput = when (compilationResult) {
                 is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -87,38 +78,33 @@ class KotlinToJSTranslator(
         }
     }
 
-    fun doTranslateWithIr(files: List<ProjectFile>, arguments: List<String>): CompilationResult<String> =
+    fun doTranslateWithIr(
+        files: List<ProjectFile>,
+        arguments: List<String>,
+        userCompilerArguments: JsCompilerArguments): CompilationResult<String> =
         usingTempDirectory { inputDir ->
-            val moduleName = "playground"
             usingTempDirectory { outputDir ->
                 val ioFiles = files.writeToIoFiles(inputDir)
                 val k2JSCompiler = K2JSCompiler()
                 val filePaths = ioFiles.map { it.toFile().canonicalPath }
                 val klibPath = (outputDir / "klib").toFile().canonicalPath
-                val additionalCompilerArgumentsForKLib = listOf(
-                    "-Xreport-all-warnings",
-                    "-Wextra",
-                    "-Xir-produce-klib-dir",
-                    "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
-                    "-ir-output-dir=$klibPath",
-                    "-ir-output-name=$moduleName",
-                )
+                val additionalCompilerArgumentsForKLib =
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                        jsCompilerArguments,
+                        compilerArgumentsUtil.PREDEFINED_JS_FIRST_PHASE_ARGUMENTS,
+                        userCompilerArguments.firstPhase
+                    ) + "-ir-output-dir=$klibPath"
                 k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
                     .flatMap {
-                        k2JSCompiler.tryCompilation(
-                            inputDir, ioFiles, listOf(
-                                "-Xreport-all-warnings",
-                                "-Wextra",
-                                "-Xir-produce-js",
-                                "-Xir-dce",
-                                "-Xinclude=$klibPath",
-                                "-libraries=${kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)}",
-                                "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}",
-                                "-ir-output-name=$moduleName",
-                            )
-                        )
+                        val secondPhaseArguments =
+                            compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                                jsCompilerArguments,
+                                compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
+                                userCompilerArguments.secondPhase
+                            ) + "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}" + "-Xinclude=$klibPath"
+                        k2JSCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
                     }
-                    .map { (outputDir / "js" / "$moduleName.js").readText() }
+                    .map { (outputDir / "js" / "$JS_DEFAULT_MODULE_NAME.js").readText() }
                     .map { it.withMainArgumentsIr(arguments) }
                     .map(::redirectOutput)
             }
@@ -137,58 +123,57 @@ class KotlinToJSTranslator(
 
     fun doTranslateWithWasm(
         files: List<ProjectFile>,
-        dependencies: List<String>,
-        compilerPlugins: List<String>,
-        compilerPluginOptions: List<String>,
+        projectType: ProjectType,
         debugInfo: Boolean,
+        userCompilerArguments: JsCompilerArguments
     ): CompilationResult<WasmTranslationSuccessfulOutput> =
         usingTempDirectory { inputDir ->
-            val moduleName = "playground"
             usingTempDirectory { outputDir ->
+                val (defaultCompilerArgs, firstPhasePredefinedArguments, secondPhasePredefinedArguments) = when (projectType) {
+                    ProjectType.WASM -> Triple(
+                        wasmCompilerArguments,
+                        compilerArgumentsUtil.PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
+                        compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS,
+                    )
+
+                    ProjectType.COMPOSE_WASM -> Triple(
+                        composeWasmCompilerArguments,
+                        compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
+                        compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS
+                    )
+
+                    else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
+                }
                 val ioFiles = files.writeToIoFiles(inputDir)
                 val k2JSCompiler = K2JSCompiler()
                 val filePaths = ioFiles.map { it.toFile().canonicalPath }
                 val klibPath = (outputDir / "klib").toFile().canonicalPath
-                val compilerPluginsArgs: List<String> = compilerPlugins
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { plugins ->
-                        plugins.map {
-                            "-Xplugin=$it"
-                        } + compilerPluginOptions.map {
-                            "-P=$it"
-                        }
-                    } ?: emptyList()
-                val additionalCompilerArgumentsForKLib: List<String> = listOf(
-                    "-Xreport-all-warnings",
-                    "-Wextra",
-                    "-Xwasm",
-                    "-Xir-produce-klib-dir",
-                    "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-                    "-ir-output-dir=$klibPath",
-                    "-ir-output-name=$moduleName",
-                ) + compilerPluginsArgs
+
+                val additionalCompilerArgumentsForKLib =
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                        defaultCompilerArgs,
+                        firstPhasePredefinedArguments,
+                        userCompilerArguments.firstPhase
+                    ) + "-ir-output-dir=$klibPath"
 
                 k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
                     .flatMap {
-                        k2JSCompiler.tryCompilation(
-                            inputDir, ioFiles, mutableListOf(
-                                "-Xreport-all-warnings",
-                                "-Wextra",
-                                "-Xwasm",
-                                "-Xir-produce-js",
-                                "-Xir-dce",
-                                "-Xinclude=$klibPath",
-                                "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
-                                "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
-                                "-ir-output-name=$moduleName",
-                            ).also { if (debugInfo) it.add("-Xwasm-generate-wat") })
+                        val secondPhaseArguments = (compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                            defaultCompilerArgs,
+                            secondPhasePredefinedArguments,
+                            userCompilerArguments.secondPhase
+                        ) + "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}" + "-Xinclude=$klibPath").toMutableList()
+
+                        if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
+
+                        k2JSCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
                     }
                     .map {
                         WasmTranslationSuccessfulOutput(
-                            jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
-                            jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
-                            wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-                            wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
+                            jsCode = (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.uninstantiated.mjs").readText(),
+                            jsInstantiated = (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.mjs").readText(),
+                            wasm = (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.wasm").readBytes(),
+                            wat = if (debugInfo) (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.wat").readText() else null,
                         )
                     }
             }

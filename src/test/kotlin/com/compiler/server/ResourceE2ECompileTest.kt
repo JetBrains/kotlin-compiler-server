@@ -1,9 +1,11 @@
 package com.compiler.server
 
+import com.compiler.server.api.ProjectFileRequestDto
+import com.compiler.server.api.RunRequest
+import com.compiler.server.api.TranslateJsRequest
 import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.compiler.components.KotlinToJSTranslator.Companion.JS_IR_CODE_BUFFER
 import com.compiler.server.compiler.components.KotlinToJSTranslator.Companion.JS_IR_OUTPUT_REWRITE
-import com.compiler.server.generator.generateSingleProject
 import com.compiler.server.model.ExecutionResult
 import com.compiler.server.model.JunitExecutionResult
 import com.compiler.server.model.JvmExecutionResult
@@ -38,16 +40,23 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
     private fun getHost(): String = "http://$host:$port"
 
     override fun request(code: String, platform: ProjectType): ExecutionResult {
-        val url = when (platform) {
-            ProjectType.JS, ProjectType.JS_IR -> "/api/compiler/translate?ir=true"
-            else -> "/api/compiler/run"
+        val (url, requestBody) = when (platform) {
+            ProjectType.JS_IR -> Pair(
+                "/api/compiler/translate?ir=true",
+                TranslateJsRequest(files = listOf(ProjectFileRequestDto(text = code, name = "File.kt")))
+            )
+
+            ProjectType.JAVA -> Pair(
+                "/api/compiler/run",
+                RunRequest(files = listOf(ProjectFileRequestDto(text = code, name = "File.kt")))
+            )
+
+            else -> throw IllegalArgumentException("Unsupported type $platform")
         }
 
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
 
-        val body = jacksonObjectMapper().writeValueAsString(
-            generateSingleProject(code, projectType = platform)
-        )
+        val body = jacksonObjectMapper().writeValueAsString(requestBody)
 
         val resultClass = when (platform) {
             ProjectType.JUNIT -> JunitExecutionResult::class.java
