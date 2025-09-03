@@ -197,6 +197,9 @@ class KotlinCompiler(
             ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
         val sources = inputDir.listDirectoryEntries().map { it.toFile() }
+        logger.warnings = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
         val compResult = try {
             service.compileJvm(projectId, strategyConfig, compilationConfig, sources, arguments)
         } catch (_: Exception) {
@@ -212,7 +215,7 @@ class KotlinCompiler(
                 }
             }
         }
-        
+
         try {
             val mainClasses = findMainClasses(outputFiles)
 

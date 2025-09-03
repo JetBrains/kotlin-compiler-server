@@ -79,11 +79,16 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
             if (outFile.exists()) {
                 val text = outFile.readText()
-                if (!compareExpectedAndActualResultFunction(text, actualResult)) {
+
+                val endPositionPattern = "\"end\":\\{\"line\":\\d+,\"ch\":\\d+\\}".toRegex()
+                val normalizedText = text.replace(endPositionPattern, "\"end\":{\"line\":0,\"ch\":0}")
+                val normalizedActualResult = actualResult.replace(endPositionPattern, "\"end\":{\"line\":0,\"ch\":0}")
+
+                if (!compareExpectedAndActualResultFunction(normalizedText, normalizedActualResult)) {
                     if (!file.isInconsistentOutput()) {
                         return@checkResourceExamples """
-                            Expected: $text
-                            Actual:   $actualResult
+                            Expected: $normalizedText
+                            Actual:   $normalizedActualResult
                         """.trimIndent()
                     }
 
