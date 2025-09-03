@@ -2,8 +2,8 @@ name: Build compiler server with tests
 
 on:
   push:
-    branches-ignore:
-      - kotlin-community/dev
+    branches:
+      - '**'
   pull_request:
     branches:
       - '**'
