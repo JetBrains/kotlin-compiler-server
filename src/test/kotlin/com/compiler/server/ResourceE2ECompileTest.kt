@@ -80,6 +80,7 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
             if (outFile.exists()) {
                 val text = outFile.readText()
 
+                // TODO(Zofia Wiora): remove this part of code and use the commented version when correct end position calculation is implemented
                 val endPositionPattern = "\"end\":\\{\"line\":\\d+,\"ch\":\\d+\\}".toRegex()
                 val normalizedText = text.replace(endPositionPattern, "\"end\":{\"line\":0,\"ch\":0}")
                 val normalizedActualResult = actualResult.replace(endPositionPattern, "\"end\":{\"line\":0,\"ch\":0}")
@@ -92,10 +93,21 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
                         """.trimIndent()
                     }
 
-                    // TODO(Dmitrii Krasnov): this code ignores some of errors,
-                    //  it would be nice to rewrite it.
                     println("!!! file: ${file.path} not equals but it's random code")
                 }
+
+//                if (!compareExpectedAndActualResultFunction(text, actualResult)) {
+//                    if (!file.isInconsistentOutput()) {
+//                        return@checkResourceExamples """
+//                            Expected: $text
+//                            Actual:   $actualResult
+//                        """.trimIndent()
+//                    }
+//
+//                    // TODO(Dmitrii Krasnov): this code ignores some of errors,
+//                    //  it would be nice to rewrite it.
+//                    println("!!! file: ${file.path} not equals but it's random code")
+//                }
             } else {
                 println("New file: ${outFile.path}")
                 File(outFile.parent).mkdirs()
