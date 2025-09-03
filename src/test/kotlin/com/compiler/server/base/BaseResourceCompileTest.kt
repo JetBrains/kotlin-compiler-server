@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 
 interface BaseResourceCompileTest {
     val testDirJVM: String
-        get() = "src/test/resources/test-compile-data/jvm/"
+        get() = "src/test/resources/test-compile-data/jvm"
 
     val testDirJS: String
         get() = "src/test/resources/test-compile-data/js"
