@@ -9,7 +9,7 @@ class CompilationLogger : KotlinLogger {
     // TODO(Zofia Wiora): received msg does not include interval.end of an error/warning
     override val isDebugEnabled: Boolean = false
 
-    var warnings: Map<String, List<ErrorDescriptor>> = emptyMap()
+    var warnings: Map<String, MutableList<ErrorDescriptor>> = emptyMap()
 
     override fun debug(msg: String) {
 
@@ -29,7 +29,9 @@ class CompilationLogger : KotlinLogger {
                 ProjectSeveriry.ERROR,
                 className
             )
-            warnings = warnings + (path to (warnings[path] ?: emptyList()) + ed)
+            warnings["$className.kt"]?.add(ed)
+
+//            warnings = warnings + ("$className.kt" to (warnings[path] ?: emptyList()) + ed)
         } catch (_: Exception) {
         }
     }
@@ -45,6 +47,7 @@ class CompilationLogger : KotlinLogger {
     override fun warn(msg: String, throwable: Throwable?) {
         try {
             val path = msg.split(" ")[0]
+            val className = path.split("/").last().split(".").first()
             val message = msg.split(path)[1].drop(1)
             val splitPath = path.split(":")
             val line = splitPath[splitPath.size - 2].toInt() - 1
@@ -55,7 +58,8 @@ class CompilationLogger : KotlinLogger {
                 ProjectSeveriry.WARNING,
                 "WARNING"
             )
-            warnings = warnings + (path to (warnings[path] ?: emptyList()) + ed)
+            warnings["$className.kt"]?.add(ed)
+//            warnings = warnings + ("$className.kt" to (warnings[path] ?: emptyList()) + ed)
         } catch (_: Exception) {
         }
     }
