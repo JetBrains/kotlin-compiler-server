@@ -11,7 +11,6 @@ import org.jetbrains.kotlin.buildtools.api.CompilationService
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
 import org.jetbrains.kotlin.buildtools.api.ProjectId
-import org.jetbrains.kotlin.buildtools.api.arguments.JvmCompilerArguments
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -92,81 +91,84 @@ class KotlinCompiler(
     }
 
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
-    private fun compileWithToolchain(inputDir: Path, outputDir: Path, cp: String): CompilationResult<JvmClasses>? {
-        try {
-            val sources = inputDir.listDirectoryEntries()
-            val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
-            val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("CLASSPATH")] = cp
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<String?>("MODULE_NAME")] = "web-module"
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_STDLIB")] = true
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("NO_Reflect")] = true
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<Boolean>("PROGRESSIVE")] = true
+    private fun compileWithToolchain(
+        files: List<ProjectFile>,
+        inputDir: Path,
+        outputDir: Path,
+        cp: String
+    ): CompilationResult<JvmClasses> {
 
-            val optIns = listOf(
-                "kotlin.ExperimentalStdlibApi",
-                "kotlin.time.ExperimentalTime",
-                "kotlin.RequiresOptIn",
-                "kotlin.ExperimentalUnsignedTypes",
-                "kotlin.contracts.ExperimentalContracts",
-                "kotlin.experimental.ExperimentalTypeInference",
-                "kotlin.uuid.ExperimentalUuidApi",
-                "kotlin.io.encoding.ExperimentalEncodingApi",
-                "kotlin.concurrent.atomics.ExperimentalAtomicApi",
-            )
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument<List<String>>("OPT_IN")] = optIns
+        val sources = inputDir.listDirectoryEntries()
+        val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
+        val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
 
-            // --- -X... przełączniki (bez wartości -> boolean) ---
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_CONTEXT_PARAMETERS")] = true
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_NESTED_TYPE_ALIASES")] = true
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_REPORT_ALL_WARNINGS")] = true
-            operation.compilerArguments[JvmCompilerArguments.JvmCompilerArgument("X_EXPLICIT_BACKING_FIELDS")] = true
-
-//            "-Wextra",
+        val cliArgs = buildList {
+            add("-Xexplicit-api=DISABLE")
+            add("-Xreturn-value-checker=DISABLED")
+            add("-opt-in=kotlin.ExperimentalStdlibApi")
+            add("-opt-in=kotlin.time.ExperimentalTime")
+            add("-opt-in=kotlin.RequiresOptIn")
+            add("-opt-in=kotlin.ExperimentalUnsignedTypes")
+            add("-opt-in=kotlin.contracts.ExperimentalContracts")
+            add("-opt-in=kotlin.experimental.ExperimentalTypeInference")
+            add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+            add("-opt-in=kotlin.io.encoding.ExperimentalEncodingApi")
+            add("-opt-in=kotlin.concurrent.atomics.ExperimentalAtomicApi")
+            add("-Xcontext-parameters")
+            add("-Xnested-type-aliases")
+            add("-Xreport-all-warnings")
+            add("-Wextra")
+            add("-XXLanguage:+ExplicitBackingFields")
+            add("-Xexplicit-backing-fields")
+            add("-classpath=$cp")
+            add("-module-name=web-module")
+            add("-no-stdlib")
+            add("-no-reflect")
+            add("-progressive")
 //            "-XPlugin=kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }"
+        }
 
-            val logger = CompilationLogger()
+        operation.compilerArguments.applyArgumentStrings(cliArgs)
 
-            val session = toolchain.createBuildSession()
+        val logger = CompilationLogger()
+        logger.warnings = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
 
-            try {
-                val result = session.executeOperation(operation, toolchain.createInProcessExecutionPolicy(), logger)
+        val session = toolchain.createBuildSession()
 
-                val outputFiles = buildMap {
-                    outputDir.visitFileTree {
-                        onVisitFile { file, _ ->
-                            put(file.relativeTo(outputDir).pathString, file.readBytes())
-                            FileVisitResult.CONTINUE
-                        }
-                    }
+        val result = try {
+            session.executeOperation(operation, toolchain.createInProcessExecutionPolicy(), logger)
+        } catch (_: Exception) {
+            null
+        }
+
+        val success = result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS
+
+        val outputFiles = buildMap {
+            outputDir.visitFileTree {
+                onVisitFile { file, _ ->
+                    put(file.relativeTo(outputDir).pathString, file.readBytes())
+                    FileVisitResult.CONTINUE
                 }
-
-                val mainClasses = findMainClasses(outputFiles)
-
-                return when (result) {
-                    org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
-                        val lw = logger.warnings
-                        val cd = CompilerDiagnostics(lw)
-                        Compiled(
-                            compilerDiagnostics = cd,
-                            result = JvmClasses(
-                                files = outputFiles,
-                                mainClasses = mainClasses,
-                            )
-                        )
-                    }
-
-                    else -> {
-                        NotCompiled(CompilerDiagnostics(logger.warnings))
-                    }
-                }
-            } finally {
-                session.close()
             }
-        } catch (e: Exception) {
-            println("Error using kotlin-build-tools-api: ${e.message}")
-            e.printStackTrace()
-            return null
+        }
+        try {
+            val mainClasses = findMainClasses(outputFiles)
+            return if (success) {
+                val cd = CompilerDiagnostics(logger.warnings)
+                Compiled(
+                    compilerDiagnostics = cd,
+                    result = JvmClasses(
+                        files = outputFiles,
+                        mainClasses = mainClasses,
+                    )
+                )
+            } else {
+                NotCompiled(CompilerDiagnostics(logger.warnings))
+            }
+        } finally {
+            session.close()
         }
     }
 
@@ -188,13 +190,14 @@ class KotlinCompiler(
         val ioFiles = files.writeToIoFiles(inputDir)
 
         val arguments =
-            ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
-                "-cp", cp,
-                "-module-name", "web-module",
-                "-no-stdlib", "-no-reflect",
-                "-progressive",
-                "-d", outputDir.absolutePathString(),
-            ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
+            ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments +
+                    listOf(
+                        "-cp", cp,
+                        "-module-name", "web-module",
+                        "-no-stdlib", "-no-reflect",
+                        "-progressive",
+                        "-d", outputDir.absolutePathString(),
+                    ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
         val sources = inputDir.listDirectoryEntries().map { it.toFile() }
         logger.warnings = sources
@@ -242,7 +245,8 @@ class KotlinCompiler(
         usingTempDirectory { outputDir ->
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
             // TODO(Zofia Wiora): Switch to compileWithToolchain when all the flags are available
-            val result = compileWithCompilationService(files, inputDir, outputDir, classpath)
+//            val result = compileWithCompilationService(files, inputDir, outputDir, classpath)
+            val result = compileWithToolchain(files, inputDir, outputDir, classpath)
             return@usingTempDirectory result
         }
     }
