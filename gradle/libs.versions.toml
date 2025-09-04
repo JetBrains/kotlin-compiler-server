@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.0-dev-6977"
+kotlin = "2.3.255-SNAPSHOT"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "3.5.5"
@@ -20,6 +20,8 @@ jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
+gson = "2.11.0"
+spring-framework = "6.2.3"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -47,6 +49,8 @@ kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", v
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
+springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 logback-logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 intellij-trove4j = { group = "org.jetbrains.intellij.deps", name = "trove4j", version.ref = "trove4j" }
@@ -72,6 +76,9 @@ gson = { group = "com.google.code.gson", name = "gson"}
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer"}
 springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "spring-boot" }
+spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer", version.ref = "spring-framework" }
 
 [bundles]
 jackson = ["jackson-databind", "jackson-core", "jackson-annotations"]

@@ -36,12 +36,11 @@ val resourceDependency: Configuration by configurations.creating {
 }
 
 dependencies {
-    annotationProcessor(libs.spring.context.indexer)
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation(libs.aws.springboot.container)
-    implementation(libs.springdoc)
+      annotationProcessor(libs.spring.context.indexer)
     implementation(libs.gson)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.springdoc)
+    implementation(libs.aws.springboot.container)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.compiler.arguments.description)
     implementation(libs.junit)
@@ -53,12 +52,12 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-6186")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-6186")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-6186")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation(libs.spring.boot.starter.test) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(libs.kotlinx.coroutines.test)
