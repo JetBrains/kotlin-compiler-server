@@ -30,8 +30,6 @@ class CompilationLogger : KotlinLogger {
                 className
             )
             warnings["$className.kt"]?.add(ed)
-
-//            warnings = warnings + ("$className.kt" to (warnings[path] ?: emptyList()) + ed)
         } catch (_: Exception) {
         }
     }
@@ -59,7 +57,6 @@ class CompilationLogger : KotlinLogger {
                 "WARNING"
             )
             warnings["$className.kt"]?.add(ed)
-//            warnings = warnings + ("$className.kt" to (warnings[path] ?: emptyList()) + ed)
         } catch (_: Exception) {
         }
     }
