@@ -1,5 +1,6 @@
 [versions]
 kotlin = "2.3.255-SNAPSHOT"
+#kotlin = "2.3.0-dev-6460"
 spring-boot = "3.5.3"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.13"

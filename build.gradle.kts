@@ -39,6 +39,9 @@ dependencies {
     annotationProcessor(libs.spring.context.indexer)
     implementation(libs.gson)
     implementation(libs.spring.boot.starter.web)
+//    annotationProcessor("org.springframework:spring-context-indexer")
+//    implementation("com.google.code.gson:gson")
+//    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation(libs.springdoc)
     implementation(libs.aws.springboot.container)
     implementation(libs.junit)
@@ -49,12 +52,16 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
+//    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-6460")
+//    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-6460")
+//    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-6460")
     implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
     implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
     implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.spring.boot.starter.test) {
+//    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(libs.kotlinx.coroutines.test)

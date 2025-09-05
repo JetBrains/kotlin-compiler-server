@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
         maven("https://redirector.kotlinlang.org/maven/dev")
@@ -11,13 +12,13 @@ pluginManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
-        mavenLocal()
     }
 }
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
         maven("https://redirector.kotlinlang.org/maven/dev")
@@ -29,7 +30,6 @@ dependencyResolutionManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
-        mavenLocal()
     }
 
     versionCatalogs {
