@@ -6,7 +6,6 @@ import com.compiler.server.model.TextInterval
 import org.jetbrains.kotlin.buildtools.api.KotlinLogger
 
 class CompilationLogger : KotlinLogger {
-    // TODO(Zofia Wiora): received msg does not include interval.end of an error/warning
     override val isDebugEnabled: Boolean = false
 
     var warnings: Map<String, MutableList<ErrorDescriptor>> = emptyMap()
@@ -21,10 +20,13 @@ class CompilationLogger : KotlinLogger {
             val className = path.split("/").last().split(".").first()
             val message = msg.split(path)[1].drop(1)
             val splitPath = path.split(":")
-            val line = splitPath[splitPath.size - 2].toInt() - 1
-            val ch = splitPath[splitPath.size - 1].toInt() - 1
+            val line = splitPath[splitPath.size - 4].toInt() - 1
+            val ch = splitPath[splitPath.size - 3].toInt() - 1
+            val endLine = splitPath[splitPath.size - 2].toInt() - 1
+            val endCh = splitPath[splitPath.size - 1].toInt() - 1
             val ed = ErrorDescriptor(
-                TextInterval(TextInterval.TextPosition(line, ch), TextInterval.TextPosition(line, ch)),
+                TextInterval(TextInterval.TextPosition(line, ch), TextInterval.TextPosition(endLine, endCh)),
+//                TextInterval(TextInterval.TextPosition(endLine, endCh), TextInterval.TextPosition(endLine, endCh)),
                 message,
                 ProjectSeveriry.ERROR,
                 className
@@ -48,10 +50,13 @@ class CompilationLogger : KotlinLogger {
             val className = path.split("/").last().split(".").first()
             val message = msg.split(path)[1].drop(1)
             val splitPath = path.split(":")
-            val line = splitPath[splitPath.size - 2].toInt() - 1
-            val ch = splitPath[splitPath.size - 1].toInt() - 1
+            val line = splitPath[splitPath.size - 4].toInt() - 1
+            val ch = splitPath[splitPath.size - 3].toInt() - 1
+            val endLine = splitPath[splitPath.size - 2].toInt() - 1
+            val endCh = splitPath[splitPath.size - 1].toInt() - 1
             val ed = ErrorDescriptor(
-                TextInterval(TextInterval.TextPosition(line, ch), TextInterval.TextPosition(line, ch)),
+                TextInterval(TextInterval.TextPosition(line, ch), TextInterval.TextPosition(endLine, endCh)),
+//                TextInterval(TextInterval.TextPosition(endLine, endCh), TextInterval.TextPosition(endLine, endCh)),
                 message,
                 ProjectSeveriry.WARNING,
                 "WARNING"

@@ -114,9 +114,8 @@ class KotlinCompiler(
         val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
         val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
 
+        // TODO(Zofia Wiora): include arguments regarding XPlugin
         val cliArgs = buildList {
-            add("-Xexplicit-api=DISABLE")
-            add("-Xreturn-value-checker=DISABLED")
             add("-opt-in=kotlin.ExperimentalStdlibApi")
             add("-opt-in=kotlin.time.ExperimentalTime")
             add("-opt-in=kotlin.RequiresOptIn")
@@ -137,6 +136,7 @@ class KotlinCompiler(
             add("-no-stdlib")
             add("-no-reflect")
             add("-progressive")
+
 //            "-XPlugin=kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }"
         }
 
@@ -260,7 +260,6 @@ class KotlinCompiler(
                     listOf("-d", outputDir.absolutePathString())
 
             val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-            // TODO(Zofia Wiora): Switch to compileWithToolchain when all the flags are available
 //            val result = compileWithCompilationService(files, inputDir, outputDir, classpath)
             val result = compileWithToolchain(files, inputDir, outputDir, classpath)
             return@usingTempDirectory result
