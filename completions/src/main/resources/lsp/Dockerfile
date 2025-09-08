@@ -1,5 +1,7 @@
 FROM gradle:9-jdk-21-and-24
 
+VOLUME [ "/workspaces" ]
+
 ARG ZIP_VERSION
 ARG ZIP_ARCH
 ENV ZIP_VERSION=${ZIP_VERSION}
@@ -8,7 +10,7 @@ ENV ZIP_ARCH=${ZIP_ARCH}
 RUN apt-get update && apt-get install -y curl zip unzip bash netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-COPY workspaces /workspaces/
+COPY workspaces /default-workspaces/
 WORKDIR /lsp
 
 COPY server/intellij-lsp-${ZIP_VERSION}-linux-${ZIP_ARCH}.zip ./intellij-lsp.zip

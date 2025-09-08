@@ -41,3 +41,6 @@ out/
 .vscode/
 
 kotlin-lsp/
+
+### LSP (:completions) generated workspace root
+completions/**/lsp-workspace-root-*

@@ -1,4 +1,3 @@
-
 package completions.lsp.util.completions
 
 import com.fasterxml.jackson.databind.ObjectMapper
