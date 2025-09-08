@@ -25,6 +25,7 @@ import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.collections.plus
 import kotlin.io.path.*
 
 @Component
@@ -102,7 +103,6 @@ class KotlinCompiler(
         val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
         val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
 
-        // TODO(Zofia Wiora): include arguments regarding XPlugin
         val cliArgs = buildList {
             add("-opt-in=kotlin.ExperimentalStdlibApi")
             add("-opt-in=kotlin.time.ExperimentalTime")
@@ -124,9 +124,7 @@ class KotlinCompiler(
             add("-no-stdlib")
             add("-no-reflect")
             add("-progressive")
-
-//            "-XPlugin=kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }"
-        }
+        } + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
         operation.compilerArguments.applyArgumentStrings(cliArgs)
 
