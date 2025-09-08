@@ -7,10 +7,8 @@ import com.compiler.server.model.bean.LibrariesFile
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
-import org.jetbrains.kotlin.buildtools.api.CompilationService
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
-import org.jetbrains.kotlin.buildtools.api.ProjectId
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -25,7 +23,6 @@ import java.io.StringWriter
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.collections.plus
 import kotlin.io.path.*
 
 @Component
@@ -91,48 +88,40 @@ class KotlinCompiler(
         }
     }
 
+    fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
+        files.writeToIoFiles(inputDir)
+        usingTempDirectory { outputDir ->
+            val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
+            val result = compileWithToolchain(inputDir, outputDir, classpath)
+            return@usingTempDirectory result
+        }
+    }
+
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
     private fun compileWithToolchain(
-        files: List<ProjectFile>,
         inputDir: Path,
         outputDir: Path,
         cp: String
     ): CompilationResult<JvmClasses> {
-
         val sources = inputDir.listDirectoryEntries()
-        val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
-        val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
 
-        val cliArgs = buildList {
-            add("-opt-in=kotlin.ExperimentalStdlibApi")
-            add("-opt-in=kotlin.time.ExperimentalTime")
-            add("-opt-in=kotlin.RequiresOptIn")
-            add("-opt-in=kotlin.ExperimentalUnsignedTypes")
-            add("-opt-in=kotlin.contracts.ExperimentalContracts")
-            add("-opt-in=kotlin.experimental.ExperimentalTypeInference")
-            add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
-            add("-opt-in=kotlin.io.encoding.ExperimentalEncodingApi")
-            add("-opt-in=kotlin.concurrent.atomics.ExperimentalAtomicApi")
-            add("-Xcontext-parameters")
-            add("-Xnested-type-aliases")
-            add("-Xreport-all-warnings")
-            add("-Wextra")
-            add("-XXLanguage:+ExplicitBackingFields")
-            add("-Xexplicit-backing-fields")
+        val logger = CompilationLogger()
+        logger.compilationLogs = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
+
+        val compilationArgs = buildList {
             add("-classpath=$cp")
             add("-module-name=web-module")
             add("-no-stdlib")
             add("-no-reflect")
             add("-progressive")
-        } + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
+        } + KotlinEnvironment.additionalCompilerArguments +
+                kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
-        operation.compilerArguments.applyArgumentStrings(cliArgs)
-
-        val logger = CompilationLogger()
-        logger.warnings = sources
-            .filter { it.name.endsWith(".kt") }
-            .associate { it.name to mutableListOf() }
-
+        val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
+        val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
+        operation.compilerArguments.applyArgumentStrings(compilationArgs)
         val session = toolchain.createBuildSession()
 
         val result = try {
@@ -141,110 +130,29 @@ class KotlinCompiler(
             null
         }
 
-        val success = result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS
-
-        val outputFiles = buildMap {
-            outputDir.visitFileTree {
-                onVisitFile { file, _ ->
-                    put(file.relativeTo(outputDir).pathString, file.readBytes())
-                    FileVisitResult.CONTINUE
-                }
-            }
-        }
         try {
-            val mainClasses = findMainClasses(outputFiles)
-            return if (success) {
-                val cd = CompilerDiagnostics(logger.warnings)
+            return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
+                val cd = CompilerDiagnostics(logger.compilationLogs)
+                val outputFiles = buildMap {
+                    outputDir.visitFileTree {
+                        onVisitFile { file, _ ->
+                            put(file.relativeTo(outputDir).pathString, file.readBytes())
+                            FileVisitResult.CONTINUE
+                        }
+                    }
+                }
                 Compiled(
                     compilerDiagnostics = cd,
                     result = JvmClasses(
                         files = outputFiles,
-                        mainClasses = mainClasses,
+                        mainClasses = findMainClasses(outputFiles),
                     )
                 )
             } else {
-                NotCompiled(CompilerDiagnostics(logger.warnings))
+                NotCompiled(CompilerDiagnostics(logger.compilationLogs))
             }
         } finally {
             session.close()
-        }
-    }
-
-    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
-    private fun compileWithCompilationService(
-        files: List<ProjectFile>,
-        inputDir: Path,
-        outputDir: Path,
-        cp: String
-    ): CompilationResult<JvmClasses> {
-
-        val logger = CompilationLogger()
-
-        val service = CompilationService.loadImplementation(ClassLoader.getSystemClassLoader())
-        val projectId = ProjectId.RandomProjectUUID()
-        val strategyConfig = service.makeCompilerExecutionStrategyConfiguration().useInProcessStrategy()
-        val compilationConfig = service.makeJvmCompilationConfiguration().useLogger(logger)
-
-        val ioFiles = files.writeToIoFiles(inputDir)
-
-        val arguments =
-            ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments +
-                    listOf(
-                        "-cp", cp,
-                        "-module-name", "web-module",
-                        "-no-stdlib", "-no-reflect",
-                        "-progressive",
-                        "-d", outputDir.absolutePathString(),
-                    ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
-
-        val sources = inputDir.listDirectoryEntries().map { it.toFile() }
-        logger.warnings = sources
-            .filter { it.name.endsWith(".kt") }
-            .associate { it.name to mutableListOf() }
-        val compResult = try {
-            service.compileJvm(projectId, strategyConfig, compilationConfig, sources, arguments)
-        } catch (_: Exception) {
-            null
-        }
-        val success = compResult == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS
-
-        val outputFiles = buildMap {
-            outputDir.visitFileTree {
-                onVisitFile { file, _ ->
-                    put(file.relativeTo(outputDir).pathString, file.readBytes())
-                    FileVisitResult.CONTINUE
-                }
-            }
-        }
-
-        try {
-            val mainClasses = findMainClasses(outputFiles)
-
-            return if (success) {
-                val cd = CompilerDiagnostics(logger.warnings)
-                Compiled(
-                    compilerDiagnostics = cd,
-                    result = JvmClasses(
-                        files = outputFiles,
-                        mainClasses = mainClasses,
-                    )
-                )
-            } else {
-                NotCompiled(CompilerDiagnostics(logger.warnings))
-            }
-        } finally {
-            service.finishProjectCompilation(projectId)
-        }
-    }
-
-    @OptIn(ExperimentalPathApi::class)
-    fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        files.writeToIoFiles(inputDir)
-        usingTempDirectory { outputDir ->
-            val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-//            val result = compileWithCompilationService(files, inputDir, outputDir, classpath)
-            val result = compileWithToolchain(files, inputDir, outputDir, classpath)
-            return@usingTempDirectory result
         }
     }
 
