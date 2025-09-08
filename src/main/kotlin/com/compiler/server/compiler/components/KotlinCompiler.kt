@@ -103,6 +103,7 @@ class KotlinCompiler(
         outputDir: Path,
         cp: String
     ): CompilationResult<JvmClasses> {
+        System.setProperty("org.jetbrains.kotlin.buildtools.logger.extendedLocation", "true")
         val sources = inputDir.listDirectoryEntries()
 
         val logger = CompilationLogger()
