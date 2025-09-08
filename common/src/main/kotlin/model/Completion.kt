@@ -34,7 +34,7 @@ data class ImportInfo(
 fun completionTextFromFullName(fullName: String): String {
   var completionText = fullName
   var position = completionText.indexOf('(')
-  if (position != -1) {
+  if (position > 0) {
     if (completionText[position - 1] == ' ') position -= 2
     if (completionText[position + 1] == ')') position++
     completionText = completionText.substring(0, position + 1)
