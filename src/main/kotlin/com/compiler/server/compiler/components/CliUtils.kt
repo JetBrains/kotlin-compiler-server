@@ -73,7 +73,7 @@ fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Pat
 
       val messageSeverity: ProjectSeveriry = when (severity) {
         EXCEPTION, ERROR -> ProjectSeveriry.ERROR
-        STRONG_WARNING, WARNING -> ProjectSeveriry.WARNING
+        STRONG_WARNING, WARNING, FIXED_WARNING -> ProjectSeveriry.WARNING
         INFO, LOGGING, OUTPUT -> return ""
       }
       val textInterval = location?.let {
