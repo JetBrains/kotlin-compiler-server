@@ -7,8 +7,6 @@ import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.psi.KtFile
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.File
-import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
@@ -158,11 +156,10 @@ class KotlinToJSTranslator(
       val moduleName = "playground"
       usingTempDirectory { outputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
-        val k2JSCompiler = K2JSCompiler()
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
 
-        k2JSCompiler.tryCompilation(
+        K2JSCompiler().tryCompilation(
           inputDir,
           ioFiles,
           compileWasmArgs(
@@ -175,7 +172,7 @@ class KotlinToJSTranslator(
           )
         )
           .flatMap {
-            k2JSCompiler.tryCompilation(
+            K2JSCompiler().tryCompilation(
               inputDir, ioFiles,
               linkWasmArgs(
                 moduleName,
@@ -189,7 +186,7 @@ class KotlinToJSTranslator(
           }
           .map {
             WasmTranslationSuccessfulOutput(
-              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText(),
+              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText().fixSkikoImport(),
               jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
               wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
               wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
@@ -198,6 +195,10 @@ class KotlinToJSTranslator(
       }
     }
 }
+
+private fun String.fixSkikoImport(): String = lineSequence()
+  .filterNot { it.contains("imports['./skiko.mjs'].skikoApi") }
+  .joinToString("\n")
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
   val mainIrFunction = """

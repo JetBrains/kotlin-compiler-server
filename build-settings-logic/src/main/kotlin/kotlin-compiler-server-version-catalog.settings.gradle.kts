@@ -2,6 +2,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
+        google()
         mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
@@ -22,6 +23,7 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
+        google()
         mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
