@@ -31,6 +31,7 @@ kotlin-stdlib-wasm-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 kotlin-compiler = { group = "org.jetbrains.kotlin", name = "kotlin-compiler", version.ref = "kotlin" }
+kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-arguments-description", version.ref = "kotlin" }
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradle-plugin-idea = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin-idea", version.ref = "kotlin" }
@@ -45,10 +46,9 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-io" }
 kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version.ref = "kotlinx-io" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
-springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
-aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 logback-logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 intellij-trove4j = { group = "org.jetbrains.intellij.deps", name = "trove4j", version.ref = "trove4j" }
@@ -68,6 +68,12 @@ compose-material3 = { group = "org.jetbrains.compose.material3", name = "materia
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
+gson = { group = "com.google.code.gson", name = "gson"}
+
+#spring stack dependencies
+aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
+spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer"}
+springdoc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 
 [bundles]
 kotlin-stdlib = ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8"]

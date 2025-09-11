@@ -1,6 +1,7 @@
 package com.compiler.server
 
-import com.compiler.server.generator.generateSingleProject
+import com.compiler.server.api.ProjectFileRequestDto
+import com.compiler.server.api.RunRequest
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -47,7 +48,7 @@ class CompilerAPITest {
         getHost() + url,
         HttpEntity(
           jacksonObjectMapper().writeValueAsString(
-            generateSingleProject(PROGRAM_RUN)
+            RunRequest(files = listOf(ProjectFileRequestDto(text = PROGRAM_RUN, name = "File.kt")),)
           ),
           headers
         ),
