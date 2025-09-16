@@ -1,6 +1,7 @@
 [versions]
-kotlin = "2.3.255-SNAPSHOT"
-#kotlin = "2.3.0-dev-6460"
+kotlin = "2.3.0-dev-8188"
+kotlinIdeVersion = "1.9.20-506"
+kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "3.5.3"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.13"
@@ -19,8 +20,6 @@ jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
-gson = "2.11.0"
-spring-framework = "6.2.3"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -67,10 +66,6 @@ compose-material3 = { group = "org.jetbrains.compose.material3", name = "materia
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web", version.ref = "spring-boot" }
-spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test", version.ref = "spring-boot" }
-spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer", version.ref = "spring-framework" }
 
 [bundles]
 jackson = ["jackson-databind", "jackson-core", "jackson-annotations"]
