@@ -12,8 +12,8 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 val propertyFile = "application.properties"
 
 plugins {
-    alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.spring.boot)
     alias(libs.plugins.kotlin.plugin.spring)
     id("base-kotlin-jvm-conventions")
 }
@@ -36,12 +36,9 @@ val resourceDependency: Configuration by configurations.creating {
 }
 
 dependencies {
-      annotationProcessor(libs.spring.context.indexer)
-    implementation(libs.gson)
-    implementation(libs.spring.boot.starter.web)
-//    annotationProcessor("org.springframework:spring-context-indexer")
-//    implementation("com.google.code.gson:gson")
-//    implementation("org.springframework.boot:spring-boot-starter-web")
+    annotationProcessor("org.springframework:spring-context-indexer")
+    implementation("com.google.code.gson:gson")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation(libs.springdoc)
     implementation(libs.aws.springboot.container)
     implementation(libs.kotlinx.serialization.json)
@@ -55,16 +52,12 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
-//    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-6460")
-//    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-6460")
-//    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-6460")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-8188")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-8188")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-8188")
 
     testImplementation(libs.kotlin.test)
-    testImplementation(libs.spring.boot.starter.test) {
-//    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(libs.kotlinx.coroutines.test)

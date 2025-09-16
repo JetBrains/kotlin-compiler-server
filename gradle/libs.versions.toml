@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.255-SNAPSHOT"
+kotlin = "2.3.0-dev-8188"
 kotlinIdeVersion = "1.9.20-506"
 kotlinIdeVersionWithSuffix = "231-1.9.20-506-IJ8109.175"
 spring-boot = "3.5.5"
@@ -20,8 +20,6 @@ jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
-gson = "2.11.0"
-spring-framework = "6.2.3"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
