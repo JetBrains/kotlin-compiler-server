@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.analyzer.ModuleInfo
 import org.jetbrains.kotlin.analyzer.ResolverForProject
+import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.container.ComponentProvider
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
@@ -18,9 +19,9 @@ import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 @OptIn(FrontendInternals::class)
 class KotlinResolutionFacade(
-  override val project: Project,
-  override val moduleDescriptor: ModuleDescriptor,
-  private val componentProvider: ComponentProvider
+    override val project: com.intellij.openapi.project.Project,
+    override val moduleDescriptor: ModuleDescriptor,
+    private val componentProvider: ComponentProvider
 ) : ResolutionFacade {
   @Suppress("UNCHECKED_CAST")
   override fun <T : Any> getFrontendService(serviceClass: Class<T>) =

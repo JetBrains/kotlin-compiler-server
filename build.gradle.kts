@@ -49,14 +49,17 @@ dependencies {
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.kotlin.stdlib)
-    implementation(libs.kotlin.compiler)
     implementation(libs.kotlin.script.runtime)
-    implementation(libs.kotlin.compiler.ide) {
-        isTransitive = false
-    }
+//    implementation(libs.kotlin.compiler.ide) {
+//        isTransitive = false
+//    }
     implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
+
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -100,7 +103,7 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs.set(listOf("-Xjsr305=strict"))
     }
     dependsOn(":executors:jar")
-    dependsOn(":indexation:run")
+//    dependsOn(":indexation:run")
     buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")

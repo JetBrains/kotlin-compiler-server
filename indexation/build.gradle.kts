@@ -5,9 +5,9 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation(libs.kotlin.compiler.ide) {
-        isTransitive = false
-    }
+//    implementation(libs.kotlin.compiler.ide) {
+//        isTransitive = false
+//    }
 }
 
 application {

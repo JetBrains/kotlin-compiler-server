@@ -2,13 +2,17 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.KotlinToolchain
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.org.objectweb.asm.ClassReader
@@ -88,18 +92,52 @@ class KotlinCompiler(
     }
   }
 
-  @OptIn(ExperimentalPathApi::class)
-  fun compile(files: List<KtFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-    val ioFiles = files.writeToIoFiles(inputDir)
+  fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
+    files.writeToIoFiles(inputDir)
     usingTempDirectory { outputDir ->
-      val arguments = ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
-        "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
-        "-module-name", "web-module",
-        "-no-stdlib", "-no-reflect",
-        "-progressive",
-        "-d", outputDir.absolutePathString(),
-      ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
-      K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
+      val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
+      val result = compileWithToolchain(inputDir, outputDir, classpath)
+      return@usingTempDirectory result
+    }
+  }
+
+  @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class)
+  private fun compileWithToolchain(
+    inputDir: Path,
+    outputDir: Path,
+    cp: String
+  ): CompilationResult<JvmClasses> {
+    System.setProperty("org.jetbrains.kotlin.buildtools.logger.extendedLocation", "true")
+    val sources = inputDir.listDirectoryEntries()
+
+    val logger = CompilationLogger()
+    logger.compilationLogs = sources
+      .filter { it.name.endsWith(".kt") }
+      .associate { it.name to mutableListOf() }
+
+    val compilationArgs = buildList {
+      add("-classpath=$cp")
+      add("-module-name=web-module")
+      add("-no-stdlib")
+      add("-no-reflect")
+      add("-progressive")
+    } + KotlinEnvironment.additionalCompilerArguments +
+            kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
+
+    val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
+    val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
+    operation.compilerArguments.applyArgumentStrings(compilationArgs)
+    val session = toolchain.createBuildSession()
+
+    val result = try {
+      session.executeOperation(operation, toolchain.createInProcessExecutionPolicy(), logger)
+    } catch (_: Exception) {
+      null
+    }
+
+    try {
+      return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
+        val cd = CompilerDiagnostics(logger.compilationLogs)
         val outputFiles = buildMap {
           outputDir.visitFileTree {
             onVisitFile { file, _ ->
@@ -108,12 +146,18 @@ class KotlinCompiler(
             }
           }
         }
-        val mainClasses = findMainClasses(outputFiles)
-        JvmClasses(
+        Compiled(
+          compilerDiagnostics = cd,
+          result = JvmClasses(
             files = outputFiles,
-            mainClasses = mainClasses,
+            mainClasses = findMainClasses(outputFiles),
+          )
         )
+      } else {
+        NotCompiled(CompilerDiagnostics(logger.compilationLogs))
       }
+    } finally {
+      session.close()
     }
   }
 
