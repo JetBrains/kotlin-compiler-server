@@ -49,9 +49,9 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:2.3.0-dev-8188")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:2.3.0-dev-8188")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.0-dev-8188")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

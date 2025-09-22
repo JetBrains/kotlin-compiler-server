@@ -4,6 +4,7 @@ import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.*
 import com.compiler.server.model.bean.LibrariesFile
+import com.compiler.server.service.KotlinProjectExecutor
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
@@ -15,11 +16,14 @@ import org.jetbrains.org.objectweb.asm.ClassVisitor
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes.*
 import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.lang.management.ManagementFactory
+import java.lang.management.MemoryMXBean
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -33,6 +37,8 @@ class KotlinCompiler(
     @Value("\${policy.file}") private val policyFileName: String
 ) {
     private val policyFile = File(policyFileName)
+    private val mem: MemoryMXBean = ManagementFactory.getMemoryMXBean()
+    private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
     data class JvmClasses(
         val files: Map<String, ByteArray> = emptyMap(),
@@ -89,11 +95,16 @@ class KotlinCompiler(
     }
 
     fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        files.writeToIoFiles(inputDir)
-        usingTempDirectory { outputDir ->
-            val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-            val result = compileWithToolchain(inputDir, outputDir, classpath)
-            return@usingTempDirectory result
+        log.info("\tmemusage\t{}\t{}", System.currentTimeMillis(), mem.heapMemoryUsage.used)
+        try {
+            files.writeToIoFiles(inputDir)
+            usingTempDirectory { outputDir ->
+                val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
+                val result = compileWithToolchain(inputDir, outputDir, classpath)
+                return@usingTempDirectory result
+            }
+        } finally {
+            log.info("\tmemusage\t{}\t{}", System.currentTimeMillis(), mem.heapMemoryUsage.used)
         }
     }
 
