@@ -9,6 +9,5 @@ plugins {
 }
 
 include(":executors")
-include(":indexation")
 include(":common")
 include(":dependencies")
