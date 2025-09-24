@@ -3,6 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.compiler.components.IndexationProvider.Companion.UNRESOLVED_REFERENCE_PREFIX
 import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ErrorDescriptor
+import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.TextInterval
 import org.jetbrains.kotlin.cli.common.CLICompiler
@@ -11,7 +12,6 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
-import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
 import java.nio.file.Path
 import java.util.*
@@ -128,7 +128,7 @@ private fun getTempDirectory(): Path {
   return File(dir).canonicalFile.resolve(sessionId).toPath()
 }
 
-fun List<KtFile>.writeToIoFiles(inputDir: Path): List<Path> {
+fun List<ProjectFile>.writeToIoFiles(inputDir: Path): List<Path> {
   val ioFiles = map { inputDir / it.name }
   for ((ioFile, ktFile) in ioFiles zip this) {
     ioFile.writeText(ktFile.text)

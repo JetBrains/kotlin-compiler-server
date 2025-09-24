@@ -5,9 +5,7 @@ import com.compiler.server.utils.CompilerArgumentsUtil
 import com.compiler.server.utils.JS_DEFAULT_MODULE_NAME
 import com.compiler.server.utils.WASM_DEFAULT_MODULE_NAME
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
-import org.jetbrains.kotlin.psi.KtFile
 import org.springframework.stereotype.Service
 import kotlin.io.path.div
 import kotlin.io.path.readBytes
@@ -35,10 +33,10 @@ class KotlinToJSTranslator(
     }
 
     fun translateJs(
-        files: List<KtFile>,
+        files: List<ProjectFile>,
         arguments: List<String>,
         jsCompilerArguments: JsCompilerArguments,
-        translate: (List<KtFile>, List<String>, JsCompilerArguments) -> CompilationResult<String>,
+        translate: (List<ProjectFile>, List<String>, JsCompilerArguments) -> CompilationResult<String>,
     ): TranslationJSResult = try {
         val compilationResult = translate(files, arguments, jsCompilerArguments)
         val jsCode = when (compilationResult) {
@@ -51,11 +49,11 @@ class KotlinToJSTranslator(
     }
 
     fun translateWasm(
-        files: List<KtFile>,
+        files: List<ProjectFile>,
         debugInfo: Boolean,
         projectType: ProjectType,
         userCompilerArguments: JsCompilerArguments,
-        translate: (List<KtFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
+        translate: (List<ProjectFile>, ProjectType, Boolean, JsCompilerArguments) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
             val compilationResult = translate(
@@ -81,7 +79,7 @@ class KotlinToJSTranslator(
     }
 
     fun doTranslateWithIr(
-        files: List<KtFile>,
+        files: List<ProjectFile>,
         arguments: List<String>,
         userCompilerArguments: JsCompilerArguments
     ): CompilationResult<String> =
@@ -125,7 +123,7 @@ class KotlinToJSTranslator(
 
 
     fun doTranslateWithWasm(
-        files: List<KtFile>,
+        files: List<ProjectFile>,
         projectType: ProjectType,
         debugInfo: Boolean,
         userCompilerArguments: JsCompilerArguments
