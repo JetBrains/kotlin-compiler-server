@@ -1510,7 +1510,7 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": "kotlin-dom-api-compat-2.3.0-dev-8188.klib:kotlin-stdlib-js-2.3.0-dev-8188.klib"
+      "predefinedValues": "kotlin-dom-api-compat-{{KOTLIN_VERSION_PLACEHOLDER}}.klib:kotlin-stdlib-js-{{KOTLIN_VERSION_PLACEHOLDER}}.klib"
     },
     {
       "name": "source-map",

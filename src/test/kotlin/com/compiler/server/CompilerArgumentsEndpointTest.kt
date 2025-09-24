@@ -4,7 +4,6 @@ import com.compiler.server.model.ProjectType
 import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import component.KotlinEnvironment
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,6 +60,7 @@ class CompilerArgumentsEndpointTest {
                 "{{PLUGIN_PLACEHOLDER}}",
                 kotlinEnvironment.compilerPlugins.joinToString(",") { "\"" + it.name } + "\"")
             .replace("{{CLASSPATH_PLACEHOLDER}}", kotlinEnvironment.classpath.joinToString(":") { it.name })
+            .replace("{{KOTLIN_VERSION_PLACEHOLDER}}", version)
 
         urls.forEach { path ->
             val response = client.exchange(
