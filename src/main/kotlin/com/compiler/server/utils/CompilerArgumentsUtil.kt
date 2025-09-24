@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.arguments.dsl.types.KotlinVersionType
 import org.jetbrains.kotlin.arguments.dsl.types.ReturnValueCheckerModeType
 import org.jetbrains.kotlin.arguments.dsl.types.StringArrayType
 import org.jetbrains.kotlin.arguments.dsl.types.StringType
-//import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
+import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.springframework.stereotype.Component
 
 internal const val COMPILER_ARGUMENTS_JSON = "kotlin-compiler-arguments.json"
@@ -541,37 +541,9 @@ class CompilerArgumentsUtil(
         }
     }
 
-//    private fun KotlinCompilerArgument.isSupportedOnCurrentVersion(): Boolean {
-//        return releaseVersionsMetadata.removedVersion?.releaseName?.let { releaseVersion ->
-//            KotlinToolingVersion(versionInfo.version) < KotlinToolingVersion(releaseVersion)
-//        } ?: true
-//    }
-
     private fun KotlinCompilerArgument.isSupportedOnCurrentVersion(): Boolean {
         return releaseVersionsMetadata.removedVersion?.releaseName?.let { releaseVersion ->
-            compareKotlinVersions(versionInfo.version, releaseVersion) < 0
+            KotlinToolingVersion(versionInfo.version) < KotlinToolingVersion(releaseVersion)
         } ?: true
-    }
-
-    private fun compareKotlinVersions(a: String, b: String): Int {
-        // Compare numeric parts first (e.g., 1.9.23 vs 2.0.0)
-        val (anum, bnum) = a.substringBefore('-') to b.substringBefore('-')
-        val asParts = anum.split('.')
-        val bsParts = bnum.split('.')
-        val max = maxOf(asParts.size, bsParts.size)
-        for (i in 0 until max) {
-            val ai = asParts.getOrNull(i)?.toIntOrNull() ?: 0
-            val bi = bsParts.getOrNull(i)?.toIntOrNull() ?: 0
-            if (ai != bi) return ai.compareTo(bi)
-        }
-
-        // Numeric parts equal → consider qualifiers (pre-release < final)
-        val aHasQualifier = a.contains('-')
-        val bHasQualifier = b.contains('-')
-        return when {
-            aHasQualifier && !bHasQualifier -> -1  // a is pre-release, b is final → a < b
-            !aHasQualifier && bHasQualifier -> 1   // a is final, b is pre-release → a > b
-            else -> 0                              // both final or both pre-release → treat equal
-        }
     }
 }

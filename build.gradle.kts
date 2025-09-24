@@ -52,9 +52,10 @@ dependencies {
     implementation(libs.kotlin.script.runtime)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:${libs.versions.kotlin.get()}")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:${libs.versions.kotlin.get()}")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
+    implementation("org.jetbrains.kotlin:kotlin-tooling-core:${libs.versions.kotlin.get()}")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

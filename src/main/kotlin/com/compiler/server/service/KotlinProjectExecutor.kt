@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component
 @Component
 class KotlinProjectExecutor(
     private val kotlinCompiler: KotlinCompiler,
-//    private val completionProvider: CompletionProvider,
     private val version: VersionInfo,
     private val kotlinToJSTranslator: KotlinToJSTranslator,
     private val kotlinEnvironment: KotlinEnvironment,
