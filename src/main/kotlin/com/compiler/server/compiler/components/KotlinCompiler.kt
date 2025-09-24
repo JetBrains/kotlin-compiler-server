@@ -99,27 +99,9 @@ class KotlinCompiler(
         val ioFiles = files.writeToIoFiles(inputDir)
         usingTempDirectory { outputDir ->
             val arguments = ioFiles.map { it.absolutePathString() } +
-                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
-                    listOf("-d", outputDir.absolutePathString())
-            val classpath = kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath }
-            val result = compileWithToolchain(inputDir, outputDir, classpath, arguments)
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments)
+            val result = compileWithToolchain(inputDir, outputDir, arguments)
             return@usingTempDirectory result
-
-//            K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
-//                val outputFiles = buildMap {
-//                    outputDir.visitFileTree {
-//                        onVisitFile { file, _ ->
-//                            put(file.relativeTo(outputDir).pathString, file.readBytes())
-//                            FileVisitResult.CONTINUE
-//                        }
-//                    }
-//                }
-//                val mainClasses = findMainClasses(outputFiles)
-//                JvmClasses(
-//                    files = outputFiles,
-//                    mainClasses = mainClasses,
-//                )
-//            }
         }
     }
 
@@ -127,7 +109,6 @@ class KotlinCompiler(
     private fun compileWithToolchain(
         inputDir: Path,
         outputDir: Path,
-        cp: String,
         arguments: List<String>
     ): CompilationResult<JvmClasses> {
         System.setProperty("org.jetbrains.kotlin.buildtools.logger.extendedLocation", "true")
@@ -137,15 +118,6 @@ class KotlinCompiler(
         logger.compilationLogs = sources
             .filter { it.name.endsWith(".kt") }
             .associate { it.name to mutableListOf() }
-
-//        val compilationArgs = buildList {
-//            add("-classpath=$cp")
-//            add("-module-name=web-module")
-//            add("-no-stdlib")
-//            add("-no-reflect")
-//            add("-progressive")
-//        } + KotlinEnvironment.additionalCompilerArguments +
-//                kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
 
         val toolchain = KotlinToolchain.loadImplementation(ClassLoader.getSystemClassLoader())
         val operation = toolchain.jvm.createJvmCompilationOperation(sources, outputDir)
