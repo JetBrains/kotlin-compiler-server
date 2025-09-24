@@ -1510,7 +1510,7 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": "kotlin-stdlib-wasm-js-2.3.0-dev-6977.klib"
+      "predefinedValues": "kotlin-stdlib-wasm-js-2.3.0-dev-8188.klib"
     },
     {
       "name": "source-map",
