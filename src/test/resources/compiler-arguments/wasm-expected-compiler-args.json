@@ -385,6 +385,18 @@
       "predefinedValues": null
     },
     {
+      "name": "XXdump-model",
+      "shortName": null,
+      "description": "Dump compilation model to specified directory for use in modularized tests.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xmetadata-version",
       "shortName": null,
       "description": "Change the metadata version of the generated binary files.",
