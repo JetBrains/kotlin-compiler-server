@@ -50,9 +50,12 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.kotlin.stdlib)
     implementation(libs.kotlin.script.runtime)
-    implementation(libs.kotlin.core)
+//    implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
+    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

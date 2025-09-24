@@ -1,9 +1,8 @@
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
-        maven("https://redirector.kotlinlang.org/maven/dev")
+        mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
         if (additionalRepositoryProperty.isPresent) {
@@ -12,16 +11,18 @@ pluginManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
+
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
+        maven("https://redirector.kotlinlang.org/maven/dev")
     }
 }
 
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
-        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven("https://redirector.kotlinlang.org/maven/dev")
+        mavenLocal()
 
         val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
         if (additionalRepositoryProperty.isPresent) {
@@ -30,6 +31,18 @@ dependencyResolutionManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
+
+        maven("https://repo.spring.io/snapshot")
+        maven("https://repo.spring.io/milestone")
+        maven("https://redirector.kotlinlang.org/maven/kotlin-ide")
+        maven("https://redirector.kotlinlang.org/maven/dev")
+        maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-ide-plugin-dependencies")
+        maven("https://www.myget.org/F/rd-snapshots/maven/")
+        maven("https://redirector.kotlinlang.org/maven/kotlin-ide")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 
     versionCatalogs {
