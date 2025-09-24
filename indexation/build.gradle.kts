@@ -5,9 +5,8 @@ plugins {
 
 dependencies {
     implementation(project(":common", configuration = "default"))
-    implementation(libs.kotlin.compiler.ide) {
-        isTransitive = false
-    }
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
+    implementation("org.jetbrains.kotlin:kotlin-script-runtime:${libs.versions.kotlin.get()}")
 }
 
 application {

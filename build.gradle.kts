@@ -12,8 +12,8 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 val propertyFile = "application.properties"
 
 plugins {
-    alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.kotlin.plugin.spring)
     id("base-kotlin-jvm-conventions")
 }
@@ -36,25 +36,23 @@ val resourceDependency: Configuration by configurations.creating {
 }
 
 dependencies {
-    annotationProcessor("org.springframework:spring-context-indexer")
-    implementation("com.google.code.gson:gson")
+    annotationProcessor(libs.spring.context.indexer)
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation(libs.springdoc)
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation(libs.aws.springboot.container)
+    implementation(libs.springdoc)
+    implementation(libs.gson)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.compiler.arguments.description)
     implementation(libs.junit)
     implementation(libs.logback.logstash.encoder)
     implementation(libs.intellij.trove4j)
     implementation(libs.kotlin.reflect)
-    implementation(libs.kotlin.stdlib)
+    implementation(libs.bundles.kotlin.stdlib)
     implementation(libs.kotlin.script.runtime)
+    implementation(libs.kotlin.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
-    implementation(project(":dependencies"))
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
