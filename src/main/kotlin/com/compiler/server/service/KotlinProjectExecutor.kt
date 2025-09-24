@@ -16,6 +16,7 @@ import com.compiler.server.model.TranslationResultWithJsCode
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
+import org.junit.Ignore
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -55,6 +56,7 @@ class KotlinProjectExecutor(
         return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
     }
 
+    @Ignore
     fun complete(project: Project, line: Int, character: Int): List<Completion> {
         return emptyList()
     }
