@@ -26,10 +26,14 @@ import org.springframework.stereotype.Component
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.lang.management.MemoryMXBean
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.*
+import java.lang.management.ManagementFactory
+import org.slf4j.LoggerFactory
+import com.compiler.server.service.KotlinProjectExecutor
 
 @Component
 class KotlinCompiler(
@@ -41,6 +45,8 @@ class KotlinCompiler(
     private val jvmCompilerArguments: Set<ExtendedCompilerArgument>,
 ) {
     private val policyFile = File(policyFileName)
+    private val mem: MemoryMXBean = ManagementFactory.getMemoryMXBean()
+    private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
 
     data class JvmClasses(
         val files: Map<String, ByteArray> = emptyMap(),
@@ -65,7 +71,12 @@ class KotlinCompiler(
             ?.joinToString("\n\n")
     }
 
-    fun run(files: List<ProjectFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun run(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        args: String,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
             val mainClass = JavaRunnerExecutor::class.java.name
             val compiledMainClass = when (compiled.mainClasses.size) {
@@ -76,7 +87,9 @@ class KotlinCompiler(
                 1 -> compiled.mainClasses.single()
                 else -> return@execute JvmExecutionResult(
                     exception = IllegalArgumentException(
-                        "Multiple classes in project contain main methods found: ${compiled.mainClasses.sorted().joinToString()}"
+                        "Multiple classes in project contain main methods found: ${
+                            compiled.mainClasses.sorted().joinToString()
+                        }"
                     ).toExceptionDescriptor()
                 )
             }
@@ -86,7 +99,11 @@ class KotlinCompiler(
         }
     }
 
-    fun test(files: List<ProjectFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun test(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, _ ->
             val mainClass = JUnitExecutors::class.java.name
             javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
@@ -95,15 +112,25 @@ class KotlinCompiler(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        val ioFiles = files.writeToIoFiles(inputDir)
-        usingTempDirectory { outputDir ->
-            val arguments = ioFiles.map { it.absolutePathString() } +
-                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments)
-            val result = compileWithToolchain(inputDir, outputDir, arguments)
-            return@usingTempDirectory result
+    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> =
+        usingTempDirectory { inputDir ->
+            val ioFiles = files.writeToIoFiles(inputDir)
+            usingTempDirectory { outputDir ->
+                log.info("\tmemusage\t{}\t{}", System.currentTimeMillis(), mem.heapMemoryUsage.used)
+                try {
+                    val arguments = ioFiles.map { it.absolutePathString() } +
+                            compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                                jvmCompilerArguments,
+                                compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS,
+                                userCompilerArguments
+                            )
+                    val result = compileWithToolchain(inputDir, outputDir, arguments)
+                    return@usingTempDirectory result
+                } finally {
+                    log.info("\tmemusage\t{}\t{}", System.currentTimeMillis(), mem.heapMemoryUsage.used)
+                }
+            }
         }
-    }
 
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class, ExperimentalBuildToolsApi::class)
     private fun compileWithToolchain(
