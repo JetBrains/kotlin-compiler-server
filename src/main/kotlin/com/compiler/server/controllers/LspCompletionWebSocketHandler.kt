@@ -16,12 +16,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import model.Completion
 import org.slf4j.LoggerFactory
@@ -38,32 +38,46 @@ import kotlin.time.Duration.Companion.seconds
 class LspCompletionWebSocketHandler(
     private val lspProxy: KotlinLspProxy,
     private val kotlinProjectExecutor: KotlinProjectExecutor,
-): TextWebSocketHandler() {
+) : TextWebSocketHandler() {
     private val job = SupervisorJob()
     private val scope = CoroutineScope(
         Dispatchers.IO + job + CoroutineName("LspCompletionWebSocketHandler")
     )
-
-    private val activeSession = ConcurrentHashMap<String, WebSocketSession>()
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
 
-    private val sessionLocks = ConcurrentHashMap<String, Mutex>()
     private val completionsJob = ConcurrentHashMap<String, Job>()
-    private val sessionFlows = ConcurrentHashMap<String, MutableSharedFlow<CompletionRequest>>()
+    private val sessionMailbox = ConcurrentHashMap<String, Channel<CompletionRequest>>()
+
+    private val responseJobs = ConcurrentHashMap<String, Job>()
+    private val outgoingResponsesFlows = ConcurrentHashMap<String, MutableSharedFlow<Response>>()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val request = session.decodeCompletionRequestFromTextMessage(message) ?: return
-        sessionFlows[session.id]?.tryEmit(request)
+        sessionMailbox[session.id]?.trySend(request)
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        activeSession[session.id] = session
+        val mailbox = Channel<CompletionRequest>(capacity = Channel.CONFLATED).also {
+            sessionMailbox[session.id] = it
+        }
 
-        val flow =  MutableSharedFlow<CompletionRequest>(
-            replay = 0,
-            extraBufferCapacity = 1,
+        val responseFlow = MutableSharedFlow<Response>(
+            extraBufferCapacity = 32,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        ).also { sessionFlows[session.id] = it }
+        ).also { outgoingResponsesFlows[session.id] = it }
+
+        val responseJob = scope.launch {
+            try {
+                responseFlow.collect { response ->
+                    if (session.isOpen) session.sendMessage(TextMessage(response.toJson()))
+                }
+            } catch (t: Throwable) {
+                if (t !is CancellationException) {
+                    logger.warn("Error collecting responses for client ${session.id}: ${t.message}")
+                }
+            }
+        }
+        responseJobs[session.id] = responseJob
 
         val completionWorker = scope.launch {
             with(session) {
@@ -78,38 +92,7 @@ class LspCompletionWebSocketHandler(
                 sendResponse(Response.Init(id))
             }
 
-            flow
-                .collectLatest { req ->
-                    val available = withTimeoutOrNull(LSP_TIMEOUT_WAIT_TIME) {
-                        while (!lspProxy.isAvailable()) {
-                            delay(LSP_TIMEOUT_POLL_INTERVAL)
-                        }
-                        true
-                    } ?: false
-
-                    if (!available) {
-                        session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
-                        return@collectLatest
-                    }
-
-                    try {
-                        val res = kotlinProjectExecutor.completeWithLsp(
-                            clientId = session.id,
-                            project = req.project,
-                            line = req.line,
-                            character = req.ch
-                        )
-                        session.sendResponse(Response.Completions(completions = res, requestId = req.requestId))
-                    } catch (e: Exception) {
-                        logger.warn("Completion processing failed for client ${session.id}:", e)
-                        session.sendResponse(
-                            Response.Error(
-                                message = "Completion failed: ${e.message}",
-                                requestId = req.requestId
-                            )
-                        )
-                    }
-                }
+            mailbox.processIncomingRequests(session)
         }
         completionWorker.invokeOnCompletion { completionsJob.remove(session.id) }
         completionsJob[session.id] = completionWorker
@@ -124,27 +107,49 @@ class LspCompletionWebSocketHandler(
     override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
         handleClientDisconnected(session.id)
         session.close(CloseStatus.SERVER_ERROR)
-        logger.debug("Lsp client transport error: {} ({}, {})", session.id, exception.cause, exception.message)
+        logger.info("Lsp client transport error: {} ({}, {})", session.id, exception.cause, exception.message)
     }
 
     private fun handleClientDisconnected(clientId: String) {
-        activeSession.remove(clientId)
-        sessionFlows.remove(clientId)
         completionsJob.remove(clientId)?.cancel()
+        responseJobs.remove(clientId)?.cancel()
+        sessionMailbox.remove(clientId)
+        outgoingResponsesFlows.remove(clientId)
         scope.launch { lspProxy.onClientDisconnected(clientId) }
     }
 
-    private suspend fun WebSocketSession.sendResponse(response: Response) {
-        val mutex = sessionLocks.computeIfAbsent(id) { Mutex() }
-        try {
-            mutex.withLock {
-                if (isOpen) sendMessage(TextMessage(response.toJson()))
+    private suspend fun Channel<CompletionRequest>.processIncomingRequests(session: WebSocketSession) {
+        consumeAsFlow().conflate().collect { req ->
+            val available = withTimeoutOrNull(LSP_TIMEOUT_WAIT_TIME) {
+                while (!lspProxy.isAvailable()) {
+                    delay(LSP_TIMEOUT_POLL_INTERVAL)
+                }
+                true
+            } ?: false
+
+            if (!available) {
+                session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
+                return@collect
             }
-        } catch (e: Exception) {
-            if (e !is CancellationException) {
-                logger.warn("Error sending message to client $id:", e.message)
+
+            try {
+                val res = kotlinProjectExecutor.completeWithLsp(
+                    clientId = session.id, project = req.project, line = req.line, character = req.ch
+                )
+                session.sendResponse(Response.Completions(completions = res, requestId = req.requestId))
+            } catch (e: Exception) {
+                logger.warn("Completion processing failed for client ${session.id}:", e)
+                session.sendResponse(
+                    Response.Error(
+                        message = e.message ?: "Unknown error", requestId = req.requestId
+                    )
+                )
             }
         }
+    }
+
+    private fun WebSocketSession.sendResponse(response: Response) {
+        outgoingResponsesFlows[id]?.tryEmit(response)
     }
 
     private fun WebSocketSession.decodeCompletionRequestFromTextMessage(message: TextMessage): CompletionRequest? =
