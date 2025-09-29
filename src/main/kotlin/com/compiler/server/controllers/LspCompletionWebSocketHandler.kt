@@ -12,16 +12,15 @@ import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import model.Completion
 import org.slf4j.LoggerFactory
@@ -56,12 +55,12 @@ class LspCompletionWebSocketHandler(
         sessionFlows[session.id]?.tryEmit(request)
     }
 
-    @OptIn(FlowPreview::class)
     override fun afterConnectionEstablished(session: WebSocketSession) {
         activeSession[session.id] = session
 
         val flow =  MutableSharedFlow<CompletionRequest>(
-            extraBufferCapacity = 16,
+            replay = 0,
+            extraBufferCapacity = 1,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         ).also { sessionFlows[session.id] = it }
 
@@ -79,7 +78,7 @@ class LspCompletionWebSocketHandler(
             }
 
             flow
-                .collect { req ->
+                .collectLatest { req ->
                     val available = withTimeoutOrNull(LSP_TIMEOUT_WAIT_TIME) {
                         while (!lspProxy.isAvailable()) {
                             delay(LSP_TIMEOUT_POLL_INTERVAL)
@@ -89,7 +88,7 @@ class LspCompletionWebSocketHandler(
 
                     if (!available) {
                         session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
-                        return@collect
+                        return@collectLatest
                     }
 
                     try {
