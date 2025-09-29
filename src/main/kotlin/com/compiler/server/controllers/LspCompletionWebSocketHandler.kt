@@ -88,7 +88,7 @@ class LspCompletionWebSocketHandler(
                     } ?: false
 
                     if (!available) {
-                        session.sendResponse(Response.Error("LSP not available"))
+                        session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
                         return@collect
                     }
 
@@ -99,10 +99,15 @@ class LspCompletionWebSocketHandler(
                             line = req.line,
                             character = req.ch
                         )
-                        session.sendResponse(Response.Completions(res))
+                        session.sendResponse(Response.Completions(completions = res, requestId = req.requestId))
                     } catch (e: Exception) {
                         logger.warn("Completion processing failed for client ${session.id}:", e)
-                        session.sendResponse(Response.Error("Completion failed: ${e.message}"))
+                        session.sendResponse(
+                            Response.Error(
+                                message = "Completion failed: ${e.message}",
+                                requestId = req.requestId
+                            )
+                        )
                     }
                 }
         }
@@ -112,12 +117,14 @@ class LspCompletionWebSocketHandler(
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         handleClientDisconnected(session.id)
+        session.close(CloseStatus.NORMAL)
         logger.info("Lsp client disconnected: ${session.id} ($status)")
     }
 
     override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
         handleClientDisconnected(session.id)
-        logger.error("Lsp client transport error: ${session.id}", exception)
+        session.close(CloseStatus.SERVER_ERROR)
+        logger.error("Lsp client transport error: ${session.id} (${exception.message})")
     }
 
     private fun handleClientDisconnected(clientId: String) {
@@ -165,16 +172,17 @@ class LspCompletionWebSocketHandler(
 }
 
 internal sealed interface Response {
+    val requestId: String?
 
-    data class Error(val message: String): Response
-    data class Init(val sessionId: String): Response
-    data class Completions(val completions: List<Completion>): Response
+    data class Error(val message: String, override val requestId: String? = null) : Response
+    data class Init(val sessionId: String, override val requestId: String? = null) : Response
+    data class Completions(val completions: List<Completion>, override val requestId: String? = null) : Response
 
     fun toJson(): String = LspCompletionWebSocketHandler.objectMapper.writeValueAsString(this)
-
 }
 
 private data class CompletionRequest(
+    val requestId: String,
     val project: Project,
     val line: Int,
     val ch: Int,

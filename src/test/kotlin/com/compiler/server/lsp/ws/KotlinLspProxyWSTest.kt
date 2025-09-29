@@ -54,8 +54,9 @@ class KotlinLspProxyWSTest: AbstractCompletionTest {
     ) = runBlocking {
         val session = connect()
         val msg = buildCompletionRequest(session.id, content, line, ch)
+        val requestId = msg["requestId"] as String
         session.sendMessage(TextMessage(objectMapper.writeValueAsString(msg)))
-        val completions = handler.receiveCompletions()
+        val completions = handler.receiveCompletions(requestId)
         val asserts = expectedCompletions.map { expected ->
             {
                 assertTrue(completions.any { received ->
@@ -82,6 +83,7 @@ class KotlinLspProxyWSTest: AbstractCompletionTest {
             "confType" to "java",
         )
         return mapOf(
+            "requestId" to java.util.UUID.randomUUID().toString(),
             "project" to project,
             "line" to line,
             "ch" to ch,
@@ -119,13 +121,15 @@ class KotlinLspProxyWSTest: AbstractCompletionTest {
                     messages.receive()
                 }
 
-            suspend fun receiveCompletions(): List<String> {
+            suspend fun receiveCompletions(expectedRequestId: String): List<String> {
                 val msg = receiveMessage()
                 val json = objectMapper.readTree(msg)
-                return extractCompletionTexts(json)
+                return extractCompletionTexts(json, expectedRequestId)
             }
 
-            private fun extractCompletionTexts(msg: JsonNode): List<String> {
+            private fun extractCompletionTexts(msg: JsonNode, expectedRequestId: String): List<String> {
+                msg["requestId"]?.asText()?.takeIf { it == expectedRequestId }
+                    ?: error("Invalid requestId, expected: $expectedRequestId, actual: ${msg["requestId"]?.asText()}")
                 val completions = msg["completions"] ?: return emptyList()
                 return completions.mapNotNull { it["displayText"]?.asText() }
             }
