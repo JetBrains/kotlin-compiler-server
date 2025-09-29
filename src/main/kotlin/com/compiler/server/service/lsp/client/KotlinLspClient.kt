@@ -120,7 +120,7 @@ class KotlinLspClient(
     ): List<CompletionItem> {
         var attempt = 0
         runCatching { awaitReady(RECONNECT_TIMEOUT.seconds) }.onFailure {
-            logger.info("LSP not ready")
+            logger.debug("LSP not ready")
             return emptyList()
         }
         do {
@@ -234,7 +234,7 @@ class KotlinLspClient(
 
     companion object {
         const val RECONNECT_TIMEOUT = 60
-        const val COMPLETIONS_TIMEOUT = 10
+        const val COMPLETIONS_TIMEOUT = 3
     }
 }
 
