@@ -138,11 +138,7 @@ class LspCompletionWebSocketHandler(
         val mutex = sessionLocks.computeIfAbsent(id) { Mutex() }
         try {
             mutex.withLock {
-                if (isOpen) {
-                    withContext(scope.coroutineContext) {
-                        sendMessage(TextMessage(response.toJson()))
-                    }
-                }
+                if (isOpen) sendMessage(TextMessage(response.toJson()))
             }
         } catch (e: Exception) {
             logger.warn("Error sending message to client $id:", e.message)
