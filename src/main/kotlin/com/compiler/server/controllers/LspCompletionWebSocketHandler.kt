@@ -53,7 +53,7 @@ class LspCompletionWebSocketHandler(
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val request = session.decodeCompletionRequestFromTextMessage(message) ?: return
-        scope.launch { sessionFlows[session.id]?.emit(request) }
+        sessionFlows[session.id]?.tryEmit(request)
     }
 
     @OptIn(FlowPreview::class)
