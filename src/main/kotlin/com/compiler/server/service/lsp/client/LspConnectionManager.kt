@@ -95,7 +95,7 @@ internal class LspConnectionManager(
         socket = s
         serverProxy = launcher.remoteProxy
         if (!initial) notifyReconnected()
-        logger.info("Connected to LSP server at {}:{}", host, port)
+        logger.info("Connected to LSP server at {}:{}, awaiting initialization result", host, port)
     }
 
     private fun watchConnection(future: Future<Void>) {

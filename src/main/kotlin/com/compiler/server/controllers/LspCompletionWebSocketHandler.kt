@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import jakarta.annotation.PreDestroy
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -123,7 +124,7 @@ class LspCompletionWebSocketHandler(
     override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
         handleClientDisconnected(session.id)
         session.close(CloseStatus.SERVER_ERROR)
-        logger.error("Lsp client transport error: ${session.id} (${exception.message})")
+        logger.debug("Lsp client transport error: {} ({}, {})", session.id, exception.cause, exception.message)
     }
 
     private fun handleClientDisconnected(clientId: String) {
@@ -140,7 +141,9 @@ class LspCompletionWebSocketHandler(
                 if (isOpen) sendMessage(TextMessage(response.toJson()))
             }
         } catch (e: Exception) {
-            logger.warn("Error sending message to client $id:", e.message)
+            if (e !is CancellationException) {
+                logger.warn("Error sending message to client $id:", e.message)
+            }
         }
     }
 
