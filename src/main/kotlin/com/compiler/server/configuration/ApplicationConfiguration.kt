@@ -19,6 +19,7 @@ class ApplicationConfiguration(
 ) : WebMvcConfigurer {
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ProjectConverter())
+    registry.addConverter(ProjectTypeConverter())
   }
 
   @Bean

@@ -3,7 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.compiler)
-    implementation(libs.kotlin.gradle.plugin.idea)
-    implementation(libs.kotlin.base.fe10.analysis)
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
 }
