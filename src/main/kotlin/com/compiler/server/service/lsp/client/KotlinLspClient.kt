@@ -234,7 +234,7 @@ class KotlinLspClient(
 
     companion object {
         const val RECONNECT_TIMEOUT = 60
-        const val COMPLETIONS_TIMEOUT = 3
+        const val COMPLETIONS_TIMEOUT = 10
     }
 }
 
