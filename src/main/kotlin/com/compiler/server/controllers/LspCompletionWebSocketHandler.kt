@@ -17,10 +17,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.getOrElse
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import model.Completion
@@ -57,7 +56,7 @@ class LspCompletionWebSocketHandler(
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val mailbox = Channel<CompletionRequest>(capacity = Channel.CONFLATED).also {
+        val mailbox = Channel<CompletionRequest>(capacity = Channel.UNLIMITED).also {
             sessionMailbox[session.id] = it
         }
 
@@ -119,7 +118,15 @@ class LspCompletionWebSocketHandler(
     }
 
     private suspend fun Channel<CompletionRequest>.processIncomingRequests(session: WebSocketSession) {
-        consumeAsFlow().conflate().collect { req ->
+        while (true) {
+            val first = receiveCatching().getOrElse { return }
+            var req = first
+
+            while (true) {
+                val next = tryReceive().getOrNull() ?: break
+                session.sendResponse(Response.Discarded(requestId = req.requestId))
+                req = next
+            }
             val available = withTimeoutOrNull(LSP_TIMEOUT_WAIT_TIME) {
                 while (!lspProxy.isAvailable()) {
                     delay(LSP_TIMEOUT_POLL_INTERVAL)
@@ -129,7 +136,7 @@ class LspCompletionWebSocketHandler(
 
             if (!available) {
                 session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
-                return@collect
+                continue
             }
 
             try {
@@ -177,9 +184,10 @@ class LspCompletionWebSocketHandler(
 internal sealed interface Response {
     val requestId: String?
 
-    data class Error(val message: String, override val requestId: String? = null) : Response
+    open class Error(val message: String, override val requestId: String? = null) : Response
     data class Init(val sessionId: String, override val requestId: String? = null) : Response
     data class Completions(val completions: List<Completion>, override val requestId: String? = null) : Response
+    data class Discarded(override val requestId: String) : Error("discarded", requestId)
 
     fun toJson(): String = LspCompletionWebSocketHandler.objectMapper.writeValueAsString(this)
 }
