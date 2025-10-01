@@ -18,10 +18,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.getOrElse
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import model.Completion
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -30,8 +28,6 @@ import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 @Component
 class LspCompletionWebSocketHandler(
@@ -127,17 +123,17 @@ class LspCompletionWebSocketHandler(
                 session.sendResponse(Response.Discarded(requestId = req.requestId))
                 req = next
             }
-            val available = withTimeoutOrNull(LSP_TIMEOUT_WAIT_TIME) {
-                while (!lspProxy.isAvailable()) {
-                    delay(LSP_TIMEOUT_POLL_INTERVAL)
-                }
-                true
-            } ?: false
 
-            if (!available) {
-                session.sendResponse(Response.Error(message = "LSP not available", req.requestId))
-                continue
-            }
+            runCatching { lspProxy.requireAvailable() }
+                .onFailure { throwable ->
+                    session.sendResponse(
+                        Response.Error(
+                            message = "LSP not available: ${throwable.cause}, ${throwable.message}",
+                            requestId = req.requestId,
+                        ),
+                    )
+                    continue
+                }
 
             try {
                 val res = kotlinProjectExecutor.completeWithLsp(
@@ -176,8 +172,6 @@ class LspCompletionWebSocketHandler(
 
     companion object {
         internal val objectMapper = ObjectMapper().apply { registerKotlinModule() }
-        private val LSP_TIMEOUT_WAIT_TIME = 10.seconds
-        private val LSP_TIMEOUT_POLL_INTERVAL = 100.milliseconds
     }
 }
 
