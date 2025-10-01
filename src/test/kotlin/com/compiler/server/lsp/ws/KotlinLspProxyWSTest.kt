@@ -25,7 +25,12 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import kotlin.time.Duration.Companion.seconds
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+
+@Suppress("SpringBootApplicationProperties")
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = ["websocket.enabled=true"],
+)
 @ExtendWith(KotlinLspComposeExtension::class)
 class KotlinLspProxyWSTest: AbstractCompletionTest {
 
