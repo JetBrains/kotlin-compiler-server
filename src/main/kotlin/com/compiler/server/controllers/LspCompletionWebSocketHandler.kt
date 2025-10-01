@@ -44,7 +44,7 @@ class LspCompletionWebSocketHandler(
     )
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
 
-    private val completionsJob = ConcurrentHashMap<String, Job>()
+    private val completionJobs = ConcurrentHashMap<String, Job>()
     private val incomingCompletionsRequests = ConcurrentHashMap<String, Channel<CompletionRequest>>()
 
     private val responseJobs = ConcurrentHashMap<String, Job>()
@@ -93,8 +93,8 @@ class LspCompletionWebSocketHandler(
 
             incoming.processIncomingRequests(session)
         }
-        completionWorker.invokeOnCompletion { completionsJob.remove(session.id) }
-        completionsJob[session.id] = completionWorker
+        completionWorker.invokeOnCompletion { completionJobs.remove(session.id) }
+        completionJobs[session.id] = completionWorker
     }
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -110,7 +110,7 @@ class LspCompletionWebSocketHandler(
     }
 
     private fun handleClientDisconnected(clientId: String) {
-        completionsJob.remove(clientId)?.cancel()
+        completionJobs.remove(clientId)?.cancel()
         responseJobs.remove(clientId)?.cancel()
         incomingCompletionsRequests.remove(clientId)
         outgoingResponsesFlows.remove(clientId)
