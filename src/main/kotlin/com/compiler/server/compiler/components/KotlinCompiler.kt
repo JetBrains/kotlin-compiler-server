@@ -2,11 +2,13 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
 import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
+import com.compiler.server.utils.CompilerArgumentsUtil
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
@@ -32,7 +34,9 @@ class KotlinCompiler(
     private val kotlinEnvironment: KotlinEnvironment,
     private val javaExecutor: JavaExecutor,
     private val librariesFile: LibrariesFile,
-    @Value("\${policy.file}") private val policyFileName: String
+    @Value("\${policy.file}") private val policyFileName: String,
+    private val compilerArgumentsUtil: CompilerArgumentsUtil,
+    private val jvmCompilerArguments: Set<ExtendedCompilerArgument>,
 ) {
     private val policyFile = File(policyFileName)
 
@@ -59,8 +63,8 @@ class KotlinCompiler(
             ?.joinToString("\n\n")
     }
 
-    fun run(files: List<ProjectFile>, addByteCode: Boolean, args: String): JvmExecutionResult {
-        return execute(files, addByteCode) { output, compiled ->
+    fun run(files: List<ProjectFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+        return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
             val mainClass = JavaRunnerExecutor::class.java.name
             val compiledMainClass = when (compiled.mainClasses.size) {
                 0 -> return@execute JvmExecutionResult(
@@ -82,8 +86,8 @@ class KotlinCompiler(
         }
     }
 
-    fun test(files: List<ProjectFile>, addByteCode: Boolean): JvmExecutionResult {
-        return execute(files, addByteCode) { output, _ ->
+    fun test(files: List<ProjectFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+        return execute(files, addByteCode, userCompilerArguments) { output, _ ->
             val mainClass = JUnitExecutors::class.java.name
             javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
                 .asJUnitExecutionResult()
@@ -91,17 +95,12 @@ class KotlinCompiler(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun compile(files: List<ProjectFile>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
+    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
         val ioFiles = files.writeToIoFiles(inputDir)
         usingTempDirectory { outputDir ->
-            val arguments =
-                ioFiles.map { it.absolutePathString() } + KotlinEnvironment.additionalCompilerArguments + listOf(
-                    "-cp", kotlinEnvironment.classpath.joinToString(PATH_SEPARATOR) { it.absolutePath },
-                    "-module-name", "web-module",
-                    "-no-stdlib", "-no-reflect",
-                    "-progressive",
-                    "-d", outputDir.absolutePathString(),
-                ) + kotlinEnvironment.compilerPlugins.map { plugin -> "-Xplugin=${plugin.absolutePath}" }
+            val arguments = ioFiles.map { it.absolutePathString() } +
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
+                    listOf("-d", outputDir.absolutePathString())
             K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
                 val outputFiles = buildMap {
                     outputDir.visitFileTree {
@@ -142,9 +141,10 @@ class KotlinCompiler(
     private fun execute(
         files: List<ProjectFile>,
         addByteCode: Boolean,
+        userCompilerArguments: Map<String, Any>,
         block: (output: OutputDirectory, compilation: JvmClasses) -> JvmExecutionResult
     ): JvmExecutionResult = try {
-        when (val compilationResult = compile(files)) {
+        when (val compilationResult = compile(files, userCompilerArguments)) {
             is Compiled<JvmClasses> -> {
                 usingTempDirectory { outputDir ->
                     val output = write(compilationResult.result, outputDir)
