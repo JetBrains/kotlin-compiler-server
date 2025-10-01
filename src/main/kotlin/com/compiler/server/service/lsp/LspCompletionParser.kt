@@ -51,12 +51,11 @@ object LspCompletionParser {
         return regex.find(detail)?.groupValues?.get(1)
     }
 
-    private fun extractImportFromLabelDetail(detail: String?): String? {
-        val input = detail ?: return null
+    private fun extractImportFromLabelDetail(detail: String): String? {
         val regex = Regex(
             """\(\s*([a-zA-Z0-9_.]+)\s*\)$|for\s+\S+\s+in\s+([a-zA-Z0-9_.]+)"""
         )
-        val match = regex.find(input) ?: return null
+        val match = regex.find(detail) ?: return null
         return match.groupValues[1].ifEmpty { match.groupValues[2].ifEmpty { null } }
     }
 
@@ -120,7 +119,7 @@ internal object FuzzyCompletionRanking {
                 ?.jsonObject?.get("prefix")
                 ?.jsonPrimitive?.content
 
-    fun fuzzyScore(query: String, candidate: String): Int {
+    private fun fuzzyScore(query: String, candidate: String): Int {
         if (query.isEmpty()) return 1
 
         var score = 0
