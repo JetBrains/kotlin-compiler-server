@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class KotlinProjectExecutor(
-    private val kotlinCompiler: KotlinCompiler,
-    private val completionProvider: CompletionProvider,
-    private val lspCompletionProvider: LspCompletionProvider,
-    private val version: VersionInfo,
-    private val kotlinToJSTranslator: KotlinToJSTranslator,
-    private val kotlinEnvironment: KotlinEnvironment,
-    private val loggerDetailsStreamer: LoggerDetailsStreamer? = null,
+  private val kotlinCompiler: KotlinCompiler,
+  private val completionProvider: CompletionProvider,
+  private val lspCompletionProvider: LspCompletionProvider,
+  private val version: VersionInfo,
+  private val kotlinToJSTranslator: KotlinToJSTranslator,
+  private val kotlinEnvironment: KotlinEnvironment,
+  private val loggerDetailsStreamer: LoggerDetailsStreamer? = null,
 ) {
 
   private val log = LoggerFactory.getLogger(KotlinProjectExecutor::class.java)
