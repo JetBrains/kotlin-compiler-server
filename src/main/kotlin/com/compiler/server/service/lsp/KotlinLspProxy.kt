@@ -4,7 +4,7 @@ import com.compiler.server.service.lsp.components.LspProject
 import com.compiler.server.model.Project
 import com.compiler.server.model.ProjectFile
 import com.compiler.server.service.lsp.client.LspClient
-import com.compiler.server.service.lsp.client.RetriableLspClient
+import com.compiler.server.service.lsp.client.ReconnectingLspClient
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -152,7 +152,7 @@ class KotlinLspProxy {
     }
 
     fun wireAvailabilityObservers(client: LspClient) {
-        (client as? RetriableLspClient)?.let { lspClient ->
+        (client as? ReconnectingLspClient)?.let { lspClient ->
             lspClient.addOnDisconnectListener {
                 if (!lspClientInitializedDeferred.isCompleted) {
                     lspClientInitializedDeferred.completeExceptionally(IOException("Lsp client disconnected"))

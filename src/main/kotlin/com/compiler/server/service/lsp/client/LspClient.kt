@@ -86,7 +86,7 @@ interface LspClient : AutoCloseable {
     }
 }
 
-interface RetriableLspClient : LspClient {
+interface ReconnectingLspClient : LspClient {
     fun addOnDisconnectListener(listener: () -> Unit)
     fun addOnReconnectListener(listener: () -> Unit)
 }
