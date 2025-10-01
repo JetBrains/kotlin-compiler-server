@@ -24,8 +24,6 @@ class WebSocketConfig : WebSocketConfigurer {
     @Bean
     fun createWebSocketContainer(): ServletServerContainerFactoryBean {
         return ServletServerContainerFactoryBean().apply {
-            maxTextMessageBufferSize = (1_000_000) // 1 MB
-            maxBinaryMessageBufferSize = (1_000_000)
             maxSessionIdleTimeout = 0L
         }
     }
