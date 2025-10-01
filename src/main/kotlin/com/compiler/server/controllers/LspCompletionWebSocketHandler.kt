@@ -45,19 +45,19 @@ class LspCompletionWebSocketHandler(
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
 
     private val completionsJob = ConcurrentHashMap<String, Job>()
-    private val sessionMailbox = ConcurrentHashMap<String, Channel<CompletionRequest>>()
+    private val incomingCompletionsRequests = ConcurrentHashMap<String, Channel<CompletionRequest>>()
 
     private val responseJobs = ConcurrentHashMap<String, Job>()
     private val outgoingResponsesFlows = ConcurrentHashMap<String, MutableSharedFlow<Response>>()
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val request = session.decodeCompletionRequestFromTextMessage(message) ?: return
-        sessionMailbox[session.id]?.trySend(request)
+        incomingCompletionsRequests[session.id]?.trySend(request)
     }
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
-        val mailbox = Channel<CompletionRequest>(capacity = Channel.UNLIMITED).also {
-            sessionMailbox[session.id] = it
+        val incoming = Channel<CompletionRequest>(capacity = Channel.UNLIMITED).also {
+            incomingCompletionsRequests[session.id] = it
         }
 
         val responseFlow = MutableSharedFlow<Response>(
@@ -91,7 +91,7 @@ class LspCompletionWebSocketHandler(
                 sendResponse(Response.Init(id))
             }
 
-            mailbox.processIncomingRequests(session)
+            incoming.processIncomingRequests(session)
         }
         completionWorker.invokeOnCompletion { completionsJob.remove(session.id) }
         completionsJob[session.id] = completionWorker
@@ -112,7 +112,7 @@ class LspCompletionWebSocketHandler(
     private fun handleClientDisconnected(clientId: String) {
         completionsJob.remove(clientId)?.cancel()
         responseJobs.remove(clientId)?.cancel()
-        sessionMailbox.remove(clientId)
+        incomingCompletionsRequests.remove(clientId)
         outgoingResponsesFlows.remove(clientId)
         scope.launch { lspProxy.onClientDisconnected(clientId) }
     }
