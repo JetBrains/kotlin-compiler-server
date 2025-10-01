@@ -104,7 +104,7 @@ internal class LspConnectionManager(
                 future.get()
             } catch (t: Throwable) {
                 if (t !is CancellationException) {
-                    logger.info("LSP listening job finished with exception:", t)
+                    logger.info("LSP connection listening job finished unexpectedly:", t)
                 }
             } finally {
                 handleDisconnectAndReconnect()
@@ -127,7 +127,7 @@ internal class LspConnectionManager(
             try {
                 while (!isClosing.get() && attempt < maxConnectionRetries) {
                     try {
-                        if (attempt > 0) delay(exponentialBackoffMillis(attempt).toLong())
+                        if (attempt > 0) delay(exponentialBackoffMillis(attempt).milliseconds)
                         connectWithRetry()
                         return@launch
                     } catch (t: Throwable) {
@@ -145,8 +145,8 @@ internal class LspConnectionManager(
     private fun notifyReconnected() = notify(reconnectListeners)
 
     private fun notify(listeners: List<() -> Unit>) {
-        runCatching { listeners.forEach {
-            runCatching { it() } }
+        listeners.forEach {
+            runCatching { it() }
         }
     }
 
