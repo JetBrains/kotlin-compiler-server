@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class ResourceCompileTest : BaseExecutorTest(), BaseResourceCompileTest {
   override fun request(code: String, platform: ProjectType) = when (platform) {
     ProjectType.JAVA -> run(code, "")
-    ProjectType.JS_IR, ProjectType.JS -> translateToJsIr(code)
+    ProjectType.JS_IR -> translateToJsIr(code)
     else -> throw IllegalArgumentException("Unknown type $platform")
   }
 
