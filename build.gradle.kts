@@ -49,13 +49,13 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.bundles.kotlin.stdlib)
     implementation(libs.kotlin.script.runtime)
+    implementation(libs.kotlin.build.tools.api)
+    implementation(libs.kotlin.build.tools.impl)
+    implementation(libs.kotlin.compiler.embeddable)
+    implementation(libs.kotlin.tooling.core)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-api:${libs.versions.kotlin.get()}")
-    implementation("org.jetbrains.kotlin:kotlin-build-tools-impl:${libs.versions.kotlin.get()}")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${libs.versions.kotlin.get()}")
-    implementation("org.jetbrains.kotlin:kotlin-tooling-core:${libs.versions.kotlin.get()}")
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {

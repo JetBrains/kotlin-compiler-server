@@ -66,7 +66,12 @@ class KotlinCompiler(
             ?.joinToString("\n\n")
     }
 
-    fun run(files: List<ProjectFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun run(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        args: String,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
             val mainClass = JavaRunnerExecutor::class.java.name
             val compiledMainClass = when (compiled.mainClasses.size) {
@@ -77,7 +82,9 @@ class KotlinCompiler(
                 1 -> compiled.mainClasses.single()
                 else -> return@execute JvmExecutionResult(
                     exception = IllegalArgumentException(
-                        "Multiple classes in project contain main methods found: ${compiled.mainClasses.sorted().joinToString()}"
+                        "Multiple classes in project contain main methods found: ${
+                            compiled.mainClasses.sorted().joinToString()
+                        }"
                     ).toExceptionDescriptor()
                 )
             }
@@ -87,7 +94,11 @@ class KotlinCompiler(
         }
     }
 
-    fun test(files: List<ProjectFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun test(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, _ ->
             val mainClass = JUnitExecutors::class.java.name
             javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
@@ -96,15 +107,20 @@ class KotlinCompiler(
     }
 
     @OptIn(ExperimentalPathApi::class)
-    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        val ioFiles = files.writeToIoFiles(inputDir)
-        usingTempDirectory { outputDir ->
-            val arguments = ioFiles.map { it.absolutePathString() } +
-                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments)
-            val result = compileWithToolchain(inputDir, outputDir, arguments)
-            return@usingTempDirectory result
+    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> =
+        usingTempDirectory { inputDir ->
+            val ioFiles = files.writeToIoFiles(inputDir)
+            usingTempDirectory { outputDir ->
+                val arguments = ioFiles.map { it.absolutePathString() } +
+                        compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                            jvmCompilerArguments,
+                            compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS,
+                            userCompilerArguments
+                        )
+                val result = compileWithToolchain(inputDir, outputDir, arguments)
+                return@usingTempDirectory result
+            }
         }
-    }
 
     @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class, ExperimentalBuildToolsApi::class)
     private fun compileWithToolchain(
@@ -112,7 +128,6 @@ class KotlinCompiler(
         outputDir: Path,
         arguments: List<String>
     ): CompilationResult<JvmClasses> {
-        System.setProperty("org.jetbrains.kotlin.buildtools.logger.extendedLocation", "true")
         val sources = inputDir.listDirectoryEntries()
 
         val logger = CompilationLogger()
@@ -128,30 +143,32 @@ class KotlinCompiler(
 
         val result = try {
             session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
-        } catch (_: Exception) {
-            null
+        } catch (e: Exception) {
+            throw Exception("Exception executing compilation operation", e)
         }
 
         try {
-            return if (result == org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS) {
-                val cd = CompilerDiagnostics(logger.compilationLogs)
-                val outputFiles = buildMap {
-                    outputDir.visitFileTree {
-                        onVisitFile { file, _ ->
-                            put(file.relativeTo(outputDir).pathString, file.readBytes())
-                            FileVisitResult.CONTINUE
+            return when (result) {
+                org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+                    val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
+                    val outputFiles = buildMap {
+                        outputDir.visitFileTree {
+                            onVisitFile { file, _ ->
+                                put(file.relativeTo(outputDir).pathString, file.readBytes())
+                                FileVisitResult.CONTINUE
+                            }
                         }
                     }
-                }
-                Compiled(
-                    compilerDiagnostics = cd,
-                    result = JvmClasses(
-                        files = outputFiles,
-                        mainClasses = findMainClasses(outputFiles),
+                    Compiled(
+                        compilerDiagnostics = compilerDiagnostics,
+                        result = JvmClasses(
+                            files = outputFiles,
+                            mainClasses = findMainClasses(outputFiles),
+                        )
                     )
-                )
-            } else {
-                NotCompiled(CompilerDiagnostics(logger.compilationLogs))
+                }
+
+                else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
             }
         } finally {
             session.close()

@@ -5,10 +5,30 @@ import com.compiler.server.model.ProjectSeveriry
 import com.compiler.server.model.TextInterval
 import org.jetbrains.kotlin.buildtools.api.KotlinLogger
 
+
+/**
+ * CompilationLogger is used for collecting logs from compilation with kotlin-build-tools-api.
+ * It is passed as an argument while executing a compilation operation. It collects logs returned
+ * during compilation, interprets returned strings, and saves logs in the map based on their severity.
+ * The map is later used to provide information about warnings and errors in the user's code.
+ *
+ * KotlinLogger interface will be changed in the future to contain more log details.
+ * Implementation of the CompilationLogger should be therefore updated after KT-80963 is implemented.
+ *
+ * @property isDebugEnabled A flag to indicate whether debug-level logging is enabled for the logger.
+ *                          If true, all messages are printed to the standard output.
+ */
 class CompilationLogger(
     override val isDebugEnabled: Boolean = false,
 ) : KotlinLogger {
 
+    /**
+     * Stores a collection of compilation logs organized by file paths.
+     *
+     * The map keys represent file paths as strings, and the associated values are mutable lists of
+     * `ErrorDescriptor` objects containing details about compilation issues, such as error messages,
+     * intervals, severity, and optional class names.
+     */
     var compilationLogs: Map<String, MutableList<ErrorDescriptor>> = emptyMap()
 
     override fun debug(msg: String) {
@@ -16,7 +36,7 @@ class CompilationLogger(
     }
 
     override fun error(msg: String, throwable: Throwable?) {
-        if (isDebugEnabled) System.err.println("[ERROR] $msg" + (throwable?.let { ": ${it.message}" } ?: ""))
+        if (isDebugEnabled) println("[ERROR] $msg" + (throwable?.let { ": ${it.message}" } ?: ""))
         try {
             addCompilationLog(msg, ProjectSeveriry.ERROR, classNameOverride = null)
         } catch (_: Exception) {}
@@ -31,12 +51,22 @@ class CompilationLogger(
     }
 
     override fun warn(msg: String, throwable: Throwable?) {
-        if (isDebugEnabled) System.err.println("[WARN] $msg" + (throwable?.let { ": ${it.message}" } ?: ""))
+        if (isDebugEnabled) println("[WARN] $msg" + (throwable?.let { ": ${it.message}" } ?: ""))
         try {
             addCompilationLog(msg, ProjectSeveriry.WARNING, classNameOverride = "WARNING")
         } catch (_: Exception) {}
     }
 
+
+    /**
+     * Adds a compilation log entry to the `compilationLogs` map based on the sting log.
+     *
+     * @param msg The raw log message containing information about the compilation event,
+     *            including the file path and error details.
+     * @param severity The severity level of the compilation event, represented by the `ProjectSeveriry` enum.
+     * @param classNameOverride An optional override for the class name that will be recorded in the log.
+     *                          If null, it will be derived from the file path in the message.
+     */
     private fun addCompilationLog(msg: String, severity: ProjectSeveriry, classNameOverride: String?) {
         val path = msg.split(" ")[0]
         val className = path.split("/").last().split(".").first()
