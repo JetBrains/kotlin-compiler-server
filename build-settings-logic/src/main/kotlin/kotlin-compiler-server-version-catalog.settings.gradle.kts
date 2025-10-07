@@ -10,6 +10,7 @@ pluginManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
+        maven("https://redirector.kotlinlang.org/maven/dev")
         mavenLocal()
     }
 }
@@ -27,6 +28,7 @@ dependencyResolutionManagement {
             }
             logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
         }
+        maven("https://redirector.kotlinlang.org/maven/dev")
         mavenLocal()
     }
 
