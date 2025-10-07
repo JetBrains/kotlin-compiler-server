@@ -35,7 +35,7 @@ class KotlinEnvironment(
       "-Xnested-type-aliases",
       "-Xreport-all-warnings",
       "-Wextra",
-      "-XXLanguage:+ExplicitBackingFields",
+      "-Xexplicit-backing-fields",
     )
   }
 
