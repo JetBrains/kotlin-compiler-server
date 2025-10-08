@@ -117,6 +117,11 @@ In case of an unsuccessful execution in the standard output will be the event wi
 }
 ```
 
+## Workflow
+This section is only relevant for JetBrains employees. 
+And includes information about working with branches and releases.
+You can find information about the development workflow in [workflow.md](docs/workflow.md).
+
 ## Kotlin release guide :rocket:
 
 1) Update the kotlin version
