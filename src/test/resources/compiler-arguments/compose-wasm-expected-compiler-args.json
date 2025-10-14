@@ -1283,7 +1283,7 @@
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1295,7 +1295,7 @@
         "isNullable": true,
         "defaultValue": null
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1415,7 +1415,7 @@
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1451,7 +1451,7 @@
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1463,7 +1463,7 @@
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1619,7 +1619,7 @@
         "isNullable": true,
         "defaultValue": null
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1703,7 +1703,7 @@
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1739,7 +1739,7 @@
         "isNullable": true,
         "defaultValue": null
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
