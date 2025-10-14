@@ -165,16 +165,12 @@ class CompilerArgumentsUtil(
 
     private val ALLOWED_JS_ARGUMENTS = setOf(
         // file paths and environment settings
-        "module-name",
         "Xir-keep",
-        "module-kind",
         "main",
         "Xir-dce",
         "Xir-dce-runtime-diagnostic",
-        "Xir-dce-print-reachability-info",
         "Xir-property-lazy-initialization",
         "Xir-minimized-member-names",
-        "Xir-module-name",
         "Xir-generate-inline-anonymous-functions",
         "Xgenerate-polyfills",
         "Xes-classes",
@@ -190,8 +186,6 @@ class CompilerArgumentsUtil(
 
     private val ALLOWED_WASM_ARGUMENTS = setOf(
         // file paths and environment settings
-        "Xwasm",
-        "Xwasm-target",
         "Xwasm-debug-info",
         "Xwasm-debug-friendly",
         "Xwasm-kclass-fqn",
@@ -200,10 +194,7 @@ class CompilerArgumentsUtil(
         "Xwasm-use-traps-instead-of-exceptions",
         "Xwasm-use-new-exception-proposal",
         "Xwasm-no-jstag",
-        "Xwasm-debugger-custom-formatters",
-        "Xwasm-source-map-include-mappings-from-unavailable-sources",
-        "Xwasm-ic-cache-readonly",
-        "Xwasm-generate-dwarf"
+        "Xwasm-source-map-include-mappings-from-unavailable-sources"
     )
 
     // Use Pair if you want to provide different values for user and for actual use.
@@ -277,7 +268,7 @@ class CompilerArgumentsUtil(
         "ir-output-name" to WASM_DEFAULT_MODULE_NAME,
         "XPlugin" to Pair(
             kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS.map { it.split("/").last() },
-                    kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS
+            kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS
         ),
         "P" to Pair(
             kotlinEnvironment.composeWasmCompilerPluginOptions,
@@ -383,7 +374,7 @@ class CompilerArgumentsUtil(
         return (kotlinCompilerArguments.topLevel.arguments +
                 commonArgumentsLevel.arguments +
                 commonKlibBasedArgumentsLevel.arguments +
-                wasmLevel.arguments+
+                wasmLevel.arguments +
                 jsLevel.arguments)
             .processCompilerArgs(
                 predefinedArguments = PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
