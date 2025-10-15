@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation(libs.spring.boot.starter.webflux)
     implementation(libs.org.eclipse.lsp4j)
     implementation(libs.kotlinx.coroutines.reactor)
     implementation(libs.kotlinx.serialization.core.jvm)
@@ -17,7 +17,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.rector.test)
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+    testImplementation(libs.spring.boot.starter.test) {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
 }
