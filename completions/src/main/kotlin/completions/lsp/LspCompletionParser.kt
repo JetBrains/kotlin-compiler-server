@@ -126,6 +126,18 @@ internal object FuzzyCompletionRanking {
                 ?.jsonObject?.get("prefix")
                 ?.jsonPrimitive?.content
 
+    /**
+     * Ranking completions inspired by how VS-code does it. Firstly a simple
+     * fuzzy scoring is performed on what has been typed by the user so far,
+     * then we use [CompletionItem.sortText] to break ties.
+     *
+     * @param query the query the user has typed so far
+     */
+    fun List<CompletionItem>.rankCompletions(query: String): List<CompletionItem> =
+        map { RankedItem(it, fuzzyScore(query, it.sortingKey())) }
+            .sortedWith(compareByDescending<RankedItem> { it.score }.thenBy { it.item.sortText })
+            .map { it.item }
+
     private fun fuzzyScore(query: String, candidate: String): Int {
         if (query.isEmpty()) return 1
 
@@ -151,18 +163,6 @@ internal object FuzzyCompletionRanking {
     }
 
     private fun CompletionItem.sortingKey(): String = this.filterText ?: this.label
-
-    /**
-     * Ranking completions inspired by how VS-code does it. Firstly a simple
-     * fuzzy scoring is performed on what has been typed by the user so far,
-     * then we use [CompletionItem.sortText] to break ties.
-     *
-     * @param query the query the user has typed so far
-     */
-    fun List<CompletionItem>.rankCompletions(query: String): List<CompletionItem> =
-        map { RankedItem(it, fuzzyScore(query, it.sortingKey())) }
-            .sortedWith(compareByDescending<RankedItem> { it.score }.thenBy { it.item.sortText })
-            .map { it.item }
 }
 
 private val objectMapper = Json { ignoreUnknownKeys = true }
