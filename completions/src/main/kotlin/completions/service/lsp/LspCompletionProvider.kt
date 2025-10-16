@@ -2,8 +2,8 @@ package completions.service.lsp
 
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
-import completions.lsp.FuzzyCompletionRanking.completionQuery
-import completions.lsp.FuzzyCompletionRanking.rankCompletions
+import completions.lsp.util.completions.FuzzyCompletionRanking.rankCompletions
+import completions.lsp.util.completions.FuzzyCompletionRanking.completionQuery
 import completions.lsp.KotlinLspProxy
 import completions.lsp.LspCompletionParser.toCompletion
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
