@@ -78,7 +78,7 @@ object LspCompletionParser {
     }
 
     /**
-     * Icon names differ from [Completion] definitions, so we just define
+     * Icon names differ from [model.Completion] definitions, so we just define
      * a simple mapping between LSP results and current definitions.
      */
     internal fun parseIcon(name: String?): Icon? {
