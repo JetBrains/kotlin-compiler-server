@@ -80,16 +80,16 @@ class LspCompletionWebSocketHandler(
         }.getOrElse { Response.Error("LSP not available: ${it.message}") }
     }.subscribeOn(Schedulers.boundedElastic())
 
-    private fun getCompletionRequests(session: WebSocketSession, sideSink: Sinks.Many<Response>): Flux<CompletionRequest> =
+    private fun getCompletionRequests(session: WebSocketSession, sideSink: Sinks.Many<Response>): Flux<WebSocketCompletionRequest> =
         session.receive()
             .map { it.payloadAsText }
             .onBackpressureDrop { dropped ->
-                runCatching { objectMapper.readValue<CompletionRequest>(dropped) }.onSuccess {
+                runCatching { objectMapper.readValue<WebSocketCompletionRequest>(dropped) }.onSuccess {
                     sideSink.tryEmitNext(Response.Discarded(it.requestId))
                 }
             }
             .flatMap({ payload ->
-                val req = runCatching { objectMapper.readValue<CompletionRequest>(payload) }.getOrNull()
+                val req = runCatching { objectMapper.readValue<WebSocketCompletionRequest>(payload) }.getOrNull()
                 if (req == null) {
                     sideSink.tryEmitNext(Response.Error("Failed to parse request: $payload"))
                     Mono.empty()
@@ -98,7 +98,7 @@ class LspCompletionWebSocketHandler(
                 }
             }, 1)
 
-    private fun handleCompletionRequest(sessionId: String, requests: Flux<CompletionRequest>): Flux<Response> =
+    private fun handleCompletionRequest(sessionId: String, requests: Flux<WebSocketCompletionRequest>): Flux<Response> =
         requests
             .concatMap({ request ->
                 mono {
@@ -148,7 +148,7 @@ sealed interface Response {
     data class Discarded(override val requestId: String) : Error("discarded", requestId)
 }
 
-private data class CompletionRequest(
+private data class WebSocketCompletionRequest(
     val requestId: String,
     val project: Project,
     val line: Int,
