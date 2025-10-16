@@ -7,7 +7,7 @@ import completions.lsp.FuzzyCompletionRanking.rankCompletions
 import completions.lsp.KotlinLspProxy
 import completions.lsp.LspCompletionParser.toCompletion
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
-import model.Completion
+import completions.dto.api.Completion
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
 

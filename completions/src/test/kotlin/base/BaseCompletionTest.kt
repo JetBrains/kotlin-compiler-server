@@ -2,7 +2,7 @@ package base
 
 import completions.dto.api.ProjectFile
 import completions.lsp.components.LspProject
-import model.Completion
+import completions.dto.api.Completion
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Duration
 import kotlin.time.Duration.Companion.minutes

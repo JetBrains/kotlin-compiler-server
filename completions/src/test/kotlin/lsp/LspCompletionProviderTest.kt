@@ -5,8 +5,8 @@ import base.BaseCompletionTest.Companion.retrieveCompletions
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
-import model.Completion
-import model.Icon
+import completions.dto.api.Completion
+import completions.dto.api.Icon
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll

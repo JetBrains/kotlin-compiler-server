@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import completions.configuration.WebSocketConfiguration
 import lsp.utils.KotlinLspComposeExtension
-import model.Completion
+import completions.dto.api.Completion
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.AfterAll

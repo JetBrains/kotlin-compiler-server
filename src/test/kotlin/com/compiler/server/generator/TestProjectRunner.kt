@@ -6,12 +6,10 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
-import model.Completion
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.io.IOException
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeBytes

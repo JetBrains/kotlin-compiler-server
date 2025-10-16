@@ -1,12 +1,11 @@
 package completions.lsp
 
 import org.eclipse.lsp4j.CompletionItem
-import model.Completion
-import model.Icon
+import completions.dto.api.Completion
+import completions.dto.api.Icon
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import model.completionTextFromFullName
 import org.eclipse.lsp4j.CompletionItemLabelDetails
 
 object LspCompletionParser {
@@ -20,7 +19,7 @@ object LspCompletionParser {
         val import = if (hasToBeImported()) importPrefix?.let { "$it.$label"} else null
 
         return Completion(
-            text = completionTextFromFullName(label + functionParams.orEmpty()),
+            text = Completion.completionTextFromFullName(label + functionParams.orEmpty()),
             displayText = label + (labelDetails.detail.orEmpty()),
             tail = labelDetails.description,
             import = import,
@@ -59,7 +58,7 @@ object LspCompletionParser {
     }
 
     /**
-     * Icon names differ from [model.Completion] definitions, so we just define
+     * Icon names differ from [Completion] definitions, so we just define
      * a simple mapping between LSP results and current definitions.
      */
     internal fun parseIcon(name: String?): Icon? {

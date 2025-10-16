@@ -9,7 +9,7 @@ import completions.lsp.StatefulKotlinLspProxy.onClientConnected
 import completions.lsp.StatefulKotlinLspProxy.onClientDisconnected
 import completions.service.lsp.LspCompletionProvider
 import kotlinx.coroutines.reactor.mono
-import model.Completion
+import completions.dto.api.Completion
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
