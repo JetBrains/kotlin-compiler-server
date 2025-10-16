@@ -4,7 +4,7 @@ package completions.controllers.ws
 
 import completions.model.Project
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import completions.lsp.KotlinLspProxy
 import completions.lsp.StatefulKotlinLspProxy.onClientConnected
 import completions.lsp.StatefulKotlinLspProxy.onClientDisconnected
@@ -49,6 +49,7 @@ import reactor.core.scheduler.Schedulers
 class LspCompletionWebSocketHandler(
     private val lspProxy: KotlinLspProxy,
     private val lspCompletionProvider: LspCompletionProvider,
+    private val objectMapper: ObjectMapper,
 ) : WebSocketHandler {
 
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
@@ -83,12 +84,12 @@ class LspCompletionWebSocketHandler(
         session.receive()
             .map { it.payloadAsText }
             .onBackpressureDrop { dropped ->
-                runCatching { objectReader.readValue<CompletionRequest>(dropped) }.onSuccess {
+                runCatching { objectMapper.readValue<CompletionRequest>(dropped) }.onSuccess {
                     sideSink.tryEmitNext(Response.Discarded(it.requestId))
                 }
             }
             .flatMap({ payload ->
-                val req = runCatching { objectReader.readValue<CompletionRequest>(payload) }.getOrNull()
+                val req = runCatching { objectMapper.readValue<CompletionRequest>(payload) }.getOrNull()
                 if (req == null) {
                     sideSink.tryEmitNext(Response.Error("Failed to parse request: $payload"))
                     Mono.empty()
@@ -135,9 +136,7 @@ class LspCompletionWebSocketHandler(
             }
     }
 
-    companion object {
-        private val objectReader = objectMapper.readerFor(CompletionRequest::class.java)
-    }
+    private fun Response.toJson(): String = objectMapper.writeValueAsString(this)
 }
 
 sealed interface Response {
@@ -147,8 +146,6 @@ sealed interface Response {
     data class Init(val sessionId: String, override val requestId: String? = null) : Response
     data class Completions(val completions: List<Completion>, override val requestId: String? = null) : Response
     data class Discarded(override val requestId: String) : Error("discarded", requestId)
-
-    fun toJson(): String = objectMapper.writeValueAsString(this)
 }
 
 private data class CompletionRequest(
@@ -157,5 +154,3 @@ private data class CompletionRequest(
     val line: Int,
     val ch: Int,
 )
-
-private val objectMapper = ObjectMapper().apply { registerKotlinModule() }
