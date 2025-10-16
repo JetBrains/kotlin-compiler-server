@@ -12,7 +12,6 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 val propertyFile = "application.properties"
 
 plugins {
-    alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.kotlin.plugin.spring)
@@ -57,17 +56,12 @@ dependencies {
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
-    implementation(libs.org.eclipse.lsp4j)
-    implementation(libs.kotlinx.coroutines.reactor)
-    implementation(libs.kotlinx.serialization.core.jvm)
-    implementation(libs.kotlinx.serialization.json.jvm)
 
     testImplementation(libs.kotlin.test)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.bundles.testcontainers)
 
     resourceDependency(libs.skiko.js.wasm.runtime)
 }
