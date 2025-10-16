@@ -10,23 +10,6 @@ class BaseExecutorTest {
   @Autowired
   private lateinit var testRunner: TestProjectRunner
 
-  fun complete(
-    @Language("kotlin")
-    code: String,
-    line: Int,
-    character: Int,
-    completions: List<String>,
-    isJs: Boolean = false
-  ) = testRunner.complete(code, line, character, completions, isJs)
-
-  fun getCompletions(
-    @Language("kotlin")
-    code: String,
-    line: Int,
-    character: Int,
-    isJs: Boolean = false
-  ) = testRunner.getCompletions(code, line, character, isJs)
-
   fun highlight(@Language("kotlin") code: String) = testRunner.highlight(code)
 
   fun highlightJS(@Language("kotlin") code: String) = testRunner.highlightJS(code)
