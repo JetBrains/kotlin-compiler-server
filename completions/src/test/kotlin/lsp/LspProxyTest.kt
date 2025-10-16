@@ -76,7 +76,7 @@ class LspProxyTest {
 
     @Test
     fun `lsp proxy should NOT provide completions for unrecognized user`() = runBlocking {
-        val testClientId = "test-client-id"
+        val testClientId = "unrecognised-client-id"
         val (initialCode, initialCaret) = extractCaret {
             """
                 fun main() {

@@ -87,13 +87,10 @@ class KotlinLspProxyWSTest : CompletionTest {
         caret: Position,
         requestId: String,
     ): Map<String, Any> {
-        val project = mapOf(
-            "files" to listOf(mapOf("name" to fileName, "text" to code)),
-            "confType" to "java",
-        )
+        val completionRequest = mapOf("files" to listOf(mapOf("name" to fileName, "text" to code)))
         return mapOf(
             "requestId" to requestId,
-            "project" to project,
+            "completionRequest" to completionRequest,
             "line" to caret.line,
             "ch" to caret.character,
         )

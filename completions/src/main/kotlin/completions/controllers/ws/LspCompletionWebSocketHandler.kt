@@ -3,7 +3,6 @@
 package completions.controllers.ws
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import completions.dto.api.CompletionRequest
 import completions.lsp.KotlinLspProxy
 import completions.lsp.StatefulKotlinLspProxy.onClientConnected
@@ -53,6 +52,7 @@ class LspCompletionWebSocketHandler(
 ) : WebSocketHandler {
 
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
+    private val objectReader = objectMapper.readerFor(WebSocketCompletionRequest::class.java)
 
     override fun handle(session: WebSocketSession): Mono<Void?> {
         val sessionId = session.id
@@ -84,12 +84,12 @@ class LspCompletionWebSocketHandler(
         session.receive()
             .map { it.payloadAsText }
             .onBackpressureDrop { dropped ->
-                runCatching { objectMapper.readValue<WebSocketCompletionRequest>(dropped) }.onSuccess {
+                runCatching { objectReader.readValue<WebSocketCompletionRequest>(dropped) }.onSuccess {
                     sideSink.tryEmitNext(Response.Discarded(it.requestId))
                 }
             }
             .flatMap({ payload ->
-                val req = runCatching { objectMapper.readValue<WebSocketCompletionRequest>(payload) }.getOrNull()
+                val req = runCatching { objectReader.readValue<WebSocketCompletionRequest>(payload) }.getOrNull()
                 if (req == null) {
                     sideSink.tryEmitNext(Response.Error("Failed to parse request: $payload"))
                     Mono.empty()
