@@ -14,7 +14,7 @@ interface ImportTest : BaseCompletionTest {
             code = "fun main() {\n    val rand = Random\n}",
             line = 1,
             character = 21,
-            completions = listOf(
+            expected = listOf(
                 "Random  (kotlin.random.Random)"
             )
         )
@@ -69,7 +69,7 @@ interface ImportTest : BaseCompletionTest {
       """.trimMargin(),
             line = 1,
             character = 20,
-            completions = listOf(
+            expected = listOf(
                 "Random  (kotlin.random.Random)"
             )
         )
@@ -83,7 +83,7 @@ interface ImportTest : BaseCompletionTest {
                     "}",
             line = 1,
             character = 15,
-            completions = listOf(
+            expected = listOf(
                 "sin(x: Double)  (kotlin.math.sin)",
                 "sin(x: Float)  (kotlin.math.sin)"
             )
@@ -134,7 +134,7 @@ interface ImportTest : BaseCompletionTest {
             code = "fun main() {\n    val rand = Random\n}",
             line = 1,
             character = 21,
-            completions = listOf(
+            expected = listOf(
                 "Random  (kotlin.random.Random)"
             ),
             isJs = true
@@ -174,7 +174,7 @@ interface ImportTest : BaseCompletionTest {
       """.trimMargin(),
             line = 1,
             character = 20,
-            completions = listOf(
+            expected = listOf(
                 "Random  (kotlin.random.Random)"
             ),
             isJs = true
@@ -189,7 +189,7 @@ interface ImportTest : BaseCompletionTest {
                     "}",
             line = 1,
             character = 15,
-            completions = listOf(
+            expected = listOf(
                 "sin(x: Double)  (kotlin.math.sin)",
                 "sin(x: Float)  (kotlin.math.sin)"
             ),

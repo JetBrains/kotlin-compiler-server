@@ -59,7 +59,7 @@ class LspClientTest : CompletionTest {
         code: String,
         line: Int,
         character: Int,
-        completions: List<String>,
+        expected: List<String>,
         isJs: Boolean
     ) = runBlocking {
         if (isJs) return@runBlocking
@@ -69,7 +69,7 @@ class LspClientTest : CompletionTest {
         val received = client.getCompletion(uri, caret).await()
 
         val labels = received.mapNotNull { it.toCompletion()?.displayText }
-        assertAll(completions.map { exp ->
+        assertAll(expected.map { exp ->
             { assertTrue(labels.any { it.contains(exp) }, "Expected completion $exp but got $labels") }
         })
     }

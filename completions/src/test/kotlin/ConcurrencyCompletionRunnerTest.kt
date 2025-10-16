@@ -1,9 +1,12 @@
 import base.BaseCompletionTest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.platform.commons.logging.LoggerFactory
 import kotlin.test.Ignore
+import kotlin.time.Duration.Companion.milliseconds
 
 abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
     // TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
@@ -15,7 +18,7 @@ abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
                 code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
                 line = 2,
                 character = 21,
-                completions = listOf(
+                expected = listOf(
                     "alex"
                 )
             )
@@ -31,7 +34,7 @@ abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
                 code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
                 line = 2,
                 character = 21,
-                completions = listOf(
+                expected = listOf(
                     "alex"
                 ),
                 isJs = true

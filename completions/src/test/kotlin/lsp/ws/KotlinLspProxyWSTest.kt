@@ -57,7 +57,7 @@ class KotlinLspProxyWSTest : CompletionTest {
         code: String,
         line: Int,
         character: Int,
-        completions: List<String>,
+        expected: List<String>,
         isJs: Boolean
     ) {
         if (isJs) return // silently ignore JS completions for now
@@ -74,7 +74,7 @@ class KotlinLspProxyWSTest : CompletionTest {
         StepVerifier.create(completionsMono)
             .assertNext { received ->
                 val labels = received.map { it.displayText }
-                assertAll(completions.map { exp ->
+                assertAll(expected.map { exp ->
                     { assertTrue(labels.any { it.contains(exp) }, "Expected completion $exp but got $labels") }
                 })
             }

@@ -1,11 +1,10 @@
 package lsp
 
 import CompletionTest
+import base.BaseCompletionTest.Companion.retrieveCompletions
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
-import completions.model.Project
-import completions.model.ProjectFile
 import model.Completion
 import model.Icon
 import org.eclipse.lsp4j.Position
@@ -17,11 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.reactive.server.WebTestClient
-import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.toJavaDuration
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -94,34 +90,18 @@ class LspCompletionProviderTest : CompletionTest {
         code: String,
         line: Int,
         character: Int,
-        completions: List<String>,
+        expected: List<String>,
         isJs: Boolean
     ) {
         val caret = Position(line, character)
         val completions = retrieveCompletionsFromEndpoint(code, caret).map { it.displayText }
-        assertAll(executables = completions.map { exp ->
+        assertAll(expected.map { exp ->
             { assertTrue(completions.any { it.contains(exp) }, "Expected completion $exp but got $completions") }
         })
     }
 
     private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<Completion>  {
-        val project = Project(files = listOf(ProjectFile(text = code, name = "file.kt")))
         val url = "http://localhost:$port/api/complete/lsp?line=${position.line}&ch=${position.character}"
-        return withTimeout {
-            post()
-                .uri(url)
-                .bodyValue(project)
-                .exchange()
-                .expectStatus().isOk
-                .expectBodyList(Completion::class.java)
-                .returnResult()
-                .responseBody
-        } ?: emptyList()
-
+        return webTestClient.retrieveCompletions(url, code)
     }
-
-    private fun <T> withTimeout(
-        duration: Duration = 2.minutes.toJavaDuration(),
-        body: WebTestClient.() -> T?
-    ): T? = with(webTestClient.mutate().responseTimeout(duration).build()) { body() }
 }

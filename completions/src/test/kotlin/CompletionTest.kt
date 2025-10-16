@@ -9,7 +9,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
             line = 2,
             character = 21,
-            completions = listOf(
+            expected = listOf(
                 "alex"
             )
         )
@@ -21,7 +21,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
             line = 2,
             character = 21,
-            completions = listOf(
+            expected = listOf(
                 "alex"
             ),
             isJs = true
@@ -34,7 +34,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    3.0.toIn\n}",
             line = 1,
             character = 12,
-            completions = listOf(
+            expected = listOf(
                 "toInt()"
             )
         )
@@ -46,7 +46,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    3.0.toIn\n}",
             line = 1,
             character = 12,
-            completions = listOf(
+            expected = listOf(
                 "toInt()"
             ),
             isJs = true
@@ -60,7 +60,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    list\n}",
             line = 1,
             character = 8,
-            completions = listOf(
+            expected = listOf(
                 "listOf()",
                 "listOf(element: T)",
                 "listOfNotNull(element: T?)",
@@ -76,7 +76,7 @@ interface CompletionTest : BaseCompletionTest {
             code = "fun main() {\n    list\n}",
             line = 1,
             character = 8,
-            completions = listOf(
+            expected = listOf(
                 "listOf()",
                 "listOf(element: T)",
                 "listOfNotNull(element: T?)",
