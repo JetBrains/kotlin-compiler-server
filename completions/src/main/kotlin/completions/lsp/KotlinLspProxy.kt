@@ -1,11 +1,11 @@
 package completions.lsp
 
+import completions.dto.api.CompletionRequest
+import completions.dto.api.ProjectFile
 import completions.exceptions.LspUnavailableException
 import completions.lsp.client.LspClient
 import completions.lsp.client.ReconnectingLspClient
 import completions.lsp.components.LspProject
-import completions.model.Project
-import completions.model.ProjectFile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +21,7 @@ import java.io.IOException
 import java.net.URI
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
@@ -28,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 class KotlinLspProxy {
 
     internal lateinit var lspClient: LspClient
-    internal val lspProjects = ConcurrentHashMap<Project, LspProject>()
+    internal val lspProjects = CopyOnWriteArrayList<LspProject>()
 
     private val available = AtomicBoolean(false)
     private val isInitializing = AtomicBoolean(false)
@@ -51,24 +52,24 @@ class KotlinLspProxy {
      * This modality is aimed for **stateless** scenarios where we don't care about
      * the identity of the client and the project.
      *
-     * @param project the project containing the file
+     * @param request the completion request
      * @param line the line number
      * @param ch the character position
      * @param projectFile the file to be used for completion, defaults to the first file in the project
      * @return a list of [CompletionItem]s
      */
     suspend fun getOneTimeCompletions(
-        project: Project,
+        request: CompletionRequest,
         line: Int,
         ch: Int,
-        projectFile: ProjectFile = project.files.first(),
+        projectFile: ProjectFile = request.files.first(),
     ): List<CompletionItem> {
         ensureLspClientReady() ?: return emptyList()
-        val lspProject = lspProjects.getOrPut(project) { createNewProject(project) }
+        val lspProject = createNewProject(request).also(lspProjects::add)
         val uri = lspProject.getDocumentUri(projectFile.name) ?: return emptyList()
         lspClient.openDocument(uri, projectFile.text, 1)
         return getCompletions(lspProject, line, ch, projectFile.name)
-            .also { closeProject(project) }
+            .also { closeProject(lspProject) }
     }
 
     /**
@@ -149,17 +150,16 @@ class KotlinLspProxy {
             else logger.debug("Lsp client not ready: ${it.message}")
         }.isSuccess.takeIf { it }
 
-    private fun createNewProject(project: Project): LspProject = LspProject.fromProject(project)
+    private fun createNewProject(project: CompletionRequest): LspProject = LspProject.fromCompletionRequest(project)
 
-    internal fun closeProject(project: Project) {
-        val lspProject = lspProjects[project] ?: return
+    internal fun closeProject(lspProject: LspProject) {
         lspProject.getDocumentsUris().forEach { uri -> lspClient.closeDocument(uri) }
         lspProject.tearDown()
-        lspProjects.remove(project)
+        lspProjects.remove(lspProject)
     }
 
     fun closeAllProjects() {
-        lspProjects.keys.forEach { closeProject(it) }
+        lspProjects.forEach { closeProject(it) }
         lspProjects.clear()
     }
 
@@ -184,10 +184,10 @@ class KotlinLspProxy {
                 isInitializing.set(false)
             }
             lspClient.addOnReconnectListener {
-                lspProjects.forEach { (project, lspProject) ->
+                lspProjects.forEach { project ->
                     val file = project.files.first()
-                    val uri = lspProject.getDocumentUri(file.name) ?: return@forEach
-                    lspProject.resetDocumentVersion(file.name)
+                    val uri = project.getDocumentUri(file.name) ?: return@forEach
+                    project.resetDocumentVersion(file.name)
                     client.openDocument(uri, file.text, 1)
                 }
                 lspClientInitializedDeferred.complete(Unit)
@@ -242,7 +242,7 @@ class KotlinLspProxy {
  * Custom WS messages could be designed to handle this.
  */
 object StatefulKotlinLspProxy {
-    private val clientsProjects = ConcurrentHashMap<String, Project>()
+    private val clientsProjects = ConcurrentHashMap<String, LspProject>()
 
     /**
      * Retrieve completions for a given line and character position in a project file.
@@ -254,21 +254,22 @@ object StatefulKotlinLspProxy {
      * the document**.
      *
      * @param clientId the user identifier (or session identifier)
-     * @param newProject the project containing the file
+     * @param completionRequest the request containing the files
      * @param line the line number
      * @param ch the character position
      * @return a list of [CompletionItem]s
      */
     suspend fun KotlinLspProxy.getCompletionsForClient(
         clientId: String,
-        newProject: Project,
+        completionRequest: CompletionRequest,
         line: Int,
         ch: Int,
-        projectFile: ProjectFile = newProject.files.first(),
+        projectFile: ProjectFile = completionRequest.files.first(),
     ): List<CompletionItem> {
-        val project =
-            clientsProjects[clientId]?.let { ensureDocumentPresent(it, projectFile, clientId) } ?: return emptyList()
-        val lspProject = lspProjects[project] ?: return emptyList()
+        val lspProject = clientsProjects[clientId]?.let {
+            ensureDocumentPresent(it, projectFile, clientId)
+        } ?: return emptyList()
+
         val newContent = projectFile.text
         val documentToChange = projectFile.name
         changeDocumentContent(lspProject, documentToChange, newContent)
@@ -282,9 +283,10 @@ object StatefulKotlinLspProxy {
      * @param clientId the unique identifier for the client that has connected
      */
     fun KotlinLspProxy.onClientConnected(clientId: String) {
-        val project = Project()
-            .also { clientsProjects[clientId] = it }
-        val lspProject = LspProject.fromProject(project, ownerId = clientId).also { lspProjects[project] = it }
+        val lspProject = LspProject.empty(clientId).also {
+            lspProjects.add(it)
+            clientsProjects[clientId] = it
+        }
         lspProject.getDocumentsUris().forEach { uri -> lspClient.openDocument(uri, "", 1) }
     }
 
@@ -298,6 +300,7 @@ object StatefulKotlinLspProxy {
         clientsProjects[clientId]?.let {
             closeProject(it)
             clientsProjects.remove(clientId)
+            lspProjects.remove(it)
         }
     }
 
@@ -309,17 +312,21 @@ object StatefulKotlinLspProxy {
      * @param projectFile the file to be opened if not present in the project
      * @return the modified project, with the file added if necessary
      */
-    private fun KotlinLspProxy.ensureDocumentPresent(project: Project, projectFile: ProjectFile, clientId: String): Project {
-        if (project.files.contains(projectFile)) return project
+    private fun KotlinLspProxy.ensureDocumentPresent(
+        project: LspProject,
+        projectFile: ProjectFile,
+        clientId: String
+    ): LspProject {
+        if (project.containsFile(projectFile)) return project
         lspProjects.remove(project)
-        val newProject = project.copy(files = project.files + projectFile)
-        val newLspProject = LspProject.fromProject(newProject, ownerId = clientId)
-        lspProjects[newProject] = newLspProject
-        clientsProjects[clientId] = newProject
+        val newLspProject = project.copy(files = project.files + projectFile).also {
+                lspProjects.add(it)
+                clientsProjects[clientId] = it
+            }
         newLspProject.getDocumentUri(projectFile.name)?.let { uri ->
             lspClient.openDocument(uri, projectFile.text, 1)
         }
-        return newProject
+        return newLspProject
     }
 
     private fun KotlinLspProxy.changeDocumentContent(

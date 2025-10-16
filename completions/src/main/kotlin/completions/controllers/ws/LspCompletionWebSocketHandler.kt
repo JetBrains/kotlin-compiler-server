@@ -2,9 +2,9 @@
 
 package completions.controllers.ws
 
-import completions.model.Project
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import completions.dto.api.CompletionRequest
 import completions.lsp.KotlinLspProxy
 import completions.lsp.StatefulKotlinLspProxy.onClientConnected
 import completions.lsp.StatefulKotlinLspProxy.onClientDisconnected
@@ -28,7 +28,7 @@ import reactor.core.scheduler.Schedulers
  * - **Connection**: Server sends `Init{ sessionId }` immediately after the WebSocket is established. The client could persist
  *   this identifier for the lifetime of the connection and treat it as the LSP client id.
  *
- * - **Requests**: Client sends `CompletionRequest{ requestId, project, line, ch }` for each caret position to be completed.
+ * - **Requests**: Client sends `CompletionRequest{ requestId, completionRequest, line, ch }` for each caret position to be completed.
  *   `requestId` must be unique per client session and is used exclusively for correlation.
  *
  * - **Responses**: For a successfully processed request: `Completions{ completions, requestId }` where `completions` are
@@ -105,7 +105,7 @@ class LspCompletionWebSocketHandler(
                     lspProxy.requireAvailable()
                     lspCompletionProvider.complete(
                         clientId = sessionId,
-                        project = request.project,
+                        request = request.completionRequest,
                         line = request.line,
                         ch = request.ch,
                         applyFuzzyRanking = true,
@@ -150,7 +150,7 @@ sealed interface Response {
 
 private data class WebSocketCompletionRequest(
     val requestId: String,
-    val project: Project,
+    val completionRequest: CompletionRequest,
     val line: Int,
     val ch: Int,
 )

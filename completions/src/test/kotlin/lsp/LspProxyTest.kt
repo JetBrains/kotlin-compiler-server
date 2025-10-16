@@ -1,9 +1,8 @@
 package lsp
 
+import completions.dto.api.CompletionRequest
+import completions.dto.api.ProjectFile
 import completions.lsp.KotlinLspProxy
-import completions.model.Project
-import completions.model.ProjectFile
-import completions.model.ProjectType
 import kotlinx.coroutines.runBlocking
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
 import completions.lsp.StatefulKotlinLspProxy.onClientConnected
@@ -32,7 +31,7 @@ class LspProxyTest {
                     listOf(1, 2, 3).fil$CARET_MARKER
             """.trimIndent()
         }
-        val project = getProject(code)
+        val project = buildCompletionRequest(code)
         val completions = lspProxy.getOneTimeCompletions(project, caret.line, caret.character)
         val expected = listOf("filter", "filterIndexed", "filterIsInstance", "filterNot")
         assertTrue(completions.map { it.label }.containsAll(expected))
@@ -51,7 +50,7 @@ class LspProxyTest {
         lspProxy.onClientConnected(testClientId)
         var completions = lspProxy.getCompletionsForClient(
             testClientId,
-            getProject(initialCode),
+            buildCompletionRequest(initialCode),
             initialCaret.line,
             initialCaret.character
         )
@@ -67,7 +66,7 @@ class LspProxyTest {
         }
         completions = lspProxy.getCompletionsForClient(
             testClientId,
-            getProject(changedCode),
+            buildCompletionRequest(changedCode),
             changedCaret.line,
             changedCaret.character
         )
@@ -87,7 +86,7 @@ class LspProxyTest {
 
         val completions = lspProxy.getCompletionsForClient(
             testClientId,
-            getProject(initialCode),
+            buildCompletionRequest(initialCode),
             initialCaret.line,
             initialCaret.character
         )
@@ -97,12 +96,8 @@ class LspProxyTest {
     @AfterEach
     fun cleanup() = lspProxy.closeAllProjects()
 
-    private fun getProject(code: String): Project =
-        Project(
-            args = "",
-            files = listOf(ProjectFile(text = code, name = "test.kt")),
-            confType = ProjectType.JAVA
-        )
+    private fun buildCompletionRequest(code: String): CompletionRequest =
+        CompletionRequest(files = listOf(ProjectFile(text = code, name = "test.kt")))
 
     companion object {
         private val lspProxy = KotlinLspProxy()

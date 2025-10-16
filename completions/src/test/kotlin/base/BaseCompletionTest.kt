@@ -1,7 +1,7 @@
 package base
 
-import completions.model.Project
-import completions.model.ProjectFile
+import completions.dto.api.ProjectFile
+import completions.lsp.components.LspProject
 import model.Completion
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Duration
@@ -19,7 +19,7 @@ interface BaseCompletionTest {
 
     companion object {
         fun WebTestClient.retrieveCompletions(url: String, code: String): List<Completion> {
-            val project = Project(files = listOf(ProjectFile(text = code, name = "file.kt")))
+            val project = LspProject(files = listOf(ProjectFile(text = code, name = "file.kt")))
             return withTimeout {
                 post()
                     .uri(url)

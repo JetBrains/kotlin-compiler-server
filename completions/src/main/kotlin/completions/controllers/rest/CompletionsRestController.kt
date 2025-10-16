@@ -1,6 +1,6 @@
 package completions.controllers.rest
 
-import completions.model.Project
+import completions.dto.api.CompletionRequest
 import completions.service.lsp.LspCompletionProvider
 import model.Completion
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,8 +16,8 @@ class CompletionsRestController(
 ) {
     @PostMapping("/lsp")
     suspend fun complete(
-        @RequestBody project: Project,
+        @RequestBody completionRequest: CompletionRequest,
         @RequestParam line: Int,
         @RequestParam ch: Int,
-    ): List<Completion> = lspCompletionProvider.complete(project, line, ch)
+    ): List<Completion> = lspCompletionProvider.complete(completionRequest, line, ch)
 }

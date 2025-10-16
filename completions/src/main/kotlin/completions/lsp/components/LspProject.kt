@@ -1,8 +1,8 @@
 package completions.lsp.components
 
+import completions.dto.api.CompletionRequest
+import completions.dto.api.ProjectFile
 import completions.lsp.KotlinLspProxy
-import completions.model.Project
-import completions.model.ProjectType
 import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -13,15 +13,11 @@ import java.util.concurrent.atomic.AtomicInteger
  * and the project's filesystem structure. It facilitates tasks such as creating a project workspace,
  * managing documents within that workspace, and tearing down the workspace when it's no longer needed.
  *
- * @property confType The configuration type of the project, defaulting to `ProjectType.JAVA`.
- * @property files A list of [LspDocument] objects representing project files.
+ * @property files A list of [ProjectFile] objects representing project files.
  */
-class LspProject(
-    confType: ProjectType = ProjectType.JAVA,
-    files: List<LspDocument> = emptyList(),
-    ownerId: String? = null,
-) {
-    private val projectRoot: Path = baseDir.resolve("$confType-${ownerId ?: UUID.randomUUID().toString()}")
+data class LspProject(val files: List<ProjectFile> = emptyList(), val ownerId: String? = null) {
+
+    private val projectRoot: Path = baseDir.resolve("${ownerId?.let { "user-$it" } ?: UUID.randomUUID()}")
     private val documentsToPaths: MutableMap<String, Path> = mutableMapOf()
     private val documentsVersions = ConcurrentHashMap<String, AtomicInteger>()
 
@@ -39,6 +35,8 @@ class LspProject(
         documentsToPaths[name]?.toFile()?.writeText(newContents)
         documentsVersions[name]?.incrementAndGet()
     }
+
+    fun containsFile(file: ProjectFile): Boolean = files.any { it.name == file.name && it.text == file.text}
 
     /**
      * Returns the URI of a document in the project compliant with the [completions.lsp.client.LspClient].
@@ -67,39 +65,26 @@ class LspProject(
         private val baseDir = Path.of(KotlinLspProxy.lspLocalWorkspaceRoot()).toAbsolutePath()
 
         /**
-         * Creates a new instance of [LspProject] based on the provided [Project] data.
+         * Creates a new instance of [LspProject] based on the provided [CompletionRequest] data.
          * Please note that currently only JVM-related projects are supported.
          *
-         * @param project the source project containing configuration type and a list of files
+         * @param completionRequest the [CompletionRequest] data to use for project creation
          * @param ownerId optional identifier for the owner of the project
          * @return a new [LspProject] instance with the provided project's configuration type and files
          */
-        fun fromProject(project: Project, ownerId: String? = null): LspProject {
+        fun fromCompletionRequest(completionRequest: CompletionRequest, ownerId: String? = null): LspProject {
             return LspProject(
-                confType = ensureSupportedConfType(project.confType),
-                files = project.files.map { LspDocument(it.text, it.name) },
+                files = completionRequest.files.map { ProjectFile(it.text, it.name) },
                 ownerId = ownerId,
             )
         }
 
         /**
-         * If and when kotlin LSP support other project types, this function can be updated.
+         * Creates a new empty [LspProject] instance, with a single empty file.
          */
-        private fun ensureSupportedConfType(projectType: ProjectType): ProjectType {
-            require(projectType == ProjectType.JAVA) { "Only JVM related projects are supported" }
-            return projectType
-        }
+        fun empty(ownerId: String? = null): LspProject = LspProject(
+            files = listOf(ProjectFile("", "File.kt")),
+            ownerId = ownerId
+        )
     }
-}
-
-data class LspDocument(
-    val text: String = "",
-    val name: String = "File.kt",
-    val publicId: String? = null,
-)
-
-@Suppress("unused")
-enum class LspProjectType(val id: String) {
-    JAVA("java"),
-    // add here support for JS, WASM, ...
 }

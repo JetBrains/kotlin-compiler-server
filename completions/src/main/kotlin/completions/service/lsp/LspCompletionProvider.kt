@@ -1,12 +1,12 @@
 package completions.service.lsp
 
+import completions.dto.api.CompletionRequest
+import completions.dto.api.ProjectFile
 import completions.lsp.FuzzyCompletionRanking.completionQuery
 import completions.lsp.FuzzyCompletionRanking.rankCompletions
 import completions.lsp.KotlinLspProxy
 import completions.lsp.LspCompletionParser.toCompletion
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
-import completions.model.Project
-import completions.model.ProjectFile
 import model.Completion
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
@@ -25,41 +25,41 @@ class LspCompletionProvider(
      * Retrieves a list of code completions for a specified position within a project file.
      * The completions are fetched and processed, with an optional fuzzy ranking applied.
      *
-     * @param project the project containing the file for which completions are being retrieved
+     * @param request the request containing the files
      * @param line the line number within the file where completions are to be provided
      * @param ch the character position within the line for the completions
      * @param applyFuzzyRanking whether to apply fuzzy ranking to the completions
      * @return a list of [Completion]s relevant to the specified position in the file
      */
     suspend fun complete(
-        project: Project,
+        request: CompletionRequest,
         line: Int,
         ch: Int,
         applyFuzzyRanking: Boolean = true
     ): List<Completion> =
-        lspProxy.getOneTimeCompletions(project, line, ch).transformCompletions(project, applyFuzzyRanking)
+        lspProxy.getOneTimeCompletions(request, line, ch).transformCompletions(request, applyFuzzyRanking)
 
     /**
      * Overload of [complete] that accepts a client ID for stateful scenarios.
      */
     suspend fun complete(
         clientId: String,
-        project: Project,
+        request: CompletionRequest,
         line: Int,
         ch: Int,
         applyFuzzyRanking: Boolean = true
     ): List<Completion> =
-        lspProxy.getCompletionsForClient(clientId, project, line, ch).transformCompletions(project, applyFuzzyRanking)
+        lspProxy.getCompletionsForClient(clientId, request, line, ch).transformCompletions(request, applyFuzzyRanking)
 
     private fun List<CompletionItem>.transformCompletions(
-        project: Project,
+        request: CompletionRequest,
         applyFuzzyRanking: Boolean
     ): List<Completion> =
         if (applyFuzzyRanking) {
             rankedCompletions()
         } else {
             this
-        }.mapNotNull { it.toCompletion() }.cleanupImports(project.files.first())
+        }.mapNotNull { it.toCompletion() }.cleanupImports(request.files.first())
 
     private fun List<CompletionItem>.rankedCompletions(): List<CompletionItem> =
         firstOrNull()?.completionQuery
