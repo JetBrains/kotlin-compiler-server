@@ -1,6 +1,6 @@
 package lsp.ws
 
-import AbstractCompletionTest
+import CompletionTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -36,7 +36,7 @@ import kotlin.time.toJavaDuration
 )
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(KotlinLspComposeExtension::class)
-class KotlinLspProxyWSTest : AbstractCompletionTest {
+class KotlinLspProxyWSTest : CompletionTest {
 
     @LocalServerPort
     private var port: Int = 0
@@ -53,7 +53,7 @@ class KotlinLspProxyWSTest : AbstractCompletionTest {
         testClient
     }
 
-    override fun performCompletion(
+    override fun performCompletionChecks(
         code: String,
         line: Int,
         character: Int,

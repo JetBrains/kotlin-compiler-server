@@ -1,6 +1,6 @@
 package lsp
 
-import AbstractCompletionTest
+import CompletionTest
 import completions.lsp.LspCompletionParser.toCompletion
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
@@ -21,7 +21,7 @@ import kotlin.test.assertTrue
 import kotlin.text.contains
 
 @ExtendWith(KotlinLspComposeExtension::class)
-class LspClientTest : AbstractCompletionTest {
+class LspClientTest : CompletionTest {
 
     @Test
     fun `LSP client should initialize correctly`() {
@@ -55,7 +55,7 @@ class LspClientTest : AbstractCompletionTest {
         openedDocuments.forEach { client.closeDocument(it) }
     }
 
-    override fun performCompletion(
+    override fun performCompletionChecks(
         code: String,
         line: Int,
         character: Int,

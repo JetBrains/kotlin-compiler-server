@@ -1,6 +1,6 @@
 package lsp
 
-import AbstractCompletionTest
+import CompletionTest
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
@@ -28,7 +28,7 @@ import kotlin.time.toJavaDuration
     classes = [completions.CompletionsApplication::class]
 )
 @ExtendWith(KotlinLspComposeExtension::class)
-class LspCompletionProviderTest : AbstractCompletionTest {
+class LspCompletionProviderTest : CompletionTest {
 
     @LocalServerPort
     private var port: Int = 0
@@ -90,7 +90,7 @@ class LspCompletionProviderTest : AbstractCompletionTest {
         return retrieveCompletionsFromEndpoint(code, position)
     }
 
-    override fun performCompletion(
+    override fun performCompletionChecks(
         code: String,
         line: Int,
         character: Int,

@@ -1,17 +1,11 @@
+import base.BaseCompletionTest
 import org.junit.jupiter.api.Test
 
-interface AbstractCompletionTest {
-    fun performCompletion(
-        code: String,
-        line: Int,
-        character: Int,
-        completions: List<String>,
-        isJs: Boolean = false
-    )
+interface CompletionTest : BaseCompletionTest {
 
     @Test
     fun `variable completion test`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
             line = 2,
             character = 21,
@@ -23,7 +17,7 @@ interface AbstractCompletionTest {
 
     @Test
     fun `variable completion test js`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
             line = 2,
             character = 21,
@@ -36,7 +30,7 @@ interface AbstractCompletionTest {
 
     @Test
     fun `double to int completion test`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    3.0.toIn\n}",
             line = 1,
             character = 12,
@@ -48,7 +42,7 @@ interface AbstractCompletionTest {
 
     @Test
     fun `double to int completion test js`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    3.0.toIn\n}",
             line = 1,
             character = 12,
@@ -62,7 +56,7 @@ interface AbstractCompletionTest {
 
     @Test
     fun `listOf completion test`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    list\n}",
             line = 1,
             character = 8,
@@ -78,7 +72,7 @@ interface AbstractCompletionTest {
 
     @Test
     fun `listOf completion test js`() {
-        performCompletion(
+        performCompletionChecks(
             code = "fun main() {\n    list\n}",
             line = 1,
             character = 8,
