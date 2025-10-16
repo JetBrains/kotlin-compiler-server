@@ -1,7 +1,7 @@
-package completions.controllers
+package completions.controllers.rest
 
-import completions.service.lsp.LspCompletionProvider
 import completions.model.Project
+import completions.service.lsp.LspCompletionProvider
 import model.Completion
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
