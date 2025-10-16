@@ -31,6 +31,7 @@ class KotlinLspProxy {
     internal val lspProjects = ConcurrentHashMap<Project, LspProject>()
 
     private val available = AtomicBoolean(false)
+    private val isInitializing = AtomicBoolean(false)
     private var lspClientInitializedDeferred = CompletableDeferred<Unit>()
 
     private val proxyCoroutineScope =
@@ -114,6 +115,7 @@ class KotlinLspProxy {
         clientName: String = "kotlin-compiler-server"
     ) {
         if (!::lspClient.isInitialized) {
+            if (isInitializing.getAndSet(true)) return
             lspClient = LspClient.createSingle(workspacePath, clientName)
             wireAvailabilityObservers(lspClient)
             available.set(true)
@@ -132,9 +134,7 @@ class KotlinLspProxy {
         if (!isAvailable()) {
             try {
                 if (!::lspClient.isInitialized) initializeClient()
-                if (!lspClientInitializedDeferred.isCompleted) {
-                    lspClientInitializedDeferred.await()
-                }
+                if (!lspClientInitializedDeferred.isCompleted) lspClientInitializedDeferred.await()
                 lspClient.awaitReady(60.seconds)
                 available.set(true)
             } catch (e: Exception) {
@@ -181,6 +181,7 @@ class KotlinLspProxy {
                 }
                 lspClientInitializedDeferred = CompletableDeferred()
                 available.set(false)
+                isInitializing.set(false)
             }
             lspClient.addOnReconnectListener {
                 lspProjects.forEach { (project, lspProject) ->
@@ -191,6 +192,7 @@ class KotlinLspProxy {
                 }
                 lspClientInitializedDeferred.complete(Unit)
                 available.set(true)
+                isInitializing.set(false)
             }
         }
     }
