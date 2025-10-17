@@ -58,7 +58,7 @@ class LspCompletionProviderTest : CompletionTest {
     @Test
     fun `rest endpoint should return completions in the expected order`() {
         val completions = getCompletions(testCode).map { it.text }
-        val expectedTexts = listOf("toInt()", "toIntervalZeroBased()", "toUInt()", "roundToInt()")
+        val expectedTexts = listOf("toInt()", "toIntervalZeroBased()", "roundToInt()", "toUInt()")
         assertEquals(expectedTexts, completions)
     }
 
@@ -101,7 +101,7 @@ class LspCompletionProviderTest : CompletionTest {
     }
 
     private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<Completion>  {
-        val url = "http://localhost:$port/api/complete/lsp?line=${position.line}&ch=${position.character}"
+        val url = "http://localhost:$port/api/compiler/complete?line=${position.line}&ch=${position.character}"
         return webTestClient.retrieveCompletions(url, code)
     }
 }
