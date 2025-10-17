@@ -1,6 +1,9 @@
 services:
   kotlin-lsp:
-    build: .
+    build:
+      context: .
+      args:
+        - LSP_ZIP=${LSP_ZIP_ARG}
     ports:
       - "9999:9999"
     platform: linux/amd64

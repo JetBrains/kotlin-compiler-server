@@ -5,7 +5,9 @@ RUN apt-get update && apt-get install -y curl zip unzip bash netcat-openbsd \
 
 COPY lsp-users-projects-root-test/ /lsp-users-projects-root-test/
 WORKDIR /lsp
-ARG LSP_ZIP=intellij-lsp-253.27396.0-linux-x64.zip
+
+ARG LSP_ZIP
+
 COPY server/${LSP_ZIP} .
 RUN unzip ${LSP_ZIP} \
     && rm ${LSP_ZIP} \
