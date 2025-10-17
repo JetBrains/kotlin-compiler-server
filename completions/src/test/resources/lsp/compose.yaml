@@ -1,7 +1,6 @@
 services:
   kotlin-lsp:
-    build: .
+    image: sfuri/intellij-lsp:latest
     ports:
       - "9999:9999"
-    platform: linux/amd64
     restart: unless-stopped
