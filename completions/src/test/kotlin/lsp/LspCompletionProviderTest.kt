@@ -48,7 +48,7 @@ class LspCompletionProviderTest : CompletionTest {
 
         val expected = Completion(
             text = "toUInt()",
-            displayText = "toUInt() for Double in kotlin",
+            displayText = "toUInt()",
             tail = "UInt",
             icon = Icon.METHOD,
             hasOtherImports = null
