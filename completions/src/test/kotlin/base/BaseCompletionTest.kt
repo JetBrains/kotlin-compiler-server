@@ -3,6 +3,7 @@ package base
 import completions.dto.api.ProjectFile
 import completions.lsp.components.LspProject
 import completions.dto.api.Completion
+import lsp.utils.extractCaret
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -10,9 +11,7 @@ import kotlin.time.toJavaDuration
 
 interface BaseCompletionTest {
     fun performCompletionChecks(
-        code: String,
-        line: Int,
-        character: Int,
+        codeWithCaret: String,
         expected: List<String>,
         isJs: Boolean = false
     )

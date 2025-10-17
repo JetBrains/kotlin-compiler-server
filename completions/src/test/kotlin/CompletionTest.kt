@@ -1,4 +1,5 @@
 import base.BaseCompletionTest
+import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
 
 interface CompletionTest : BaseCompletionTest {
@@ -6,9 +7,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `variable completion test`() {
         performCompletionChecks(
-            code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
-            line = 2,
-            character = 21,
+            codeWithCaret = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a$CARET_MARKER\n}",
             expected = listOf(
                 "alex"
             )
@@ -18,9 +17,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `variable completion test js`() {
         performCompletionChecks(
-            code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
-            line = 2,
-            character = 21,
+            codeWithCaret = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a$CARET_MARKER\n}",
             expected = listOf(
                 "alex"
             ),
@@ -31,9 +28,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `double to int completion test`() {
         performCompletionChecks(
-            code = "fun main() {\n    3.0.toIn\n}",
-            line = 1,
-            character = 12,
+            codeWithCaret = "fun main() {\n    3.0.toIn$CARET_MARKER\n}",
             expected = listOf(
                 "toInt()"
             )
@@ -43,9 +38,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `double to int completion test js`() {
         performCompletionChecks(
-            code = "fun main() {\n    3.0.toIn\n}",
-            line = 1,
-            character = 12,
+            codeWithCaret = "fun main() {\n    3.0.toIn$CARET_MARKER\n}",
             expected = listOf(
                 "toInt()"
             ),
@@ -57,9 +50,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `listOf completion test`() {
         performCompletionChecks(
-            code = "fun main() {\n    list\n}",
-            line = 1,
-            character = 8,
+            codeWithCaret = "fun main() {\n    list$CARET_MARKER\n}",
             expected = listOf(
                 "listOf()",
                 "listOf(element: T)",
@@ -73,9 +64,7 @@ interface CompletionTest : BaseCompletionTest {
     @Test
     fun `listOf completion test js`() {
         performCompletionChecks(
-            code = "fun main() {\n    list\n}",
-            line = 1,
-            character = 8,
+            codeWithCaret = "fun main() {\n    list$CARET_MARKER\n}",
             expected = listOf(
                 "listOf()",
                 "listOf(element: T)",

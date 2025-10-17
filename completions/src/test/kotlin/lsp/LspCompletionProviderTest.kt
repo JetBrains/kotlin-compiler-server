@@ -88,14 +88,12 @@ class LspCompletionProviderTest : CompletionTest {
     }
 
     override fun performCompletionChecks(
-        code: String,
-        line: Int,
-        character: Int,
+        codeWithCaret: String,
         expected: List<String>,
         isJs: Boolean
     ) {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
-        val caret = Position(line, character)
+        val (code, caret) = extractCaret { codeWithCaret }
         val completions = retrieveCompletionsFromEndpoint(code, caret).map { it.displayText }
         assertAll(expected.map { exp ->
             { assertTrue(completions.any { it.contains(exp) }, "Expected completion $exp but got $completions") }

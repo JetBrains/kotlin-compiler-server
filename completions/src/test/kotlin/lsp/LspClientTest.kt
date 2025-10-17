@@ -9,7 +9,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import completions.lsp.client.KotlinLspClient
 import completions.lsp.client.LspClient
-import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assumptions.assumeFalse
@@ -57,14 +56,12 @@ class LspClientTest : CompletionTest {
     }
 
     override fun performCompletionChecks(
-        code: String,
-        line: Int,
-        character: Int,
+        codeWithCaret: String,
         expected: List<String>,
         isJs: Boolean
     ) = runBlocking {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
-        val caret = Position(line, character)
+        val (code, caret) = extractCaret { codeWithCaret }
         val uri = randomResourceUri
         client.openDocument(uri, code)
         val received = client.getCompletion(uri, caret).await()

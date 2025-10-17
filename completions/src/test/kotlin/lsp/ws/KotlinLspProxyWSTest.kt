@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import completions.configuration.WebSocketConfiguration
 import lsp.utils.KotlinLspComposeExtension
 import completions.dto.api.Completion
+import lsp.utils.extractCaret
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.AfterAll
@@ -55,18 +56,17 @@ class KotlinLspProxyWSTest : CompletionTest {
     }
 
     override fun performCompletionChecks(
-        code: String,
-        line: Int,
-        character: Int,
+        codeWithCaret: String,
         expected: List<String>,
         isJs: Boolean
     ) {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         val requestId = UUID.randomUUID().toString()
+        val (code, caret) = extractCaret { codeWithCaret }
         val payload = buildCompletionRequest(
             fileName = "test$requestId.kt",
             code = code,
-            caret = Position(line, character),
+            caret = caret,
             requestId = requestId,
         )
 
