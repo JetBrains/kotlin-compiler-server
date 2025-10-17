@@ -16,11 +16,13 @@ object LspCompletionParser {
     fun CompletionItem.toCompletion(): Completion? {
         val (functionParams, importPrefix) = extractParamsAndImportFromLabelDetails(labelDetails)
         if (importPrefix != null && isInternalImport(importPrefix)) return null
-        val import = if (hasToBeImported()) importPrefix?.let { "$it.$label"} else null
+        val hasToBeImported = hasToBeImported()
+        val import = if (hasToBeImported) importPrefix?.let { "$it.$label"} else null
+        val detail = labelDetails.detail?.let { removeImportFromDetail(it, hasToBeImported) }
 
         return Completion(
             text = Completion.completionTextFromFullName(label + functionParams.orEmpty()),
-            displayText = label + (labelDetails.detail.orEmpty()),
+            displayText = label + detail,
             tail = labelDetails.description,
             import = import,
             icon = parseIcon(kind?.name)
@@ -55,6 +57,24 @@ object LspCompletionParser {
         val regex = Regex("""\(\s*([a-zA-Z0-9_.]+)\s*\)$|for\s+\S+\s+in\s+([a-zA-Z0-9_.]+)""")
         val match = regex.find(detail) ?: return null
         return match.groupValues[1].ifEmpty { match.groupValues[2].ifEmpty { null } }
+    }
+
+    private fun removeImportFromDetail(detail: String, hasToBeImported: Boolean): String {
+        if (hasToBeImported) return detail
+
+        // ` (qualified.name.here)`
+        val onlyImport = Regex("""^\s*\(\s*[a-zA-Z0-9_.]+\s*\)\s*$""")
+        if (onlyImport.matches(detail)) return ""
+
+        var result = detail
+
+        // ``(params) (qualified.name.here)`
+        result = result.replace(Regex("""\s*\(\s*[a-zA-Z0-9_.]+\s*\)\s*$"""), "")
+
+        // `... for <receiver> in qualified.name.here`
+        result = result.replace(Regex("""\s+for\s+\S+\s+in\s+[a-zA-Z0-9_.]+\s*$"""), "")
+
+        return result
     }
 
     /**
