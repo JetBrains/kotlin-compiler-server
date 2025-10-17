@@ -3,4 +3,5 @@ services:
     build: .
     ports:
       - "9999:9999"
+    platform: linux/amd64
     restart: unless-stopped
