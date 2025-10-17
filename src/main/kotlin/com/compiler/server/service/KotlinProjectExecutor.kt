@@ -6,8 +6,6 @@ import com.compiler.server.model.*
 import com.compiler.server.model.JsCompilerArguments
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
-import model.Completion
-import org.junit.Ignore
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -42,12 +40,6 @@ class KotlinProjectExecutor(
 
     fun convertToWasm(project: Project, debugInfo: Boolean = false): TranslationResultWithJsCode {
         return convertWasmWithConverter(project, debugInfo, kotlinToJSTranslator::doTranslateWithWasm)
-    }
-
-    // TODO(Dmitrii Krasnov): implement this method in KTL-2807
-    @Ignore
-    fun complete(project: Project, line: Int, character: Int): List<Completion> {
-        return emptyList()
     }
 
     fun highlight(project: Project): CompilerDiagnostics = try {

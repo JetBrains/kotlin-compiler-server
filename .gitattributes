@@ -1,1 +1,2 @@
 * text=auto eol=lf
+completions/src/test/resources/lsp/server/intellij-lsp-253.27396.0-linux-x64.zip filter=lfs diff=lfs merge=lfs -text
