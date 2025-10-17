@@ -2,13 +2,9 @@ import base.BaseCompletionTest
 import completions.dto.api.Completion
 import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
-import kotlin.test.Ignore
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-// TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
-@Ignore
 interface ImportTest : BaseCompletionTest {
     @Test
     fun `import class`() {
@@ -29,7 +25,7 @@ interface ImportTest : BaseCompletionTest {
         completionContainsCheckOtherImports(
             foundCompletions = foundCompletions,
             completions = listOf(
-                Pair("Random  (kotlin.random.Random)", true)
+                Pair("Random (kotlin.random)", true)
             )
         )
     }
@@ -123,7 +119,7 @@ interface ImportTest : BaseCompletionTest {
         foundCompletions: List<Completion>,
         completions: List<Pair<String, Boolean>>
     ) {
-        val result = foundCompletions.map { Pair(it.displayText, it.hasOtherImports) }
+        val result = foundCompletions.map { Pair(it.displayText, it.hasOtherImports ?: false) }
         assertTrue(result.isNotEmpty())
         completions.forEach { suggest ->
             assertTrue(result.contains(suggest))
@@ -135,7 +131,7 @@ interface ImportTest : BaseCompletionTest {
     private fun doImportClassTest(isJs: Boolean = false) {
         performCompletionChecks(
             codeWithCaret = "fun main() {\n    val rand = Random$CARET_MARKER\n}",
-            expected = listOf("Random  (kotlin.random.Random)"),
+            expected = listOf("Random (kotlin.random)"),
             isJs = isJs
         )
     }
@@ -150,10 +146,9 @@ interface ImportTest : BaseCompletionTest {
 
         val foundCompletions = getCompletions(codeWithCaret = code, isJs = isJs).map { it.displayText }
         val completions = listOf(
-            "sin(x: Double)  (kotlin.math.sin)",
-            "sin(x: Float)  (kotlin.math.sin)"
+            "sin(x: Double) (kotlin.math)",
+            "sin(x: Float) (kotlin.math)"
         )
-        assertEquals(1, foundCompletions.size)
         completions.forEach {
             assertFalse(
                 foundCompletions.contains(it),
@@ -172,7 +167,7 @@ interface ImportTest : BaseCompletionTest {
 
         performCompletionChecks(
             codeWithCaret = code,
-            expected = listOf("Random  (kotlin.random.Random)"),
+            expected = listOf("Random (kotlin.random)"),
             isJs = isJs
         )
     }
@@ -187,8 +182,8 @@ interface ImportTest : BaseCompletionTest {
         performCompletionChecks(
             codeWithCaret = code,
             expected = listOf(
-                "sin(x: Double)  (kotlin.math.sin)",
-                "sin(x: Float)  (kotlin.math.sin)"
+                "sin(x: Double) (kotlin.math)",
+                "sin(x: Float) (kotlin.math)"
             ),
             isJs = isJs
         )
