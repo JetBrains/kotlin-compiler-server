@@ -11,6 +11,7 @@ import completions.dto.api.Completion
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
@@ -60,7 +61,7 @@ class KotlinLspProxyWSTest : CompletionTest {
         expected: List<String>,
         isJs: Boolean
     ) {
-        if (isJs) return // silently ignore JS completions for now
+        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         val requestId = UUID.randomUUID().toString()
         val payload = buildCompletionRequest(
             fileName = "test$requestId.kt",

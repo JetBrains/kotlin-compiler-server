@@ -8,6 +8,7 @@ import lsp.utils.extractCaret
 import completions.dto.api.Completion
 import completions.dto.api.Icon
 import org.eclipse.lsp4j.Position
+import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertNull
@@ -93,6 +94,7 @@ class LspCompletionProviderTest : CompletionTest {
         expected: List<String>,
         isJs: Boolean
     ) {
+        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         val caret = Position(line, character)
         val completions = retrieveCompletionsFromEndpoint(code, caret).map { it.displayText }
         assertAll(expected.map { exp ->

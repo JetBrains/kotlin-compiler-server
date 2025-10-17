@@ -12,6 +12,7 @@ import completions.lsp.client.LspClient
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -62,7 +63,7 @@ class LspClientTest : CompletionTest {
         expected: List<String>,
         isJs: Boolean
     ) = runBlocking {
-        if (isJs) return@runBlocking
+        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         val caret = Position(line, character)
         val uri = randomResourceUri
         client.openDocument(uri, code)
