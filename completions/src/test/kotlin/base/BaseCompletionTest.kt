@@ -17,7 +17,7 @@ interface BaseCompletionTest {
         isJs: Boolean = false
     )
 
-    companion object {
+    companion object Utils {
         fun WebTestClient.retrieveCompletions(url: String, code: String): List<Completion> {
             val project = LspProject(files = listOf(ProjectFile(text = code, name = "file.kt")))
             return withTimeout {

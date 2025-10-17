@@ -1,7 +1,7 @@
 package lsp
 
 import CompletionTest
-import base.BaseCompletionTest.Companion.retrieveCompletions
+import base.BaseCompletionTest.Utils.retrieveCompletions
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
