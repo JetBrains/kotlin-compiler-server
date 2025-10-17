@@ -51,6 +51,10 @@ class LspCompletionProvider(
     ): List<Completion> =
         lspProxy.getCompletionsForClient(clientId, request, line, ch).transformCompletions(request, applyFuzzyRanking)
 
+    suspend fun awaitReady() {
+        lspProxy.requireAvailable()
+    }
+
     private fun List<CompletionItem>.transformCompletions(
         request: CompletionRequest,
         applyFuzzyRanking: Boolean
