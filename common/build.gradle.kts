@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.compiler)
+    implementation(libs.kotlin.compiler.embeddable)
 }

@@ -2,6 +2,7 @@ package com.compiler.server.compiler.components
 
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
+import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.JvmExecutionResult
 import com.compiler.server.model.OutputDirectory
@@ -12,7 +13,9 @@ import com.compiler.server.utils.CompilerArgumentsUtil
 import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
-import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
+import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -63,7 +66,12 @@ class KotlinCompiler(
             ?.joinToString("\n\n")
     }
 
-    fun run(files: List<ProjectFile>, addByteCode: Boolean, args: String, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun run(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        args: String,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, compiled ->
             val mainClass = JavaRunnerExecutor::class.java.name
             val compiledMainClass = when (compiled.mainClasses.size) {
@@ -86,7 +94,11 @@ class KotlinCompiler(
         }
     }
 
-    fun test(files: List<ProjectFile>, addByteCode: Boolean, userCompilerArguments: Map<String, Any>): JvmExecutionResult {
+    fun test(
+        files: List<ProjectFile>,
+        addByteCode: Boolean,
+        userCompilerArguments: Map<String, Any>
+    ): JvmExecutionResult {
         return execute(files, addByteCode, userCompilerArguments) { output, _ ->
             val mainClass = JUnitExecutors::class.java.name
             javaExecutor.execute(argsFrom(mainClass, output, listOf(output.path.toString())))
@@ -94,29 +106,74 @@ class KotlinCompiler(
         }
     }
 
-    @OptIn(ExperimentalPathApi::class)
-    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> = usingTempDirectory { inputDir ->
-        val ioFiles = files.writeToIoFiles(inputDir)
-        usingTempDirectory { outputDir ->
-            val arguments = ioFiles.map { it.absolutePathString() } +
-                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(jvmCompilerArguments, compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS, userCompilerArguments) +
-                    listOf("-d", outputDir.absolutePathString())
-            K2JVMCompiler().tryCompilation(inputDir, ioFiles, arguments) {
-                val outputFiles = buildMap {
-                    outputDir.visitFileTree {
-                        onVisitFile { file, _ ->
-                            put(file.relativeTo(outputDir).pathString, file.readBytes())
-                            FileVisitResult.CONTINUE
-                        }
-                    }
-                }
-                val mainClasses = findMainClasses(outputFiles)
-                JvmClasses(
-                    files = outputFiles,
-                    mainClasses = mainClasses,
-                )
+    fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> =
+        usingTempDirectory { inputDir ->
+            val ioFiles = files.writeToIoFiles(inputDir)
+            usingTempDirectory { outputDir ->
+                val arguments = ioFiles.map { it.absolutePathString() } +
+                        compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                            jvmCompilerArguments,
+                            compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS,
+                            userCompilerArguments
+                        )
+                val result = compileWithToolchain(inputDir, outputDir, arguments)
+                return@usingTempDirectory result
             }
         }
+
+    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class, ExperimentalBuildToolsApi::class)
+    private fun compileWithToolchain(
+        inputDir: Path,
+        outputDir: Path,
+        arguments: List<String>
+    ): CompilationResult<JvmClasses> {
+        val sources = inputDir.listDirectoryEntries()
+
+        val logger = CompilationLogger()
+        logger.compilationLogs = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
+
+        val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
+        val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
+        val operation = jvmToolchain.createJvmCompilationOperation(sources, outputDir)
+        operation.compilerArguments.applyArgumentStrings(arguments)
+
+        toolchains.createBuildSession().use { session ->
+            val result = try {
+                session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
+            } catch (e: Exception) {
+                throw Exception("Exception executing compilation operation", e)
+            }
+            return toCompilationResult(result, logger, outputDir)
+        }
+    }
+
+    private fun toCompilationResult(
+        buildResult: org.jetbrains.kotlin.buildtools.api.CompilationResult,
+        logger: CompilationLogger,
+        outputDir: Path,
+    ): CompilationResult<JvmClasses> = when (buildResult) {
+        org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
+            val outputFiles = buildMap {
+                outputDir.visitFileTree {
+                    onVisitFile { file, _ ->
+                        put(file.relativeTo(outputDir).pathString, file.readBytes())
+                        FileVisitResult.CONTINUE
+                    }
+                }
+            }
+            Compiled(
+                compilerDiagnostics = compilerDiagnostics,
+                result = JvmClasses(
+                    files = outputFiles,
+                    mainClasses = findMainClasses(outputFiles),
+                )
+            )
+        }
+
+        else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
     }
 
     private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =
