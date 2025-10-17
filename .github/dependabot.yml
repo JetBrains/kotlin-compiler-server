@@ -4,6 +4,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
+    target-branch: "kotlin-community/dev"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -22,3 +23,4 @@ updates:
       - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk7"
       - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
       - dependency-name: "org.jetbrains.kotlin.plugin.spring"
+      - dependency-name: "org.jetbrains.skiko:skiko-js-wasm-runtime"
