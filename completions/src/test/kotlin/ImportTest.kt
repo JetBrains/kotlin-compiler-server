@@ -1,34 +1,31 @@
 import base.BaseCompletionTest
 import completions.dto.api.Completion
-import org.junit.jupiter.api.Assertions
+import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
 import kotlin.test.Ignore
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 // TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
 @Ignore
 interface ImportTest : BaseCompletionTest {
     @Test
     fun `import class`() {
-        performCompletionChecks(
-            code = "fun main() {\n    val rand = Random\n}",
-            line = 1,
-            character = 21,
-            expected = listOf(
-                "Random  (kotlin.random.Random)"
-            )
-        )
+        doImportClassTest()
     }
 
     @Test
     fun `import class with import`() {
-        val foundCompletions = getCompletions(
-            code = "import kotlin.math.sin\nimport java.util.Random\nfun main() {\n" +
-                    "    val rand = Random\n" +
-                    "}",
-            line = 3,
-            character = 21
-        )
+        val code = ("""
+            import kotlin.math.sin
+            import java.util.Random
+            fun main() {
+                val rand = Random$CARET_MARKER
+            }
+        """.trimIndent())
+
+        val foundCompletions = getCompletions(codeWithCaret = code)
         completionContainsCheckOtherImports(
             foundCompletions = foundCompletions,
             completions = listOf(
@@ -39,89 +36,38 @@ interface ImportTest : BaseCompletionTest {
 
     @Test
     fun `import method with other import`() {
-        val foundCompletions = getCompletions(
-            code = "import kotlin.math.sin\nfun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 2,
-            character = 15
-        ).map { it.displayText }
-        val completions = listOf(
-            "sin(x: Double)  (kotlin.math.sin)",
-            "sin(x: Float)  (kotlin.math.sin)"
-        )
-        assertEquals(1, foundCompletions.size)
-        completions.forEach {
-            Assertions.assertFalse(
-                foundCompletions.contains(it),
-                "Suggests adding an import, even though it has already been added."
-            )
-        }
+        doImportMethodWithOtherImportTest()
     }
 
     @Test
     fun `import class with parameters`() {
-        performCompletionChecks(
-            code = """fun main() {
-        |    randVal = Random(3)
-        |    println(randomVal.nextInt())
-        |}
-      """.trimMargin(),
-            line = 1,
-            character = 20,
-            expected = listOf(
-                "Random  (kotlin.random.Random)"
-            )
-        )
+        doImportClassWithParametersTest()
     }
 
     @Test
     fun `import method`() {
-        performCompletionChecks(
-            code = "fun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 1,
-            character = 15,
-            expected = listOf(
-                "sin(x: Double)  (kotlin.math.sin)",
-                "sin(x: Float)  (kotlin.math.sin)"
-            )
-        )
+        doImportMethodTest()
     }
 
     @Test
     fun `open bracket after import completion`() {
-        val foundCompletionsTexts = getCompletions(
-            code = "fun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 1,
-            character = 15
-        ).map { it.text }
-        val completions = listOf("kotlin.math.sin(")
-        completions.forEach {
-            Assertions.assertTrue(
-                foundCompletionsTexts.contains(it),
-                "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
-            )
-        }
+        doOpenBracketAfterImportCompletionTest()
     }
 
     @Test
     fun `brackets after import completion`() {
-        val foundCompletionsTexts = getCompletions(
-            code = "fun main() {\n" +
-                    "    val timeZone  = getDefaultTimeZone\n" +
-                    "}",
-            line = 1,
-            character = 38
-        ).map { it.text }
+        val code = """
+            fun main() {
+                val timeZone  = getDefaultTimeZone$CARET_MARKER
+            }
+        """.trimIndent()
+
+        val foundCompletionsTexts = getCompletions(codeWithCaret = code).map { it.text }
         val completions = listOf(
             "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
         )
         completions.forEach {
-            Assertions.assertTrue(
+            assertTrue(
                 foundCompletionsTexts.contains(it),
                 "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
             )
@@ -130,107 +76,43 @@ interface ImportTest : BaseCompletionTest {
 
     @Test
     fun `import class js`() {
-        performCompletionChecks(
-            code = "fun main() {\n    val rand = Random\n}",
-            line = 1,
-            character = 21,
-            expected = listOf(
-                "Random  (kotlin.random.Random)"
-            ),
-            isJs = true
-        )
+        doImportClassTest(isJs = true)
     }
 
     @Test
     fun `import method with other import js`() {
-        val foundCompletions = getCompletions(
-            code = "import kotlin.math.sin\nfun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 2,
-            character = 15,
-            isJs = true
-        ).map { it.displayText }
-        val completions = listOf(
-            "sin(x: Double)  (kotlin.math.sin)",
-            "sin(x: Float)  (kotlin.math.sin)"
-        )
-        assertEquals(1, foundCompletions.size)
-        completions.forEach {
-            Assertions.assertFalse(
-                foundCompletions.contains(it),
-                "Suggests adding an import, even though it has already been added."
-            )
-        }
+        doImportMethodWithOtherImportTest(isJs = true)
     }
 
     @Test
     fun `import class with parameters js`() {
-        performCompletionChecks(
-            code = """fun main() {
-        |    randVal = Random(3)
-        |    println(randomVal.nextInt())
-        |}
-      """.trimMargin(),
-            line = 1,
-            character = 20,
-            expected = listOf(
-                "Random  (kotlin.random.Random)"
-            ),
-            isJs = true
-        )
+        doImportClassWithParametersTest(isJs = true)
     }
 
     @Test
     fun `import method js`() {
-        performCompletionChecks(
-            code = "fun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 1,
-            character = 15,
-            expected = listOf(
-                "sin(x: Double)  (kotlin.math.sin)",
-                "sin(x: Float)  (kotlin.math.sin)"
-            ),
-            isJs = true
-        )
+        doImportMethodTest(isJs = true)
     }
 
     @Test
     fun `open bracket after import completion js`() {
-        val foundCompletionsTexts = getCompletions(
-            code = "fun main() {\n" +
-                    "    val s = sin\n" +
-                    "}",
-            line = 1,
-            character = 15,
-            isJs = true
-        ).map { it.text }
-        val completions = listOf("kotlin.math.sin(")
-        completions.forEach {
-            Assertions.assertTrue(
-                foundCompletionsTexts.contains(it),
-                "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
-            )
-        }
+        doOpenBracketAfterImportCompletionTest(isJs = true)
     }
 
     @Test
     fun `not jvm imports in js imports`() {
-        val foundCompletionsTexts = getCompletions(
-            code = "fun main() {\n" +
-                    "    val timeZone  = getDefaultTimeZone\n" +
-                    "}",
-            line = 1,
-            character = 38,
-            isJs = true
-        ).map { it.text }
+        val code = """
+            fun main() {
+                val timeZone  = getDefaultTimeZone$CARET_MARKER
+            }
+        """.trimIndent()
+
+        val foundCompletionsTexts = getCompletions(codeWithCaret = code, isJs = true).map { it.text }
         val completions = listOf(
             "com.fasterxml.jackson.databind.util.StdDateFormat.getDefaultTimeZone()"
         )
         completions.forEach {
-            Assertions.assertFalse(
+            assertFalse(
                 foundCompletionsTexts.contains(it),
                 "Wrong completion text for import. Expected not to find $it in $foundCompletionsTexts"
             )
@@ -242,11 +124,90 @@ interface ImportTest : BaseCompletionTest {
         completions: List<Pair<String, Boolean>>
     ) {
         val result = foundCompletions.map { Pair(it.displayText, it.hasOtherImports) }
-        Assertions.assertTrue(result.isNotEmpty())
+        assertTrue(result.isNotEmpty())
         completions.forEach { suggest ->
-            Assertions.assertTrue(result.contains(suggest))
+            assertTrue(result.contains(suggest))
         }
     }
 
-    fun getCompletions(code: String, line: Int, character: Int, isJs: Boolean = false): List<Completion>
+    fun getCompletions(codeWithCaret: String, isJs: Boolean = false): List<Completion>
+
+    private fun doImportClassTest(isJs: Boolean = false) {
+        performCompletionChecks(
+            codeWithCaret = "fun main() {\n    val rand = Random$CARET_MARKER\n}",
+            expected = listOf("Random  (kotlin.random.Random)"),
+            isJs = isJs
+        )
+    }
+
+    private fun doImportMethodWithOtherImportTest(isJs: Boolean = false) {
+        val code = ("""
+            import kotlin.math.sin
+            fun main() {
+                val s = sin$CARET_MARKER
+            }
+        """.trimIndent())
+
+        val foundCompletions = getCompletions(codeWithCaret = code, isJs = isJs).map { it.displayText }
+        val completions = listOf(
+            "sin(x: Double)  (kotlin.math.sin)",
+            "sin(x: Float)  (kotlin.math.sin)"
+        )
+        assertEquals(1, foundCompletions.size)
+        completions.forEach {
+            assertFalse(
+                foundCompletions.contains(it),
+                "Suggests adding an import, even though it has already been added."
+            )
+        }
+    }
+
+    private fun doImportClassWithParametersTest(isJs: Boolean = false) {
+        val code = """
+            fun main() {
+                randVal = Random$CARET_MARKER(3)
+                println(randomVal.nextInt())
+            }
+        """.trimIndent()
+
+        performCompletionChecks(
+            codeWithCaret = code,
+            expected = listOf("Random  (kotlin.random.Random)"),
+            isJs = isJs
+        )
+    }
+
+    private fun doImportMethodTest(isJs: Boolean = false) {
+        val code = """
+            fun main() {
+                val s = sin$CARET_MARKER
+            }
+        """.trimIndent()
+
+        performCompletionChecks(
+            codeWithCaret = code,
+            expected = listOf(
+                "sin(x: Double)  (kotlin.math.sin)",
+                "sin(x: Float)  (kotlin.math.sin)"
+            ),
+            isJs = isJs
+        )
+    }
+
+    private fun doOpenBracketAfterImportCompletionTest(isJs: Boolean = false) {
+        val code = """
+            fun main() {
+                val s = sin$CARET_MARKER
+            }
+        """.trimIndent()
+
+        val foundCompletionsTexts = getCompletions(codeWithCaret = code, isJs = isJs).map { it.text }
+        val completions = listOf("kotlin.math.sin(")
+        completions.forEach {
+            assertTrue(
+                foundCompletionsTexts.contains(it),
+                "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+            )
+        }
+    }
 }
