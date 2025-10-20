@@ -51,8 +51,7 @@ interface ImportTest : BaseCompletionTest {
         doOpenBracketAfterImportCompletionTest()
     }
 
-    // TODO(IJPL-213504) Auto-completion/auto-import issue with external library
-    @Ignore
+    @Ignore("(IJPL-213504) Auto-completion/auto-import issue with external library")
     @Test
     fun `brackets after import completion`() {
         val code = """
@@ -207,6 +206,10 @@ interface ImportTest : BaseCompletionTest {
             assertTrue(
                 foundCompletions.map { c -> c.text }.contains(it),
                 "Wrong completion text for import. Expected to find $it in $foundCompletions"
+            )
+            assertTrue(
+                foundCompletions.filter { c -> c.text.contains("sin") }.all { c -> c.import != null},
+                "Expected all `sin` completions to have an import. Found completions without imports: $foundCompletions"
             )
         }
     }

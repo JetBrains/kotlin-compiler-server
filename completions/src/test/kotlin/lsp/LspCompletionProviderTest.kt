@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.reactive.server.WebTestClient
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -104,6 +105,10 @@ class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyComplet
             { assertTrue(completions.any { it.contains(exp) }, "Expected completion $exp but got $completions") }
         })
     }
+
+    @Ignore("(IJPL-213504) Auto-completion/auto-import issue with external library")
+    @Test
+    override fun `brackets after import completion`() { }
 
     override fun getCompletions(
         codeWithCaret: String,
