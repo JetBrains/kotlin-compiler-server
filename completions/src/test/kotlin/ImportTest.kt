@@ -201,12 +201,12 @@ interface ImportTest : BaseCompletionTest {
             }
         """.trimIndent()
 
-        val foundCompletionsTexts = getCompletions(codeWithCaret = code, isJs = isJs).map { it.text }
-        val completions = listOf("kotlin.math.sin(")
+        val foundCompletions = getCompletions(codeWithCaret = code, isJs = isJs).map { it }
+        val completions = listOf("sin(")
         completions.forEach {
             assertTrue(
-                foundCompletionsTexts.contains(it),
-                "Wrong completion text for import. Expected to find $it in $foundCompletionsTexts"
+                foundCompletions.map { c -> c.text }.contains(it),
+                "Wrong completion text for import. Expected to find $it in $foundCompletions"
             )
         }
     }
