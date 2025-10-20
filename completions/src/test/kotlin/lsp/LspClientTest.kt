@@ -32,22 +32,12 @@ class LspClientTest : CompletionTest {
     fun `LSP client should provide completions for libs declared in build file (kotlinx-coroutines)`() = runBlocking {
         val snippet =
             """
+                import kotlinx.coroutines.runBlocking
                 fun main() {
                     runBlock$CARET_MARKER
                 }
             """.trimIndent()
-        checkCompletions(snippet, listOf("runBlocking"))
-    }
-
-    private fun checkCompletions(snippet: String, expectedLabels: List<String>) = runBlocking {
-        val (code, position) = extractCaret { snippet }
-        val uri = randomResourceUri
-        client.openDocument(uri, code)
-        val completions = client.getCompletion(uri, position).await()
-        assertAll(
-            { assertTrue { completions.isNotEmpty() } },
-            { assertTrue(completions.map { it.label }.containsAll(expectedLabels)) },
-        )
+        performCompletionChecks(snippet, listOf("runBlocking"))
     }
 
     @AfterEach
