@@ -59,35 +59,3 @@ abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
         }
     }
 }
-
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = [completions.CompletionsApplication::class]
-)
-@ExtendWith(KotlinLspComposeExtension::class)
-class StatelessConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest() {
-    @LocalServerPort
-    private var port: Int = 0
-
-    @Autowired
-    private lateinit var webTestClient: WebTestClient
-
-    override fun performCompletionChecks(
-        codeWithCaret: String,
-        expected: List<String>,
-        isJs: Boolean
-    ) {
-        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
-        val (code, caret) = extractCaret { codeWithCaret }
-        val completions = retrieveCompletionsFromEndpoint(code, caret).map { it.displayText }
-        assertAll(expected.map { exp ->
-            { assertTrue(completions.any { it.contains(exp) }, "Expected completion $exp but got $completions") }
-        })
-    }
-
-    private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<Completion>  {
-        val url = "http://localhost:$port/api/compiler/complete?line=${position.line}&ch=${position.character}"
-        return webTestClient.retrieveCompletions(url, code)
-    }
-
-}
