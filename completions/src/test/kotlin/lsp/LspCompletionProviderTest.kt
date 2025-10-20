@@ -1,6 +1,8 @@
 package lsp
 
 import CompletionTest
+import ConcurrencyCompletionRunnerTest
+import ImportTest
 import base.BaseCompletionTest.Utils.retrieveCompletions
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
@@ -20,12 +22,15 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+/**
+ * Test class for Stateless (REST) lsp-based completions.
+ */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [completions.CompletionsApplication::class]
 )
 @ExtendWith(KotlinLspComposeExtension::class)
-class LspCompletionProviderTest : CompletionTest {
+class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyCompletionRunnerTest() {
 
     @LocalServerPort
     private var port: Int = 0
@@ -98,6 +103,15 @@ class LspCompletionProviderTest : CompletionTest {
         assertAll(expected.map { exp ->
             { assertTrue(completions.any { it.contains(exp) }, "Expected completion $exp but got $completions") }
         })
+    }
+
+    override fun getCompletions(
+        codeWithCaret: String,
+        isJs: Boolean
+    ): List<Completion> {
+        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
+        val (code, caret) = extractCaret { codeWithCaret }
+        return retrieveCompletionsFromEndpoint(code, caret)
     }
 
     private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<Completion>  {
