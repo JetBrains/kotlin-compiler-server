@@ -1,6 +1,7 @@
 package lsp.ws
 
 import CompletionTest
+import ImportTest
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -8,11 +9,14 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import completions.configuration.WebSocketConfiguration
 import lsp.utils.KotlinLspComposeExtension
 import completions.dto.api.Completion
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.runBlocking
 import lsp.utils.extractCaret
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assumptions.assumeFalse
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +31,7 @@ import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
 import java.net.URI
 import java.util.UUID
+import kotlin.test.Ignore
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -38,7 +43,7 @@ import kotlin.time.toJavaDuration
 )
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(KotlinLspComposeExtension::class)
-class KotlinLspProxyWSTest : CompletionTest {
+class KotlinLspProxyWSTest : CompletionTest, ImportTest {
 
     @LocalServerPort
     private var port: Int = 0
@@ -61,16 +66,7 @@ class KotlinLspProxyWSTest : CompletionTest {
         isJs: Boolean
     ) {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
-        val requestId = UUID.randomUUID().toString()
-        val (code, caret) = extractCaret { codeWithCaret }
-        val payload = buildCompletionRequest(
-            fileName = "test$requestId.kt",
-            code = code,
-            caret = caret,
-            requestId = requestId,
-        )
-
-        val completionsMono = client.sendAndWaitCompletions(payload, requestId, defaultTimeout)
+        val completionsMono = getCompletionMono(codeWithCaret)
 
         StepVerifier.create(completionsMono)
             .assertNext { received ->
@@ -80,6 +76,30 @@ class KotlinLspProxyWSTest : CompletionTest {
                 })
             }
             .verifyComplete()
+    }
+
+    override fun getCompletions(
+        codeWithCaret: String,
+        isJs: Boolean
+    ): List<Completion> = runBlocking {
+        assumeFalse(isJs, "JS completions are not supported by LSP yet.")
+        getCompletionMono(codeWithCaret).awaitSingle()
+    }
+
+    @Ignore("(IJPL-213504) Auto-completion/auto-import issue with external library")
+    @Test
+    override fun `brackets after import completion`() { }
+
+    private fun getCompletionMono(codeWithCaret: String): Mono<List<Completion>> {
+        val requestId = UUID.randomUUID().toString()
+        val (code, caret) = extractCaret { codeWithCaret }
+        val payload = buildCompletionRequest(
+            fileName = "test$requestId.kt",
+            code = code,
+            caret = caret,
+            requestId = requestId,
+        )
+        return client.sendAndWaitCompletions(payload, requestId, defaultTimeout)
     }
 
     private fun buildCompletionRequest(
