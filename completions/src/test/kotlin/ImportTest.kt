@@ -2,6 +2,7 @@ import base.BaseCompletionTest
 import completions.dto.api.Completion
 import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
+import kotlin.test.Ignore
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -50,6 +51,8 @@ interface ImportTest : BaseCompletionTest {
         doOpenBracketAfterImportCompletionTest()
     }
 
+    // TODO(IJPL-213504) Auto-completion/auto-import issue with external library
+    @Ignore
     @Test
     fun `brackets after import completion`() {
         val code = """
@@ -95,6 +98,8 @@ interface ImportTest : BaseCompletionTest {
         doOpenBracketAfterImportCompletionTest(isJs = true)
     }
 
+    // TODO(IJPL-213504) Auto-completion/auto-import issue with external library
+    @Ignore
     @Test
     fun `not jvm imports in js imports`() {
         val code = """
