@@ -1,23 +1,9 @@
 import base.BaseCompletionTest
-import base.BaseCompletionTest.Utils.retrieveCompletions
-import completions.dto.api.Completion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import lsp.utils.CARET_MARKER
-import lsp.utils.KotlinLspComposeExtension
-import lsp.utils.extractCaret
-import org.eclipse.lsp4j.Position
-import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.test.web.reactive.server.WebTestClient
-import kotlin.test.Ignore
-import kotlin.test.assertTrue
 
 abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
     @Test
@@ -32,8 +18,6 @@ abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
         }
     }
 
-    // TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
-    @Ignore
     @Test
     fun `a lot of complete test JS`() {
         runManyTest {
