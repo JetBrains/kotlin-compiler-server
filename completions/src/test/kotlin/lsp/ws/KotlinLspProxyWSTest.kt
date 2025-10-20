@@ -35,6 +35,7 @@ import java.util.UUID
 import kotlin.test.Ignore
 import kotlin.test.assertTrue
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
@@ -60,7 +61,7 @@ class KotlinLspProxyWSTest : CompletionTest, ImportTest {
     @BeforeAll
     fun setup() {
         client = TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient())
-        client.connect(defaultTimeout)
+        client.connect()
     }
 
     override fun performCompletionChecks(
@@ -134,7 +135,7 @@ private class TestWSClient(
     private var connected = false
     private var subscription: Disposable? = null
 
-    fun connect(timeout: Duration) {
+    fun connect(timeout: Duration = 2.minutes) {
         if (connected) return
         val connectMomo = client.execute(uriProvider()) { session ->
             val inbound = session.receive()
