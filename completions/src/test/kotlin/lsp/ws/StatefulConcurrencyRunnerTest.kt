@@ -21,6 +21,7 @@ import java.net.URI
 import java.util.UUID
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.use
 
 @SpringBootTest(
@@ -38,11 +39,11 @@ class StatefulConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest(
             .build(true).toUri()
     }
 
-    private val defaultTimeout = 3.minutes
+    private val defaultTimeout = 30.seconds
 
     @BeforeAll
     fun setup() {
-        createAndConnectClient() // warmup
+        createAndConnectClient().use { _ -> /* warmup */ }
     }
 
     override fun performCompletionChecks(
