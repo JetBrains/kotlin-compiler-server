@@ -1,11 +1,9 @@
 //sampleStart
 fun getStringLength(obj: Any): Int? {
-    // `obj` is automatically cast to `String` on the right-hand side of `&&`
-    if (obj is String && obj.length > 0) {
-        return obj.length
-    }
+    if (obj !is String) return null
 
-    return null
+    // `obj` is automatically cast to `String` in this branch
+    return obj.length
 }
 //sampleEnd
 
@@ -14,6 +12,11 @@ fun main() {
         println("Getting the length of '$obj'. Result: ${getStringLength(obj) ?: "Error: The object is not a string"} ")
     }
     printLength("Incomprehensibilities")
-    printLength("")
     printLength(1000)
+    val any = object : Any() {
+        override fun toString(): String {
+            return "Any"
+        }
+    }
+    printLength(listOf(any))
 }

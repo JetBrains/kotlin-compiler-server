@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>Width=3, height=4, area=12\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Copied address: Holmes, Sherlock, Baker, London\nCompany: Detective Inc. in UK\nEmail: sherlock@example.com\n</outStream>"}
