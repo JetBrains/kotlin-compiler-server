@@ -7,7 +7,6 @@ import com.compiler.server.model.JsCompilerArguments
 import com.compiler.server.model.bean.VersionInfo
 import component.KotlinEnvironment
 import model.Completion
-import org.junit.Ignore
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -45,7 +44,6 @@ class KotlinProjectExecutor(
     }
 
     // TODO(Dmitrii Krasnov): implement this method in KTL-2807
-    @Ignore
     fun complete(project: Project, line: Int, character: Int): List<Completion> {
         return emptyList()
     }
@@ -117,5 +115,4 @@ class KotlinProjectExecutor(
             getVersion().version
         )
     }
-
 }
