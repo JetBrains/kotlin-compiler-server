@@ -16,6 +16,7 @@ import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assumptions.assumeFalse
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
@@ -54,10 +55,12 @@ class KotlinLspProxyWSTest : CompletionTest, ImportTest {
 
     private val defaultTimeout = 30.seconds
 
-    private val client: TestWSClient by lazy {
-        val testClient = TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient())
-        testClient.connect(defaultTimeout)
-        testClient
+    private lateinit var client: TestWSClient
+
+    @BeforeAll
+    fun setup() {
+        client = TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient())
+        client.connect(defaultTimeout)
     }
 
     override fun performCompletionChecks(
