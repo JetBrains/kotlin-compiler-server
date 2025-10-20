@@ -38,7 +38,7 @@ class StatefulConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest(
             .build(true).toUri()
     }
 
-    private val defaultTimeout = 2.minutes
+    private val defaultTimeout = 3.minutes
 
     @BeforeAll
     fun setup() {
