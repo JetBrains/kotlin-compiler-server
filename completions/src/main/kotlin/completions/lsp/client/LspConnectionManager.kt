@@ -28,7 +28,7 @@ internal class LspConnectionManager(
     private val host: String = lspHost(),
     private val port: Int = lspPort(),
     private val languageClient: LanguageClient = KotlinLanguageClient(),
-    private val maxConnectionRetries: Int = 5,
+    private val maxConnectionRetries: Int = 10,
 ): AutoCloseable {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -204,10 +204,10 @@ internal class LspConnectionManager(
         internal fun exponentialBackoffMillis(
             attempt: Int,
             base: Double = 1000.0,
-            maxVal: Double = 5 * base,
+            maxVal: Double = 60 * base,
             jitterFactor: Double = 0.3
         ): Double {
-            val backoff = base * 2.0.pow(attempt)
+            val backoff = base * 3.0.pow(attempt)
             val jitter = Random.nextDouble(from = -jitterFactor, until = jitterFactor)
             val withJitter = backoff * (1.0 + jitter)
             return withJitter.coerceAtMost(maxVal)
