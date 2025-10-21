@@ -10,6 +10,13 @@ import kotlinx.coroutines.launch
 import org.springframework.stereotype.Component
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Manages a queue for handling LSP code completion requests using background workers.
+ *
+ * Each worker is initialized to await the readiness of the [LspCompletionProvider] before processing requests.
+ * Code completion requests are submitted via the [complete] function and are processed asynchronously,
+ * while returned to the caller through a [CompletableDeferred].
+ */
 @Component
 class LspCompletionQueue(
     private val provider: LspCompletionProvider,
@@ -36,6 +43,17 @@ class LspCompletionQueue(
         }
     }
 
+    /**
+     * Handles a code completion request by adding it to a processing queue and awaiting the result.
+     *
+     * The request is submitted as a [CompletionJob], which is asynchronously processed by a worker.
+     * Once processed, the result is returned as a list of [Completion]s.
+     *
+     * @param request the [CompletionRequest] object containing the necessary context for code completion
+     * @param line the line number in the file for which completions are to be provided
+     * @param ch the character position within the specified line for determining completions
+     * @return a list of [Completion]s corresponding to the provided position in the file
+     */
     suspend fun complete(request: CompletionRequest, line: Int, ch: Int): List<Completion> {
         val deferred = CompletableDeferred<List<Completion>>()
         queue.send(CompletionJob(request, line, ch, deferred))
