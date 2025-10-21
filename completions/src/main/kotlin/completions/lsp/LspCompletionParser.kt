@@ -128,9 +128,14 @@ object LspCompletionParser {
             it in excludeFromCompletion || excludeFromCompletion.any { prefix -> it.startsWith(prefix) }
         }
 
-    // TODO(Stefano Furi): include what was excluded in previous completion results
     private val excludeFromCompletion = listOf(
         "jdk.internal",
+        "kotlin.jvm.internal",
+        "kotlin.coroutines.experimental.intrinsics",
+        "kotlin.coroutines.intrinsics",
+        "kotlin.coroutines.experimental.jvm.internal",
+        "kotlin.coroutines.jvm.internal",
+        "kotlin.reflect.jvm.internal",
     )
 }
 
