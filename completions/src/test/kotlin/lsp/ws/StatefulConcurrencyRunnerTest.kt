@@ -20,7 +20,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.use
 

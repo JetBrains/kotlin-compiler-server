@@ -6,32 +6,35 @@ import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
 
 abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
+
+    private val numberOfTests = 100
+
+    private val code = """
+        fun main() {
+            val a = 3.0.toIn$CARET_MARKER
+        }
+    """.trimIndent()
+
+    private val expectedCompletions = listOf(
+        "toInt()",
+        "toUInt()",
+    )
+
     @Test
     fun `a lot of complete test`() {
-        runManyTest {
-            performCompletionChecks(
-                codeWithCaret = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a$CARET_MARKER\n}",
-                expected = listOf(
-                    "alex"
-                )
-            )
+        runManyTest(numberOfTests) {
+            performCompletionChecks(code, expectedCompletions)
         }
     }
 
     @Test
     fun `a lot of complete test JS`() {
-        runManyTest {
-            performCompletionChecks(
-                codeWithCaret = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a$CARET_MARKER\n}",
-                expected = listOf(
-                    "alex"
-                ),
-                isJs = true
-            )
+        runManyTest(numberOfTests) {
+            performCompletionChecks(code, expectedCompletions, isJs = true)
         }
     }
 
-    private fun runManyTest(times: Int = 100, test: () -> Unit) {
+    private fun runManyTest(times: Int, test: () -> Unit) {
         runBlocking {
             launch(Dispatchers.IO) {
                 repeat(times) {
