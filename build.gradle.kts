@@ -12,10 +12,7 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 val propertyFile = "application.properties"
 
 plugins {
-    alias(libs.plugins.spring.boot)
-    alias(libs.plugins.spring.dependency.management)
-    alias(libs.plugins.kotlin.plugin.spring)
-    id("base-kotlin-jvm-conventions")
+    id("base-spring-boot-conventions")
 }
 
 apply<NodeJsRootPlugin>()
