@@ -1,7 +1,7 @@
 package completions.lsp
 
 import org.eclipse.lsp4j.CompletionItem
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import completions.dto.api.Icon
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -13,15 +13,15 @@ object LspCompletionParser {
     /**
      * Converts a `CompletionItem` into a `Completion` by extracting and processing its details.
      */
-    fun CompletionItem.toCompletion(): Completion? {
+    fun CompletionItem.toCompletion(): CompletionResponse? {
         val (functionParams, importPrefix) = extractParamsAndImportFromLabelDetails(labelDetails)
         if (importPrefix != null && isInternalImport(importPrefix)) return null
         val hasToBeImported = hasToBeImported()
         val import = if (hasToBeImported) importPrefix?.let { "$it.$label"} else null
         val detail = labelDetails.detail?.let { removeImportFromDetail(it, hasToBeImported) }
 
-        return Completion(
-            text = Completion.completionTextFromFullName(label + functionParams.orEmpty()),
+        return CompletionResponse(
+            text = CompletionResponse.completionTextFromFullName(label + functionParams.orEmpty()),
             displayText = label + detail,
             tail = labelDetails.description,
             import = import,
@@ -78,7 +78,7 @@ object LspCompletionParser {
     }
 
     /**
-     * Icon names differ from [model.Completion] definitions, so we just define
+     * Icon names differ from [CompletionResponse] definitions, so we just define
      * a simple mapping between LSP results and current definitions.
      */
     internal fun parseIcon(name: String?): Icon? {

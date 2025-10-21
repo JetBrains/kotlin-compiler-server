@@ -4,7 +4,7 @@ import CompletionTest
 import ImportTest
 import completions.configuration.WebSocketConfiguration
 import lsp.utils.KotlinLspComposeExtension
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import lsp.utils.TestWSClient
@@ -76,7 +76,7 @@ class KotlinLspProxyWSTest : CompletionTest, ImportTest {
     override fun getCompletions(
         codeWithCaret: String,
         isJs: Boolean
-    ): List<Completion> = runBlocking {
+    ): List<CompletionResponse> = runBlocking {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         getCompletionMono(codeWithCaret).awaitSingle()
     }
@@ -85,7 +85,7 @@ class KotlinLspProxyWSTest : CompletionTest, ImportTest {
     @Test
     override fun `brackets after import completion`() { }
 
-    private fun getCompletionMono(codeWithCaret: String): Mono<List<Completion>> {
+    private fun getCompletionMono(codeWithCaret: String): Mono<List<CompletionResponse>> {
         val requestId = UUID.randomUUID().toString()
         val (code, caret) = extractCaret { codeWithCaret }
         val payload = buildCompletionRequest(

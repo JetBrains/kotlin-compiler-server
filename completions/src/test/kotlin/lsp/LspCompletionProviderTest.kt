@@ -7,7 +7,7 @@ import base.BaseCompletionTest.Utils.retrieveCompletions
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import completions.dto.api.Icon
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.Assumptions.assumeFalse
@@ -52,7 +52,7 @@ class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyComplet
         val toUint = completions.find { it.text == "toUInt()" }
             ?: error("Expected to find \"toUInt()\" completion, but got $completions\"")
 
-        val expected = Completion(
+        val expected = CompletionResponse(
             text = "toUInt()",
             displayText = "toUInt()",
             tail = "UInt",
@@ -88,7 +88,7 @@ class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyComplet
         )
     }
 
-    private fun getCompletions(textWithCaret: String): List<Completion> {
+    private fun getCompletions(textWithCaret: String): List<CompletionResponse> {
         val (code, position) = extractCaret { textWithCaret }
         return retrieveCompletionsFromEndpoint(code, position)
     }
@@ -113,13 +113,13 @@ class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyComplet
     override fun getCompletions(
         codeWithCaret: String,
         isJs: Boolean
-    ): List<Completion> {
+    ): List<CompletionResponse> {
         assumeFalse(isJs, "JS completions are not supported by LSP yet.")
         val (code, caret) = extractCaret { codeWithCaret }
         return retrieveCompletionsFromEndpoint(code, caret)
     }
 
-    private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<Completion>  {
+    private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<CompletionResponse>  {
         val url = "http://localhost:$port/api/compiler/complete?line=${position.line}&ch=${position.character}"
         return webTestClient.retrieveCompletions(url, code)
     }

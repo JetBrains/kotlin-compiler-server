@@ -7,7 +7,7 @@ import completions.lsp.util.completions.FuzzyCompletionRanking.completionQuery
 import completions.lsp.KotlinLspProxy
 import completions.lsp.LspCompletionParser.toCompletion
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
 
@@ -29,14 +29,14 @@ class LspCompletionProvider(
      * @param line the line number within the file where completions are to be provided
      * @param ch the character position within the line for the completions
      * @param applyFuzzyRanking whether to apply fuzzy ranking to the completions
-     * @return a list of [Completion]s relevant to the specified position in the file
+     * @return a list of [CompletionResponse]s relevant to the specified position in the file
      */
     suspend fun complete(
         request: CompletionRequest,
         line: Int,
         ch: Int,
         applyFuzzyRanking: Boolean = true
-    ): List<Completion> =
+    ): List<CompletionResponse> =
         lspProxy.getOneTimeCompletions(request, line, ch).transformCompletions(request, applyFuzzyRanking)
 
     /**
@@ -48,7 +48,7 @@ class LspCompletionProvider(
         line: Int,
         ch: Int,
         applyFuzzyRanking: Boolean = true
-    ): List<Completion> =
+    ): List<CompletionResponse> =
         lspProxy.getCompletionsForClient(clientId, request, line, ch).transformCompletions(request, applyFuzzyRanking)
 
     suspend fun awaitReady() {
@@ -58,7 +58,7 @@ class LspCompletionProvider(
     private fun List<CompletionItem>.transformCompletions(
         request: CompletionRequest,
         applyFuzzyRanking: Boolean
-    ): List<Completion> =
+    ): List<CompletionResponse> =
         if (applyFuzzyRanking) {
             rankedCompletions()
         } else {
@@ -73,11 +73,11 @@ class LspCompletionProvider(
 
 
     /**
-     * Transform a list of [Completion]s to a list of [CompletionItem]s, with the following changes:
+     * Transform a list of [CompletionResponse]s to a list of [CompletionItem]s, with the following changes:
      * - Remove any imports if already imported in the project
      * - Add the `hasOtherImports` flag to any completions that have the same name as an already-imported class
      */
-    private fun List<Completion>.cleanupImports(file: ProjectFile): List<Completion> {
+    private fun List<CompletionResponse>.cleanupImports(file: ProjectFile): List<CompletionResponse> {
         val imports = extractImports(file)
         return map { completion ->
             if (completion.import != null && completion.import in imports) {
@@ -105,6 +105,6 @@ class LspCompletionProvider(
             .toSet()
     }
 
-    private fun getTextWhenHasOtherImports(completion: Completion) =
+    private fun getTextWhenHasOtherImports(completion: CompletionResponse) =
         completion.import?.substringBeforeLast('.') + '.' + completion.text
 }

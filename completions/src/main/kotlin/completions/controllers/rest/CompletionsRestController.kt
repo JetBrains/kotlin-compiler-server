@@ -1,7 +1,7 @@
 package completions.controllers.rest
 
 import completions.dto.api.CompletionRequest
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import completions.service.lsp.LspCompletionQueue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,7 +19,7 @@ class CompletionsRestController(
         @RequestBody completionRequest: CompletionRequest,
         @RequestParam line: Int,
         @RequestParam ch: Int,
-    ): List<Completion> {
+    ): List<CompletionResponse> {
         return lspCompletionQueue.complete(completionRequest, line, ch)
     }
 }

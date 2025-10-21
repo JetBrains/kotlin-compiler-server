@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import org.eclipse.lsp4j.Position
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
@@ -53,7 +53,7 @@ internal class TestWSClient(
         payload: Map<String, Any>,
         requestId: String,
         timeout: Duration,
-    ): Mono<List<Completion>> {
+    ): Mono<List<CompletionResponse>> {
         check(connected) { "Not connected" }
         val json = objectMapper.writeValueAsString(payload)
         outboundSink.tryEmitNext(json)
@@ -70,7 +70,7 @@ internal class TestWSClient(
         connected = false
     }
 
-    private fun extractCompletions(json: String): List<Completion> {
+    private fun extractCompletions(json: String): List<CompletionResponse> {
         val node: JsonNode = objectMapper.readTree(json)
         val completionsNode = node["completions"] ?: return emptyList()
         return objectMapper.readValue(completionsNode.toString())

@@ -2,8 +2,7 @@ package base
 
 import completions.dto.api.ProjectFile
 import completions.lsp.components.LspProject
-import completions.dto.api.Completion
-import lsp.utils.extractCaret
+import completions.dto.api.CompletionResponse
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -17,7 +16,7 @@ interface BaseCompletionTest {
     )
 
     companion object Utils {
-        fun WebTestClient.retrieveCompletions(url: String, code: String): List<Completion> {
+        fun WebTestClient.retrieveCompletions(url: String, code: String): List<CompletionResponse> {
             val project = LspProject(files = listOf(ProjectFile(text = code, name = "file.kt")))
             return withTimeout {
                 post()
@@ -25,7 +24,7 @@ interface BaseCompletionTest {
                     .bodyValue(project)
                     .exchange()
                     .expectStatus().isOk
-                    .expectBodyList(Completion::class.java)
+                    .expectBodyList(CompletionResponse::class.java)
                     .returnResult()
                     .responseBody
             } ?: emptyList()

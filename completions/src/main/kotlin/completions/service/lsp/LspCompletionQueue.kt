@@ -1,6 +1,6 @@
 package completions.service.lsp
 
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import completions.dto.api.CompletionRequest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -47,15 +47,15 @@ class LspCompletionQueue(
      * Handles a code completion request by adding it to a processing queue and awaiting the result.
      *
      * The request is submitted as a [CompletionJob], which is asynchronously processed by a worker.
-     * Once processed, the result is returned as a list of [Completion]s.
+     * Once processed, the result is returned as a list of [CompletionResponse]s.
      *
      * @param request the [CompletionRequest] object containing the necessary context for code completion
      * @param line the line number in the file for which completions are to be provided
      * @param ch the character position within the specified line for determining completions
-     * @return a list of [Completion]s corresponding to the provided position in the file
+     * @return a list of [CompletionResponse]s corresponding to the provided position in the file
      */
-    suspend fun complete(request: CompletionRequest, line: Int, ch: Int): List<Completion> {
-        val deferred = CompletableDeferred<List<Completion>>()
+    suspend fun complete(request: CompletionRequest, line: Int, ch: Int): List<CompletionResponse> {
+        val deferred = CompletableDeferred<List<CompletionResponse>>()
         queue.send(CompletionJob(request, line, ch, deferred))
         return deferred.await()
     }
@@ -64,6 +64,6 @@ class LspCompletionQueue(
         val request: CompletionRequest,
         val line: Int,
         val ch: Int,
-        val result: CompletableDeferred<List<Completion>>,
+        val result: CompletableDeferred<List<CompletionResponse>>,
     )
 }

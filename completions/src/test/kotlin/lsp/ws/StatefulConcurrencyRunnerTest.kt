@@ -2,7 +2,7 @@ package lsp.ws
 
 import ConcurrencyCompletionRunnerTest
 import completions.configuration.WebSocketConfiguration
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import lsp.utils.KotlinLspComposeExtension
@@ -70,7 +70,7 @@ class StatefulConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest(
     private suspend fun getCompletions(
         client: TestWSClient,
         codeWithCaret: String
-    ): List<Completion> {
+    ): List<CompletionResponse> {
         val requestId = UUID.randomUUID().toString()
         val (code, caret) = extractCaret { codeWithCaret }
         val payload = buildCompletionRequest(

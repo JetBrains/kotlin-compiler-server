@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class Completion(
+data class CompletionResponse(
     val text: String,
     val displayText: String,
     val tail: String? = null,
@@ -13,7 +13,7 @@ data class Completion(
     var hasOtherImports: Boolean? = null
 ) {
 
-    companion object {
+    companion object Companion {
         fun completionTextFromFullName(fullName: String): String {
             var completionText = fullName
             var position = completionText.indexOf('(')

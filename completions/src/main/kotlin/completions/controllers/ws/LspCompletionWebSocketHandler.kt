@@ -9,7 +9,7 @@ import completions.lsp.StatefulKotlinLspProxy.onClientConnected
 import completions.lsp.StatefulKotlinLspProxy.onClientDisconnected
 import completions.service.lsp.LspCompletionProvider
 import kotlinx.coroutines.reactor.mono
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -31,7 +31,7 @@ import reactor.core.scheduler.Schedulers
  *   `requestId` must be unique per client session and is used exclusively for correlation.
  *
  * - **Responses**: For a successfully processed request: `Completions{ completions, requestId }` where `completions` are
- *   a list of [Completion].If a request is dropped due to backpressure: `Discarded{ requestId }`.This is a terminal outcome
+ *   a list of [CompletionResponse].If a request is dropped due to backpressure: `Discarded{ requestId }`.This is a terminal outcome
  *   for that requestId. On failure: Error{ message, requestId? }. If requestId is present, the error pertains to that
  *   specific request.
  *
@@ -144,7 +144,7 @@ sealed interface Response {
 
     open class Error(val message: String, override val requestId: String? = null) : Response
     data class Init(val sessionId: String, override val requestId: String? = null) : Response
-    data class Completions(val completions: List<Completion>, override val requestId: String? = null) : Response
+    data class Completions(val completions: List<CompletionResponse>, override val requestId: String? = null) : Response
     data class Discarded(override val requestId: String) : Error("discarded", requestId)
 }
 

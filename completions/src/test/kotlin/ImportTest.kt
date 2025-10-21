@@ -1,5 +1,5 @@
 import base.BaseCompletionTest
-import completions.dto.api.Completion
+import completions.dto.api.CompletionResponse
 import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
 import kotlin.test.Ignore
@@ -120,7 +120,7 @@ interface ImportTest : BaseCompletionTest {
     }
 
     private fun completionContainsCheckOtherImports(
-        foundCompletions: List<Completion>,
+        foundCompletions: List<CompletionResponse>,
         completions: List<Pair<String, Boolean>>
     ) {
         val result = foundCompletions.map { Pair(it.displayText, it.hasOtherImports ?: false) }
@@ -130,7 +130,7 @@ interface ImportTest : BaseCompletionTest {
         }
     }
 
-    fun getCompletions(codeWithCaret: String, isJs: Boolean = false): List<Completion>
+    fun getCompletions(codeWithCaret: String, isJs: Boolean = false): List<CompletionResponse>
 
     private fun doImportClassTest(isJs: Boolean = false) {
         performCompletionChecks(
