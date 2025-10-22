@@ -2,12 +2,11 @@ package completions.service.lsp
 
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
-import completions.lsp.util.completions.FuzzyCompletionRanking.rankCompletions
-import completions.lsp.util.completions.FuzzyCompletionRanking.completionQuery
 import completions.lsp.KotlinLspProxy
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
 import completions.dto.api.CompletionResponse
 import completions.lsp.LspCompletionParser
+import completions.lsp.util.completions.FuzzyCompletionRanker
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
 
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Component
 class LspCompletionProvider(
     private val lspProxy: KotlinLspProxy,
     private val lspCompletionParser: LspCompletionParser,
+    private val completionRanker: FuzzyCompletionRanker,
 ) {
 
     /**
@@ -61,17 +61,10 @@ class LspCompletionProvider(
         applyFuzzyRanking: Boolean
     ): List<CompletionResponse> =
         if (applyFuzzyRanking) {
-            rankedCompletions()
+            with (completionRanker) { rankedCompletions() }
         } else {
             this
         }.mapNotNull(lspCompletionParser::toCompletion).cleanupImports(request.files.first())
-
-    private fun List<CompletionItem>.rankedCompletions(): List<CompletionItem> =
-        firstOrNull()?.completionQuery
-            ?.takeIf { !it.isBlank() }
-            ?.let { rankCompletions(it) }
-            ?: this
-
 
     /**
      * Transform a list of [CompletionResponse]s to a list of [CompletionItem]s, with the following changes:

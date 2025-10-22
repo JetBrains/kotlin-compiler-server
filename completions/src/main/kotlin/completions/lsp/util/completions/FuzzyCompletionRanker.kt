@@ -1,12 +1,15 @@
+
 package completions.lsp.util.completions
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import com.fasterxml.jackson.databind.ObjectMapper
+import completions.configuration.JacksonConfig.Companion.walk
 import org.eclipse.lsp4j.CompletionItem
+import org.springframework.stereotype.Component
 
-internal object FuzzyCompletionRanking {
-    private val objectMapper = Json { ignoreUnknownKeys = true }
+@Component
+class FuzzyCompletionRanker(
+    private val objectMapper: ObjectMapper
+) {
 
     private data class RankedItem(
         val item: CompletionItem,
@@ -15,13 +18,11 @@ internal object FuzzyCompletionRanking {
         val candidateLength: Int
     )
 
-    /**
-     * Extracts the prefix of this [CompletionItem] that triggered the completion.
-     */
-    val CompletionItem.completionQuery: String?
-        get() = objectMapper.parseToJsonElement(data.toString()).jsonObject["additionalData"]
-            ?.jsonObject?.get("prefix")
-            ?.jsonPrimitive?.content
+    fun List<CompletionItem>.rankedCompletions(): List<CompletionItem> =
+        firstOrNull()?.completionQuery(objectMapper)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { rankCompletions(it) }
+            ?: this
 
     /**
      * Ranking completions inspired by how VS-code does it. Firstly a simple
@@ -36,10 +37,8 @@ internal object FuzzyCompletionRanking {
      * @param query the query the user has typed so far
      */
     fun List<CompletionItem>.rankCompletions(query: String): List<CompletionItem> {
-        // Empty query should rank purely by sortText (do not involve span/length)
-        if (query.isEmpty()) {
-            return this.sortedBy { it.sortText }
-        }
+        if (query.isEmpty()) return this.sortedBy { it.sortText }
+
         return map { item ->
             val candidate = item.sortingKey()
             val (score, span) = fuzzyScoreWithSpan(query, candidate)
@@ -53,6 +52,15 @@ internal object FuzzyCompletionRanking {
             )
             .map { it.item }
     }
+
+    /**
+     * Extracts the prefix of the input [CompletionItem] that triggered the completion.
+     */
+    private fun CompletionItem.completionQuery(objectMapper: ObjectMapper): String? =
+        objectMapper.readTree(data.toString())
+            .walk("additionalData")
+            ?.walk("prefix")
+            ?.asText()
 
     private fun fuzzyScoreWithSpan(query: String, candidate: String): Pair<Int, Int> {
         if (query.isEmpty()) return 1 to 0

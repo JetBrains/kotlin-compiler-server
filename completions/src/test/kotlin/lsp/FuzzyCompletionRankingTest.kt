@@ -1,12 +1,20 @@
 package lsp
 
-import completions.lsp.util.completions.FuzzyCompletionRanking.rankCompletions
-import lsp.RankingTestDSL.rankingTest
+import completions.lsp.util.completions.FuzzyCompletionRanker
 import org.eclipse.lsp4j.CompletionItem
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    classes = [completions.CompletionsApplication::class]
+)
 class FuzzyCompletionRankingTest {
+
+    @Autowired
+    private lateinit var completionRanker: FuzzyCompletionRanker
 
     @Test
     fun `empty query ranks only by sortText`() = rankingTest("") {
@@ -61,6 +69,12 @@ class FuzzyCompletionRankingTest {
         val sparse = item("iXoScope", sortText = "1")
         expectOrder(consecutive, sparse)
     }
+
+    private fun rankingTest(query: String, build: RankingTestDSL.RankingCase.() -> Unit) {
+        val case = RankingTestDSL.RankingCase(query).apply(build)
+        val ranked = with(completionRanker) { case.items.rankCompletions(query) }
+        assertIterableEquals(case.expected, ranked, "Expected(query=$query): ${case.expected} but got: $ranked")
+    }
 }
 
 private object RankingTestDSL {
@@ -82,11 +96,5 @@ private object RankingTestDSL {
             expected.clear()
             expected += items
         }
-    }
-
-    fun rankingTest(query: String, build: RankingCase.() -> Unit) {
-        val case = RankingCase(query).apply(build)
-        val ranked = case.items.rankCompletions(query)
-        assertIterableEquals(case.expected, ranked, "Expected(query=$query): ${case.expected} but got: $ranked")
     }
 }

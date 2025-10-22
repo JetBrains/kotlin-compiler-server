@@ -1,18 +1,17 @@
 package completions.lsp
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import completions.configuration.JacksonConfig.Companion.walk
 import org.eclipse.lsp4j.CompletionItem
 import completions.dto.api.CompletionResponse
 import completions.dto.api.Icon
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.eclipse.lsp4j.CompletionItemLabelDetails
 import org.springframework.stereotype.Component
 
 @Component
-class LspCompletionParser {
-
-    private val objectMapper = Json { ignoreUnknownKeys = true }
+class LspCompletionParser(
+    private val objectMapper: ObjectMapper,
+) {
 
     /**
      * Converts a `CompletionItem` into a `Completion` by extracting and processing its details.
@@ -104,27 +103,26 @@ class LspCompletionParser {
      * related to IntelliJ lookup objects data (e.g. the `importStrategy`) and PSI data.
      */
     private fun CompletionItem.hasToBeImported(): Boolean {
-        val lookupObject = objectMapper.parseToJsonElement(data.toString())
-            .jsonObject["additionalData"]
-            ?.jsonObject?.get("model")
-            ?.jsonObject?.get("delegate")
-            ?.jsonObject?.get("delegate")
-            ?.jsonObject?.get("lookupObject")
-            ?.jsonObject?.get("lookupObject")
+        val jsonTree = objectMapper.readTree(data.toString())
+        val lookupObject = jsonTree
+            .walk("additionalData")
+            ?.walk("model")
+            ?.walk("delegate")
+            ?.walk("delegate")
+            ?.walk("lookupObject")
+            ?.walk("lookupObject") ?: return true
 
-        val importingStrategy =
-            if (lookupObject?.jsonObject?.get("options") != null) {
-                lookupObject.jsonObject["options"]
-            } else lookupObject
+        val importingStrategy = lookupObject.walk("options") ?: lookupObject
 
-        lookupObject?.jsonObject?.get("kind")?.let {
-            if (it.jsonPrimitive.content.contains("PackagePart")) return false
+        lookupObject.walk("kind")?.let {
+            if (it.asText().contains("PackagePart")) return false
         }
 
         return importingStrategy
-            ?.jsonObject?.get("importingStrategy")
-            ?.jsonObject?.get("kind")
-            ?.jsonPrimitive?.content?.contains("DoNothing")?.not()
+            .walk("importingStrategy")
+            ?.walk("kind")
+            ?.asText()
+            ?.contains("DoNothing")?.not()
             ?: true
     }
 
