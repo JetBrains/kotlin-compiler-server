@@ -1,5 +1,6 @@
 package completions.lsp.client
 
+import completions.configuration.lsp.LspProperties
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -179,18 +180,9 @@ internal class LspConnectionManager(
     }
 
     companion object {
-        private const val LSP_DEFAULT_HOST = "127.0.0.1"
-        private const val LSP_DEFAULT_PORT = 9999
 
-        fun lspHost(): String =
-            System.getProperty("LSP_HOST")
-                ?: System.getenv("LSP_HOST")
-                ?: LSP_DEFAULT_HOST
-
-        fun lspPort(): Int =
-            System.getProperty("LSP_PORT")?.toInt()
-                ?: System.getenv("LSP_PORT")?.toInt()
-                ?: LSP_DEFAULT_PORT
+        fun lspHost(): String = LspProperties.getHost()
+        fun lspPort(): Int = LspProperties.getPort()
 
         /**
          * Basic exponential backoff starting from [base]ms with jitter (+/-[jitterFactor]%), up to [maxVal]ms

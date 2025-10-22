@@ -1,0 +1,6 @@
+server:
+  port: 8082
+lsp:
+  host: localhost
+  port: 9999
+  reconnection-retries: 10
