@@ -1,7 +1,7 @@
 package lsp
 
 import CompletionTest
-import completions.lsp.LspCompletionParser.toCompletion
+import completions.lsp.LspCompletionParser
 import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
@@ -16,12 +16,21 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.util.UUID
 import kotlin.test.assertTrue
 import kotlin.text.contains
 
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    classes = [completions.CompletionsApplication::class]
+)
 @ExtendWith(KotlinLspComposeExtension::class)
 class LspClientTest : CompletionTest {
+
+    @Autowired
+    private lateinit var lspCompletionParser: LspCompletionParser
 
     @Test
     fun `LSP client should initialize correctly`() {
@@ -56,7 +65,7 @@ class LspClientTest : CompletionTest {
         client.openDocument(uri, code)
         val received = client.getCompletion(uri, caret).await()
 
-        val labels = received.mapNotNull { it.toCompletion()?.displayText }
+        val labels = received.mapNotNull { lspCompletionParser.toCompletion(it)?.displayText }
         assertAll(expected.map { exp ->
             { assertTrue(labels.any { it.contains(exp) }, "Expected completion $exp but got $labels") }
         })

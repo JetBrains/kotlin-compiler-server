@@ -5,9 +5,9 @@ import completions.dto.api.ProjectFile
 import completions.lsp.util.completions.FuzzyCompletionRanking.rankCompletions
 import completions.lsp.util.completions.FuzzyCompletionRanking.completionQuery
 import completions.lsp.KotlinLspProxy
-import completions.lsp.LspCompletionParser.toCompletion
 import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
 import completions.dto.api.CompletionResponse
+import completions.lsp.LspCompletionParser
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
 
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component
 @Component
 class LspCompletionProvider(
     private val lspProxy: KotlinLspProxy,
+    private val lspCompletionParser: LspCompletionParser,
 ) {
 
     /**
@@ -63,7 +64,7 @@ class LspCompletionProvider(
             rankedCompletions()
         } else {
             this
-        }.mapNotNull { it.toCompletion() }.cleanupImports(request.files.first())
+        }.mapNotNull(lspCompletionParser::toCompletion).cleanupImports(request.files.first())
 
     private fun List<CompletionItem>.rankedCompletions(): List<CompletionItem> =
         firstOrNull()?.completionQuery

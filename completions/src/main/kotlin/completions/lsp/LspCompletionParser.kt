@@ -7,27 +7,32 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.eclipse.lsp4j.CompletionItemLabelDetails
+import org.springframework.stereotype.Component
 
-object LspCompletionParser {
+@Component
+class LspCompletionParser {
+
+    private val objectMapper = Json { ignoreUnknownKeys = true }
 
     /**
      * Converts a `CompletionItem` into a `Completion` by extracting and processing its details.
      */
-    fun CompletionItem.toCompletion(): CompletionResponse? {
-        val (functionParams, importPrefix) = extractParamsAndImportFromLabelDetails(labelDetails)
-        if (importPrefix != null && isInternalImport(importPrefix)) return null
-        val hasToBeImported = hasToBeImported()
-        val import = if (hasToBeImported) importPrefix?.let { "$it.$label"} else null
-        val detail = labelDetails.detail?.let { removeImportFromDetail(it, hasToBeImported) }
+    fun toCompletion(completionItem: CompletionItem): CompletionResponse? =
+        with(completionItem) {
+            val (functionParams, importPrefix) = extractParamsAndImportFromLabelDetails(labelDetails)
+            if (importPrefix != null && isInternalImport(importPrefix)) return null
+            val hasToBeImported = hasToBeImported()
+            val import = if (hasToBeImported) importPrefix?.let { "$it.$label" } else null
+            val detail = labelDetails.detail?.let { removeImportFromDetail(it, hasToBeImported) }
 
-        return CompletionResponse(
-            text = CompletionResponse.completionTextFromFullName(label + functionParams.orEmpty()),
-            displayText = label + detail,
-            tail = labelDetails.description,
-            import = import,
-            icon = parseIcon(kind?.name)
-        )
-    }
+            CompletionResponse(
+                text = CompletionResponse.completionTextFromFullName(label + functionParams.orEmpty()),
+                displayText = label + detail,
+                tail = labelDetails.description,
+                import = import,
+                icon = parseIcon(kind?.name)
+            )
+        }
 
     /**
      * 4 cases of label details returned by the LSP:
@@ -138,5 +143,3 @@ object LspCompletionParser {
         "kotlin.reflect.jvm.internal",
     )
 }
-
-private val objectMapper = Json { ignoreUnknownKeys = true }
