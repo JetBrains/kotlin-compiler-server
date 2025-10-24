@@ -82,9 +82,7 @@ class KotlinToJSTranslator(
         files: List<ProjectFile>, arguments: List<String>, userCompilerArguments: JsCompilerArguments
     ): CompilationResult<String> = usingTempDirectory { inputDir ->
         usingTempDirectory { outputDir ->
-//            val ioFiles = files.writeToIoFiles(inputDir)
-//            val k2JSCompiler = K2JSCompiler()
-//            val filePaths = ioFiles.map { it.toFile().canonicalPath }
+            files.writeToIoFiles(inputDir)
             val klibPath = (outputDir / "klib").toFile().canonicalPath
             val additionalCompilerArgumentsForKLib = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                 jsCompilerArguments,
