@@ -55,9 +55,6 @@ dependencies {
     implementation(project(":dependencies"))
 
     testImplementation(libs.kotlin.test)
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
     testImplementation(libs.kotlinx.coroutines.test)
 
     resourceDependency(libs.skiko.js.wasm.runtime)
@@ -90,12 +87,6 @@ fun generateProperties(prefix: String = "") = """
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {
-    compilerOptions {
-        freeCompilerArgs.addAll(
-            "-Xjsr305=strict",
-        )
-
-    }
     dependsOn(":executors:jar")
     buildPropertyFile()
 }
@@ -143,7 +134,6 @@ tasks.withType<Test> {
     with(rootProject.kotlinNodeJsEnvSpec) {
         dependsOn(rootProject.nodeJsSetupTaskProvider)
     }
-    useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)
