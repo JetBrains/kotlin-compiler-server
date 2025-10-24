@@ -2,11 +2,11 @@ package completions.lsp.components
 
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
-import completions.lsp.KotlinLspProxy
 import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.io.path.createTempDirectory
 
 /**
  * Represents a LSP project. This class manages documents, their versions,
@@ -62,7 +62,7 @@ data class LspProject(val files: List<ProjectFile> = emptyList(), val ownerId: S
     }
 
     companion object {
-        private val baseDir = Path.of(KotlinLspProxy.lspLocalWorkspaceRoot()).toAbsolutePath()
+        private val baseDir = createTempDirectory("lsp-users-projects")
 
         /**
          * Creates a new instance of [LspProject] based on the provided [CompletionRequest] data.
