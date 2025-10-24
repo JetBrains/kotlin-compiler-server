@@ -17,6 +17,7 @@ jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.7.0"
 gradle-develocity = "3.17.5"
+snapshot = "2.3.255-SNAPSHOT"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -25,8 +26,8 @@ kotlin-stdlib-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-js", 
 kotlin-stdlib-wasm-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-wasm-js", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "kotlin"}
-kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "kotlin"}
+kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "snapshot"}
+kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "snapshot"}
 kotlin-compiler-embeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-tooling-core = { group = "org.jetbrains.kotlin", name = "kotlin-tooling-core", version.ref = "kotlin" }
 kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-arguments-description", version.ref = "kotlin" }
