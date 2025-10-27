@@ -16,8 +16,8 @@ dependencies {
 }
 
 tasks.named<BootBuildImage>("bootBuildImage") {
+    // TODO(KTL-3803):push docker image to JB registry
     val baseImageName = "sfuri/kotlin-compiler-server-completions-lsp"
-    // TODO: push docker image to JB registry
     // publish = true
     imageName = "$baseImageName:${project.version}"
     tags = setOf("$baseImageName:latest")
