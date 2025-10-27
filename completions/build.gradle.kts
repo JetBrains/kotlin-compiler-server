@@ -8,6 +8,7 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 
 dependencies {
     implementation(libs.spring.boot.starter.webflux)
+    implementation(libs.spring.boot.docker.compose)
     implementation(libs.org.eclipse.lsp4j)
     implementation(libs.kotlinx.coroutines.reactor)
     testImplementation(libs.kotlin.test)

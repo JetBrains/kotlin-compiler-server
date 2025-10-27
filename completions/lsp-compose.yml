@@ -1,0 +1,5 @@
+services:
+  kotlin-lsp:
+    image: sfuri/intellij-lsp
+    ports:
+      - "9999:9999"

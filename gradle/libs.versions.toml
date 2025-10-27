@@ -50,6 +50,7 @@ org-eclipse-lsp4j = { group = "org.eclipse.lsp4j", name = "org.eclipse.lsp4j", v
 rector-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "reactor" }
 spring-boot-starter-webflux = { group = "org.springframework.boot", name = "spring-boot-starter-webflux" }
 spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+spring-boot-docker-compose = { group = "org.springframework.boot", name = "spring-boot-docker-compose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 logback-logstash-encoder = { group = "net.logstash.logback", name = "logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 skiko-js-wasm-runtime = { group = "org.jetbrains.skiko", name = "skiko-js-wasm-runtime", version.ref = "skiko" }
