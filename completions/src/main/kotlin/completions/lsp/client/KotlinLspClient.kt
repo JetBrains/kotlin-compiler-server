@@ -22,8 +22,8 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class KotlinLspClient(
-    host: String = LspConnectionManager.lspHost(),
-    port: Int = LspConnectionManager.lspPort(),
+    host: String,
+    port: Int,
 ) : ReconnectingLspClient {
 
     private val logger = LoggerFactory.getLogger(this::class.java)

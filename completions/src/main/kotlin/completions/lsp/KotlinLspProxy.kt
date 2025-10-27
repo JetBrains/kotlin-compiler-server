@@ -1,5 +1,6 @@
 package completions.lsp
 
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
 import completions.exceptions.LspUnavailableException
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
 @Component
-class KotlinLspProxy {
+class KotlinLspProxy(private val lspProperties: LspProperties) {
 
     internal lateinit var lspClient: LspClient
     internal val lspProjects = CopyOnWriteArrayList<LspProject>()
@@ -117,7 +118,12 @@ class KotlinLspProxy {
     ) {
         if (!::lspClient.isInitialized) {
             if (isInitializing.getAndSet(true)) return
-            lspClient = LspClient.createSingle(workspacePath, clientName)
+            lspClient = LspClient.createSingle(
+                kotlinProjectRoot = workspacePath,
+                projectName = clientName,
+                host = lspProperties.host,
+                port = lspProperties.port,
+            )
             wireAvailabilityObservers(lspClient)
             available.set(true)
             lspClientInitializedDeferred.complete(Unit)
