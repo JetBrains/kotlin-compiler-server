@@ -1,5 +1,6 @@
 package lsp
 
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
 import completions.lsp.KotlinLspProxy
@@ -100,7 +101,13 @@ class LspProxyTest {
         CompletionRequest(files = listOf(ProjectFile(text = code, name = "test.kt")))
 
     companion object {
-        private val lspProxy = KotlinLspProxy()
+        private val lspProxy = KotlinLspProxy(
+            LspProperties(
+                host = System.getProperty("LSP_HOST"),
+                port = System.getProperty("LSP_PORT").toInt(),
+                reconnectionRetries = 10,
+            )
+        )
 
         @BeforeAll
         @JvmStatic

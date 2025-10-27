@@ -1,6 +1,5 @@
 package completions.lsp.client
 
-import completions.configuration.lsp.LspProperties
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +25,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 
 internal class LspConnectionManager(
-    private val host: String = lspHost(),
-    private val port: Int = lspPort(),
+    private val host: String,
+    private val port: Int,
     private val languageClient: LanguageClient = KotlinLanguageClient(),
     private val maxConnectionRetries: Int = 10,
 ): AutoCloseable {
@@ -180,9 +179,6 @@ internal class LspConnectionManager(
     }
 
     companion object {
-
-        fun lspHost(): String = LspProperties.getHost()
-        fun lspPort(): Int = LspProperties.getPort()
 
         /**
          * Basic exponential backoff starting from [base]ms with jitter (+/-[jitterFactor]%), up to [maxVal]ms
