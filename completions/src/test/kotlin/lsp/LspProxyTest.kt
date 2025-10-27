@@ -104,7 +104,8 @@ class LspProxyTest {
         private val lspProxy = KotlinLspProxy(
             LspProperties(
                 host = System.getProperty("LSP_HOST"),
-                port = System.getProperty("LSP_PORT").toInt()
+                port = System.getProperty("LSP_PORT").toInt(),
+                reconnectionRetries = 10,
             )
         )
 
