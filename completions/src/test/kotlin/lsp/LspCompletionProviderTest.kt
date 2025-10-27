@@ -8,7 +8,7 @@ import lsp.utils.CARET_MARKER
 import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
 import completions.dto.api.CompletionResponse
-import completions.dto.api.Icon
+import completions.enums.Icon
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.Test

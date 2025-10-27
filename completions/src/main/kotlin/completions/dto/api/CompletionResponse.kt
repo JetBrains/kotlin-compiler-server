@@ -1,7 +1,7 @@
 package completions.dto.api
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.annotation.JsonProperty
+import completions.enums.Icon
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CompletionResponse(
@@ -27,18 +27,4 @@ data class CompletionResponse(
             return completionText
         }
     }
-}
-
-
-enum class Icon {
-    @JsonProperty("class")
-    CLASS,
-    @JsonProperty("method")
-    METHOD,
-    @JsonProperty("property")
-    PROPERTY,
-    @JsonProperty("package")
-    PACKAGE,
-    @JsonProperty("genericValue")
-    GENERIC_VALUE
 }
