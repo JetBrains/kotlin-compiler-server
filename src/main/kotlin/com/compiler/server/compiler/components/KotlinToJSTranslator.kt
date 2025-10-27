@@ -9,8 +9,8 @@ import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
 import org.jetbrains.kotlin.buildtools.api.arguments.ExperimentalCompilerArgument
 import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain
-import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.springframework.stereotype.Service
+import java.nio.file.Path
 import kotlin.io.path.*
 
 @Service
@@ -83,6 +83,13 @@ class KotlinToJSTranslator(
     ): CompilationResult<String> = usingTempDirectory { inputDir ->
         usingTempDirectory { outputDir ->
             files.writeToIoFiles(inputDir)
+
+            val sources = inputDir.listDirectoryEntries()
+            val logger = CompilationLogger()
+            logger.compilationLogs = sources.filter { it.name.endsWith(".kt") }.associate { it.name to mutableListOf() }
+            val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
+            val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
+
             val klibPath = (outputDir / "klib").toFile().canonicalPath
             val additionalCompilerArgumentsForKLib = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                 jsCompilerArguments,
@@ -90,109 +97,60 @@ class KotlinToJSTranslator(
                 userCompilerArguments.firstPhase
             ) + "-ir-output-dir=$klibPath"
 
-
-            val sources = inputDir.listDirectoryEntries()
-
-            val logger = CompilationLogger()
-            logger.compilationLogs = sources.filter { it.name.endsWith(".kt") }.associate { it.name to mutableListOf() }
-
-            val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
-            val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
-
             toolchains.createBuildSession().use { session ->
-                val result = try {
-                    val operation = jsToolchain.createJsCompilationOperation(sources, outputDir)
-                    operation.compilerArguments.applyArgumentStrings(arguments + additionalCompilerArgumentsForKLib)
-
-                    session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
-                } catch (e: Exception) {
-                    throw Exception("Exception executing compilation operation", e)
-                }
-                return@use toCompilationResult(result, logger).flatMap {
+                tryCompilation(
+                    jsToolchain,
+                    sources,
+                    outputDir,
+                    arguments + additionalCompilerArgumentsForKLib,
+                    session,
+                    toolchains,
+                    logger,
+                    Unit
+                ).flatMap {
                     val secondPhaseArguments = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                         jsCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
                         userCompilerArguments.secondPhase
                     ) + "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}" + "-Xinclude=$klibPath"
 
-                    val result = try {
-                        val operation = jsToolchain.createJsCompilationOperation(sources, outputDir)
-                        operation.compilerArguments.applyArgumentStrings(secondPhaseArguments)
-
-                        session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
-                    } catch (e: Exception) {
-                        throw Exception("Exception executing compilation operation", e)
-                    }
-                    toCompilationResultString(result, logger)
-
+                    tryCompilation(
+                        jsToolchain, sources, outputDir, secondPhaseArguments, session, toolchains, logger, ""
+                    )
                 }.map { (outputDir / "js" / "$JS_DEFAULT_MODULE_NAME.js").readText() }
                     .map { it.withMainArgumentsIr(arguments) }.map(::redirectOutput)
             }
-
-//            k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib).flatMap {
-//                    val secondPhaseArguments = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
-//                        jsCompilerArguments,
-//                        compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
-//                        userCompilerArguments.secondPhase
-//                    ) + "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}" + "-Xinclude=$klibPath"
-//                    k2JSCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
-//                }.map { (outputDir / "js" / "$JS_DEFAULT_MODULE_NAME.js").readText() }
-//                .map { it.withMainArgumentsIr(arguments) }.map(::redirectOutput)
         }
     }
 
-    private fun toCompilationResult(
-        buildResult: org.jetbrains.kotlin.buildtools.api.CompilationResult,
+    @OptIn(ExperimentalBuildToolsApi::class, ExperimentalCompilerArgument::class)
+    private fun <T> tryCompilation(
+        jsToolchain: JsPlatformToolchain,
+        sources: List<Path>,
+        outputDir: Path,
+        arguments: List<String>,
+        session: KotlinToolchains.BuildSession,
+        toolchains: KotlinToolchains,
         logger: CompilationLogger,
-    ): CompilationResult<Unit> = when (buildResult) {
-        org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
-            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
-//            val outputFiles = buildMap {
-//                outputDir.visitFileTree {
-//                    onVisitFile { file, _ ->
-//                        put(file.relativeTo(outputDir).pathString, file.readBytes())
-//                        FileVisitResult.CONTINUE
-//                    }
-//                }
-//            }
-            Compiled(result = Unit, compilerDiagnostics = compilerDiagnostics)
+        successValue: T,
+    ): CompilationResult<T> {
+        val result = try {
+            val operation = jsToolchain.createJsCompilationOperation(sources, outputDir)
+            operation.compilerArguments.applyArgumentStrings(arguments)
 
-//            Compiled(
-//                compilerDiagnostics = compilerDiagnostics,
-//                result = JvmClasses(
-//                    files = outputFiles,
-//                )
-//            )
+            session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
+        } catch (e: Exception) {
+            throw Exception("Exception executing compilation operation", e)
         }
 
-        else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
-    }
+        return when (result) {
+            org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
+                val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
+                Compiled(result = successValue, compilerDiagnostics = compilerDiagnostics)
+            }
 
-    private fun toCompilationResultString(
-        buildResult: org.jetbrains.kotlin.buildtools.api.CompilationResult,
-        logger: CompilationLogger,
-    ): CompilationResult<String> = when (buildResult) {
-        org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
-            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
-//            val outputFiles = buildMap {
-//                outputDir.visitFileTree {
-//                    onVisitFile { file, _ ->
-//                        put(file.relativeTo(outputDir).pathString, file.readBytes())
-//                        FileVisitResult.CONTINUE
-//                    }
-//                }
-//            }
-            Compiled(result = "", compilerDiagnostics = compilerDiagnostics)
-
-//            Compiled(
-//                compilerDiagnostics = compilerDiagnostics,
-//                result = JvmClasses(
-//                    files = outputFiles,
-//                )
-//            )
+            else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
         }
-
-        else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
     }
 
     private fun redirectOutput(code: String): String {
@@ -203,7 +161,7 @@ class KotlinToJSTranslator(
         return listLines.joinToString("\n")
     }
 
-
+    @OptIn(ExperimentalBuildToolsApi::class, ExperimentalCompilerArgument::class)
     fun doTranslateWithWasm(
         files: List<ProjectFile>,
         projectType: ProjectType,
@@ -215,7 +173,7 @@ class KotlinToJSTranslator(
                 ProjectType.WASM -> Triple(
                     wasmCompilerArguments,
                     compilerArgumentsUtil.PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
-                    compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS,
+                    compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS
                 )
 
                 ProjectType.COMPOSE_WASM -> Triple(
@@ -226,23 +184,41 @@ class KotlinToJSTranslator(
 
                 else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
             }
-            val ioFiles = files.writeToIoFiles(inputDir)
-            val k2JSCompiler = K2JSCompiler()
-            val filePaths = ioFiles.map { it.toFile().canonicalPath }
+            files.writeToIoFiles(inputDir)
+            val sources = inputDir.listDirectoryEntries()
+            val logger = CompilationLogger().apply {
+                compilationLogs = sources.filter { it.name.endsWith(".kt") }.associate { it.name to mutableListOf() }
+            }
+            val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
+            val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
+
             val klibPath = (outputDir / "klib").toFile().canonicalPath
 
             val additionalCompilerArgumentsForKLib = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                 defaultCompilerArgs, firstPhasePredefinedArguments, userCompilerArguments.firstPhase
             ) + "-ir-output-dir=$klibPath"
 
-            k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib).flatMap {
+            toolchains.createBuildSession().use { session ->
+                tryCompilation(
+                    jsToolchain,
+                    sources,
+                    outputDir,
+                    additionalCompilerArgumentsForKLib,
+                    session,
+                    toolchains,
+                    logger,
+                    Unit
+                ).flatMap {
+
                     val secondPhaseArguments = (compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                         defaultCompilerArgs, secondPhasePredefinedArguments, userCompilerArguments.secondPhase
                     ) + "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}" + "-Xinclude=$klibPath").toMutableList()
 
                     if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
 
-                    k2JSCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
+                    tryCompilation(
+                        jsToolchain, sources, outputDir, secondPhaseArguments, session, toolchains, logger, Unit
+                    )
                 }.map {
                     WasmTranslationSuccessfulOutput(
                         jsCode = (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.uninstantiated.mjs").readText(),
@@ -251,6 +227,7 @@ class KotlinToJSTranslator(
                         wat = if (debugInfo) (outputDir / "wasm" / "$WASM_DEFAULT_MODULE_NAME.wat").readText() else null,
                     )
                 }
+            }
         }
     }
 }

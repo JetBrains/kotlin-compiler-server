@@ -1,20 +1,10 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.model.*
-import org.jetbrains.kotlin.cli.common.CLICompiler
-import org.jetbrains.kotlin.cli.common.CLICompiler.Companion.doMainNoExit
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.*
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
-import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import java.io.File
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
-
-private fun minusOne(value: Int) = if (value > 0) value - 1 else value
-
-private const val UNRESOLVED_REFERENCE_PREFIX = "Unresolved reference: "
 
 sealed class CompilationResult<out T> {
   abstract val compilerDiagnostics: CompilerDiagnostics
@@ -43,70 +33,6 @@ sealed class CompilationResult<out T> {
 data class Compiled<T>(override val compilerDiagnostics: CompilerDiagnostics, val result: T) : CompilationResult<T>()
 
 data class NotCompiled(override val compilerDiagnostics: CompilerDiagnostics) : CompilationResult<Nothing>()
-
-fun CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Path>, arguments: List<String>): CompilationResult<Unit> = tryCompilation(inputDirectory, inputFiles, arguments) {}
-
-fun <T> CLICompiler<*>.tryCompilation(inputDirectory: Path, inputFiles: List<Path>, arguments: List<String>, onSuccess: () -> T): CompilationResult<T> {
-  fun Path.outputFilePathString() = inputDirectory.relativize(this).pathString
-
-  val diagnosticsMap = mutableMapOf<String, MutableList<ErrorDescriptor>>().apply {
-    inputFiles.forEach { put(it.outputFilePathString(), mutableListOf()) }
-  }
-  val defaultFileName = inputFiles.singleOrNull()?.outputFilePathString() ?: ""
-  val exitCode = doMainNoExit(this, arguments.toTypedArray(), object : MessageRenderer {
-    override fun renderPreamble(): String = ""
-
-    override fun render(
-      severity: CompilerMessageSeverity,
-      message: String,
-      location: CompilerMessageSourceLocation?
-    ): String {
-      when {
-        // suppress -XXLanguage:+ExplicitBackingFields
-        severity == STRONG_WARNING && message.contains("ExplicitBackingFields") ->
-          return ""
-      }
-
-      val messageSeverity: ProjectSeveriry = when (severity) {
-        EXCEPTION, ERROR -> ProjectSeveriry.ERROR
-        STRONG_WARNING, WARNING, FIXED_WARNING -> ProjectSeveriry.WARNING
-        INFO, LOGGING, OUTPUT -> return ""
-      }
-      val textInterval = location?.let {
-        TextInterval(
-          start = TextInterval.TextPosition(minusOne(location.line), minusOne(location.column)),
-          end = TextInterval.TextPosition(minusOne(location.lineEnd), minusOne(location.columnEnd))
-        )
-      }
-
-      val errorFilePath = location?.path?.let(::Path)?.outputFilePathString() ?: defaultFileName
-
-      val className = if (!message.startsWith(UNRESOLVED_REFERENCE_PREFIX) && severity == ERROR) "red_wavy_line" else messageSeverity.name
-      val errorDescriptor = ErrorDescriptor(textInterval, message, messageSeverity, className)
-
-      diagnosticsMap.getOrPut(errorFilePath) { mutableListOf() }.add(errorDescriptor)
-      return ""
-    }
-
-    override fun renderUsage(usage: String): String =
-      render(STRONG_WARNING, usage, null)
-
-    override fun renderConclusion(): String = ""
-
-    override fun getName(): String = "Redirector"
-  })
-  val diagnostics = CompilerDiagnostics(diagnosticsMap)
-  return when {
-    diagnostics.any { it.severity == ProjectSeveriry.ERROR } -> NotCompiled(diagnostics)
-    exitCode.code != 0 -> ErrorDescriptor(
-      severity = ProjectSeveriry.ERROR,
-      message = "Compiler finished with non-null exit code ${exitCode.code}: ${exitCode.name}",
-      interval = null
-    ).let { NotCompiled(CompilerDiagnostics(mapOf(defaultFileName to listOf(it)))) }
-
-    else -> Compiled(result = onSuccess(), compilerDiagnostics = diagnostics)
-  }
-}
 
 @OptIn(ExperimentalPathApi::class)
 fun <T> usingTempDirectory(action: (path: Path) -> T): T {
