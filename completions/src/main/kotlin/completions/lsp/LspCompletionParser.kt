@@ -112,6 +112,10 @@ class LspCompletionParser(
             ?.walk("lookupObject")
             ?.walk("lookupObject") ?: return true
 
+        lookupObject.walk("kind")?.let {
+            if (it.asText().contains("PackagePart")) return false
+        }
+
         val importingStrategy = lookupObject.walk("options") ?: lookupObject
 
         lookupObject.walk("kind")?.let {
