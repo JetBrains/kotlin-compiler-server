@@ -1,10 +1,10 @@
 package completions.lsp
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import completions.configuration.JacksonConfig.Companion.walk
 import org.eclipse.lsp4j.CompletionItem
 import completions.dto.api.CompletionResponse
-import completions.dto.api.Icon
+import completions.enums.Icon
+import completions.util.SerializationUtil.walk
 import org.eclipse.lsp4j.CompletionItemLabelDetails
 import org.springframework.stereotype.Component
 
@@ -117,10 +117,6 @@ class LspCompletionParser(
         }
 
         val importingStrategy = lookupObject.walk("options") ?: lookupObject
-
-        lookupObject.walk("kind")?.let {
-            if (it.asText().contains("PackagePart")) return false
-        }
 
         return importingStrategy
             .walk("importingStrategy")

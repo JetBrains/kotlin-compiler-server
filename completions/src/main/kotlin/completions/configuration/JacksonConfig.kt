@@ -1,6 +1,5 @@
 package completions.configuration
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import org.springframework.context.annotation.Bean
@@ -12,8 +11,4 @@ class JacksonConfig {
     @Bean
     fun objectMapper(): ObjectMapper =
         ObjectMapper().registerModule(kotlinModule())
-
-    companion object {
-        fun JsonNode.walk(fieldName: String): JsonNode? = path(fieldName).takeIf { !it.isMissingNode }
-    }
 }
