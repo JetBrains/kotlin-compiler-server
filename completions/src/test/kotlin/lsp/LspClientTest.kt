@@ -70,8 +70,8 @@ class LspClientTest : CompletionTest, LspIntegrationTest() {
     }
 
     companion object {
-        private val WORKSPACE_PATH = System.getProperty("LSP_REMOTE_WORKSPACE_ROOT") ?:
-            LspClientTest::class.java.getResource("/lsp/lsp-users-projects-root-test")?.path
+        private val WORKSPACE_PATH = System.getProperty("LSP_REMOTE_WORKSPACE_ROOT")
+            ?: LspClientTest::class.java.getResource("/lsp/workspaces/lsp-users-projects-root")?.path
             ?: error("Could not find LSP remote workspace root")
         private val LSP_HOST = System.getProperty("LSP_HOST") ?: "localhost"
         private val LSP_PORT = System.getProperty("LSP_PORT")?.toInt() ?: 9999

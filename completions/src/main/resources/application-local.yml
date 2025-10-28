@@ -4,6 +4,7 @@ lsp:
   host: ${LSP_HOST:localhost}
   port: ${LSP_PORT:9999}
   reconnection-retries: 10
+  remote-workspace-root: /workspaces/lsp-users-projects-root
 spring:
   docker:
     compose:

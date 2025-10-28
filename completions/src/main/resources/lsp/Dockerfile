@@ -8,7 +8,7 @@ ENV ZIP_ARCH=${ZIP_ARCH}
 RUN apt-get update && apt-get install -y curl zip unzip bash netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-COPY lsp-users-projects-root-test/ /lsp-users-projects-root-test/
+COPY workspaces /workspaces/
 WORKDIR /lsp
 
 COPY server/intellij-lsp-${ZIP_VERSION}-linux-${ZIP_ARCH}.zip ./intellij-lsp.zip
