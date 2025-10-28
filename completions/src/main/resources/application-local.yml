@@ -8,3 +8,7 @@ spring:
   docker:
     compose:
       file: completions/lsp-compose.yml
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /api-docs/swagger-ui.html
