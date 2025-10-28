@@ -1,66 +1,6 @@
 {
   "compilerArguments": [
     {
-      "name": "help",
-      "shortName": "h",
-      "description": "Print a synopsis of standard options.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "X",
-      "shortName": null,
-      "description": "Print a synopsis of advanced options.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "version",
-      "shortName": null,
-      "description": "Display the compiler version.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "verbose",
-      "shortName": null,
-      "description": "Enable verbose logging output.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "nowarn",
-      "shortName": null,
-      "description": "Don't generate any warnings.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
       "name": "Werror",
       "shortName": null,
       "description": "Report an error if there are any warnings.",
@@ -85,45 +25,33 @@
       "predefinedValues": null
     },
     {
-      "name": "language-version",
+      "name": "X",
       "shortName": null,
-      "description": "Provide source compatibility with the specified version of Kotlin.",
+      "description": "Print a synopsis of advanced options.",
       "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
       },
       "disabled": true,
       "predefinedValues": null
     },
     {
-      "name": "api-version",
-      "shortName": null,
-      "description": "Allow using declarations from only the specified version of bundled libraries.",
+      "name": "help",
+      "shortName": "h",
+      "description": "Print a synopsis of standard options.",
       "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
       },
       "disabled": true,
       "predefinedValues": null
     },
     {
-      "name": "kotlin-home",
+      "name": "nowarn",
       "shortName": null,
-      "description": "Path to the Kotlin compiler home directory used for the discovery of runtime libraries.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "progressive",
-      "shortName": null,
-      "description": "Enable progressive compiler mode.\nIn this mode, deprecations and bug fixes for unstable code take effect immediately\ninstead of going through a graceful migration cycle.\nCode written in progressive mode is backward compatible; however, code written without\nprogressive mode enabled may cause compilation errors in progressive mode.",
+      "description": "Don't generate any warnings.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -133,9 +61,9 @@
       "predefinedValues": null
     },
     {
-      "name": "script",
+      "name": "verbose",
       "shortName": null,
-      "description": "Evaluate the given Kotlin script (*.kts) file.",
+      "description": "Enable verbose logging output.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -145,9 +73,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xrepl",
+      "name": "version",
       "shortName": null,
-      "description": "Run Kotlin REPL (deprecated)",
+      "description": "Display the compiler version.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -157,9 +85,23 @@
       "predefinedValues": null
     },
     {
-      "name": "opt-in",
+      "name": "P",
       "shortName": null,
-      "description": "Enable API usages that require opt-in with an opt-in requirement marker with the given fully qualified name.",
+      "description": "Pass an option to a plugin.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": [
+        "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=false"
+      ]
+    },
+    {
+      "name": "XXLanguage",
+      "shortName": null,
+      "description": "Enables/disables specified language feature.\nWarning: this flag is not intended for production use. If you want to configure the language behaviour use the\n-language-version or corresponding experimental feature flags.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -169,9 +111,45 @@
       "predefinedValues": null
     },
     {
-      "name": "Xno-inline",
+      "name": "XXdebug-level-compiler-checks",
       "shortName": null,
-      "description": "Disable method inlining.",
+      "description": "Enable debug level compiler checks. ATTENTION: these checks can slow compiler down or even crash it.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "XXdump-model",
+      "shortName": null,
+      "description": "Dump compilation model to specified directory for use in modularized tests.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "XXexplicit-return-types",
+      "shortName": null,
+      "description": "Force the compiler to report errors on all public API declarations without an explicit return type.\nUse the 'warning' level to issue warnings instead of errors.\nThis flag partially enables functionality of `-Xexplicit-api` flag, so please don't use them altogether",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "disable"
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "XXlenient-mode",
+      "shortName": null,
+      "description": "Lenient compiler mode. When actuals are missing, placeholder declarations are generated.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -181,9 +159,21 @@
       "predefinedValues": null
     },
     {
-      "name": "Xskip-metadata-version-check",
+      "name": "Xallow-any-scripts-in-source-roots",
       "shortName": null,
-      "description": "Allow loading classes with bad metadata versions and pre-release classes.",
+      "description": "Allow compiling scripts along with regular Kotlin sources.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xallow-condition-implies-returns-contracts",
+      "shortName": null,
+      "description": "Allow contracts that specify a limited conditional returns postcondition.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -193,9 +183,21 @@
       "predefinedValues": null
     },
     {
-      "name": "Xskip-prerelease-check",
+      "name": "Xallow-contracts-on-more-functions",
       "shortName": null,
-      "description": "Allow loading pre-release classes.",
+      "description": "Allow contracts on some operators and accessors, and allow checks for erased types.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xallow-holdsin-contract",
+      "shortName": null,
+      "description": "Allow contracts that specify a condition that holds true inside a lambda argument.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -217,9 +219,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xstdlib-compilation",
+      "name": "Xallow-reified-type-in-catch",
       "shortName": null,
-      "description": "Enables special features which are relevant only for stdlib compilation.",
+      "description": "Allow 'catch' parameters to have reified types.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -229,21 +231,45 @@
       "predefinedValues": null
     },
     {
-      "name": "Xreport-output-files",
+      "name": "Xannotation-default-target",
       "shortName": null,
-      "description": "Report the source-to-output file mapping.",
+      "description": "Change the default annotation targets for constructor properties:\n-Xannotation-default-target=first-only:      use the first of the following allowed targets: '@param:', '@property:', '@field:';\n-Xannotation-default-target=first-only-warn: same as first-only, and raise warnings when both '@param:' and either '@property:' or '@field:' are allowed;\n-Xannotation-default-target=param-property:  use '@param:' target if applicable, and also use the first of either '@property:' or '@field:';\ndefault: 'first-only-warn' in language version 2.2+, 'first-only' in version 2.1 and before.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xannotation-target-all",
+      "shortName": null,
+      "description": "Enable experimental language support for @all: annotation use-site target.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": true,
+      "disabled": false,
       "predefinedValues": null
     },
     {
-      "name": "Xplugin",
+      "name": "Xcheck-phase-conditions",
       "shortName": null,
-      "description": "Load plugins from the given classpath.",
+      "description": "Check pre- and postconditions of IR lowering phases.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xcommon-sources",
+      "shortName": null,
+      "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -251,20 +277,6 @@
       },
       "disabled": true,
       "predefinedValues": null
-    },
-    {
-      "name": "P",
-      "shortName": null,
-      "description": "Pass an option to a plugin.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": [
-        "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=false"
-      ]
     },
     {
       "name": "Xcompiler-plugin",
@@ -291,21 +303,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xmulti-platform",
+      "name": "Xconsistent-data-class-copy-visibility",
       "shortName": null,
-      "description": "Enable language support for multiplatform projects.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xno-check-actual",
-      "shortName": null,
-      "description": "Do not check for the presence of the 'actual' modifier in multiplatform projects.",
+      "description": "The effect of this compiler flag is the same as applying @ConsistentCopyVisibility annotation to all data classes in the module. See https://youtrack.jetbrains.com/issue/KT-11914",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -315,21 +315,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xintellij-plugin-root",
+      "name": "Xcontext-parameters",
       "shortName": null,
-      "description": "Path to 'kotlin-compiler.jar' or the directory where the IntelliJ IDEA configuration files can be found.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xnew-inference",
-      "shortName": null,
-      "description": "Enable the new experimental generic type inference algorithm.",
+      "description": "Enable experimental context parameters.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -339,9 +327,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xinline-classes",
+      "name": "Xcontext-receivers",
       "shortName": null,
-      "description": "Enable experimental inline classes.",
+      "description": "Enable experimental context receivers.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -351,15 +339,27 @@
       "predefinedValues": null
     },
     {
-      "name": "Xreport-perf",
+      "name": "Xcontext-sensitive-resolution",
       "shortName": null,
-      "description": "Report detailed performance statistics.",
+      "description": "Enable experimental context-sensitive resolution.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": true,
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xdata-flow-based-exhaustiveness",
+      "shortName": null,
+      "description": "Enable `when` exhaustiveness improvements that rely on data-flow analysis.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -375,63 +375,27 @@
       "predefinedValues": null
     },
     {
-      "name": "Xdump-perf",
+      "name": "Xdirect-java-actualization",
       "shortName": null,
-      "description": "Dump detailed performance statistics to the specified file in plain text, JSON or markdown format (it's detected by the file's extension).\nAlso, it supports the placeholder `*` and directory for generating file names based on the module being compiled and the current time stamp.\nExample: `path/to/dir/*.log` creates logs like `path/to/dir/my-module_2025-06-20-12-22-32.log` in plain text format, `path/to/dir/` creates logs like `path/to/dir/my-log_2025-06-20-12-22-32.json`.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "XXdump-model",
-      "shortName": null,
-      "description": "Dump compilation model to specified directory for use in modularized tests.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xmetadata-version",
-      "shortName": null,
-      "description": "Change the metadata version of the generated binary files.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcommon-sources",
-      "shortName": null,
-      "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xlist-phases",
-      "shortName": null,
-      "description": "List backend phases.",
+      "description": "Enable experimental direct Java actualization support.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
       },
-      "disabled": true,
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xdisable-default-scripting-plugin",
+      "shortName": null,
+      "description": "Don't enable the scripting plugin by default.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -447,51 +411,15 @@
       "predefinedValues": null
     },
     {
-      "name": "Xverbose-phases",
+      "name": "Xdont-warn-on-error-suppression",
       "shortName": null,
-      "description": "Be verbose while performing the given backend phases.",
+      "description": "Don't report warnings when errors are suppressed. This only affects K2.",
       "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
       },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xphases-to-dump-before",
-      "shortName": null,
-      "description": "Dump the backend's state before these phases.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xphases-to-dump-after",
-      "shortName": null,
-      "description": "Dump the backend's state after these phases.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xphases-to-dump",
-      "shortName": null,
-      "description": "Dump the backend's state both before and after these phases.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -519,9 +447,69 @@
       "predefinedValues": null
     },
     {
-      "name": "Xphases-to-validate-before",
+      "name": "Xdump-perf",
       "shortName": null,
-      "description": "Validate the backend's state before these phases.",
+      "description": "Dump detailed performance statistics to the specified file in plain text, JSON or markdown format (it's detected by the file's extension).\nAlso, it supports the placeholder `*` and directory for generating file names based on the module being compiled and the current time stamp.\nExample: `path/to/dir/*.log` creates logs like `path/to/dir/my-module_2025-06-20-12-22-32.log` in plain text format, `path/to/dir/` creates logs like `path/to/dir/my-log_2025-06-20-12-22-32.json`.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xenable-incremental-compilation",
+      "shortName": null,
+      "description": "Enable incremental compilation.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xexpect-actual-classes",
+      "shortName": null,
+      "description": "'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta.\nKotlin reports a warning every time you use one of them. You can use this flag to mute the warning.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xexplicit-api",
+      "shortName": null,
+      "description": "Force the compiler to report errors on all public API declarations without an explicit visibility or a return type.\nUse the 'warning' level to issue warnings instead of errors.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "disable"
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xexplicit-backing-fields",
+      "shortName": null,
+      "description": "Enable experimental language support for explicit backing fields.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfragment-dependency",
+      "shortName": null,
+      "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -531,9 +519,249 @@
       "predefinedValues": null
     },
     {
-      "name": "Xphases-to-validate-after",
+      "name": "Xfragment-friend-dependency",
       "shortName": null,
-      "description": "Validate the backend's state after these phases.",
+      "description": "Declare common klib friend dependencies for the specific fragment.\nThis argument can be specified for any HMPP module except the platform leaf module: it takes dependencies from the platform specific friend module arguments.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfragment-refines",
+      "shortName": null,
+      "description": "Declare that <fromModuleName> refines <onModuleName> with the dependsOn/refines relation.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfragment-sources",
+      "shortName": null,
+      "description": "Add sources to a specific fragment of a multiplatform compilation.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfragments",
+      "shortName": null,
+      "description": "Declare all known fragments of a multiplatform compilation.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xignore-const-optimization-errors",
+      "shortName": null,
+      "description": "Ignore all compilation exceptions while optimizing some constant expressions.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xinline-classes",
+      "shortName": null,
+      "description": "Enable experimental inline classes.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xintellij-plugin-root",
+      "shortName": null,
+      "description": "Path to 'kotlin-compiler.jar' or the directory where the IntelliJ IDEA configuration files can be found.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xlist-phases",
+      "shortName": null,
+      "description": "List backend phases.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xmetadata-klib",
+      "shortName": null,
+      "description": "Produce a klib that only contains the metadata of declarations.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xmetadata-version",
+      "shortName": null,
+      "description": "Change the metadata version of the generated binary files.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xmulti-dollar-interpolation",
+      "shortName": null,
+      "description": "Enable experimental multi-dollar interpolation.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xmulti-platform",
+      "shortName": null,
+      "description": "Enable language support for multiplatform projects.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xname-based-destructuring",
+      "shortName": null,
+      "description": "Enables the following destructuring features:\n-Xname-based-destructuring=only-syntax:   Enables syntax for positional destructuring with square brackets and the full form of name-based destructuring with parentheses;\n-Xname-based-destructuring=name-mismatch: Reports warnings when short form positional destructuring of data classes uses names that don't match the property names;\n-Xname-based-destructuring=complete:      Enables short-form name-based destructuring with parentheses;",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xnested-type-aliases",
+      "shortName": null,
+      "description": "Enable experimental language support for nested type aliases.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xnew-inference",
+      "shortName": null,
+      "description": "Enable the new experimental generic type inference algorithm.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xno-check-actual",
+      "shortName": null,
+      "description": "Do not check for the presence of the 'actual' modifier in multiplatform projects.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xno-inline",
+      "shortName": null,
+      "description": "Disable method inlining.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xnon-local-break-continue",
+      "shortName": null,
+      "description": "Enable experimental non-local break and continue.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xphases-to-dump",
+      "shortName": null,
+      "description": "Dump the backend's state both before and after these phases.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xphases-to-dump-after",
+      "shortName": null,
+      "description": "Dump the backend's state after these phases.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xphases-to-dump-before",
+      "shortName": null,
+      "description": "Dump the backend's state before these phases.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -555,27 +783,39 @@
       "predefinedValues": null
     },
     {
-      "name": "Xverify-ir",
+      "name": "Xphases-to-validate-after",
       "shortName": null,
-      "description": "IR verification mode (no verification by default).",
+      "description": "Validate the backend's state after these phases.",
       "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
-        "defaultValue": null
+        "defaultValue": []
       },
-      "disabled": false,
+      "disabled": true,
       "predefinedValues": null
     },
     {
-      "name": "Xverify-ir-visibility",
+      "name": "Xphases-to-validate-before",
       "shortName": null,
-      "description": "Check for visibility violations in IR when validating it before running any lowerings. Only has effect if '-Xverify-ir' is not 'none'.",
+      "description": "Validate the backend's state before these phases.",
       "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
       },
-      "disabled": false,
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xplugin",
+      "shortName": null,
+      "description": "Load plugins from the given classpath.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -591,9 +831,165 @@
       "predefinedValues": null
     },
     {
-      "name": "Xcheck-phase-conditions",
+      "name": "Xrender-internal-diagnostic-names",
       "shortName": null,
-      "description": "Check pre- and postconditions of IR lowering phases.",
+      "description": "Render the internal names of warnings and errors.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xrepl",
+      "shortName": null,
+      "description": "Run Kotlin REPL (deprecated)",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xreport-all-warnings",
+      "shortName": null,
+      "description": "Report all warnings even if errors are found.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xreport-output-files",
+      "shortName": null,
+      "description": "Report the source-to-output file mapping.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xreport-perf",
+      "shortName": null,
+      "description": "Report detailed performance statistics.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xreturn-value-checker",
+      "shortName": null,
+      "description": "Set improved unused return value checker mode. Use 'check' to run checker only and use 'full' to also enable automatic annotation insertion.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "disable"
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xseparate-kmp-compilation",
+      "shortName": null,
+      "description": "Enables the separated compilation scheme, in which common source sets are analyzed against their own dependencies",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xskip-metadata-version-check",
+      "shortName": null,
+      "description": "Allow loading classes with bad metadata versions and pre-release classes.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xskip-prerelease-check",
+      "shortName": null,
+      "description": "Allow loading pre-release classes.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xstdlib-compilation",
+      "shortName": null,
+      "description": "Enables special features which are relevant only for stdlib compilation.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xsuppress-api-version-greater-than-language-version-error",
+      "shortName": null,
+      "description": "Suppress error about API version greater than language version.\nWarning: This is temporary solution (see KT-63712) intended to be used only for stdlib build.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xsuppress-version-warnings",
+      "shortName": null,
+      "description": "Suppress warnings about outdated, inconsistent, or experimental language or API versions.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xsuppress-warning",
+      "shortName": null,
+      "description": "Suppress specified warning module-wide. This option is deprecated in favor of \"-Xwarning-level\" flag",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xunrestricted-builder-inference",
+      "shortName": null,
+      "description": "Eliminate builder inference restrictions, for example by allowing type variables to be returned from builder inference calls.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -639,227 +1035,23 @@
       "predefinedValues": null
     },
     {
-      "name": "Xmetadata-klib",
+      "name": "Xverbose-phases",
       "shortName": null,
-      "description": "Produce a klib that only contains the metadata of declarations.",
+      "description": "Be verbose while performing the given backend phases.",
       "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
       },
       "disabled": true,
       "predefinedValues": null
     },
     {
-      "name": "Xdisable-default-scripting-plugin",
+      "name": "Xverify-ir",
       "shortName": null,
-      "description": "Don't enable the scripting plugin by default.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xexplicit-api",
-      "shortName": null,
-      "description": "Force the compiler to report errors on all public API declarations without an explicit visibility or a return type.\nUse the 'warning' level to issue warnings instead of errors.",
+      "description": "IR verification mode (no verification by default).",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": "disable"
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "XXexplicit-return-types",
-      "shortName": null,
-      "description": "Force the compiler to report errors on all public API declarations without an explicit return type.\nUse the 'warning' level to issue warnings instead of errors.\nThis flag partially enables functionality of `-Xexplicit-api` flag, so please don't use them altogether",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": "disable"
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xreturn-value-checker",
-      "shortName": null,
-      "description": "Set improved unused return value checker mode. Use 'check' to run checker only and use 'full' to also enable automatic annotation insertion.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": "disable"
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xsuppress-version-warnings",
-      "shortName": null,
-      "description": "Suppress warnings about outdated, inconsistent, or experimental language or API versions.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xsuppress-api-version-greater-than-language-version-error",
-      "shortName": null,
-      "description": "Suppress error about API version greater than language version.\nWarning: This is temporary solution (see KT-63712) intended to be used only for stdlib build.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xexpect-actual-classes",
-      "shortName": null,
-      "description": "'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta.\nKotlin reports a warning every time you use one of them. You can use this flag to mute the warning.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xconsistent-data-class-copy-visibility",
-      "shortName": null,
-      "description": "The effect of this compiler flag is the same as applying @ConsistentCopyVisibility annotation to all data classes in the module. See https://youtrack.jetbrains.com/issue/KT-11914",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xunrestricted-builder-inference",
-      "shortName": null,
-      "description": "Eliminate builder inference restrictions, for example by allowing type variables to be returned from builder inference calls.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcontext-receivers",
-      "shortName": null,
-      "description": "Enable experimental context receivers.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcontext-parameters",
-      "shortName": null,
-      "description": "Enable experimental context parameters.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcontext-sensitive-resolution",
-      "shortName": null,
-      "description": "Enable experimental context-sensitive resolution.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xnon-local-break-continue",
-      "shortName": null,
-      "description": "Enable experimental non-local break and continue.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xdata-flow-based-exhaustiveness",
-      "shortName": null,
-      "description": "Enable `when` exhaustiveness improvements that rely on data-flow analysis.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xexplicit-backing-fields",
-      "shortName": null,
-      "description": "Enable experimental language support for explicit backing fields.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xdirect-java-actualization",
-      "shortName": null,
-      "description": "Enable experimental direct Java actualization support.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xmulti-dollar-interpolation",
-      "shortName": null,
-      "description": "Enable experimental multi-dollar interpolation.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xenable-incremental-compilation",
-      "shortName": null,
-      "description": "Enable incremental compilation.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": true,
         "defaultValue": null
       },
@@ -867,169 +1059,13 @@
       "predefinedValues": null
     },
     {
-      "name": "Xrender-internal-diagnostic-names",
+      "name": "Xverify-ir-visibility",
       "shortName": null,
-      "description": "Render the internal names of warnings and errors.",
+      "description": "Check for visibility violations in IR when validating it before running any lowerings. Only has effect if '-Xverify-ir' is not 'none'.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xallow-any-scripts-in-source-roots",
-      "shortName": null,
-      "description": "Allow compiling scripts along with regular Kotlin sources.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xreport-all-warnings",
-      "shortName": null,
-      "description": "Report all warnings even if errors are found.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfragments",
-      "shortName": null,
-      "description": "Declare all known fragments of a multiplatform compilation.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfragment-sources",
-      "shortName": null,
-      "description": "Add sources to a specific fragment of a multiplatform compilation.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfragment-refines",
-      "shortName": null,
-      "description": "Declare that <fromModuleName> refines <onModuleName> with the dependsOn/refines relation.",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfragment-dependency",
-      "shortName": null,
-      "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfragment-friend-dependency",
-      "shortName": null,
-      "description": "Declare common klib friend dependencies for the specific fragment.\nThis argument can be specified for any HMPP module except the platform leaf module: it takes dependencies from the platform specific friend module arguments.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xseparate-kmp-compilation",
-      "shortName": null,
-      "description": "Enables the separated compilation scheme, in which common source sets are analyzed against their own dependencies",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xignore-const-optimization-errors",
-      "shortName": null,
-      "description": "Ignore all compilation exceptions while optimizing some constant expressions.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xdont-warn-on-error-suppression",
-      "shortName": null,
-      "description": "Don't report warnings when errors are suppressed. This only affects K2.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwhen-guards",
-      "shortName": null,
-      "description": "Enable experimental language support for when guards.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xnested-type-aliases",
-      "shortName": null,
-      "description": "Enable experimental language support for nested type aliases.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xsuppress-warning",
-      "shortName": null,
-      "description": "Suppress specified warning module-wide. This option is deprecated in favor of \"-Xwarning-level\" flag",
-      "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
       },
       "disabled": false,
       "predefinedValues": null
@@ -1047,33 +1083,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xannotation-default-target",
+      "name": "Xwhen-guards",
       "shortName": null,
-      "description": "Change the default annotation targets for constructor properties:\n-Xannotation-default-target=first-only:      use the first of the following allowed targets: '@param:', '@property:', '@field:';\n-Xannotation-default-target=first-only-warn: same as first-only, and raise warnings when both '@param:' and either '@property:' or '@field:' are allowed;\n-Xannotation-default-target=param-property:  use '@param:' target if applicable, and also use the first of either '@property:' or '@field:';\ndefault: 'first-only-warn' in language version 2.2+, 'first-only' in version 2.1 and before.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "XXdebug-level-compiler-checks",
-      "shortName": null,
-      "description": "Enable debug level compiler checks. ATTENTION: these checks can slow compiler down or even crash it.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xannotation-target-all",
-      "shortName": null,
-      "description": "Enable experimental language support for @all: annotation use-site target.",
+      "description": "Enable experimental language support for when guards.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1083,69 +1095,9 @@
       "predefinedValues": null
     },
     {
-      "name": "XXlenient-mode",
+      "name": "api-version",
       "shortName": null,
-      "description": "Lenient compiler mode. When actuals are missing, placeholder declarations are generated.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xallow-reified-type-in-catch",
-      "shortName": null,
-      "description": "Allow 'catch' parameters to have reified types.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xallow-contracts-on-more-functions",
-      "shortName": null,
-      "description": "Allow contracts on some operators and accessors, and allow checks for erased types.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xallow-condition-implies-returns-contracts",
-      "shortName": null,
-      "description": "Allow contracts that specify a limited conditional returns postcondition.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xallow-holdsin-contract",
-      "shortName": null,
-      "description": "Allow contracts that specify a condition that holds true inside a lambda argument.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xname-based-destructuring",
-      "shortName": null,
-      "description": "Enables the following destructuring features:\n-Xname-based-destructuring=only-syntax:   Enables syntax for positional destructuring with square brackets and the full form of name-based destructuring with parentheses;\n-Xname-based-destructuring=name-mismatch: Reports warnings when short form positional destructuring of data classes uses names that don't match the property names;\n-Xname-based-destructuring=complete:      Enables short-form name-based destructuring with parentheses;",
+      "description": "Allow using declarations from only the specified version of bundled libraries.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1155,9 +1107,33 @@
       "predefinedValues": null
     },
     {
-      "name": "XXLanguage",
+      "name": "kotlin-home",
       "shortName": null,
-      "description": "Enables/disables specified language feature.\nWarning: this flag is not intended for production use. If you want to configure the language behaviour use the\n-language-version or corresponding experimental feature flags.",
+      "description": "Path to the Kotlin compiler home directory used for the discovery of runtime libraries.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "language-version",
+      "shortName": null,
+      "description": "Provide source compatibility with the specified version of Kotlin.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "opt-in",
+      "shortName": null,
+      "description": "Enable API usages that require opt-in with an opt-in requirement marker with the given fully qualified name.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1167,15 +1143,75 @@
       "predefinedValues": null
     },
     {
-      "name": "Xklib-relative-path-base",
+      "name": "progressive",
       "shortName": null,
-      "description": "Provide a base path to compute the source's relative paths in klib (default is empty).",
+      "description": "Enable progressive compiler mode.\nIn this mode, deprecations and bug fixes for unstable code take effect immediately\ninstead of going through a graceful migration cycle.\nCode written in progressive mode is backward compatible; however, code written without\nprogressive mode enabled may cause compilation errors in progressive mode.",
       "type": {
-        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": []
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "script",
+      "shortName": null,
+      "description": "Evaluate the given Kotlin script (*.kts) file.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
       },
       "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xklib-abi-version",
+      "shortName": null,
+      "description": "Specify the custom ABI version to be written in KLIB. This option is intended only for tests.\nWarning: This option does not affect KLIB ABI. Neither allows it making a KLIB backward-compatible with older ABI versions.\nThe only observable effect is that a custom ABI version is written to KLIB manifest file.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xklib-duplicated-unique-name-strategy",
+      "shortName": null,
+      "description": "Klib dependencies usage strategy when multiple KLIBs has same `unique_name` property value.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xklib-enable-signature-clash-checks",
+      "shortName": null,
+      "description": "Enable signature uniqueness checks.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": true
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xklib-ir-inliner",
+      "shortName": null,
+      "description": "Set the mode of the experimental IR inliner on the first compilation stage.\n- `intra-module` mode enforces inlining of the functions only from the compiled module\n- `full` mode enforces inlining of all functions (from the compiled module and from all dependencies)\n   Warning: This mode will trigger setting the `pre-release` flag for the compiled library.\n- `disabled` mode completely disables the IR inliner\n- `default` mode lets the IR inliner run in `intra-module`, `full` or `disabled` mode based on the current language version\n        ",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "default"
+      },
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -1191,15 +1227,27 @@
       "predefinedValues": null
     },
     {
-      "name": "Xklib-enable-signature-clash-checks",
+      "name": "Xklib-relative-path-base",
       "shortName": null,
-      "description": "Enable signature uniqueness checks.",
+      "description": "Provide a base path to compute the source's relative paths in klib (default is empty).",
       "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": true
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
       },
-      "disabled": false,
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xklib-zip-file-accessor-cache-limit",
+      "shortName": null,
+      "description": "Maximum number of klibs that can be cached during compilation. Default is 64.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "64"
+      },
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1227,33 +1275,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xklib-duplicated-unique-name-strategy",
+      "name": "Xir-dce-dump-reachability-info-to-file",
       "shortName": null,
-      "description": "Klib dependencies usage strategy when multiple KLIBs has same `unique_name` property value.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xklib-ir-inliner",
-      "shortName": null,
-      "description": "Set the mode of the experimental IR inliner on the first compilation stage.\n- `intra-module` mode enforces inlining of the functions only from the compiled module\n- `full` mode enforces inlining of all functions (from the compiled module and from all dependencies)\n   Warning: This mode will trigger setting the `pre-release` flag for the compiled library.\n- `disabled` mode completely disables the IR inliner\n- `default` mode lets the IR inliner run in `intra-module`, `full` or `disabled` mode based on the current language version\n        ",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": "default"
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xklib-abi-version",
-      "shortName": null,
-      "description": "Specify the custom ABI version to be written in KLIB. This option is intended only for tests.\nWarning: This option does not affect KLIB ABI. Neither allows it making a KLIB backward-compatible with older ABI versions.\nThe only observable effect is that a custom ABI version is written to KLIB manifest file.",
+      "description": "Dump reachability information collected about declarations while performing DCE to a file. The format will be chosen automatically based on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1263,13 +1287,13 @@
       "predefinedValues": null
     },
     {
-      "name": "Xklib-zip-file-accessor-cache-limit",
+      "name": "Xir-dump-declaration-ir-sizes-to-file",
       "shortName": null,
-      "description": "Maximum number of klibs that can be cached during compilation. Default is 64.",
+      "description": "Dump the IR size of each declaration into a file. The format will be chosen automatically depending on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": "64"
+        "isNullable": true,
+        "defaultValue": null
       },
       "disabled": true,
       "predefinedValues": null
@@ -1287,15 +1311,15 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-target",
+      "name": "Xwasm-debug-friendly",
       "shortName": null,
-      "description": "Set up the Wasm target (wasm-js or wasm-wasi).",
+      "description": "Avoid optimizations that can break debugging.",
       "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
       },
-      "disabled": true,
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -1311,39 +1335,15 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-debug-friendly",
+      "name": "Xwasm-debugger-custom-formatters",
       "shortName": null,
-      "description": "Avoid optimizations that can break debugging.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-generate-wat",
-      "shortName": null,
-      "description": "Generate a .wat file.",
+      "description": "Generates devtools custom formatters (https://firefox-source-docs.mozilla.org/devtools-user/custom_formatters) for Kotlin/Wasm values",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-kclass-fqn",
-      "shortName": null,
-      "description": "Enable support for 'KClass.qualifiedName'.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": true
-      },
-      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -1371,45 +1371,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-use-traps-instead-of-exceptions",
+      "name": "Xwasm-generate-dwarf",
       "shortName": null,
-      "description": "Use traps instead of throwing exceptions.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-use-new-exception-proposal",
-      "shortName": null,
-      "description": "Use an updated version of the exception proposal with try_table.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-no-jstag",
-      "shortName": null,
-      "description": "Don't use WebAssembly.JSTag for throwing and catching exceptions",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-debugger-custom-formatters",
-      "shortName": null,
-      "description": "Generates devtools custom formatters (https://firefox-source-docs.mozilla.org/devtools-user/custom_formatters) for Kotlin/Wasm values",
+      "description": "Generate DWARF debug information.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1419,21 +1383,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-source-map-include-mappings-from-unavailable-sources",
+      "name": "Xwasm-generate-wat",
       "shortName": null,
-      "description": "Insert source mappings from libraries even if their sources are unavailable on the end-user machine.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-preserve-ic-order",
-      "shortName": null,
-      "description": "Preserve wasm file structure between IC runs.",
+      "description": "Generate a .wat file.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1455,9 +1407,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-generate-dwarf",
+      "name": "Xwasm-included-module-only",
       "shortName": null,
-      "description": "Generate DWARF debug information.",
+      "description": "Compile only a module passed using `-include` option.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1467,9 +1419,57 @@
       "predefinedValues": null
     },
     {
-      "name": "Xir-dce-dump-reachability-info-to-file",
+      "name": "Xwasm-kclass-fqn",
       "shortName": null,
-      "description": "Dump reachability information collected about declarations while performing DCE to a file. The format will be chosen automatically based on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
+      "description": "Enable support for 'KClass.qualifiedName'.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": true
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xwasm-no-jstag",
+      "shortName": null,
+      "description": "Don't use WebAssembly.JSTag for throwing and catching exceptions",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xwasm-preserve-ic-order",
+      "shortName": null,
+      "description": "Preserve wasm file structure between IC runs.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xwasm-source-map-include-mappings-from-unavailable-sources",
+      "shortName": null,
+      "description": "Insert source mappings from libraries even if their sources are unavailable on the end-user machine.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xwasm-target",
+      "shortName": null,
+      "description": "Set up the Wasm target (wasm-js or wasm-wasi).",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1479,15 +1479,423 @@
       "predefinedValues": null
     },
     {
-      "name": "Xir-dump-declaration-ir-sizes-to-file",
+      "name": "Xwasm-use-new-exception-proposal",
       "shortName": null,
-      "description": "Dump the IR size of each declaration into a file. The format will be chosen automatically depending on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
+      "description": "Use an updated version of the exception proposal with try_table.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xwasm-use-traps-instead-of-exceptions",
+      "shortName": null,
+      "description": "Use traps instead of throwing exceptions.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xcache-directory",
+      "shortName": null,
+      "description": "Path to the cache directory.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
         "defaultValue": null
       },
       "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xenable-extension-functions-in-externals",
+      "shortName": null,
+      "description": "Enable extension function members in external interfaces.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xes-arrow-functions",
+      "shortName": null,
+      "description": "Use ES2015 arrow functions in the JavaScript code generated for Kotlin lambdas. Enabled by default in case of ES2015 target usage",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xes-classes",
+      "shortName": null,
+      "description": "Let generated JavaScript code use ES2015 classes. Enabled by default in case of ES2015 target usage",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xes-generators",
+      "shortName": null,
+      "description": "Enable ES2015 generator functions usage inside the compiled code. Enabled by default in case of ES2015 target usage",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xes-long-as-bigint",
+      "shortName": null,
+      "description": "Compile Long values as ES2020 bigint instead of object.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfake-override-validator",
+      "shortName": null,
+      "description": "Enable the IR fake override validator.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfriend-modules",
+      "shortName": null,
+      "description": "Paths to friend modules.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xfriend-modules-disabled",
+      "shortName": null,
+      "description": "Disable internal declaration export.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xgenerate-dts",
+      "shortName": null,
+      "description": "Generate a TypeScript declaration .d.ts file alongside the JS file.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xgenerate-polyfills",
+      "shortName": null,
+      "description": "Generate polyfills for features from the ES6+ standards.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": true
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xinclude",
+      "shortName": null,
+      "description": "Path to an intermediate library that should be processed in the same manner as source files.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-build-cache",
+      "shortName": null,
+      "description": "Use the compiler to build the cache.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-dce",
+      "shortName": null,
+      "description": "Perform experimental dead code elimination.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-dce-print-reachability-info",
+      "shortName": null,
+      "description": "Print reachability information about declarations to 'stdout' while performing DCE.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-dce-runtime-diagnostic",
+      "shortName": null,
+      "description": "Enable runtime diagnostics instead of removing declarations when performing DCE.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-generate-inline-anonymous-functions",
+      "shortName": null,
+      "description": "Lambda expressions that capture values are translated into in-line anonymous JavaScript functions.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-keep",
+      "shortName": null,
+      "description": "Comma-separated list of fully qualified names not to be eliminated by DCE (if it can be reached), and for which to keep non-minified names.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-minimized-member-names",
+      "shortName": null,
+      "description": "Minimize the names of members.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-module-name",
+      "shortName": null,
+      "description": "Specify the name of the compilation module for the IR backend.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-per-file",
+      "shortName": null,
+      "description": "Generate one .js file per source file.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-per-module",
+      "shortName": null,
+      "description": "Generate one .js file per module.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-per-module-output-name",
+      "shortName": null,
+      "description": "Add a custom output name to the split .js files.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-produce-js",
+      "shortName": null,
+      "description": "Generate a JS file using the IR backend.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-produce-klib-dir",
+      "shortName": null,
+      "description": "Generate an unpacked klib into the parent directory of the output JS file.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-produce-klib-file",
+      "shortName": null,
+      "description": "Generate a packed klib into the directory specified by '-ir-output-dir'.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-property-lazy-initialization",
+      "shortName": null,
+      "description": "Perform lazy initialization for properties.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": true
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-safe-external-boolean",
+      "shortName": null,
+      "description": "Wrap access to external 'Boolean' properties with an explicit conversion to 'Boolean'.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xir-safe-external-boolean-diagnostic",
+      "shortName": null,
+      "description": "Enable runtime diagnostics when accessing external 'Boolean' properties.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xoptimize-generated-js",
+      "shortName": null,
+      "description": "Perform additional optimizations on the generated JS code.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": true
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xplatform-arguments-in-main-function",
+      "shortName": null,
+      "description": "JS expression that will be executed in runtime and be put as an Array<String> parameter of the main function",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xstrict-implicit-export-types",
+      "shortName": null,
+      "description": "Generate strict types for implicitly exported entities inside d.ts files.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xtyped-arrays",
+      "shortName": null,
+      "description": "This option does nothing and is left for compatibility with the legacy backend.\nIt is deprecated and will be removed in a future release.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -1527,6 +1935,30 @@
       "predefinedValues": "animation-core-wasm-js-1.7.0.klib:animation-graphics-wasm-js-1.7.0.klib:animation-wasm-js-1.7.0.klib:annotation-wasm-js-1.7.0.klib:atomicfu-wasm-js-0.23.2.klib:collection-wasm-js-1.7.0.klib:foundation-layout-wasm-js-1.7.0.klib:foundation-wasm-js-1.7.0.klib:kotlin-stdlib-wasm-js-{{KOTLIN_VERSION_PLACEHOLDER}}.klib:kotlinx-browser-wasm-js-0.1-javadoc.klib:kotlinx-coroutines-core-wasm-js-1.8.0.klib:kotlinx-datetime-wasm-js-0.6.0.klib:kotlinx-serialization-core-wasm-js-1.6.2.klib:library-wasm-js-1.7.0.klib:lifecycle-common-wasm-js-2.8.3.klib:lifecycle-runtime-compose-wasm-js-2.8.3.klib:lifecycle-runtime-wasm-js-2.8.3.klib:lifecycle-viewmodel-wasm-js-2.8.3.klib:material-icons-core-wasm-js-1.7.0.klib:material-ripple-wasm-js-1.7.0.klib:material-wasm-js-1.7.0.klib:material3-wasm-js-1.7.0.klib:runtime-saveable-wasm-js-1.7.0.klib:runtime-wasm-js-1.7.0.klib:skiko-wasm-js-0.8.15.klib:ui-geometry-wasm-js-1.7.0.klib:ui-graphics-wasm-js-1.7.0.klib:ui-text-wasm-js-1.7.0.klib:ui-unit-wasm-js-1.7.0.klib:ui-util-wasm-js-1.7.0.klib:ui-wasm-js-1.7.0.klib"
     },
     {
+      "name": "main",
+      "shortName": null,
+      "description": "Specify whether the 'main' function should be called upon execution.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "module-kind",
+      "shortName": null,
+      "description": "The kind of JS module generated by the compiler. ES modules are enabled by default in case of ES2015 target usage",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "source-map",
       "shortName": null,
       "description": "Generate a source map.",
@@ -1534,18 +1966,6 @@
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "source-map-prefix",
-      "shortName": null,
-      "description": "Add the specified prefix to the paths in the source map.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
       },
       "disabled": true,
       "predefinedValues": null
@@ -1587,6 +2007,18 @@
       "predefinedValues": null
     },
     {
+      "name": "source-map-prefix",
+      "shortName": null,
+      "description": "Add the specified prefix to the paths in the source map.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": null
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "target",
       "shortName": null,
       "description": "Generate JS files for the specified ECMA version.",
@@ -1596,426 +2028,6 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-keep",
-      "shortName": null,
-      "description": "Comma-separated list of fully qualified names not to be eliminated by DCE (if it can be reached), and for which to keep non-minified names.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "module-kind",
-      "shortName": null,
-      "description": "The kind of JS module generated by the compiler. ES modules are enabled by default in case of ES2015 target usage",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "main",
-      "shortName": null,
-      "description": "Specify whether the 'main' function should be called upon execution.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-produce-klib-dir",
-      "shortName": null,
-      "description": "Generate an unpacked klib into the parent directory of the output JS file.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-produce-klib-file",
-      "shortName": null,
-      "description": "Generate a packed klib into the directory specified by '-ir-output-dir'.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-produce-js",
-      "shortName": null,
-      "description": "Generate a JS file using the IR backend.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-dce",
-      "shortName": null,
-      "description": "Perform experimental dead code elimination.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-dce-runtime-diagnostic",
-      "shortName": null,
-      "description": "Enable runtime diagnostics instead of removing declarations when performing DCE.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-dce-print-reachability-info",
-      "shortName": null,
-      "description": "Print reachability information about declarations to 'stdout' while performing DCE.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-property-lazy-initialization",
-      "shortName": null,
-      "description": "Perform lazy initialization for properties.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": true
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-minimized-member-names",
-      "shortName": null,
-      "description": "Minimize the names of members.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-module-name",
-      "shortName": null,
-      "description": "Specify the name of the compilation module for the IR backend.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-safe-external-boolean",
-      "shortName": null,
-      "description": "Wrap access to external 'Boolean' properties with an explicit conversion to 'Boolean'.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-safe-external-boolean-diagnostic",
-      "shortName": null,
-      "description": "Enable runtime diagnostics when accessing external 'Boolean' properties.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-per-module",
-      "shortName": null,
-      "description": "Generate one .js file per module.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-per-module-output-name",
-      "shortName": null,
-      "description": "Add a custom output name to the split .js files.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-per-file",
-      "shortName": null,
-      "description": "Generate one .js file per source file.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-generate-inline-anonymous-functions",
-      "shortName": null,
-      "description": "Lambda expressions that capture values are translated into in-line anonymous JavaScript functions.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xinclude",
-      "shortName": null,
-      "description": "Path to an intermediate library that should be processed in the same manner as source files.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcache-directory",
-      "shortName": null,
-      "description": "Path to the cache directory.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xir-build-cache",
-      "shortName": null,
-      "description": "Use the compiler to build the cache.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xgenerate-dts",
-      "shortName": null,
-      "description": "Generate a TypeScript declaration .d.ts file alongside the JS file.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xgenerate-polyfills",
-      "shortName": null,
-      "description": "Generate polyfills for features from the ES6+ standards.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": true
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xstrict-implicit-export-types",
-      "shortName": null,
-      "description": "Generate strict types for implicitly exported entities inside d.ts files.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xes-classes",
-      "shortName": null,
-      "description": "Let generated JavaScript code use ES2015 classes. Enabled by default in case of ES2015 target usage",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xplatform-arguments-in-main-function",
-      "shortName": null,
-      "description": "JS expression that will be executed in runtime and be put as an Array<String> parameter of the main function",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xes-generators",
-      "shortName": null,
-      "description": "Enable ES2015 generator functions usage inside the compiled code. Enabled by default in case of ES2015 target usage",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xes-arrow-functions",
-      "shortName": null,
-      "description": "Use ES2015 arrow functions in the JavaScript code generated for Kotlin lambdas. Enabled by default in case of ES2015 target usage",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xes-long-as-bigint",
-      "shortName": null,
-      "description": "Compile Long values as ES2020 bigint instead of object.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xtyped-arrays",
-      "shortName": null,
-      "description": "This option does nothing and is left for compatibility with the legacy backend.\nIt is deprecated and will be removed in a future release.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfriend-modules-disabled",
-      "shortName": null,
-      "description": "Disable internal declaration export.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfriend-modules",
-      "shortName": null,
-      "description": "Paths to friend modules.",
-      "type": {
-        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xenable-extension-functions-in-externals",
-      "shortName": null,
-      "description": "Enable extension function members in external interfaces.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xfake-override-validator",
-      "shortName": null,
-      "description": "Enable the IR fake override validator.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xoptimize-generated-js",
-      "shortName": null,
-      "description": "Perform additional optimizations on the generated JS code.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": true
-      },
-      "disabled": false,
       "predefinedValues": null
     }
   ]
