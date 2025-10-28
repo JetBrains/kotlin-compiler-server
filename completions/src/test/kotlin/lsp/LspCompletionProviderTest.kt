@@ -5,16 +5,15 @@ import ConcurrencyCompletionRunnerTest
 import ImportTest
 import base.BaseCompletionTest.Utils.retrieveCompletions
 import lsp.utils.CARET_MARKER
-import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
 import completions.dto.api.CompletionResponse
 import completions.enums.Icon
+import lsp.utils.LspIntegrationTest
 import org.eclipse.lsp4j.Position
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertNull
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -30,8 +29,7 @@ import kotlin.test.assertTrue
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [completions.CompletionsApplication::class]
 )
-@ExtendWith(KotlinLspComposeExtension::class)
-class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyCompletionRunnerTest() {
+class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyCompletionRunnerTest, LspIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0

@@ -5,20 +5,23 @@ import kotlinx.coroutines.runBlocking
 import lsp.utils.CARET_MARKER
 import org.junit.jupiter.api.Test
 
-abstract class ConcurrencyCompletionRunnerTest : BaseCompletionTest {
+interface ConcurrencyCompletionRunnerTest : BaseCompletionTest {
 
-    private val numberOfTests = 100
+    val numberOfTests: Int
+        get() = 100
 
-    private val code = """
-        fun main() {
-            val a = 3.0.toIn$CARET_MARKER
-        }
-    """.trimIndent()
+    val code: String
+        get() = """
+            fun main() {
+                val a = 3.0.toIn$CARET_MARKER
+            }
+            """.trimIndent()
 
-    private val expectedCompletions = listOf(
-        "toInt()",
-        "toUInt()",
-    )
+    val expectedCompletions: List<String>
+        get() = listOf(
+            "toInt()",
+            "toUInt()",
+        )
 
     @Test
     fun `a lot of complete test`() {

@@ -3,10 +3,10 @@ package lsp.ws
 import CompletionTest
 import ImportTest
 import completions.configuration.WebSocketConfiguration
-import lsp.utils.KotlinLspComposeExtension
 import completions.dto.api.CompletionResponse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
+import lsp.utils.LspIntegrationTest
 import lsp.utils.TestWSClient
 import lsp.utils.TestWSClient.Companion.buildCompletionRequest
 import lsp.utils.extractCaret
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
@@ -35,8 +34,7 @@ import kotlin.time.Duration.Companion.seconds
     classes = [completions.CompletionsApplication::class]
 )
 @TestInstance(Lifecycle.PER_CLASS)
-@ExtendWith(KotlinLspComposeExtension::class)
-class KotlinLspProxyWSTest : CompletionTest, ImportTest {
+class KotlinLspProxyWSTest : CompletionTest, ImportTest, LspIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0

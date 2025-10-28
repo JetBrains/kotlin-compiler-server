@@ -1,20 +1,16 @@
 package lsp
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import completions.lsp.util.completions.FuzzyCompletionRanker
 import org.eclipse.lsp4j.CompletionItem
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.NONE,
-    classes = [completions.CompletionsApplication::class]
-)
 class FuzzyCompletionRankingTest {
 
-    @Autowired
-    private lateinit var completionRanker: FuzzyCompletionRanker
+    private val completionRanker: FuzzyCompletionRanker =
+        FuzzyCompletionRanker(ObjectMapper().registerModule(kotlinModule()))
 
     @Test
     fun `empty query ranks only by sortText`() = rankingTest("") {

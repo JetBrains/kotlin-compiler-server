@@ -3,19 +3,18 @@ package lsp
 import CompletionTest
 import completions.lsp.LspCompletionParser
 import lsp.utils.CARET_MARKER
-import lsp.utils.KotlinLspComposeExtension
 import lsp.utils.extractCaret
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import completions.lsp.client.KotlinLspClient
 import completions.lsp.client.LspClient
+import lsp.utils.LspIntegrationTest
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.UUID
@@ -26,8 +25,7 @@ import kotlin.text.contains
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
     classes = [completions.CompletionsApplication::class]
 )
-@ExtendWith(KotlinLspComposeExtension::class)
-class LspClientTest : CompletionTest {
+class LspClientTest : CompletionTest, LspIntegrationTest() {
 
     @Autowired
     private lateinit var lspCompletionParser: LspCompletionParser
