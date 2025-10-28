@@ -11,4 +11,6 @@ data class LspProperties(
     val host: String,
     val port: Int,
     val reconnectionRetries: Int,
+    val remoteWorkspaceRoot: String = "/lsp/workspaces/lsp-users-projects-root",
+    val localWorkspaceRoot: String = "/lsp/workspaces/lsp-users-projects-root"
 )

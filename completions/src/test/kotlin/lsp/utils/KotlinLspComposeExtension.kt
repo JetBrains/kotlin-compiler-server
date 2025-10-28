@@ -32,9 +32,9 @@ internal class KotlinLspComposeExtension : BeforeAllCallback {
 
             System.setProperty("LSP_HOST", "localhost")
             System.setProperty("LSP_PORT", mappedPort.toString())
-            System.setProperty("LSP_REMOTE_WORKSPACE_ROOT", "/lsp-users-projects-root-test")
+            System.setProperty("LSP_REMOTE_WORKSPACE_ROOT", "/workspaces/lsp-users-projects-root")
 
-            val localWorkspaceRoot = createTempDirectory("lsp-users-projects-root-test")
+            val localWorkspaceRoot = createTempDirectory("lsp-users-projects-root")
             System.setProperty("LSP_LOCAL_WORKSPACE_ROOT", localWorkspaceRoot.absolutePathString())
 
             LspIntegrationTestUtils.waitForLspReady(

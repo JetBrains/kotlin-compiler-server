@@ -113,7 +113,7 @@ class KotlinLspProxy(private val lspProperties: LspProperties) {
      * @param clientName the name of the client, defaults to "lsp-proxy"
      */
     suspend fun initializeClient(
-        workspacePath: String = lspRemoteWorkspaceRoot().path,
+        workspacePath: String = Path.of(lspProperties.remoteWorkspaceRoot).toUri().path,
         clientName: String = "kotlin-compiler-server"
     ) {
         if (!::lspClient.isInitialized) {
@@ -203,37 +203,8 @@ class KotlinLspProxy(private val lspProperties: LspProperties) {
         }
     }
 
-    /**
-     * [lspRemoteWorkspaceRoot] is the workspace that the LSP will point to, while
-     * [lspLocalWorkspaceRoot] is the local workspace that the LSP client is running on.
-     * They are usually the same if the LSP client is running on the same machine as the server,
-     * otherwise [lspRemoteWorkspaceRoot] will have to be set wrt to server's local workspace.
-     *
-     * Note that [lspRemoteWorkspaceRoot] is the most important one, since it will be used
-     * from the LSP analyzer to resolve the project's dependencies.
-     */
     companion object {
         private val logger = LoggerFactory.getLogger(KotlinLspProxy::class.java)
-
-        fun lspRemoteWorkspaceRoot(): URI =Path.of(
-            System.getProperty("LSP_REMOTE_WORKSPACE_ROOT")
-                ?: System.getenv("LSP_REMOTE_WORKSPACE_ROOT")
-                ?: defaultWorkspacePath()
-        ).toUri()
-
-        fun lspLocalWorkspaceRoot(): URI = Path.of(
-            System.getProperty("LSP_LOCAL_WORKSPACE_ROOT")
-                ?: System.getenv("LSP_LOCAL_WORKSPACE_ROOT")
-                ?: defaultWorkspacePath()
-        ).toUri()
-
-        private fun defaultWorkspacePath(): String =
-            System.getProperty("LSP_USERS_PROJECTS_ROOT")
-                ?: System.getProperty("LSP_USERS_PROJECTS_ROOT")
-                ?: run {
-                    KotlinLspProxy::class.java.getResource("/lsp-users-projects-root")?.path
-                        ?: error("Could not find default workspace path")
-                }
     }
 }
 
