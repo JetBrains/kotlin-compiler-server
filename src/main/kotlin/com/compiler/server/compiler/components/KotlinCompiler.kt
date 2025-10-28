@@ -134,7 +134,7 @@ class KotlinCompiler(
             .filter { it.name.endsWith(".kt") }
             .associate { it.name to mutableListOf() }
 
-        val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
+        val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
         val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
         val operation = jvmToolchain.createJvmCompilationOperation(sources, outputDir)
         operation.compilerArguments.applyArgumentStrings(arguments)
