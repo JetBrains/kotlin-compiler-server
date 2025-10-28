@@ -129,7 +129,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(compilerPluginsForJVMFolder) { into(compilerPluginsForJVM) }
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
     into("lib") {
-        from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
+        from(configurations.productionRuntimeClasspath) { exclude("tomcat-embed-*") }
     }
 }
 
