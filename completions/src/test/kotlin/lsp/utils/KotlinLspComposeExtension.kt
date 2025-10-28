@@ -19,7 +19,7 @@ internal class KotlinLspComposeExtension : BeforeAllCallback {
         val store = context.root.getStore(Namespace.create("lsp", "compose", "kotlin"))
         store.getOrComputeIfAbsent("kotlinLspCompose", {
             val composeFile = KotlinLspComposeExtension::class.java
-                .getResource("/lsp/compose.yaml")
+                .getResource("/lsp-compose.yml")
                 ?.file
                 ?: error("Could not find docker compose file")
 
