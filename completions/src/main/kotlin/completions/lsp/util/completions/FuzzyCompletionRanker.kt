@@ -2,7 +2,7 @@
 package completions.lsp.util.completions
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import completions.util.SerializationUtil.walk
+import completions.util.SerializationExtensions.walk
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
 
