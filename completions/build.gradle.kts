@@ -62,6 +62,7 @@ tasks.register("generateLspWorkspaceRoot") {
             acc.replace(placeholder, values.joinToString("\n    "))
         }
     buildFile.writeText(newContent)
+    println("LSP workspace root for kotlin=$kotlinVersion created at: ${targetDir.path}")
 }
 
 tasks.processResources {
