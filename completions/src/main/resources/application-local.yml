@@ -4,11 +4,16 @@ lsp:
   host: ${LSP_HOST:localhost}
   port: ${LSP_PORT:9999}
   reconnection-retries: 10
-  remote-workspace-root: /workspaces/lsp-users-projects-root
+  kotlin-version: @@KOTLIN_VERSION@@
+  remote-workspace-root: /workspaces/lsp-workspace-root-@@KOTLIN_VERSION@@
+
 spring:
   docker:
     compose:
-      file: completions/lsp-compose.yml
+      enabled: true
+      file: completions/src/main/resources/lsp-compose.yml
+      lifecycle-management: start_and_stop
+
 springdoc:
   swagger-ui:
     enabled: true

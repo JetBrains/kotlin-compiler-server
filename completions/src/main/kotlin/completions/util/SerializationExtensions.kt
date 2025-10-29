@@ -2,6 +2,6 @@ package completions.util
 
 import com.fasterxml.jackson.databind.JsonNode
 
-object SerializationUtil {
+object SerializationExtensions {
     fun JsonNode.walk(fieldName: String): JsonNode? = path(fieldName).takeIf { !it.isMissingNode }
 }

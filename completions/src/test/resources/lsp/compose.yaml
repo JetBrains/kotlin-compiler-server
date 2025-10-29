@@ -1,6 +1,0 @@
-services:
-  kotlin-lsp:
-    image: registry.jetbrains.team/p/kotlin-website-team/kotlin-playground/intellij-lsp:latest
-    ports:
-      - "9999:9999"
-    restart: unless-stopped

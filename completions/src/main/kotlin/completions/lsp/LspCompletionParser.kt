@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.eclipse.lsp4j.CompletionItem
 import completions.dto.api.CompletionResponse
 import completions.enums.Icon
-import completions.util.SerializationUtil.walk
+import completions.util.SerializationExtensions.walk
 import org.eclipse.lsp4j.CompletionItemLabelDetails
 import org.springframework.stereotype.Component
 
