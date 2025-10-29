@@ -8,7 +8,9 @@ lsp:
 spring:
   docker:
     compose:
+      enabled: true
       file: completions/src/main/resources/lsp-compose.yml
+      lifecycle-management: start_and_stop
 springdoc:
   swagger-ui:
     enabled: true
