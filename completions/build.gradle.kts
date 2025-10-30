@@ -4,7 +4,7 @@ plugins {
     id("base-spring-boot-conventions")
 }
 
-val kotlinVersion = libs.versions.kotlin.get()
+val kotlinVersion = "2.2.20" // libs.versions.kotlin.get()
 version = "$kotlinVersion-SNAPSHOT"
 
 val depsProject = project(":dependencies")
@@ -40,11 +40,12 @@ tasks.register("generateLspWorkspaceRoot") {
 
     val buildFile = targetDir.resolve("build.gradle.kts")
 
-    val compilerPlugins = depsProject.configurations["kotlinCompilerPluginDependency"]
+    // TODO(Stefano Furi): retrieve "plugin.serialization" name not "org.jetbrains...", or how do we use the latter
+    val compilerPlugins = /* depsProject.configurations["kotlinCompilerPluginDependency"]
         ?.resolvedConfiguration
         ?.resolvedArtifacts
-        ?.map { "id(\"${it.moduleVersion}\")" }
-        ?: emptySet()
+        ?.map { "kotlin(\"${it.moduleVersion.id.name}\") version \"${it.moduleVersion.id.version}\"" }
+        ?: emptySet() */ emptySet<String>()
 
     val deps = depsProject.configurations["kotlinDependency"]
         ?.resolvedConfiguration
