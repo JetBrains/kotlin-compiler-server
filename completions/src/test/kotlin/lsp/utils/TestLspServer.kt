@@ -94,11 +94,31 @@ class TestLspServer(port: Int = 0): AutoCloseable {
     }
 
     companion object {
-        fun withTestLspServer(port: Int = 0, body: TestLspServer.() -> Unit) {
-            TestLspServer(port).use { server ->
+        suspend fun withTestLspServer(port: Int = 0, body: suspend TestLspServer.() -> Unit) {
+            TestLspServer(port).useSuspend { server ->
                 server.startAccepting()
                 body(server)
             }
         }
+
+        suspend inline fun <T : AutoCloseable?, R> T.useSuspend(block: suspend (T) -> R): R {
+            var closed = false
+            try {
+                return block(this)
+            } catch (e: Exception) {
+                closed = true
+                try {
+                    this?.close()
+                } catch (closeException: Exception) {
+                    e.addSuppressed(closeException)
+                }
+                throw e
+            } finally {
+                if (!closed) {
+                    this?.close()
+                }
+            }
+        }
+
     }
 }

@@ -1,18 +1,20 @@
 package lsp
 
-import lsp.utils.TestLspServer
+import completions.lsp.client.LspConnectionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import completions.lsp.client.LspConnectionManager
+import lsp.utils.TestLspServer
+import lsp.utils.TestLspServer.Companion.useSuspend
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNotNull
+import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-
 
 class LspConnectionManagerTest {
 
@@ -33,7 +35,7 @@ class LspConnectionManagerTest {
 
     @Test
     fun `manager auto-reconnects after abrupt server-side-disconnect`() = runBlocking {
-         var disconnects = 0
+        var disconnects = 0
         var reconnects = 0
         TestLspServer.withTestLspServer {
             LspConnectionManager(HOST, boundPort).use { manager ->
@@ -64,6 +66,25 @@ class LspConnectionManagerTest {
                 }
             } finally {
                 delayedServer.close()
+            }
+        }
+    }
+
+    @Test
+    fun `ensureConnected is single-flight and debounces concurrent attempts`() = runBlocking {
+        TestLspServer.withTestLspServer {
+            LspConnectionManager(HOST, boundPort).useSuspend { manager ->
+                val jobs = (1..16).map {
+                    async(Dispatchers.IO) { manager.ensureConnected() }
+                }
+
+                val results = jobs.awaitAll()
+                val first = results.first()
+
+                results.forEach { assertSame(first, it, "All ensureConnected() results must be the same instance") }
+
+                val second = manager.ensureConnected()
+                assertSame(first, second, "Subsequent ensureConnected() must return the same instance")
             }
         }
     }
