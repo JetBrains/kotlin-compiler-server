@@ -23,25 +23,31 @@ import reactor.core.scheduler.Schedulers
  * WebSocket handler for stateful LSP code-completion sessions.
  *
  * Protocol (wire-level):
- * - **Connection**: Server sends `Init{ sessionId }` immediately after the WebSocket is established. The client could persist
- *   this identifier for the lifetime of the connection and treat it as the LSP client id.
+ * - Connection:
+ *   Server sends `Init{ sessionId }` immediately after the WebSocket is established. The client must persist this
+ *   sessionId for the lifetime of the connection. Client registration is deferred: the client must send
+ *   `InitializationRequest{ requestId, kotlinVersion }` to initialize its LSP state. The server replies with
+ *   `Initialized{ clientId=sessionId, kotlinVersion, requestId }` on success. Until initialization succeeds,
+ *   stateful operations are not guaranteed to work.
  *
- * - **Requests**: Client sends `CompletionRequest{ requestId, completionRequest, line, ch }` for each caret position to be completed.
- *   `requestId` must be unique per client session and is used exclusively for correlation.
+ * - Requests:
+ *   Completions are requested via `CompletionRequest{ requestId, completionRequest, line, ch, kotlinVersion? }`.
+ *   The requestId must be unique per session. kotlinVersion is optional; if absent, the server default is used.
  *
- * - **Responses**: For a successfully processed request: `Completions{ completions, requestId }` where `completions` are
- *   a list of [CompletionResponse].If a request is dropped due to backpressure: `Discarded{ requestId }`.This is a terminal outcome
- *   for that requestId. On failure: Error{ message, requestId? }. If requestId is present, the error pertains to that
- *   specific request.
+ * - Responses:
+ *   Success: `Completions{ completions, requestId }` where completions is a list of [CompletionResponse].
+ *   Backpressure drop: `Discarded{ requestId }` (terminal for that requestId).
+ *   Errors: `Error{ message, requestId? }`. If requestId is present, the error pertains to that specific request.
  *
- * The server serializes processing and maintains "latest-wins" semantics under pressure:
- * - While one request is processing, newly arrived requests may be enqueued. If the inbound rate exceeds capacity,
- *   all but the most recent enqueued request are discarded; each discarded request results in `Discarded{ requestId }`.
- * - The in-flight request is never cancelled. It is allowed to complete and will produce either Completions or Error.
+ * Concurrency and backpressure:
+ * - Processing is serialized with "latest-wins": while one request is processing, new ones may queue; under pressure,
+ *   only the most recent queued request is retained and others emit `Discarded`.
+ * - The in-flight request is never cancelled; it completes and yields either `Completions` or `Error`.
  *
- * The rationale for not cancelling the in-flight request is due to the condition in which, with a high request rate,
- * cancelling the in-flight task would cause repeated aborts and potential starvation, making it possible for the client
- * to never receive any completions at all.
+ * Notes:
+ * - Initialization is version-aware; the server ensures the requested Kotlin LSP version is available both at
+ *   initialization and per-request when an explicit kotlinVersion is supplied.
+ * - Disconnection cleans up the client state and associated LSP project.
  */
 @Component
 class LspCompletionWebSocketHandler(

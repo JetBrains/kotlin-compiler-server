@@ -12,6 +12,7 @@ import reactor.core.Disposable
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Sinks
 import java.net.URI
+import java.util.UUID
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
@@ -49,6 +50,33 @@ internal class TestWSClient(
             .block()
     }
 
+    fun connectAndInitialize(kotlinVersion: String, timeout: Duration = 2.minutes) {
+        connect(timeout)
+        val requestId = UUID.randomUUID().toString()
+        sendInitialization(requestId, kotlinVersion)
+            .timeout(timeout.toJavaDuration())
+            .block()
+    }
+
+    fun sendInitialization(requestId: String, kotlinVersion: String): Mono<Unit> {
+        check(connected) { "Not connected" }
+        val payload = mapOf(
+            "requestId" to requestId,
+            "kotlinVersion" to kotlinVersion
+        )
+        val json = objectMapper.writeValueAsString(payload)
+        outboundSink.tryEmitNext(json)
+
+        return receiveSink.asFlux()
+            .filter { hasRequestId(it, requestId) && isInitialized(it) || isError(it) && hasRequestId(it, requestId) }
+            .next()
+            .flatMap { msg ->
+                if (isInitialized(msg)) Mono.empty<Nothing>()
+                else Mono.error<Nothing>(IllegalStateException("Initialization failed: $msg"))
+            }
+            .then(Mono.just(Unit))
+    }
+
     fun sendAndWaitCompletions(
         payload: Map<String, Any>,
         requestId: String,
@@ -78,7 +106,12 @@ internal class TestWSClient(
 
     private fun isInit(json: String): Boolean =
         runCatching { objectMapper.readTree(json) }
-            .map { node -> node["sessionId"] != null }
+            .map { node -> node["sessionId"] != null && node["completions"] == null && node["message"] == null }
+            .getOrDefault(false)
+
+    private fun isInitialized(json: String): Boolean =
+        runCatching { objectMapper.readTree(json) }
+            .map { node -> node["clientId"] != null && node["kotlinVersion"] != null && node["completions"] == null && node["message"] == null }
             .getOrDefault(false)
 
     private fun isError(json: String): Boolean =

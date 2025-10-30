@@ -2,6 +2,7 @@ package lsp.ws
 
 import ConcurrencyCompletionRunnerTest
 import completions.configuration.WebSocketConfiguration
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionResponse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -12,6 +13,7 @@ import lsp.utils.extractCaret
 import org.junit.jupiter.api.Assumptions.assumeFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
@@ -27,7 +29,9 @@ import kotlin.use
     classes = [completions.CompletionsApplication::class]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class StatefulConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest, LspIntegrationTest() {
+class StatefulConcurrencyCompletionRunnerTest(
+    @Autowired private val lspProperties: LspProperties,
+) : ConcurrencyCompletionRunnerTest, LspIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0
@@ -63,7 +67,9 @@ class StatefulConcurrencyCompletionRunnerTest : ConcurrencyCompletionRunnerTest,
     }
 
     private fun createAndConnectClient(): TestWSClient =
-        TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient()).also { it.connect() }
+        TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient()).also {
+            it.connectAndInitialize(lspProperties.kotlinVersion)
+        }
 
     private suspend fun getCompletions(
         client: TestWSClient,

@@ -8,16 +8,9 @@ import completions.lsp.client.LspClient
 import completions.lsp.client.ReconnectingLspClient
 import completions.lsp.components.LspProject
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.eclipse.lsp4j.CompletionItem
 import org.eclipse.lsp4j.Position
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
-import org.springframework.stereotype.Component
 import java.io.IOException
 import java.net.URI
 import java.nio.file.Path
@@ -34,16 +27,6 @@ class KotlinLspProxy(private val lspProperties: LspProperties) {
     private val available = AtomicBoolean(false)
     private val isInitializing = AtomicBoolean(false)
     private var lspClientInitializedDeferred = CompletableDeferred<Unit>()
-
-    private val proxyCoroutineScope =
-        CoroutineScope(Dispatchers.IO + CoroutineName("KotlinLspProxy"))
-
-    @EventListener(ApplicationReadyEvent::class)
-    fun initClientOnReady() {
-        proxyCoroutineScope.launch {
-            initializeClient()
-        }
-    }
 
     /**
      * Retrieve completions for a given line and character position in a project file.

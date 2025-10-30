@@ -3,6 +3,7 @@ package lsp.ws
 import CompletionTest
 import ImportTest
 import completions.configuration.WebSocketConfiguration
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionResponse
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
@@ -34,7 +36,9 @@ import kotlin.time.Duration.Companion.seconds
     classes = [completions.CompletionsApplication::class]
 )
 @TestInstance(Lifecycle.PER_CLASS)
-class KotlinLspProxyWSTest : CompletionTest, ImportTest, LspIntegrationTest() {
+class KotlinLspProxyWSTest(
+    @Autowired private val lspProperties: LspProperties,
+) : CompletionTest, ImportTest, LspIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0
@@ -50,7 +54,7 @@ class KotlinLspProxyWSTest : CompletionTest, ImportTest, LspIntegrationTest() {
     @BeforeAll
     fun setup() {
         client = TestWSClient({ baseWsUrl }, ReactorNettyWebSocketClient())
-        client.connect()
+        client.connectAndInitialize(lspProperties.kotlinVersion, defaultTimeout)
     }
 
     override fun performCompletionChecks(
