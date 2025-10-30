@@ -57,7 +57,7 @@ class FuzzyCompletionRanker(
      * Extracts the prefix of the input [CompletionItem] that triggered the completion.
      */
     private fun CompletionItem.completionQuery(objectMapper: ObjectMapper): String? =
-        objectMapper.readTree(data.toString())
+        objectMapper.readTree(data?.toString().orEmpty())
             .walk("additionalData")
             ?.walk("prefix")
             ?.asText()

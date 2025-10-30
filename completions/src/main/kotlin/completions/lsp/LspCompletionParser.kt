@@ -103,6 +103,7 @@ class LspCompletionParser(
      * related to IntelliJ lookup objects data (e.g. the `importStrategy`) and PSI data.
      */
     private fun CompletionItem.hasToBeImported(): Boolean {
+        if (data == null) return false
         val jsonTree = objectMapper.readTree(data.toString())
         val lookupObject = jsonTree
             .walk("additionalData")
