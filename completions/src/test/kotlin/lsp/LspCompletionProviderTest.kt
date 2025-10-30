@@ -4,6 +4,7 @@ import CompletionTest
 import ConcurrencyCompletionRunnerTest
 import ImportTest
 import base.BaseCompletionTest.Utils.retrieveCompletions
+import completions.configuration.lsp.LspProperties
 import lsp.utils.CARET_MARKER
 import lsp.utils.extractCaret
 import completions.dto.api.CompletionResponse
@@ -29,7 +30,9 @@ import kotlin.test.assertTrue
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [completions.CompletionsApplication::class]
 )
-class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyCompletionRunnerTest, LspIntegrationTest() {
+class LspCompletionProviderTest(
+    @Autowired private val lspProperties: LspProperties
+) : CompletionTest, ImportTest, ConcurrencyCompletionRunnerTest, LspIntegrationTest() {
 
     @LocalServerPort
     private var port: Int = 0
@@ -117,8 +120,13 @@ class LspCompletionProviderTest : CompletionTest, ImportTest, ConcurrencyComplet
         return retrieveCompletionsFromEndpoint(code, caret)
     }
 
-    private fun retrieveCompletionsFromEndpoint(code: String, position: Position): List<CompletionResponse>  {
-        val url = "http://localhost:$port/api/compiler/complete?line=${position.line}&ch=${position.character}"
+    private fun retrieveCompletionsFromEndpoint(
+        code: String,
+        position: Position,
+        kotlinVersion: String = lspProperties.kotlinVersion,
+    ): List<CompletionResponse>  {
+        val url =
+            "http://localhost:$port/api/compiler/$kotlinVersion/complete?line=${position.line}&ch=${position.character}"
         return webTestClient.retrieveCompletions(url, code)
     }
 }
