@@ -33,12 +33,16 @@ data class LspProperties(
     fun forKotlinVersion(kotlinVersion: String): LspProperties =
         this.copy(
             kotlinVersion = kotlinVersion,
-            remoteWorkspaceRoot = resolveWorkspacePath(this.remoteWorkspaceRoot, kotlinVersion),
-            localWorkspaceRoot = resolveWorkspacePath(this.localWorkspaceRoot, kotlinVersion)
+            remoteWorkspaceRoot = changeKotlinVersionInWorkspacePath(this.remoteWorkspaceRoot, kotlinVersion),
+            localWorkspaceRoot = changeKotlinVersionInWorkspacePath(this.localWorkspaceRoot, kotlinVersion)
         )
 
+    private fun changeKotlinVersionInWorkspacePath(workspacePath: String, kotlinVersion: String): String =
+        "${workspacePath.substringBefore(GENERATED_WORKSPACE_PREFIX)}/$GENERATED_WORKSPACE_PREFIX$kotlinVersion"
+
     companion object {
-        private const val DEFAULT_WORKSPACE_ROOT_PATH: String = "/lsp/workspaces/lsp-workspace-root-"
+        private const val GENERATED_WORKSPACE_PREFIX = "lsp-workspace-root-"
+        private const val DEFAULT_WORKSPACE_ROOT_PATH: String = "/lsp/workspaces/$GENERATED_WORKSPACE_PREFIX"
 
         private fun resolveWorkspacePath(workspacePath: String, kotlinVersion: String) = workspacePath + kotlinVersion
 
