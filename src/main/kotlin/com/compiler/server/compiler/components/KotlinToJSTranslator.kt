@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
 import org.jetbrains.kotlin.buildtools.api.arguments.ExperimentalCompilerArgument
-import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain
+import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain.Companion.js
 import org.springframework.stereotype.Service
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -88,7 +88,6 @@ class KotlinToJSTranslator(
             val logger = CompilationLogger()
             logger.compilationLogs = sources.filter { it.name.endsWith(".kt") }.associate { it.name to mutableListOf() }
             val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
-            val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
 
             val klibPath = (outputDir / "klib").toFile().canonicalPath
             val additionalCompilerArgumentsForKLib = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
@@ -99,7 +98,6 @@ class KotlinToJSTranslator(
 
             toolchains.createBuildSession().use { session ->
                 tryCompilation(
-                    jsToolchain,
                     sources,
                     outputDir,
                     arguments + additionalCompilerArgumentsForKLib,
@@ -115,7 +113,7 @@ class KotlinToJSTranslator(
                     ) + "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}" + "-Xinclude=$klibPath"
 
                     tryCompilation(
-                        jsToolchain, sources, outputDir, secondPhaseArguments, session, toolchains, logger, ""
+                        sources, outputDir, secondPhaseArguments, session, toolchains, logger, ""
                     )
                 }.map { (outputDir / "js" / "$JS_DEFAULT_MODULE_NAME.js").readText() }
                     .map { it.withMainArgumentsIr(arguments) }.map(::redirectOutput)
@@ -125,7 +123,6 @@ class KotlinToJSTranslator(
 
     @OptIn(ExperimentalBuildToolsApi::class, ExperimentalCompilerArgument::class)
     private fun <T> tryCompilation(
-        jsToolchain: JsPlatformToolchain,
         sources: List<Path>,
         outputDir: Path,
         arguments: List<String>,
@@ -135,7 +132,7 @@ class KotlinToJSTranslator(
         successValue: T,
     ): CompilationResult<T> {
         val result = try {
-            val operation = jsToolchain.createJsCompilationOperation(sources, outputDir)
+            val operation = toolchains.js.createJsCompilationOperation(sources, outputDir)
             operation.compilerArguments.applyArgumentStrings(arguments)
 
             session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
@@ -190,7 +187,6 @@ class KotlinToJSTranslator(
                 compilationLogs = sources.filter { it.name.endsWith(".kt") }.associate { it.name to mutableListOf() }
             }
             val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
-            val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
 
             val klibPath = (outputDir / "klib").toFile().canonicalPath
 
@@ -200,7 +196,6 @@ class KotlinToJSTranslator(
 
             toolchains.createBuildSession().use { session ->
                 tryCompilation(
-                    jsToolchain,
                     sources,
                     outputDir,
                     additionalCompilerArgumentsForKLib,
@@ -217,7 +212,7 @@ class KotlinToJSTranslator(
                     if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
 
                     tryCompilation(
-                        jsToolchain, sources, outputDir, secondPhaseArguments, session, toolchains, logger, Unit
+                        sources, outputDir, secondPhaseArguments, session, toolchains, logger, Unit
                     )
                 }.map {
                     WasmTranslationSuccessfulOutput(

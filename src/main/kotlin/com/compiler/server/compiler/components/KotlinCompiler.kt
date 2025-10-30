@@ -15,7 +15,7 @@ import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
-import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain
+import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain.Companion.jvm
 import org.jetbrains.org.objectweb.asm.ClassReader
 import org.jetbrains.org.objectweb.asm.ClassReader.*
 import org.jetbrains.org.objectweb.asm.ClassVisitor
@@ -135,8 +135,7 @@ class KotlinCompiler(
             .associate { it.name to mutableListOf() }
 
         val toolchains = KotlinToolchains.loadImplementation(ClassLoader.getSystemClassLoader())
-        val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
-        val operation = jvmToolchain.createJvmCompilationOperation(sources, outputDir)
+        val operation = toolchains.jvm.createJvmCompilationOperation(sources, outputDir)
         operation.compilerArguments.applyArgumentStrings(arguments)
 
         toolchains.createBuildSession().use { session ->
