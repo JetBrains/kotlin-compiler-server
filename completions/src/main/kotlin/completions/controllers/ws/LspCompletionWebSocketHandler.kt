@@ -3,13 +3,12 @@
 package completions.controllers.ws
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionRequest
-import completions.lsp.KotlinLspProxy
-import completions.lsp.StatefulKotlinLspProxy.onClientConnected
-import completions.lsp.StatefulKotlinLspProxy.onClientDisconnected
 import completions.service.lsp.LspCompletionProvider
 import kotlinx.coroutines.reactor.mono
 import completions.dto.api.CompletionResponse
+import completions.lsp.MultipleVersionsKotlinLspProxy
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.socket.WebSocketHandler
@@ -46,13 +45,15 @@ import reactor.core.scheduler.Schedulers
  */
 @Component
 class LspCompletionWebSocketHandler(
-    private val lspProxy: KotlinLspProxy,
+    private val lspProxy: MultipleVersionsKotlinLspProxy,
     private val lspCompletionProvider: LspCompletionProvider,
     private val objectMapper: ObjectMapper,
+    private val lspProperties: LspProperties,
 ) : WebSocketHandler {
 
     private val logger = LoggerFactory.getLogger(LspCompletionWebSocketHandler::class.java)
-    private val objectReader = objectMapper.readerFor(WebSocketCompletionRequest::class.java)
+    private val completionRequestReader = objectMapper.readerFor(WebSocketCompletionRequest::class.java)
+    private val initRequestReader = objectMapper.readerFor(InitializationRequest::class.java)
 
     override fun handle(session: WebSocketSession): Mono<Void?> {
         val sessionId = session.id
@@ -60,54 +61,76 @@ class LspCompletionWebSocketHandler(
         val sideSink = Sinks.many().unicast().onBackpressureBuffer<Response>()
         val sideFlux = sideSink.asFlux()
 
-        val completions = handleCompletionRequest(
-            sessionId = sessionId,
-            requests = getCompletionRequests(session, sideSink)
-        )
+        val inbound = session.receive().map { it.payloadAsText }.share()
+
+        val initResponses = handleInitializationRequests(sessionId, inbound)
+
+        val completions = handleCompletionRequest(sessionId, inbound, sideSink)
 
         return session.startCompletionHandler(
             initial = getInitialMono(sessionId),
+            initResponses,
             completions,
             sideFlux,
         )
     }
 
+    private fun handleInitializationRequests(sessionId: String, inbound: Flux<String>): Flux<Response> =
+        inbound
+            .flatMap({ payload ->
+                mono {
+                    runCatching { initRequestReader.readValue<InitializationRequest>(payload) }
+                        .getOrNull()
+                }.subscribeOn(Schedulers.boundedElastic())
+            }, 1)
+            .filter { it != null }
+            .concatMap({ init ->
+                mono {
+                    runCatching {
+                        lspProxy.requireAvailable(init.kotlinVersion)
+                        lspProxy.onClientConnected(sessionId, init.kotlinVersion)
+                        Response.Initialized(sessionId, init.kotlinVersion, init.requestId)
+                    }.getOrElse {
+                        Response.Error("Initialization failed: ${it.message}", init.requestId)
+                    }
+                }.subscribeOn(Schedulers.boundedElastic())
+            }, 1)
+
     private fun getInitialMono(sessionId: String): Mono<Response> = mono {
         runCatching {
             lspProxy.requireAvailable()
-            lspProxy.onClientConnected(sessionId)
             Response.Init(sessionId)
         }.getOrElse { Response.Error("LSP not available: ${it.message}") }
     }.subscribeOn(Schedulers.boundedElastic())
 
-    private fun getCompletionRequests(session: WebSocketSession, sideSink: Sinks.Many<Response>): Flux<WebSocketCompletionRequest> =
-        session.receive()
-            .map { it.payloadAsText }
+    private fun handleCompletionRequest(
+        sessionId: String,
+        inbound: Flux<String>,
+        sideSink: Sinks.Many<Response>,
+    ): Flux<Response> =
+        inbound
             .onBackpressureDrop { dropped ->
-                runCatching { objectReader.readValue<WebSocketCompletionRequest>(dropped) }.onSuccess {
+                runCatching { completionRequestReader.readValue<WebSocketCompletionRequest>(dropped) }.onSuccess {
                     sideSink.tryEmitNext(Response.Discarded(it.requestId))
                 }
             }
             .flatMap({ payload ->
-                val req = runCatching { objectReader.readValue<WebSocketCompletionRequest>(payload) }.getOrNull()
-                if (req == null) {
-                    sideSink.tryEmitNext(Response.Error("Failed to parse request: $payload"))
-                    Mono.empty()
-                } else {
-                    Mono.just(req)
-                }
+                runCatching { completionRequestReader.readValue<WebSocketCompletionRequest>(payload) }
+                    .fold(
+                        onSuccess = { Mono.just(it) },
+                        onFailure = { Mono.empty() }
+                    )
             }, 1)
-
-    private fun handleCompletionRequest(sessionId: String, requests: Flux<WebSocketCompletionRequest>): Flux<Response> =
-        requests
             .concatMap({ request ->
                 mono {
-                    lspProxy.requireAvailable()
+                    val version = request.kotlinVersion ?: lspProperties.kotlinVersion
+                    lspProxy.requireAvailable(version)
                     lspCompletionProvider.complete(
                         clientId = sessionId,
                         request = request.completionRequest,
                         line = request.line,
                         ch = request.ch,
+                        kotlinVersion = version,
                         applyFuzzyRanking = true,
                     )
                 }
@@ -131,7 +154,7 @@ class LspCompletionWebSocketHandler(
         return send(outbound)
             .doOnError { logger.warn("WS session error for client $id: ${it.message}") }
             .doFinally {
-                runCatching { lspProxy.onClientDisconnected(id) }
+                runCatching { mono { lspProxy.onClientDisconnected(id) } }
                 runCatching { close() }
             }
     }
@@ -142,8 +165,9 @@ class LspCompletionWebSocketHandler(
 sealed interface Response {
     val requestId: String?
 
-    open class Error(val message: String, override val requestId: String? = null) : Response
+    open class Error(@Suppress("unused") val message: String, override val requestId: String? = null) : Response
     data class Init(val sessionId: String, override val requestId: String? = null) : Response
+    data class Initialized(val clientId: String, val kotlinVersion: String, override val requestId: String?) : Response
     data class Completions(val completions: List<CompletionResponse>, override val requestId: String? = null) : Response
     data class Discarded(override val requestId: String) : Error("discarded", requestId)
 }
@@ -153,4 +177,10 @@ private data class WebSocketCompletionRequest(
     val completionRequest: CompletionRequest,
     val line: Int,
     val ch: Int,
+    val kotlinVersion: String? = null,
+)
+
+private data class InitializationRequest(
+    val requestId: String,
+    val kotlinVersion: String,
 )

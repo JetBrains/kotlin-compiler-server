@@ -29,11 +29,21 @@ data class LspProperties(
     val remoteWorkspaceRoot: String = resolveWorkspacePaths(kotlinVersion),
     val localWorkspaceRoot: String = resolveWorkspacePaths(kotlinVersion),
 ) {
+
+    fun forKotlinVersion(kotlinVersion: String): LspProperties =
+        this.copy(
+            kotlinVersion = kotlinVersion,
+            remoteWorkspaceRoot = resolveWorkspacePath(this.remoteWorkspaceRoot, kotlinVersion),
+            localWorkspaceRoot = resolveWorkspacePath(this.localWorkspaceRoot, kotlinVersion)
+        )
+
     companion object {
         private const val DEFAULT_WORKSPACE_ROOT_PATH: String = "/lsp/workspaces/lsp-workspace-root-"
 
+        private fun resolveWorkspacePath(workspacePath: String, kotlinVersion: String) = workspacePath + kotlinVersion
+
         private fun resolveWorkspacePaths(kotlinVersion: String): String {
-            val path = DEFAULT_WORKSPACE_ROOT_PATH + kotlinVersion
+            val path = resolveWorkspacePath(DEFAULT_WORKSPACE_ROOT_PATH, kotlinVersion)
             return this::class.java.getResource(path)?.toURI()?.path
                 ?: error(
                     """

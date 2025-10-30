@@ -1,5 +1,6 @@
 package completions.service.lsp
 
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionResponse
 import completions.dto.api.CompletionRequest
 import kotlinx.coroutines.CompletableDeferred
@@ -20,6 +21,7 @@ import kotlin.coroutines.CoroutineContext
 @Component
 class LspCompletionQueue(
     private val provider: LspCompletionProvider,
+    private val lspProperties: LspProperties,
     workerContext: CoroutineContext,
 ) {
     private val queue = Channel<CompletionJob>(capacity = 256)
@@ -32,8 +34,8 @@ class LspCompletionQueue(
                 provider.awaitReady()
                 for (job in queue) {
                     runCatching {
-                        provider.awaitReady()
-                        provider.complete(job.request, job.line, job.ch)
+                        provider.awaitReady(job.kotlinVersion)
+                        provider.complete(job.request, job.line, job.ch, job.kotlinVersion)
                     }.fold(
                         onSuccess = { job.result.complete(it) },
                         onFailure = { job.result.completeExceptionally(it) }
@@ -54,9 +56,14 @@ class LspCompletionQueue(
      * @param ch the character position within the specified line for determining completions
      * @return a list of [CompletionResponse]s corresponding to the provided position in the file
      */
-    suspend fun complete(request: CompletionRequest, line: Int, ch: Int): List<CompletionResponse> {
+    suspend fun complete(
+        request: CompletionRequest,
+        line: Int,
+        ch: Int,
+        kotlinVersion: String? = null,
+    ): List<CompletionResponse> {
         val deferred = CompletableDeferred<List<CompletionResponse>>()
-        queue.send(CompletionJob(request, line, ch, deferred))
+        queue.send(CompletionJob(request, line, ch, kotlinVersion ?: lspProperties.kotlinVersion, deferred))
         return deferred.await()
     }
 
@@ -64,6 +71,7 @@ class LspCompletionQueue(
         val request: CompletionRequest,
         val line: Int,
         val ch: Int,
+        val kotlinVersion: String,
         val result: CompletableDeferred<List<CompletionResponse>>,
     )
 }

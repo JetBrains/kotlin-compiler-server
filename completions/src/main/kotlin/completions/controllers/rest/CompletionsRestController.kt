@@ -3,6 +3,7 @@ package completions.controllers.rest
 import completions.dto.api.CompletionRequest
 import completions.dto.api.CompletionResponse
 import completions.service.lsp.LspCompletionQueue
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -21,5 +22,15 @@ class CompletionsRestController(
         @RequestParam ch: Int,
     ): List<CompletionResponse> {
         return lspCompletionQueue.complete(completionRequest, line, ch)
+    }
+
+    @PostMapping("/{version}/complete")
+    suspend fun complete(
+        @PathVariable version: String,
+        @RequestBody completionRequest: CompletionRequest,
+        @RequestParam line: Int,
+        @RequestParam ch: Int,
+    ): List<CompletionResponse> {
+        return lspCompletionQueue.complete(completionRequest, line, ch, version)
     }
 }

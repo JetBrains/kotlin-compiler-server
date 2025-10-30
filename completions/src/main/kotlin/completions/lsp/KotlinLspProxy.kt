@@ -26,7 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.time.Duration.Companion.seconds
 
-@Component
 class KotlinLspProxy(private val lspProperties: LspProperties) {
 
     internal lateinit var lspClient: LspClient

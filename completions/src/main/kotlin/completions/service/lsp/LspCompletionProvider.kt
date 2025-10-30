@@ -1,11 +1,11 @@
 package completions.service.lsp
 
+import completions.configuration.lsp.LspProperties
 import completions.dto.api.CompletionRequest
 import completions.dto.api.ProjectFile
-import completions.lsp.KotlinLspProxy
-import completions.lsp.StatefulKotlinLspProxy.getCompletionsForClient
 import completions.dto.api.CompletionResponse
 import completions.lsp.LspCompletionParser
+import completions.lsp.MultipleVersionsKotlinLspProxy
 import completions.lsp.util.completions.FuzzyCompletionRanker
 import org.eclipse.lsp4j.CompletionItem
 import org.springframework.stereotype.Component
@@ -17,9 +17,10 @@ import org.springframework.stereotype.Component
  */
 @Component
 class LspCompletionProvider(
-    private val lspProxy: KotlinLspProxy,
+    private val lspProxy: MultipleVersionsKotlinLspProxy,
     private val lspCompletionParser: LspCompletionParser,
     private val completionRanker: FuzzyCompletionRanker,
+    private val lspProperties: LspProperties,
 ) {
 
     /**
@@ -29,6 +30,7 @@ class LspCompletionProvider(
      * @param request the request containing the files
      * @param line the line number within the file where completions are to be provided
      * @param ch the character position within the line for the completions
+     * @param kotlinVersion the kotlin version of the files associated with this request
      * @param applyFuzzyRanking whether to apply fuzzy ranking to the completions
      * @return a list of [CompletionResponse]s relevant to the specified position in the file
      */
@@ -36,9 +38,11 @@ class LspCompletionProvider(
         request: CompletionRequest,
         line: Int,
         ch: Int,
+        kotlinVersion: String,
         applyFuzzyRanking: Boolean = true
     ): List<CompletionResponse> =
-        lspProxy.getOneTimeCompletions(request, line, ch).transformCompletions(request, applyFuzzyRanking)
+        lspProxy.getOneTimeCompletions(request, kotlinVersion, line, ch)
+            .transformCompletions(request, applyFuzzyRanking)
 
     /**
      * Overload of [complete] that accepts a client ID for stateful scenarios.
@@ -48,12 +52,14 @@ class LspCompletionProvider(
         request: CompletionRequest,
         line: Int,
         ch: Int,
+        kotlinVersion: String,
         applyFuzzyRanking: Boolean = true
     ): List<CompletionResponse> =
-        lspProxy.getCompletionsForClient(clientId, request, line, ch).transformCompletions(request, applyFuzzyRanking)
+        lspProxy.getCompletionsForClient(clientId, request, kotlinVersion, line, ch)
+            .transformCompletions(request, applyFuzzyRanking)
 
-    suspend fun awaitReady() {
-        lspProxy.requireAvailable()
+    suspend fun awaitReady(kotlinVersion: String = lspProperties.kotlinVersion) {
+        lspProxy.requireAvailable(kotlinVersion)
     }
 
     private fun List<CompletionItem>.transformCompletions(
