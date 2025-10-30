@@ -2,8 +2,10 @@ package completions.lsp.client
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,6 +49,10 @@ internal class LspConnectionManager(
     private val disconnectListeners = mutableListOf<() -> Unit>()
     private val reconnectListeners = mutableListOf<() -> Unit>()
 
+    // Single-flight guard for concurrent connect attempts
+    @Volatile
+    private var connecting: Deferred<Unit>? = null
+
     /**
      * Connects to the language server, if not already connected.
      *
@@ -57,7 +63,16 @@ internal class LspConnectionManager(
     fun ensureConnected(initial: Boolean = false): LanguageServer {
         if (isClosing.get()) error("Connection manager is closing or already closed")
         serverProxy?.let { return it }
-        runBlocking { connectWithRetry(initial) }
+
+        connecting?.let { runBlocking { it.await() } }
+            ?: run {
+                val started = scope.async { connectWithRetry(initial) }.also { connecting = it }
+                try {
+                    runBlocking { started.await() }
+                } finally {
+                    connecting = null
+                }
+            }
         return serverProxy ?: error("Could not connect to LSP server")
     }
 
@@ -134,10 +149,17 @@ internal class LspConnectionManager(
                 while (!isClosing.get() && attempt < maxConnectionRetries) {
                     try {
                         if (attempt > 0) delay(exponentialBackoffMillis(attempt).milliseconds)
-                        connectWithRetry()
+                        synchronized(this@LspConnectionManager) {
+                            if (serverProxy == null && connecting == null) {
+                                connecting = scope.async { connectWithRetry() }
+                            }
+                        }
+                        connecting?.await()
                         return@launch
                     } catch (t: Throwable) {
                         logger.info("Reconnect attempt {} failed: {}", ++attempt, t.message)
+                    } finally {
+                        connecting?.let { if (it.isCompleted) connecting = null }
                     }
                 }
             } finally {
