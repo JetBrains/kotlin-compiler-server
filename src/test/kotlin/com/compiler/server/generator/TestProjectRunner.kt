@@ -6,12 +6,10 @@ import com.compiler.server.base.renderErrorDescriptors
 import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.model.*
 import com.compiler.server.service.KotlinProjectExecutor
-import model.Completion
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.io.IOException
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeBytes
@@ -103,36 +101,6 @@ class TestProjectRunner {
 
   fun testRaw(@Language("kotlin") vararg test: String, addByteCode: Boolean): JunitExecutionResult? =
     executeTest(*test, addByteCode = addByteCode)
-
-  fun complete(
-    @Language("kotlin")
-    code: String,
-    line: Int,
-    character: Int,
-    completions: List<String>,
-    isJs: Boolean = false
-  ) {
-    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
-    val project = generateSingleProject(text = code, projectType = type)
-    val result = kotlinProjectExecutor.complete(project, line, character)
-      .map { it.displayText }
-    Assertions.assertTrue(result.isNotEmpty())
-    completions.forEach { suggest ->
-      Assertions.assertTrue(result.contains(suggest))
-    }
-  }
-
-  fun getCompletions(
-    @Language("kotlin")
-    code: String,
-    line: Int,
-    character: Int,
-    isJs: Boolean = false
-  ): List<Completion> {
-    val type = if (isJs) ProjectType.JS_IR else ProjectType.JAVA
-    val project = generateSingleProject(text = code, projectType = type)
-    return kotlinProjectExecutor.complete(project, line, character)
-  }
 
   fun highlight(@Language("kotlin") code: String): CompilerDiagnostics {
     val project = generateSingleProject(text = code)
