@@ -12,10 +12,7 @@ version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 val propertyFile = "application.properties"
 
 plugins {
-    alias(libs.plugins.spring.boot)
-    alias(libs.plugins.spring.dependency.management)
-    alias(libs.plugins.kotlin.plugin.spring)
-    id("base-kotlin-jvm-conventions")
+    id("base-spring-boot-conventions")
 }
 
 apply<NodeJsRootPlugin>()
@@ -40,7 +37,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation(libs.aws.springboot.container)
-    implementation(libs.springdoc)
+    implementation(libs.springdoc.webmvc)
     implementation(libs.gson)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlin.compiler.arguments.description)
@@ -58,9 +55,6 @@ dependencies {
     implementation(project(":dependencies"))
 
     testImplementation(libs.kotlin.test)
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
     testImplementation(libs.kotlinx.coroutines.test)
 
     resourceDependency(libs.skiko.js.wasm.runtime)
@@ -93,12 +87,6 @@ fun generateProperties(prefix: String = "") = """
 """.trimIndent()
 
 tasks.withType<KotlinCompile> {
-    compilerOptions {
-        freeCompilerArgs.addAll(
-            "-Xjsr305=strict",
-        )
-
-    }
     dependsOn(":executors:jar")
     buildPropertyFile()
 }
@@ -146,7 +134,6 @@ tasks.withType<Test> {
     with(rootProject.kotlinNodeJsEnvSpec) {
         dependsOn(rootProject.nodeJsSetupTaskProvider)
     }
-    useJUnitPlatform()
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)

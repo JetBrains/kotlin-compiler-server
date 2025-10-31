@@ -96,13 +96,6 @@ class CompilerRestController(
         )
     }
 
-    @PostMapping("/complete")
-    fun getKotlinCompleteEndpoint(
-        @RequestBody project: Project,
-        @RequestParam line: Int,
-        @RequestParam ch: Int
-    ) = kotlinProjectExecutor.complete(project, line, ch)
-
     @PostMapping("/highlight")
     fun highlightEndpoint(@RequestBody project: Project): CompilerDiagnostics =
         kotlinProjectExecutor.highlight(project)
@@ -140,4 +133,3 @@ class CompilerRestController(
         }
     }
 }
-

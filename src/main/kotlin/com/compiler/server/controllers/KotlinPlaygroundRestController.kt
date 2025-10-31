@@ -55,12 +55,6 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
           }
 
           "highlight" -> kotlinProjectExecutor.highlight(project)
-          "complete" -> {
-            if (line != null && ch != null) {
-              kotlinProjectExecutor.complete(project, line, ch)
-            } else error("No parameters 'line' or 'ch'")
-          }
-
           else -> error("No parameter 'type' found")
         }
       }
