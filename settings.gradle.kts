@@ -11,3 +11,4 @@ plugins {
 include(":executors")
 include(":common")
 include(":dependencies")
+include(":completions")
