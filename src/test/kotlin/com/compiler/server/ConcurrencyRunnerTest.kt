@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import kotlin.test.Ignore
 
 class ConcurrencyRunnerTest : BaseExecutorTest() {
     @Test
@@ -14,39 +13,6 @@ class ConcurrencyRunnerTest : BaseExecutorTest() {
             run(
                 code = "fun main() {\n println(\"Hello, world!!!\")\n}",
                 contains = "Hello, world!!!"
-            )
-        }
-    }
-
-    // TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
-    @Ignore
-    @Test
-    fun `a lot of complete test`() {
-        runManyTest {
-            complete(
-                code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
-                line = 2,
-                character = 21,
-                completions = listOf(
-                    "alex"
-                )
-            )
-        }
-    }
-
-    // TODO(Dmitrii Krasnov): this test is disabled until KTL-2807 is fixed
-    @Ignore
-    @Test
-    fun `a lot of complete test JS`() {
-        runManyTest {
-            complete(
-                code = "fun main() {\n    val alex = 1\n    val alex1 = 1 + a\n}",
-                line = 2,
-                character = 21,
-                completions = listOf(
-                    "alex"
-                ),
-                isJs = true
             )
         }
     }
