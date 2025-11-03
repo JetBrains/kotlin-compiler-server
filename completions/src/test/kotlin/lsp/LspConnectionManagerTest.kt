@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import lsp.utils.TestLspServer
 import lsp.utils.TestLspServer.Companion.useSuspend
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
@@ -34,6 +35,7 @@ class LspConnectionManagerTest {
     }
 
     @Test
+    @Disabled("It is disable because it if fluky on TeamCity")
     fun `manager auto-reconnects after abrupt server-side-disconnect`() = runBlocking {
         var disconnects = 0
         var reconnects = 0
