@@ -409,6 +409,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xdont-sort-source-files",
+      "shortName": null,
+      "description": "Disable automatic sorting of source files.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xdont-warn-on-error-suppression",
       "shortName": null,
       "description": "Don't report warnings when errors are suppressed. This only affects K2.",
@@ -565,6 +577,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xheader-mode",
+      "shortName": null,
+      "description": "Enable header compilation mode.\nIn this mode, the compiler produces class files that only contain the 'skeleton' of the classes to be\ncompiled but the method bodies of all the implementations are empty.  This is used to speed up parallel compilation\nbuild systems where header libraries can be used to replace downstream dependencies for which we only need to\nsee the type names and method signatures required to compile a given translation unit. Inline functions are still kept\nwith bodies.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xignore-const-optimization-errors",
       "shortName": null,
       "description": "Ignore all compilation exceptions while optimizing some constant expressions.",
@@ -604,6 +628,18 @@
       "name": "Xlist-phases",
       "shortName": null,
       "description": "List backend phases.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xlocal-type-aliases",
+      "shortName": null,
+      "description": "Enable experimental language support for local type aliases.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1882,18 +1918,6 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xtyped-arrays",
-      "shortName": null,
-      "description": "This option does nothing and is left for compatibility with the legacy backend.\nIt is deprecated and will be removed in a future release.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
       "predefinedValues": null
     },
     {
