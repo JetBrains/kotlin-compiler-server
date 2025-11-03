@@ -12,7 +12,7 @@ kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-io = "0.8.0"
 kotlinx-serialization = "1.9.0"
 lsp4j = "0.24.0"
-reactor = "3.7.11"
+reactor = "3.7.12"
 skiko = "0.9.24"
 testcontainers = "1.21.3"
 # don't forget to update jackson version in `executor.policy` file.
