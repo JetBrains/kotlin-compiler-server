@@ -24,3 +24,13 @@ tasks.named<BootBuildImage>("bootBuildImage") {
     imageName = "$baseImageName:${project.version}"
     tags = setOf("$baseImageName:latest")
 }
+
+tasks.withType<Test> {
+
+    // We disable this on TeamCity, because we don't want to fail this test,
+    // when compiler server's test run as a K2 user project.
+    // But for our pull requests we still need to run this test, so we add it to our GitHub action.
+    if (System.getenv("TEAMCITY_VERSION") != null) {
+        this.enabled = false
+    }
+}
