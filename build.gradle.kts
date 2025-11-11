@@ -39,7 +39,7 @@ setOf(
     }
 }
 
-val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
+val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -47,10 +47,6 @@ val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
         attribute(
             Category.CATEGORY_ATTRIBUTE,
             objects.categoryComposeCache
-        )
-        attribute(
-            CacheAttribute.cacheAttribute,
-            CacheAttribute.WASM
         )
     }
 }
@@ -93,7 +89,7 @@ dependencies {
     }
     testImplementation(libs.kotlinx.coroutines.test)
 
-    kotlinComposeWasmStdlibFile(project(":cache-maker"))
+    kotlinComposeWasmRuntime(project(":cache-maker"))
     composeWasmStaticResources(project(":resource-server"))
 }
 
@@ -121,12 +117,10 @@ fun Project.generateProperties(
 )
 
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
-    hashableFile.fileProvider(
-        provider {
-            kotlinComposeWasmStdlibFile.singleFile
-        }
+    hashableDir.from(
+        kotlinComposeWasmRuntime
     )
     generateProperties().forEach { (name, value) ->
         propertiesMap.put(name, value)
@@ -134,13 +128,9 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 }
 
 val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     propertiesFile.set(layout.buildDirectory.file("tmp/propertiesGenerator/${propertyFile}"))
-    hashableFile.fileProvider(
-        provider {
-            kotlinComposeWasmStdlibFile.singleFile
-        }
-    )
+    hashableDir.from(kotlinComposeWasmRuntime)
 
     generateProperties(lambdaPrefix).forEach { (name, value) ->
         propertiesMap.put(name, value)
@@ -186,7 +176,7 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) { into(compilerPluginsForJVM) }
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     into("lib") {
         from(configurations.compileClasspath) { exclude("tomcat-embed-*") }
     }

@@ -1,6 +1,7 @@
-import org.gradle.kotlin.dsl.support.serviceOf
+import org.apache.tools.ant.filters.ConcatFilter
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.FileInputStream
+import java.io.StringReader
 import java.util.*
 
 plugins {
@@ -15,7 +16,7 @@ val resourceDependency: Configuration by configurations.creating {
     isCanBeConsumed = false
 }
 
-val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
+val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
@@ -23,26 +24,6 @@ val kotlinComposeWasmStdlibFile: Configuration by configurations.creating {
         attribute(
             Category.CATEGORY_ATTRIBUTE,
             objects.categoryComposeCache
-        )
-        attribute(
-            CacheAttribute.cacheAttribute,
-            CacheAttribute.WASM
-        )
-    }
-}
-
-val kotlinComposeWasmStdlib: Configuration by configurations.creating {
-    isTransitive = false
-    isCanBeResolved = true
-    isCanBeConsumed = false
-    attributes {
-        attribute(
-            Category.CATEGORY_ATTRIBUTE,
-            objects.categoryComposeCache
-        )
-        attribute(
-            CacheAttribute.cacheAttribute,
-            CacheAttribute.FULL
         )
     }
 }
@@ -54,12 +35,11 @@ dependencies {
     }
 
     resourceDependency(libs.skiko.js.wasm.runtime)
-    kotlinComposeWasmStdlib(project(":cache-maker"))
-    kotlinComposeWasmStdlibFile(project(":cache-maker"))
+    kotlinComposeWasmRuntime(project(":cache-maker"))
 }
 
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     propertiesMap.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher")
     propertiesMap.put("server.port", "8081")
     propertiesMap.put("skiko.version", libs.versions.skiko.get())
@@ -68,40 +48,28 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 
     propertiesFile.fileValue(applicationPropertiesPath)
 
-    val composeWasmStdlibFile: FileCollection = kotlinComposeWasmStdlibFile
+    val composeWasmStdlibFile: FileCollection = kotlinComposeWasmRuntime
 
-    hashableFile.fileProvider(
-        provider {
-            composeWasmStdlibFile.singleFile
-        }
-    )
+    hashableDir.from(composeWasmStdlibFile)
 }
 
 tasks.withType<KotlinCompile> {
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     dependsOn(propertiesGenerator)
 }
 
 val skikoVersion = libs.versions.skiko
 
 val prepareComposeWasmResources by tasks.registering(Sync::class) {
-    dependsOn(kotlinComposeWasmStdlibFile)
+    dependsOn(kotlinComposeWasmRuntime)
     dependsOn(propertiesGenerator)
-    val archiveOperation = project.serviceOf<ArchiveOperations>()
 
     into(layout.buildDirectory.dir("tmp/prepareResources"))
 
-    from(resourceDependency.map {
-        archiveOperation.zipTree(it)
-    }) {
-        rename("skiko\\.(.*)", "skiko-${skikoVersion.get()}.\$1")
-        include("skiko.mjs", "skiko.wasm")
-    }
-
     val propertiesFile = propertiesGenerator.flatMap { it.propertiesFile }
 
-    from(kotlinComposeWasmStdlib) {
-        include("stdlib_master.uninstantiated.mjs", "stdlib_master.wasm")
+    from(kotlinComposeWasmRuntime) {
+        include("**/*.uninstantiated.mjs", "skiko.mjs", "**/*.wasm", "@js-joda/**")
 
         rename { original ->
             val properties = FileInputStream(propertiesFile.get().asFile).use {
@@ -109,11 +77,68 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
                     load(it)
                 }
             }
-            val regex = Regex("stdlib_master(\\.uninstantiated)*\\.(.*)")
-            regex.find(original)?.groupValues?.get(2)?.let { extension ->
-                "stdlib-${properties["dependencies.compose.wasm"]}.$extension"
+            val regex = Regex("^(.+?)(\\.uninstantiated)*\\.(mjs|wasm)\$")
+            regex.find(original)?.groupValues?.let { groups ->
+                val name = groups[1]
+                val uninst: String = groups[2]
+                val extension = groups[3]
+                "$name-${properties["dependencies.compose-wasm"]}$uninst.$extension"
             } ?: original
 
+        }
+
+        includeEmptyDirs = false
+
+        filesMatching("@js-joda/**") {
+            val properties = FileInputStream(propertiesFile.get().asFile).use {
+                Properties().apply {
+                    load(it)
+                }
+            }
+            path = path.replace("@js-joda", "@js-joda-${properties["dependencies.compose-wasm"]}")
+        }
+
+        filesMatching(listOf("_kotlin_.uninstantiated.mjs")) {
+            val header = """
+                class BufferedOutput {
+                    constructor() {
+                        this.buffer = ""
+                    }
+                }
+                globalThis.bufferedOutput = new BufferedOutput()
+            """.trimIndent()
+
+            filter(mapOf("prependReader" to StringReader(header)), ConcatFilter::class.java)
+
+            filter { line: String ->
+                line.replace(
+                    "const importObject = {",
+                    "js_code['kotlin.io.printImpl'] = (message) => globalThis.bufferedOutput.buffer += message\n" +
+                            "js_code['kotlin.io.printlnImpl'] = (message) => {globalThis.bufferedOutput.buffer += message;bufferedOutput.buffer += \"\\n\"}\n" +
+                            "const importObject = {"
+                )
+            }
+        }
+
+        filesMatching(listOf("**/*.uninstantiated.mjs", "skiko.mjs")) {
+            filter { line: String ->
+                val properties = FileInputStream(propertiesFile.get().asFile).use {
+                    Properties().apply {
+                        load(it)
+                    }
+                }
+
+                val composeWasmHash = properties["dependencies.compose-wasm"]
+                line
+                    .replace(".wasm\'", "-$composeWasmHash.wasm\'")
+                    .replace(".uninstantiated.mjs\')", "-$composeWasmHash.uninstantiated.mjs\')")
+                    .replace("skiko.mjs\')", "skiko-$composeWasmHash.mjs\')")
+                    .replace("skiko.wasm\"", "skiko-$composeWasmHash.wasm\"")
+                    .replace(
+                        "import('@js-joda/core')",
+                        "import('./@js-joda-${composeWasmHash}/core/dist/js-joda.esm.js')"
+                    )
+            }
         }
     }
 }
@@ -121,7 +146,7 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
 tasks.named<Copy>("processResources") {
     dependsOn(prepareComposeWasmResources)
     from(prepareComposeWasmResources) {
-        into("com/compiler/server")
+        into("static")
     }
 }
 

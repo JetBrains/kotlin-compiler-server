@@ -159,6 +159,12 @@ class KotlinToJSTranslator(
         val filePaths = ioFiles.map { it.toFile().canonicalPath }
         val klibPath = (outputDir / "klib").toFile().canonicalPath
 
+        val fixedModuleName = if (!multiModule) {
+            moduleName
+        } else {
+            "_${moduleName}_"
+        }
+
         K2JSCompiler().tryCompilation(
           inputDir,
           ioFiles,
@@ -186,19 +192,25 @@ class KotlinToJSTranslator(
           }
           .map {
             WasmTranslationSuccessfulOutput(
-              jsCode = (outputDir / "wasm" / "$moduleName.uninstantiated.mjs").readText().fixSkikoImport(),
-              jsInstantiated = (outputDir / "wasm" / "$moduleName.mjs").readText(),
-              wasm = (outputDir / "wasm" / "$moduleName.wasm").readBytes(),
-              wat = if (debugInfo) (outputDir / "wasm" / "$moduleName.wat").readText() else null,
+              jsCode = (outputDir / "wasm" / "$fixedModuleName.uninstantiated.mjs").readText().fixWasmImports().fixSkikoImports(),
+              jsInstantiated = (outputDir / "wasm" / "$fixedModuleName.mjs").readText(),
+              wasm = (outputDir / "wasm" / "$fixedModuleName.wasm").readBytes(),
+              wat = if (debugInfo) (outputDir / "wasm" / "$fixedModuleName.wat").readText() else null,
             )
           }
       }
     }
-}
 
-private fun String.fixSkikoImport(): String = lineSequence()
-  .filterNot { it.contains("imports['./skiko.mjs'].skikoApi") }
-  .joinToString("\n")
+    private fun String.fixWasmImports(): String = replace(
+        ".uninstantiated.mjs",
+        "-${kotlinEnvironment.dependenciesComposeWasm}.uninstantiated.mjs"
+    )
+
+    private fun String.fixSkikoImports(): String = replace(
+        "skiko.mjs",
+        "skiko-${kotlinEnvironment.dependenciesComposeWasm}.mjs"
+    )
+}
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
   val mainIrFunction = """

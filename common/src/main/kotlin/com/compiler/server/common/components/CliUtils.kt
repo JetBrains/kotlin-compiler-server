@@ -66,14 +66,15 @@ fun linkWasmArgs(
     "-Xwasm",
     "-Xir-produce-js",
     "-Xinclude=$klibPath",
-    "-libraries=${dependencies.joinToString(PATH_SEPARATOR)}",
+    "-libraries=${(dependencies + klibPath).joinToString(PATH_SEPARATOR)}",
     "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}",
     "-ir-output-name=$moduleName",
+    "-Xwasm-debug-friendly",
   ).also {
     if (debugInfo) it.add("-Xwasm-generate-wat")
 
     if (multiModule) {
-        it.add("-Xwasm-multimodule-mode=slave")
+        it.add("-Xwasm-included-module-only")
     } else {
       it.add("-Xir-dce")
     }
