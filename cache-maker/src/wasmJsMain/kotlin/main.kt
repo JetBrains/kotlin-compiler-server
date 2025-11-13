@@ -12,12 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 
-//sampleStart
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    ComposeViewport(document.body!!) {
+    ComposeViewport(viewportContainer = document.body!!, content = {
         App()
-    }
+    })
 }
 
 @Composable

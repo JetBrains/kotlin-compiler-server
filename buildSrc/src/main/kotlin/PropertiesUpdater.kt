@@ -1,18 +1,17 @@
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
 
 abstract class PropertiesGenerator : DefaultTask() {
 
-    @get:InputFile
-    abstract val hashableFile: RegularFileProperty
+    @get:InputFiles
+    @get:Classpath
+    abstract val hashableDir: ConfigurableFileCollection
 
     @get:Input
     abstract val propertiesMap: MapProperty<String, String>
@@ -34,23 +33,26 @@ abstract class PropertiesGenerator : DefaultTask() {
         }
 
         file.appendText(
-            "\ndependencies.compose.wasm=${hashFileContent(hashableFile.get().asFile.absolutePath)}"
+            "\ndependencies.compose-wasm=${hashFileContent(hashableDir.singleFile)}"
         )
     }
 }
 
-fun hashFileContent(filePath: String, hashAlgorithm: String = "SHA-256"): String {
-    val file = File(filePath)
+fun hashFileContent(files: File, hashAlgorithm: String = "SHA-256"): String {
     val digest = MessageDigest.getInstance(hashAlgorithm)
 
-    // Read the file content in chunks and update the digest
-    FileInputStream(file).use { fileInputStream ->
-        val buffer = ByteArray(1024)
-        var bytesRead: Int
-        while (fileInputStream.read(buffer).also { bytesRead = it } != -1) {
-            digest.update(buffer, 0, bytesRead)
+    files.listFiles()
+        .filter { it.isFile }
+        .forEach { file ->
+            // Read the file content in chunks and update the digest
+            FileInputStream(file).use { fileInputStream ->
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+                while (fileInputStream.read(buffer).also { bytesRead = it } != -1) {
+                    digest.update(buffer, 0, bytesRead)
+                }
+            }
         }
-    }
 
     // Convert the resulting byte array to a readable hex string
     return digest.digest().joinToString("") { "%02x".format(it) }

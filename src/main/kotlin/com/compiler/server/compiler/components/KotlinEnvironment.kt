@@ -1,6 +1,7 @@
 package com.compiler.server.compiler.components
 
 import com.compiler.server.common.components.KotlinEnvironment
+import com.compiler.server.model.bean.Dependencies
 import com.compiler.server.model.bean.LibrariesFile
 import component.CompilerPluginOption
 import org.springframework.context.annotation.Bean
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class KotlinEnvironmentConfiguration(
   val librariesFile: LibrariesFile,
+  val dependencies: Dependencies,
 ) {
   @Bean
   fun kotlinEnvironment(): KotlinEnvironment {
@@ -39,6 +41,7 @@ class KotlinEnvironmentConfiguration(
           "false"
         ),
       ),
+      dependencies.composeWasm
     )
   }
 }
