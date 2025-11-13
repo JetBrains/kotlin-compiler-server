@@ -1,6 +1,7 @@
 package component
 
-import org.jetbrains.kotlin.library.impl.isKotlinLibrary
+import org.jetbrains.kotlin.library.loader.KlibLoader
+import org.jetbrains.kotlin.library.loader.KlibPlatformChecker
 import java.io.File
 
 // NOTE: if new class paths are added, please add them to `JavaExec` task's inputs in build.gradle.kts as well
@@ -41,13 +42,13 @@ class KotlinEnvironment(
 
   val JS_LIBRARIES = additionalJsClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+    .filter { isJsKlib(it) }
   val WASM_LIBRARIES = additionalWasmClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+    .filter { isWasmKlib(it) }
   val COMPOSE_WASM_LIBRARIES = additionalComposeWasmClasspath
     .map { it.absolutePath }
-    .filter { isKotlinLibrary(File(it)) }
+    .filter { isWasmKlib(it) }
   val COMPOSE_WASM_COMPILER_PLUGINS = composeWasmCompilerPlugins
     .map { it.absolutePath }
 
@@ -59,4 +60,13 @@ class KotlinEnvironment(
         return f()
     }
 
+    private fun isJsKlib(path: String) = KlibLoader {
+        libraryPaths(path)
+        platformChecker(KlibPlatformChecker.JS)
+    }.load().librariesStdlibFirst.isNotEmpty()
+
+    private fun isWasmKlib(path: String) = KlibLoader {
+        libraryPaths(path)
+        platformChecker(KlibPlatformChecker.Wasm())
+    }.load().librariesStdlibFirst.isNotEmpty()
 }
