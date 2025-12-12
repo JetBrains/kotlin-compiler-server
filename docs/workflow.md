@@ -49,7 +49,10 @@ This block describes the process of releasing a new version.
 2. Modify [the Kotlin version](https://github.com/JetBrains/kotlin-compiler-server/blob/master/gradle/libs.versions.toml#L2) in the branch.
 3. If the current Kotlin version is bigger than in `master`, then create a pull request to `master`. Otherwise, push your changes to the remote branch and skip the rest of the steps.
    * creating a pull request should be from the separate branch like `merge/2.0.0-RC2`
-   * use rebase instead of merge for resolving conflicts
+   * use **rebase** instead of **merge** for resolving conflicts. It make sense to use [rebase --onto](https://git-scm.com/docs/git-rebase#_transplanting_a_topic_branch_with_onto), when you have too many conflicts, just because of the changed commit hash. Example:
+   ```bash
+    git rebase --onto origin/master origin/2.3.0-Beta2 merge/2.3.0-RC3
+   ```
    * after the pull request is merged, delete the `merge/*` branch.
 4. Wait until the tests are completed successfully.
 5. Merge the branch to master.
