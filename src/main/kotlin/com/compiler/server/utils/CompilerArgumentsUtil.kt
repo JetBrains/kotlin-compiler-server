@@ -180,8 +180,9 @@ class CompilerArgumentsUtil(
         "Xes-long-as-bigint",
         "Xtyped-arrays",
         "Xenable-extension-functions-in-externals",
+        "Xenable-suspend-function-exporting",
         "Xfake-override-validator",
-        "Xoptimize-generated-js"
+        "Xoptimize-generated-js",
     )
 
     private val ALLOWED_WASM_ARGUMENTS = setOf(
