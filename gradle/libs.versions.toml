@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.20-dev-6805"
-spring-boot = "3.5.7"
+spring-boot = "4.0.0"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.14"
 aws-serverless-java-container-springboot3 = "2.1.5"
