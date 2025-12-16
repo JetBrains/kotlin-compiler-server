@@ -1417,18 +1417,6 @@
       "predefinedValues": null
     },
     {
-      "name": "Xir-inliner",
-      "shortName": null,
-      "description": "Inline functions using the IR inliner instead of the bytecode inliner.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
       "name": "Xjava-package-prefix",
       "shortName": null,
       "description": "Package prefix for Java files.",
@@ -1882,18 +1870,6 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xuse-k2-kapt",
-      "shortName": null,
-      "description": "Enable the experimental support for K2 KAPT.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": true,
-        "defaultValue": null
-      },
-      "disabled": false,
       "predefinedValues": null
     },
     {
