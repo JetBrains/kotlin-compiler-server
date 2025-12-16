@@ -1899,18 +1899,6 @@
       "predefinedValues": null
     },
     {
-      "name": "Xtyped-arrays",
-      "shortName": null,
-      "description": "This option does nothing and is left for compatibility with the legacy backend.\nIt is deprecated and will be removed in a future release.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
       "name": "ir-output-dir",
       "shortName": null,
       "description": "Destination for generated files.",
