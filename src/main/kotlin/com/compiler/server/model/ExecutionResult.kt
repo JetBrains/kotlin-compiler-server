@@ -71,10 +71,8 @@ data class TranslationJSResult(
 ) : TranslationResultWithJsCode(jsCode, compilerDiagnostics, exception)
 
 data class TranslationWasmResult(
-  override val jsCode: String? = null,
-  val jsInstantiated: String,
-  val wasm: ByteArray,
-  val wat: String?,
+  override val jsCode: String,
+  val deps: Map<String, String>,
   override var exception: ExceptionDescriptor? = null,
   @field:JsonProperty("errors")
   override var compilerDiagnostics: CompilerDiagnostics = CompilerDiagnostics()
