@@ -6,10 +6,14 @@ import java.io.IOException
 @Throws(IOException::class, InterruptedException::class)
 fun startNodeJsApp(
     pathToBinNode: String?,
-    pathToAppScript: String?
+    pathToAppScript: String?,
+    additionalScript: String? = null
 ): String {
     val processBuilder = ProcessBuilder()
-    processBuilder.command(pathToBinNode, pathToAppScript)
+    if (additionalScript != null)
+        processBuilder.command(pathToBinNode, "--import", additionalScript, pathToAppScript)
+    else
+        processBuilder.command(pathToBinNode, pathToAppScript)
     val process = processBuilder.start()
     val inputStream = process.inputStream
     process.waitFor()
