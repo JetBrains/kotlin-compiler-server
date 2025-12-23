@@ -34,6 +34,8 @@ internal const val METADATA_ARGUMENTS_NAME = "metadataArguments"
 
 internal const val JS_DEFAULT_MODULE_NAME = "playground"
 internal const val WASM_DEFAULT_MODULE_NAME = "playground"
+internal const val JS_BUILTINS_POSTFIX = "js-builtins"
+internal const val IMPORT_OBJECT_POSTFIX = "import-object"
 
 @Component
 class CompilerArgumentsUtil(
