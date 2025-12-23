@@ -177,11 +177,7 @@ class TestProjectRunner {
 
         val tmpDir = createTempDirectory()
         val jsMain = tmpDir.resolve("playground.mjs")
-        jsMain.writeText(result.jsCode)
-        result.deps.forEach { (dependencyName, content) ->
-            val dependency = tmpDir.resolve(dependencyName)
-            dependency.writeText(content)
-        }
+        jsMain.writeText(result.jsCode!!)
 
         // this script simulates the env like in browser inside the node js
         val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
@@ -221,16 +217,6 @@ class TestProjectRunner {
                 }
                 globalThis.process = undefined;
                 
-                // 2. Override atob / btoa with a tolerant implementation, required for wasm decoding
-                
-                globalThis.atob = (str) => {
-                  const clean = String(str).replace(/[\t\n\f\r ]+/g, '');
-                  return Buffer.from(clean, 'base64').toString('binary');
-                };
-                
-                globalThis.btoa = (str) => {
-                  return Buffer.from(String(str), 'binary').toString('base64');
-                };
                 """.trimIndent()
         )
         return bootstrapBrowser

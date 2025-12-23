@@ -9,6 +9,8 @@ import com.compiler.server.model.TranslationResultWithJsCode
 import com.compiler.server.model.TranslationWasmResult
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
+import com.compiler.server.utils.IMPORT_OBJECT_POSTFIX
+import com.compiler.server.utils.JS_BUILTINS_POSTFIX
 import com.compiler.server.utils.JS_DEFAULT_MODULE_NAME
 import com.compiler.server.utils.WASM_DEFAULT_MODULE_NAME
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -16,11 +18,11 @@ import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.springframework.stereotype.Service
 import kotlin.io.encoding.Base64
 import kotlin.io.path.div
-import kotlin.io.path.extension
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
+
+private val JS_BUILTINS_ALIAS_NAME_REGEX =
+    Regex("""import\s+\*\s+as\s+(\S+)\s+from\s+'\./$JS_DEFAULT_MODULE_NAME\.$JS_BUILTINS_POSTFIX\.mjs';""")
 
 @Service
 class KotlinToJSTranslator(
@@ -77,31 +79,20 @@ class KotlinToJSTranslator(
                 is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
                 is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
             }
-            val jsCode = convertOutputToJsCode(wasmCompilationOutput)
-            TranslationWasmResult(jsCode = jsCode, deps = wasmCompilationOutput.dependencies, compilerDiagnostics = compilationResult.compilerDiagnostics,)
+            TranslationWasmResult(
+                jsCode = mergeWasmOutputIntoOneJs(wasmCompilationOutput),
+                compilerDiagnostics = compilationResult.compilerDiagnostics
+            )
         } catch (e: Exception) {
-            TranslationJSResult(exception = e.toExceptionDescriptor())
+            TranslationWasmResult(exception = e.toExceptionDescriptor())
         }
-    }
-
-    private fun convertOutputToJsCode(wasmOutput: WasmTranslationSuccessfulOutput): String {
-        return wasmOutput.jsCode
-                    .replace(
-                        "wasmInstance = (await WebAssembly.instantiateStreaming(fetch(new URL('./playground.wasm',import.meta.url).href), importObject, wasmOptions)).instance;",
-                        "wasmInstance = await (async () => {\n" +
-                                "  const wasmBase64 = '\${${Base64.encode(wasmOutput.wasm)}}';\n" +
-                                "  const wasmBinary = Uint8Array.from(atob(wasmBase64), (c) => c.charCodeAt(0));\n" +
-                                "  return (await WebAssembly.instantiate(wasmBinary, importObject)).instance;\n" +
-                                "  })();"
-                    )
-
-
     }
 
     fun doTranslateWithIr(
         files: List<ProjectFile>,
         arguments: List<String>,
-        userCompilerArguments: JsCompilerArguments): CompilationResult<String> =
+        userCompilerArguments: JsCompilerArguments
+    ): CompilationResult<String> =
         usingTempDirectory { inputDir ->
             usingTempDirectory { outputDir ->
                 val ioFiles = files.writeToIoFiles(inputDir)
@@ -190,19 +181,48 @@ class KotlinToJSTranslator(
                     }
                     .map {
                         val wasmOutputDir = outputDir / "wasm"
-                        val dependencies = wasmOutputDir.listDirectoryEntries()
-                            .filter { it.name != "$WASM_DEFAULT_MODULE_NAME.mjs" }
-                            .filter { it.extension == "js" || it.extension == "mjs" }
-                            .associate { it.name to it.readText() }
 
                         WasmTranslationSuccessfulOutput(
-                            jsCode = (wasmOutputDir / "$WASM_DEFAULT_MODULE_NAME.mjs").readText(),
+                            jsCode = (wasmOutputDir / "$JS_DEFAULT_MODULE_NAME.mjs").readText(),
+                            jsBuiltins = (wasmOutputDir / "$JS_DEFAULT_MODULE_NAME.$JS_BUILTINS_POSTFIX.mjs").readText(),
+                            importObject = (wasmOutputDir / "$JS_DEFAULT_MODULE_NAME.$IMPORT_OBJECT_POSTFIX.mjs").readText(),
                             wasm = (wasmOutputDir / "$WASM_DEFAULT_MODULE_NAME.wasm").readBytes(),
-                            dependencies = dependencies,
                         )
                     }
             }
         }
+
+    private fun mergeWasmOutputIntoOneJs(wasmOutput: WasmTranslationSuccessfulOutput): String {
+        val importObjectJsContent = wasmOutput.importObject
+
+        val jsBuitinsAlias = JS_BUILTINS_ALIAS_NAME_REGEX.find(importObjectJsContent)?.groupValues?.get(1)
+
+        val replacedImportObjectContent = importObjectJsContent.replace(
+            JS_BUILTINS_ALIAS_NAME_REGEX,
+            "const $jsBuitinsAlias = await import(`data:application/javascript;base64, ${Base64.encode(wasmOutput.jsBuiltins.toByteArray())}`)"
+        )
+
+        return wasmOutput.jsCode
+            .replace(
+                "import { importObject, setWasmExports } from './playground.import-object.mjs'",
+                "const { importObject, setWasmExports } = await import(`data:application/javascript;base64,${
+                    Base64.encode(
+                        replacedImportObjectContent.toByteArray()
+                    )
+                }`) "
+            )
+            .replace(
+                "wasmInstance = (await WebAssembly.instantiateStreaming(fetch(new URL('./playground.wasm',import.meta.url).href), importObject, wasmOptions)).instance;",
+                "wasmInstance = await (async () => {\n" +
+                        "  const wasmBase64 = await fetch(`data:application/wasm;base64,${Base64.encode(wasmOutput.wasm)}`); \n" +
+                        "  const wasmBinary = new Uint8Array(await wasmBase64.arrayBuffer());\n" +
+                        " if (typeof bufferedOutput !== 'undefined') {" +
+                        "  importObject.js_code['kotlin.io.printImpl'] = (message) => bufferedOutput.buffer += message\n" +
+                        "  importObject.js_code['kotlin.io.printlnImpl'] = (message) => {bufferedOutput.buffer += message;bufferedOutput.buffer += \"\\n\"}}\n" +
+                        "  return (await WebAssembly.instantiate(wasmBinary, importObject)).instance;\n" +
+                        "  })();"
+            ) + "\n export const instantiate = () => Promise.resolve();"
+    }
 }
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
@@ -220,6 +240,7 @@ private fun String.withMainArgumentsIr(arguments: List<String>): String {
 
 data class WasmTranslationSuccessfulOutput(
     val jsCode: String,
-    val dependencies: Map<String, String>,
+    val jsBuiltins: String,
+    val importObject: String,
     val wasm: ByteArray
 )
