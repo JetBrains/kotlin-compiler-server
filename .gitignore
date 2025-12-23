@@ -27,6 +27,7 @@ indexes*.json
 *.iml
 *.ipr
 out/
+.junie/memory
 
 ### NetBeans ###
 /nbproject/private/
