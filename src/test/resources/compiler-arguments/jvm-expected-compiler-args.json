@@ -1441,6 +1441,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xignored-annotations-for-bridges",
+      "shortName": null,
+      "description": "Do not copy these annotations to the bridge methods from their targets.",
+      "type": {
+        "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
+        "isNullable": true,
+        "defaultValue": []
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xindy-allow-annotated-lambdas",
       "shortName": null,
       "description": "Allow using 'invokedynamic' for lambda expressions with annotations",
