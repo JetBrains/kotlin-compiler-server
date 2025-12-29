@@ -34,7 +34,7 @@ jobs:
         with:
           io-event: '' #reset default behavior
           repository: '${{ matrix.repo }}'
-          verify-branch: 'kotlin-community/dev'
+          verify-branch: 'master'
           push-repository: 'https://github.com/${{github.repository}}'
           tag-filter: '${{ matrix.filter }}'
           push-path: '${{ matrix.path }}'
