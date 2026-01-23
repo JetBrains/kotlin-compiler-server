@@ -13,7 +13,6 @@ import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
-import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi

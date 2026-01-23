@@ -1,6 +1,4 @@
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin.Companion.kotlinNodeJsEnvSpec
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -88,12 +86,10 @@ dependencies {
 fun Project.generateProperties(
     prefix: String = "",
 ): Map<String, String> = mapOf(
+    "server.error.include-message" to "always",
+    "server.error.include-binding-errors" to "always",
     "kotlin.version" to kotlinVersion,
     "policy.file" to prefix + policy,
-    "indexes.file" to prefix + indexes,
-    "indexesJs.file" to prefix + indexesJs,
-    "indexesWasm.file" to prefix + indexesWasm,
-    "indexesComposeWasm.file" to prefix + indexesComposeWasm,
     "libraries.folder.jvm" to prefix + libJVM,
     "libraries.folder.js" to prefix + libJS,
     "libraries.folder.wasm" to prefix + libWasm,
@@ -101,11 +97,9 @@ fun Project.generateProperties(
     "libraries.folder.compose-wasm-compiler-plugins" to prefix + libComposeWasmCompilerPlugins,
     "libraries.folder.compiler-plugins" to prefix + compilerPluginsForJVM,
     "spring.mvc.pathmatch.matching-strategy" to "ant_path_matcher",
-    "spring.main.banner-mode" to "off",
     "server.compression.enabled" to "true",
     "server.compression.mime-types" to "application/json,text/javascript,application/wasm",
     "springdoc.swagger-ui.path" to "/api-docs/swagger-ui.html",
-    "skiko.version" to libs.versions.skiko.get(),
 )
 
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
@@ -132,7 +126,6 @@ val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 tasks.withType<KotlinCompile> {
     dependsOn(":executors:jar")
     dependsOn(propertiesGenerator)
-    buildPropertyFile()
 }
 println("Using Kotlin compiler ${libs.versions.kotlin.get()}")
 

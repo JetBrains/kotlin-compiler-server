@@ -54,12 +54,10 @@ class KotlinProjectExecutor(
     fun convertToWasm(
         project: Project,
         debugInfo: Boolean = false,
-        multiModule: Boolean,
     ): TranslationResultWithJsCode {
         return convertWasmWithConverter(
             project,
             debugInfo,
-            multiModule,
             kotlinToJSTranslator::doTranslateWithWasm
         )
     }
@@ -76,13 +74,11 @@ class KotlinProjectExecutor(
             ProjectType.WASM -> convertToWasm(
                 project,
                 debugInfo = false,
-                multiModule = false,
             ).compilerDiagnostics
 
             ProjectType.COMPOSE_WASM -> convertToWasm(
                 project,
                 debugInfo = false,
-                multiModule = true,
             ).compilerDiagnostics
         }
     } catch (e: Exception) {
@@ -113,11 +109,9 @@ class KotlinProjectExecutor(
     private fun convertWasmWithConverter(
         project: Project,
         debugInfo: Boolean,
-        multiModule: Boolean,
         converter: (
             List<ProjectFile>,
             ProjectType,
-            Boolean,
             Boolean,
             JsCompilerArguments,
         ) -> CompilationResult<WasmTranslationSuccessfulOutput>
@@ -127,7 +121,6 @@ class KotlinProjectExecutor(
             kotlinToJSTranslator.translateWasm(
                 project.files,
                 debugInfo,
-                multiModule,
                 project.confType,
                 JsCompilerArguments(
                     project.compilerArguments.getOrElse(0, { emptyMap() }),

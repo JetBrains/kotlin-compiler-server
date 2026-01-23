@@ -4,8 +4,10 @@
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.compilerRunner.*
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptionsHelper
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.COMPILER_CLASSPATH_CONFIGURATION_NAME
+import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider.Companion.kotlinPropertiesProvider
 import org.jetbrains.kotlin.gradle.plugin.categoryByName
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
@@ -13,10 +15,13 @@ import org.jetbrains.kotlin.gradle.plugin.usesPlatformOf
 import org.jetbrains.kotlin.gradle.report.ReportingSettings
 import org.jetbrains.kotlin.gradle.targets.js.internal.LibraryFilterCachingService
 import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy
 import org.jetbrains.kotlin.gradle.utils.kotlinSessionsDir
-import org.jetbrains.kotlin.library.impl.isKotlinLibrary
+import org.jetbrains.kotlin.library.loader.KlibLoader
+import java.nio.file.Files
 
 plugins {
     id("base-kotlin-multiplatform-conventions")
@@ -94,18 +99,25 @@ dependencies {
                 project.projectDir
             )
             val projectName = project.name
-            clientIsAliveFlagFile.set(
-                compileTask.map { GradleCompilerRunner.getOrCreateClientFlagFile(it.logger, projectName) }
+            this.projectName.set(projectName)
+            projectSessionsDir.set(project.kotlinSessionsDir)
 
-            )
-            val projectSessionsDir = project.kotlinSessionsDir
-            sessionFlagFile.set(
-                compileTask.map { GradleCompilerRunner.getOrCreateSessionFlagFile(it.logger, projectSessionsDir) }
-
-            )
-            buildDir.set(project.layout.buildDirectory.asFile)
+            this.buildDir.set(project.layout.buildDirectory.asFile)
 
             libraryFilterCacheService.set(libraryFilterService)
+
+            compilerOptions.set(
+                compileTask.map {
+                    val args = K2JSCompilerArguments()
+                    KotlinCommonCompilerOptionsHelper.fillCompilerArguments(it.compilerOptions, args)
+                    args
+                }
+            )
+            enhancedFreeCompilerArgs.set(compileTask.flatMap { it.enhancedFreeCompilerArgs })
+
+//            BinaryenPlugin.apply(project)
+//            it.binaryenExec.set(project.extensions.findByType(BinaryenEnvSpec::class.java).executable)
+//            it.mode.set(binary.mode)
         }
     }
 
@@ -121,7 +133,9 @@ val prepareRuntime by tasks.registering(Copy::class) {
 
     from(allRuntimes) {
         include {
-            it.name.endsWith(".uninstantiated.mjs") || it.name.endsWith(".wasm") || it.name.endsWith("skiko.mjs") || it.name.endsWith("skiko.wasm")
+            it.name.endsWith(".mjs") || it.name.endsWith(".wasm") || it.name.endsWith("skiko.mjs") || it.name.endsWith(
+                "skiko.wasm"
+            )
         }
 
         filesMatching(listOf("**/*.uninstantiated.mjs")) {
@@ -173,15 +187,22 @@ class JarToKlibRule : AttributeCompatibilityRule<String> {
     }
 }
 
-abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Parameters> {
+@CacheableTransform
+internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Parameters> {
+    /**
+     * Parameters for the [WasmBinaryTransform].
+     */
     abstract class Parameters : TransformParameters {
+        @get:Internal
+        abstract val compilerOptions: Property<K2JSCompilerArguments>
+
         @get:Internal
         abstract val currentJvmJdkToolsJar: Property<File>
 
         @get:Classpath
         abstract val defaultCompilerClasspath: ConfigurableFileCollection
 
-        @get:Internal
+        @get:Input
         abstract val kotlinPluginVersion: Property<String>
 
         @get:Internal
@@ -191,16 +212,22 @@ abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Paramet
         abstract val projectRootFile: Property<File>
 
         @get:Internal
-        abstract val clientIsAliveFlagFile: Property<File>
+        internal abstract val projectName: Property<String>
 
         @get:Internal
-        abstract val sessionFlagFile: Property<File>
+        internal abstract val projectSessionsDir: DirectoryProperty
 
         @get:Internal
         abstract val buildDir: Property<File>
 
         @get:Internal
         internal abstract val libraryFilterCacheService: Property<LibraryFilterCachingService>
+
+        @get:Input
+        internal abstract val enhancedFreeCompilerArgs: ListProperty<String>
+
+        @get:Internal
+        internal abstract val binaryenExec: Property<String>
     }
 
     @get:Inject
@@ -209,7 +236,11 @@ abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Paramet
     @get:Inject
     abstract val archiveOperations: ArchiveOperations
 
+    @get:Inject
+    abstract val execOps: ExecOperations
+
     @get:InputArtifact
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     @get:CompileClasspath
@@ -218,41 +249,36 @@ abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Paramet
 
     override fun transform(outputs: TransformOutputs) {
         val inputFile = inputArtifact.get().asFile
-        val outputDir = outputs.dir(inputFile.name.replace(".klib", "-transformed"))
 
-        val isKotlinLibrary = parameters.libraryFilterCacheService.get().getOrCompute(
-            LibraryFilterCachingService.LibraryFilterCacheKey(
-                inputFile
-            ),
-            ::isKotlinLibrary
-        )
+        val compilerOutputDir = Files.createTempDirectory("wasm-transform-").toFile()
+
+        val isKotlinLibrary = isKotlinLibrary(inputFile)
 
         if (!isKotlinLibrary) {
             fs.copy {
                 from(archiveOperations.zipTree(inputFile))
-                into(outputDir)
+                into(compilerOutputDir)
             }
             return
         }
 
-        val args = K2JSCompilerArguments().apply {
-            multiPlatform = true
-            this.outputDir = outputDir.absolutePath
-            libraries = dependencies.files.plus(inputFile).joinToString(File.pathSeparator) { it.absolutePath }
+        val args: K2JSCompilerArguments = parameters.compilerOptions.get()
+        args.apply {
+            this.outputDir = compilerOutputDir.absolutePath
             moduleName = inputFile.nameWithoutExtension
             includes = inputFile.absolutePath
-            wasm = true
-            wasmTarget = "wasm-js"
             wasmIncludedModuleOnly = true
             irProduceJs = true
-            forceDebugFriendlyCompilation = true
+            libraries = dependencies.files.plus(inputFile).joinToString(File.pathSeparator) { it.absolutePath }
         }
+
+        args.freeArgs += parameters.enhancedFreeCompilerArgs.get()
 
         val workArgs = GradleKotlinCompilerWorkArguments(
             projectFiles = ProjectFilesForCompilation(
                 parameters.projectRootFile.get(),
-                parameters.clientIsAliveFlagFile.get(),
-                parameters.sessionFlagFile.get(),
+                GradleCompilerRunner.getOrCreateClientFlagFile(LOGGER, parameters.projectName.get()),
+                GradleCompilerRunner.getOrCreateSessionFlagFile(LOGGER, parameters.projectSessionsDir.get().asFile),
                 parameters.buildDir.get(),
             ),
             compilerFullClasspath = (parameters.defaultCompilerClasspath.files + parameters.currentJvmJdkToolsJar.orNull).filterNotNull(),
@@ -270,17 +296,60 @@ abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransform.Paramet
                 null,
                 KotlinCompilerExecutionStrategy.DAEMON,
                 true,
-//                generateCompilerRefIndex = false,
+                generateCompilerRefIndex = false,
             ),
             errorsFiles = null,
             kotlinPluginVersion = parameters.kotlinPluginVersion.get(),
             //no need to log warnings in MessageCollector hear it will be logged by compiler
-            kotlinLanguageVersion = KotlinVersion.DEFAULT,
+            kotlinLanguageVersion = args.languageVersion?.let { v ->
+                KotlinVersion.fromVersion(
+                    v
+                )
+            } ?: KotlinVersion.DEFAULT,
             compilerArgumentsLogLevel = KotlinCompilerArgumentsLogLevel.DEFAULT,
         )
+
+        println("Start to compile ${inputFile.name}")
 
         GradleKotlinCompilerWork(
             workArgs
         ).run()
+
+        println("End to compile ${inputFile.name}")
+
+        val binaryenOutputDirectory = outputs.dir(inputFile.name.replace(".klib", "-transformed"))
+
+//        execOps.exec {
+//            executable = parameters.binaryenExec.get()
+//            val inputFileBinaryen = compilerOutputDir.listFiles().first { it.extension == "wasm" }
+//            val newArgs = mutableListOf<String>()
+//            newArgs.addAll(binaryenArgs(false))
+//            newArgs.add(inputFileBinaryen.absolutePath)
+//            newArgs.add("-o")
+//            newArgs.add(binaryenOutputDirectory.resolve(inputFileBinaryen.name).absolutePath)
+//            setWorkingDir(binaryenOutputDirectory)
+//            args = newArgs
+//        }
+//
+        fs.copy {
+            from(compilerOutputDir)
+            into(binaryenOutputDirectory)
+            include("*.mjs", "*.js", "*.js.map", "*.wasm")
+        }
+
+    }
+
+    private fun isKotlinLibrary(file: File): Boolean {
+        return parameters.libraryFilterCacheService.get().getOrCompute(
+            LibraryFilterCachingService.LibraryFilterCacheKey(
+                file
+            )
+        ) {
+            KlibLoader { libraryPaths(it.absolutePath) }.load().librariesStdlibFirst.isNotEmpty()
+        }
+    }
+
+    private companion object {
+        private val LOGGER: Logger = Logging.getLogger(WasmBinaryTransform::class.java)
     }
 }

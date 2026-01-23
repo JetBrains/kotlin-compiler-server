@@ -3,7 +3,7 @@ package com.compiler.server.compiler.components
 import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.model.bean.Dependencies
 import com.compiler.server.model.bean.LibrariesFile
-import component.CompilerPluginOption
+import com.compiler.server.common.components.CompilerPluginOption
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 

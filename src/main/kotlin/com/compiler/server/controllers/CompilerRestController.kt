@@ -1,28 +1,12 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.api.CompilerArgumentResponse
-import com.compiler.server.api.RunRequest
-import com.compiler.server.api.TestRequest
-import com.compiler.server.api.TranslateComposeWasmRequest
-import com.compiler.server.api.TranslateJsRequest
-import com.compiler.server.api.TranslateWasmRequest
-import com.compiler.server.model.CompilerDiagnostics
-import com.compiler.server.model.ExecutionResult
-import com.compiler.server.model.KotlinTranslatableCompiler
-import com.compiler.server.model.Project
-import com.compiler.server.model.ProjectFile
-import com.compiler.server.model.ProjectType
-import com.compiler.server.model.TranslationResultWithJsCode
+import com.compiler.server.api.*
+import com.compiler.server.model.*
 import com.compiler.server.service.CompilerArgumentsService
 import com.compiler.server.service.KotlinProjectExecutor
 import jakarta.validation.Valid
 import org.jetbrains.kotlin.utils.mapToSetOrEmpty
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
@@ -79,7 +63,8 @@ class CompilerRestController(
                 args = request.args,
                 files = request.files.map { ProjectFile(name = it.name, text = it.text) },
                 confType = ProjectType.WASM,
-                compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments))
+                compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments)
+            ),
         )
     }
 
@@ -92,7 +77,8 @@ class CompilerRestController(
                 args = request.args,
                 files = request.files.map { ProjectFile(name = it.name, text = it.text) },
                 confType = ProjectType.COMPOSE_WASM,
-                compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments))
+                compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments)
+            ),
         )
     }
 
@@ -129,15 +115,14 @@ class CompilerRestController(
         return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
             KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
             KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(
-        project,
-        debugInfo,
-        multiModule = false,
-      )
+                project,
+                debugInfo,
+            )
+
             KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
-        project,
-        debugInfo,
-        multiModule = true,
-      )
+                project,
+                debugInfo,
+            )
         }
     }
 }

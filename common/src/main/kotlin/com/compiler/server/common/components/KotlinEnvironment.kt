@@ -1,6 +1,5 @@
 package com.compiler.server.common.components
 
-import component.CompilerPluginOption
 import org.jetbrains.kotlin.library.loader.KlibLoader
 import org.jetbrains.kotlin.library.loader.KlibPlatformChecker
 import java.io.File

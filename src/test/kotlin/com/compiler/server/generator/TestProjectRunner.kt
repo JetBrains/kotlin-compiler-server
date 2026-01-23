@@ -163,7 +163,6 @@ class TestProjectRunner {
     val result = kotlinProjectExecutor.convertToWasm(
       project,
       debugInfo = true,
-      multiModule = false,
     )
 
         if (result !is TranslationWasmResult) {
