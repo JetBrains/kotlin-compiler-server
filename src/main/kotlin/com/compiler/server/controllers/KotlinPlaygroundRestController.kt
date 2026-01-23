@@ -49,12 +49,10 @@ class KotlinPlaygroundRestController(private val kotlinProjectExecutor: KotlinPr
               ProjectType.WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
                 debugInfo = false,
-                multiModule = false,
               )
               ProjectType.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
                 debugInfo = false,
-                multiModule = true,
               )
               ProjectType.JUNIT -> kotlinProjectExecutor.test(project, addByteCode)
             }

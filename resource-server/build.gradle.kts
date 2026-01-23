@@ -5,9 +5,7 @@ import java.io.StringReader
 import java.util.*
 
 plugins {
-    alias(libs.plugins.spring.dependency.management)
-    alias(libs.plugins.spring.boot)
-    alias(libs.plugins.kotlin.plugin.spring)
+    id("base-spring-boot-conventions")
     id("base-kotlin-jvm-conventions")
 }
 
@@ -42,7 +40,6 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmRuntime)
     propertiesMap.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher")
     propertiesMap.put("server.port", "8081")
-    propertiesMap.put("skiko.version", libs.versions.skiko.get())
 
     val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
 
@@ -57,8 +54,6 @@ tasks.withType<KotlinCompile> {
     dependsOn(kotlinComposeWasmRuntime)
     dependsOn(propertiesGenerator)
 }
-
-val skikoVersion = libs.versions.skiko
 
 val prepareComposeWasmResources by tasks.registering(Sync::class) {
     dependsOn(kotlinComposeWasmRuntime)
