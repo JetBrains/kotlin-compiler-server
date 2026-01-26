@@ -53,10 +53,12 @@ class KotlinProjectExecutor(
 
     fun convertToWasm(
         project: Project,
+        staticUrl: String = "",
         debugInfo: Boolean = false,
     ): TranslationResultWithJsCode {
         return convertWasmWithConverter(
             project,
+            staticUrl,
             debugInfo,
             kotlinToJSTranslator::doTranslateWithWasm
         )
@@ -108,6 +110,7 @@ class KotlinProjectExecutor(
 
     private fun convertWasmWithConverter(
         project: Project,
+        staticUrl: String,
         debugInfo: Boolean,
         converter: (
             List<ProjectFile>,
@@ -120,6 +123,7 @@ class KotlinProjectExecutor(
         return environment.synchronize {
             kotlinToJSTranslator.translateWasm(
                 project.files,
+                staticUrl,
                 debugInfo,
                 project.confType,
                 JsCompilerArguments(
