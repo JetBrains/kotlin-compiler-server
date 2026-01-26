@@ -11,5 +11,6 @@ class TranslateComposeWasmRequest(
     @CompilerArgumentsConstraint(ProjectType.COMPOSE_WASM)
     val firstPhaseCompilerArguments: Map<String, Any> = emptyMap(),
     @CompilerArgumentsConstraint(ProjectType.COMPOSE_WASM)
-    val secondPhaseCompilerArguments: Map<String, Any> = emptyMap()
+    val secondPhaseCompilerArguments: Map<String, Any> = emptyMap(),
+    val staticUrl: String = "",
 )

@@ -2,6 +2,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import java.io.File
 import java.io.FileInputStream
@@ -9,12 +10,12 @@ import java.security.MessageDigest
 
 abstract class PropertiesGenerator : DefaultTask() {
 
-    @get:InputFiles
-    @get:Classpath
-    abstract val hashableDir: ConfigurableFileCollection
+//    @get:InputFiles
+//    @get:Classpath
+//    abstract val hashableDir: ConfigurableFileCollection
 
     @get:Input
-    abstract val propertiesMap: MapProperty<String, String>
+    abstract val propertiesMap: MapProperty<String, Any>
 
     @get:OutputFile
     abstract val propertiesFile: RegularFileProperty
@@ -27,14 +28,18 @@ abstract class PropertiesGenerator : DefaultTask() {
             if (it.isNotEmpty()) {
                 file.writeText("")
                 it.forEach { (key, value) ->
-                    file.appendText("$key=$value\n")
+                    if (value is Provider<*>) {
+                        file.appendText("$key=${value.get()}\n")
+                    } else {
+                        file.appendText("$key=$value\n")
+                    }
                 }
             }
         }
 
-        file.appendText(
-            "\ndependencies.compose-wasm=${hashFileContent(hashableDir.singleFile)}"
-        )
+//        file.appendText(
+//            "\ndependencies.compose-wasm=${hashFileContent(hashableDir.singleFile)}"
+//        )
     }
 }
 
