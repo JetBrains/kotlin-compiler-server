@@ -42,14 +42,14 @@ val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     }
 }
 
-val composeWasmStaticResources: Configuration by configurations.creating {
+val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = true
     isCanBeConsumed = false
     attributes {
         attribute(
             Category.CATEGORY_ATTRIBUTE,
-            objects.categoryComposeWasmResources
+            objects.categoryComposeCacheHash
         )
     }
 }
@@ -80,7 +80,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 
     kotlinComposeWasmRuntime(project(":cache-maker"))
-    composeWasmStaticResources(project(":resource-server"))
+    kotlinComposeWasmRuntimeHash(project(":cache-maker"))
 }
 
 fun Project.generateProperties(
@@ -104,19 +104,30 @@ fun Project.generateProperties(
 
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmRuntime)
+    dependsOn(kotlinComposeWasmRuntimeHash)
+
+    val kotlinComposeWasmRuntimeHash: FileCollection = kotlinComposeWasmRuntimeHash
+
     propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
-    hashableDir.from(
-        kotlinComposeWasmRuntime
-    )
     generateProperties().forEach { (name, value) ->
         propertiesMap.put(name, value)
     }
+
+    val hashValue = objects.property(Function0::class.java).value {
+        kotlinComposeWasmRuntimeHash.files.single().readText()
+    }.map<Any> {
+        it.invoke()
+    }
+
+    propertiesMap.put(
+        "dependencies.compose-wasm",
+        hashValue
+    )
 }
 
 val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmRuntime)
     propertiesFile.set(layout.buildDirectory.file("tmp/propertiesGenerator/${propertyFile}"))
-    hashableDir.from(kotlinComposeWasmRuntime)
 
     generateProperties(lambdaPrefix).forEach { (name, value) ->
         propertiesMap.put(name, value)
@@ -135,7 +146,7 @@ tasks.withType<BootJar> {
 }
 
 val prepareComposeWasmResources by tasks.registering(Sync::class) {
-    from(composeWasmStaticResources)
+    from(kotlinComposeWasmRuntime)
     into(layout.buildDirectory.dir("compose-wasm-resources"))
 }
 
