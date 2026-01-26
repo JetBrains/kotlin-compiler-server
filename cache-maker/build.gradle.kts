@@ -1,13 +1,13 @@
 @file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 @file:OptIn(ExperimentalWasmDsl::class)
 
+import org.apache.tools.ant.filters.ConcatFilter
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.compilerRunner.*
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptionsHelper
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.COMPILER_CLASSPATH_CONFIGURATION_NAME
-import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider.Companion.kotlinPropertiesProvider
 import org.jetbrains.kotlin.gradle.plugin.categoryByName
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
@@ -15,12 +15,11 @@ import org.jetbrains.kotlin.gradle.plugin.usesPlatformOf
 import org.jetbrains.kotlin.gradle.report.ReportingSettings
 import org.jetbrains.kotlin.gradle.targets.js.internal.LibraryFilterCachingService
 import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
-import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenEnvSpec
-import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy
 import org.jetbrains.kotlin.gradle.utils.kotlinSessionsDir
 import org.jetbrains.kotlin.library.loader.KlibLoader
+import java.io.StringReader
 import java.nio.file.Files
 
 plugins {
@@ -63,6 +62,14 @@ val allRuntimes: Configuration by configurations.creating {
     }
 }
 
+val allRuntimesKlibs: Configuration by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    usesPlatformOf(kotlin.wasmJs())
+    attributes.attribute(Usage.USAGE_ATTRIBUTE, KotlinUsages.consumerRuntimeUsage(kotlin.wasmJs()))
+    attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.categoryByName(Category.LIBRARY))
+}
+
 // we don't need to build cache-maker
 tasks.named("build") {
     dependsOn.clear()
@@ -75,6 +82,10 @@ dependencies {
     allRuntimes(libs.bundles.compose)
     allRuntimes(libs.kotlinx.coroutines.core.compose.wasm)
     allRuntimes(libs.kotlin.stdlib.wasm.js)
+
+    allRuntimesKlibs(libs.bundles.compose)
+    allRuntimesKlibs(libs.kotlinx.coroutines.core.compose.wasm)
+    allRuntimesKlibs(libs.kotlin.stdlib.wasm.js)
 
     registerTransform(WasmBinaryTransform::class.java) {
         from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "klib")
@@ -115,6 +126,10 @@ dependencies {
             )
             enhancedFreeCompilerArgs.set(compileTask.flatMap { it.enhancedFreeCompilerArgs })
 
+            classpath.from(
+                allRuntimesKlibs
+            )
+
 //            BinaryenPlugin.apply(project)
 //            it.binaryenExec.set(project.extensions.findByType(BinaryenEnvSpec::class.java).executable)
 //            it.mode.set(binary.mode)
@@ -133,15 +148,7 @@ val prepareRuntime by tasks.registering(Copy::class) {
 
     from(allRuntimes) {
         include {
-            it.name.endsWith(".mjs") || it.name.endsWith(".wasm") || it.name.endsWith("skiko.mjs") || it.name.endsWith(
-                "skiko.wasm"
-            )
-        }
-
-        filesMatching(listOf("**/*.uninstantiated.mjs")) {
-            filter { line: String ->
-                line.replace("%3", "%253")
-            }
+            it.name.endsWith(".mjs") || it.name.endsWith(".wasm")
         }
     }
 
@@ -160,6 +167,95 @@ val prepareRuntime by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("all-libs"))
 }
 
+val calculatedHash = layout.buildDirectory.file("tmp/calculateHash/hash")
+
+val calculateHash by tasks.registering(DefaultTask::class) {
+    val destDir = prepareRuntime.map { it.destinationDir }
+    inputs.dir(destDir)
+    val outputFile = calculatedHash
+    outputs.file(outputFile)
+
+    doLast {
+        outputFile.get().asFile.also {
+            it.parentFile.mkdirs()
+            it.writeText(hashFileContent(destDir.get()))
+        }
+    }
+}
+
+val prepareComposeWasmResources by tasks.registering(Sync::class) {
+    into(layout.buildDirectory.dir("tmp/prepareResources"))
+
+    dependsOn(calculateHash)
+
+    val calculatedHash = calculatedHash
+
+    inputs.file(calculatedHash)
+
+    from(prepareRuntime) {
+        rename { original ->
+
+            val hash = calculatedHash.get().asFile.readText()
+            val regex = Regex("^(.+?)\\.(mjs|wasm)$")
+            regex.find(original)?.groupValues?.let { groups ->
+                val name = groups[1]
+                val extension = groups[2]
+                "$name-$hash.$extension"
+            } ?: original
+
+        }
+
+        includeEmptyDirs = false
+
+        filesMatching("@js-joda/**") {
+            val hash = calculatedHash.get().asFile.readText()
+            path = path.replace("@js-joda", "@js-joda-$hash")
+        }
+
+        filesMatching(listOf("kotlin-kotlin-stdlib.mjs")) {
+            val header = """
+                class BufferedOutput {
+                    constructor() {
+                        this.buffer = ""
+                    }
+                }
+                globalThis.bufferedOutput = new BufferedOutput()
+            """.trimIndent()
+
+            filter(mapOf("prependReader" to StringReader(header)), ConcatFilter::class.java)
+        }
+
+        filesMatching(listOf("kotlin-kotlin-stdlib.import-object.mjs")) {
+            filter { line: String ->
+                line.replace(
+                    "export const importObject = {",
+                    "js_code['kotlin.io.printImpl'] = (message) => globalThis.bufferedOutput.buffer += message\n" +
+                            "js_code['kotlin.io.printlnImpl'] = (message) => {globalThis.bufferedOutput.buffer += message;bufferedOutput.buffer += \"\\n\"}\n" +
+                            "export const importObject = {"
+                )
+            }
+        }
+
+        filesMatching(listOf("**/*.mjs", "skiko.mjs")) {
+            filter { line: String ->
+                val hash = calculatedHash.get().asFile.readText()
+
+                line
+                    .replace(".mjs\':", "<TEMP_IMPORT>")
+                    .replace(".wasm\'", "-$hash.wasm\'")
+                    .replace(".mjs\'", "-$hash.mjs\'")
+                    .replace(".mjs\"", "-$hash.mjs\"")
+                    .replace("skiko.wasm\"", "skiko-$hash.wasm\"")
+                    .replace(
+                        "'@js-joda/core'",
+                        "'./@js-joda-${hash}/core/dist/js-joda.esm.js'"
+                    )
+                    .replace("<TEMP_IMPORT>", ".mjs\':")
+            }
+        }
+    }
+}
+
 val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
@@ -172,7 +268,28 @@ val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     }
 
     outgoing.variants.create("all", Action {
-        artifact(prepareRuntime)
+        artifact(prepareComposeWasmResources)
+    })
+}
+
+val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = false
+    isCanBeConsumed = true
+
+    attributes {
+        attribute(
+            Category.CATEGORY_ATTRIBUTE,
+            objects.categoryComposeCacheHash
+        )
+    }
+
+    outgoing.variants.create("hash", Action {
+        artifact(calculatedHash) {
+            builtBy(calculateHash)
+        }
+
+
     })
 }
 
@@ -226,6 +343,9 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
         @get:Input
         internal abstract val enhancedFreeCompilerArgs: ListProperty<String>
 
+        @get:Classpath
+        internal abstract val classpath: ConfigurableFileCollection
+
         @get:Internal
         internal abstract val binaryenExec: Property<String>
     }
@@ -257,7 +377,7 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
         if (!isKotlinLibrary) {
             fs.copy {
                 from(archiveOperations.zipTree(inputFile))
-                into(compilerOutputDir)
+                into(outputs.dir(inputFile.name.replaceAfterLast(".", "-transformed")))
             }
             return
         }
@@ -269,7 +389,7 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
             includes = inputFile.absolutePath
             wasmIncludedModuleOnly = true
             irProduceJs = true
-            libraries = dependencies.files.plus(inputFile).joinToString(File.pathSeparator) { it.absolutePath }
+            libraries = parameters.classpath.files.plus(inputFile).joinToString(File.pathSeparator) { it.absolutePath }
         }
 
         args.freeArgs += parameters.enhancedFreeCompilerArgs.get()
@@ -309,13 +429,9 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
             compilerArgumentsLogLevel = KotlinCompilerArgumentsLogLevel.DEFAULT,
         )
 
-        println("Start to compile ${inputFile.name}")
-
         GradleKotlinCompilerWork(
             workArgs
         ).run()
-
-        println("End to compile ${inputFile.name}")
 
         val binaryenOutputDirectory = outputs.dir(inputFile.name.replace(".klib", "-transformed"))
 

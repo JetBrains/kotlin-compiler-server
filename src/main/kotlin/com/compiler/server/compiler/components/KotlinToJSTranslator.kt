@@ -1,6 +1,6 @@
 package com.compiler.server.compiler.components
 
-import com.compiler.server.common.components.*
+import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.model.*
 import com.compiler.server.utils.*
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -55,6 +55,7 @@ class KotlinToJSTranslator(
 
     fun translateWasm(
         files: List<ProjectFile>,
+        staticUrl: String,
         debugInfo: Boolean,
         projectType: ProjectType,
         userCompilerArguments: JsCompilerArguments,
@@ -83,7 +84,7 @@ class KotlinToJSTranslator(
                 is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
             }
             TranslationWasmResult(
-                jsCode = mergeWasmOutputIntoOneJs(wasmCompilationOutput, outputFileName).fixSkikoImports(),
+                jsCode = mergeWasmOutputIntoOneJs(wasmCompilationOutput, staticUrl, outputFileName),
                 compilerDiagnostics = compilationResult.compilerDiagnostics
             )
         } catch (e: Exception) {
@@ -202,6 +203,7 @@ class KotlinToJSTranslator(
 
     private fun mergeWasmOutputIntoOneJs(
         wasmOutput: WasmTranslationSuccessfulOutput,
+        staticUrl: String,
         outputFileName: String,
     ): String {
         val importObjectJsContent = wasmOutput.importObject
@@ -209,12 +211,27 @@ class KotlinToJSTranslator(
         val jsBuitinsAlias = JS_BUILTINS_ALIAS_NAME_REGEX.find(importObjectJsContent)?.groupValues?.get(1)
 
         val replacedImportObjectContent =
-            wasmOutput.jsBuiltins?.toByteArray()?.let { byteContent ->
-                importObjectJsContent.replace(
-                    JS_BUILTINS_ALIAS_NAME_REGEX,
-                    "const $jsBuitinsAlias = await import(`data:application/javascript;base64, ${Base64.encode(byteContent)}`)"
-                )
-            } ?: importObjectJsContent
+            (wasmOutput.jsBuiltins?.toByteArray()?.let { byteContent ->
+                importObjectJsContent
+                    .replace(
+                        JS_BUILTINS_ALIAS_NAME_REGEX,
+                        "const $jsBuitinsAlias = await import(`data:application/javascript;base64, ${
+                            Base64.encode(
+                                byteContent
+                            )
+                        }`)"
+                    )
+            } ?: importObjectJsContent)
+                .let {
+                    val replacedContent = if (staticUrl.isNotEmpty()) {
+                        it.replace(
+                            "from './",
+                            "from '$staticUrl/",
+                        )
+                    } else it
+
+                    replacedContent.fixImports()
+                }
 
         return wasmOutput.jsCode
             .replace(
@@ -238,9 +255,9 @@ class KotlinToJSTranslator(
             ) + "\n export const instantiate = () => Promise.resolve();"
     }
 
-    private fun String.fixSkikoImports(): String = replace(
-        "skiko.mjs",
-        "skiko-${dependenciesUtil.dependenciesComposeWasm}.mjs"
+    private fun String.fixImports(): String = replace(
+        ".mjs",
+        "-${dependenciesUtil.dependenciesComposeWasm}.mjs"
     )
 }
 
