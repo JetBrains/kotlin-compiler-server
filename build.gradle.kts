@@ -16,18 +16,10 @@ plugins {
 
 apply<NodeJsRootPlugin>()
 
-setOf(
-    rootProject,
-    project(":common"),
-    project(":executors"),
-).forEach { project ->
-    project.afterEvaluate {
-        project.dependencies {
-            project.dependencies {
-                implementation(libs.jackson.module.kotlin)
-            }
-        }
-    }
+val kotlinComposeWasmCache: Configuration by configurations.creating {
+    isTransitive = false
+    isCanBeResolved = false
+    isCanBeConsumed = false
 }
 
 val kotlinComposeWasmRuntime: Configuration by configurations.creating {
@@ -40,6 +32,7 @@ val kotlinComposeWasmRuntime: Configuration by configurations.creating {
             objects.categoryComposeCache
         )
     }
+    extendsFrom(kotlinComposeWasmCache)
 }
 
 val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
@@ -52,6 +45,7 @@ val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
             objects.categoryComposeCacheHash
         )
     }
+    extendsFrom(kotlinComposeWasmCache)
 }
 
 dependencies {
@@ -72,6 +66,7 @@ dependencies {
     implementation(libs.kotlin.build.tools.impl)
     implementation(libs.kotlin.compiler.embeddable)
     implementation(libs.kotlin.tooling.core)
+    implementation(libs.jackson.module.kotlin)
     implementation(project(":executors", configuration = "default"))
     implementation(project(":common", configuration = "default"))
     implementation(project(":dependencies"))
@@ -79,8 +74,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    kotlinComposeWasmRuntime(project(":cache-maker"))
-    kotlinComposeWasmRuntimeHash(project(":cache-maker"))
+    kotlinComposeWasmCache(project(":cache-maker"))
 }
 
 fun Project.generateProperties(
