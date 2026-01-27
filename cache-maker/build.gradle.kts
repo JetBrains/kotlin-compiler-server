@@ -288,8 +288,6 @@ val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
         artifact(calculatedHash) {
             builtBy(calculateHash)
         }
-
-
     })
 }
 
