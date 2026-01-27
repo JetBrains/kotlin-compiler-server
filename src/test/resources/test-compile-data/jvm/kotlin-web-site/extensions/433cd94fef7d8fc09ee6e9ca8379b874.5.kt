@@ -1,23 +1,16 @@
-class Host(val hostname: String) {
-    fun printHostname() { print(hostname) }
-}
-
-class Connection(val host: Host, val port: Int) {
-    fun printPort() { print(port) }
-
-    fun Host.printConnectionString() {
-        printHostname()   // calls Host.printHostname()
-        print(":")
-        printPort()   // calls Connection.printPort()
-    }
-
-    fun connect() {
-        /*...*/
-        host.printConnectionString()   // calls the extension function
-    }
+fun <T> List<T>.endpoints(): Pair<T, T> {
+    return first() to last()
 }
 
 fun main() {
-    Connection(Host("kotl.in"), 443).connect()
-    //Host("kotl.in").printConnectionString()  // error, the extension function is unavailable outside Connection
+    val cities = listOf("Paris", "London", "Berlin", "Prague")
+    val temperatures = listOf(21.0, 19.5, 22.3)
+
+    val cityEndpoints = cities.endpoints()
+    val tempEndpoints = temperatures.endpoints()
+
+    println("First and last cities: $cityEndpoints")
+    // (Paris, Prague)
+    println("First and last temperatures: $tempEndpoints") 
+    // (21.0, 22.3)
 }
