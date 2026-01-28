@@ -105,10 +105,8 @@ fun MapProperty<String, String>.fillProperties(
 
     val kotlinComposeWasmRuntimeHash: FileCollection = kotlinComposeWasmRuntimeHash
 
-    val hashValue: Provider<String> = objects.property<Function0<String>>().value {
-        kotlinComposeWasmRuntimeHash.files.single().readText()
-    }.map {
-        it.invoke()
+    val hashValue: Provider<String> = kotlinComposeWasmRuntimeHash.elements.map {
+        it.single().asFile.readText()
     }
 
     put(
