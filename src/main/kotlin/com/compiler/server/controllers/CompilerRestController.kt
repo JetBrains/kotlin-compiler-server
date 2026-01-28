@@ -79,7 +79,6 @@ class CompilerRestController(
                 confType = ProjectType.COMPOSE_WASM,
                 compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments)
             ),
-            staticUrl = request.staticUrl,
         )
     }
 
@@ -111,20 +110,17 @@ class CompilerRestController(
     fun translate(
         @RequestBody @Valid project: Project,
         @RequestParam(defaultValue = "js") compiler: String,
-        @RequestParam(defaultValue = "") staticUrl: String,
         @RequestParam(defaultValue = "false") debugInfo: Boolean
     ): TranslationResultWithJsCode {
         return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
             KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
             KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
-                staticUrl,
                 debugInfo,
             )
 
             KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
-                staticUrl,
                 debugInfo,
             )
         }

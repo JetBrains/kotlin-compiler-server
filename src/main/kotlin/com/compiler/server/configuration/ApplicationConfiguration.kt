@@ -33,6 +33,7 @@ class ApplicationConfiguration(
   @Bean
   fun dependencies() = Dependencies(
       dependenciesProperties.composeWasm,
+    dependenciesProperties.staticUrl,
   )
 
   @Bean
@@ -59,4 +60,5 @@ class LibrariesFolderProperties {
 @ConfigurationProperties(prefix = "dependencies")
 class DependenciesProperties {
   lateinit var composeWasm: String
+  lateinit var staticUrl: String
 }
