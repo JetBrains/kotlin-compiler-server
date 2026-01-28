@@ -43,3 +43,9 @@ val Project.libComposeWasmFolder
 
 val Project.libComposeWasmCompilerPluginsFolder
     get() = rootProject.layout.projectDirectory.dir(libComposeWasmCompilerPlugins)
+
+const val dependenciesComposeWasm = "dependencies.compose-wasm"
+const val dependenciesStaticUrl = "dependencies.static-url"
+const val STATIC_URL_ENV_VAR = "DEPENDENCIES_STATIC_URL"
+const val staticPort = "8081"
+const val localhostStaticUrl = "http://localhost:$staticPort"
