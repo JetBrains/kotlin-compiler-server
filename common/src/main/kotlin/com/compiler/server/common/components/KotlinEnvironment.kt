@@ -14,6 +14,7 @@ class KotlinEnvironment(
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
   val dependenciesComposeWasm: String = "",
+  val dependenciesStaticUrl: String = "",
 ) {
   companion object {
     /**

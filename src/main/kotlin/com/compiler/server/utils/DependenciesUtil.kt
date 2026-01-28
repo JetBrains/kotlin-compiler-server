@@ -17,4 +17,6 @@ class DependenciesUtil(
 ) {
 
     val dependenciesComposeWasm: String = kotlinEnvironment.dependenciesComposeWasm
+
+    val dependenciesStaticUrl: String = kotlinEnvironment.dependenciesStaticUrl
 }
