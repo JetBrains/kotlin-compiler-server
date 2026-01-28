@@ -41,7 +41,8 @@ class KotlinEnvironmentConfiguration(
           "false"
         ),
       ),
-      dependencies.composeWasm
+      dependencies.composeWasm,
+      dependencies.staticUrl,
     )
   }
 }

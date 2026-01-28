@@ -107,15 +107,20 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
         propertiesMap.put(name, value)
     }
 
-    val hashValue = objects.property(Function0::class.java).value {
+    val hashValue: Provider<String> = objects.property<Function0<String>>().value {
         kotlinComposeWasmRuntimeHash.files.single().readText()
-    }.map<Any> {
+    }.map {
         it.invoke()
     }
 
     propertiesMap.put(
         "dependencies.compose-wasm",
         hashValue
+    )
+
+    propertiesMap.put(
+        "dependencies.static-url",
+        providers.environmentVariable("dependencies.static-url").orElse("http://localhost:8081")
     )
 }
 
