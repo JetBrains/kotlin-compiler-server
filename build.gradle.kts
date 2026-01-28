@@ -96,16 +96,14 @@ fun Project.generateProperties(
     "springdoc.swagger-ui.path" to "/api-docs/swagger-ui.html",
 )
 
-val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmRuntime)
-    dependsOn(kotlinComposeWasmRuntimeHash)
+fun MapProperty<String, String>.fillProperties(
+    prefix: String = "",
+) {
+    generateProperties(prefix).forEach { (name, value) ->
+        put(name, value)
+    }
 
     val kotlinComposeWasmRuntimeHash: FileCollection = kotlinComposeWasmRuntimeHash
-
-    propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
-    generateProperties().forEach { (name, value) ->
-        propertiesMap.put(name, value)
-    }
 
     val hashValue: Provider<String> = objects.property<Function0<String>>().value {
         kotlinComposeWasmRuntimeHash.files.single().readText()
@@ -113,24 +111,31 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
         it.invoke()
     }
 
-    propertiesMap.put(
-        "dependencies.compose-wasm",
+    put(
+        dependenciesComposeWasm,
         hashValue
     )
 
-    propertiesMap.put(
-        "dependencies.static-url",
-        providers.environmentVariable("dependencies.static-url").orElse("http://localhost:8081")
+    put(
+        dependenciesStaticUrl,
+        providers.environmentVariable(STATIC_URL_ENV_VAR).orElse(localhostStaticUrl)
     )
+}
+
+val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
+    dependsOn(kotlinComposeWasmRuntime)
+    dependsOn(kotlinComposeWasmRuntimeHash)
+
+    propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
+
+    propertiesMap.fillProperties()
 }
 
 val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmRuntime)
     propertiesFile.set(layout.buildDirectory.file("tmp/propertiesGenerator/${propertyFile}"))
 
-    generateProperties(lambdaPrefix).forEach { (name, value) ->
-        propertiesMap.put(name, value)
-    }
+    propertiesMap.fillProperties(lambdaPrefix)
 }
 
 tasks.withType<KotlinCompile> {

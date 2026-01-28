@@ -35,7 +35,7 @@ dependencies {
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
     dependsOn(kotlinComposeWasmRuntime)
     propertiesMap.put("spring.mvc.pathmatch.matching-strategy", "ant_path_matcher")
-    propertiesMap.put("server.port", "8081")
+    propertiesMap.put("server.port", staticPort)
 
     val applicationPropertiesPath = projectDir.resolve("src/main/resources/application.properties")
 
