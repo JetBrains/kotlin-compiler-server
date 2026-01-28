@@ -303,7 +303,6 @@ val bundledRuntimes by tasks.registering(DefaultTask::class) {
         fs.copy {
             from(inputDir) {
                 include {
-                    println(it.name)
                     it.name.substringBeforeLast("-") == "skiko"
                 }
             }
