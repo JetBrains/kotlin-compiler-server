@@ -46,6 +46,6 @@ val Project.libComposeWasmCompilerPluginsFolder
 
 const val dependenciesComposeWasm = "dependencies.compose-wasm"
 const val dependenciesStaticUrl = "dependencies.static-url"
-const val STATIC_URL_ENV_VAR = "DEPENDENCIES_STATIC_URL"
+const val DEPENDENCIES_STATIC_URL = "dependencies.static_url"
 const val staticPort = "8081"
 const val localhostStaticUrl = "http://localhost:$staticPort"

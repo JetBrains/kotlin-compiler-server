@@ -265,6 +265,9 @@ val bundledRuntimes by tasks.registering(DefaultTask::class) {
     val outputDir = bundledRuntimesDir
     outputs.dir(outputDir)
 
+    val staticUrl = providers.gradleProperty(DEPENDENCIES_STATIC_URL)
+    inputs.property("staticUrl", staticUrl).optional(true)
+
     val fs = project.serviceOf<FileSystemOperations>()
 
     doLast {
@@ -291,7 +294,7 @@ val bundledRuntimes by tasks.registering(DefaultTask::class) {
                     wasmFile.readBytes(),
                     relevantName,
                     hash,
-                    System.getenv(STATIC_URL_ENV_VAR) ?: localhostStaticUrl
+                    staticUrl.orElse(localhostStaticUrl).get()
                 )
 
                 outputDir.get().asFile.resolve("$nameWithoutExtension.mjs").writeText(resultMjs)

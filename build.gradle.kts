@@ -118,7 +118,7 @@ fun MapProperty<String, String>.fillProperties(
 
     put(
         dependenciesStaticUrl,
-        providers.environmentVariable(STATIC_URL_ENV_VAR).orElse(localhostStaticUrl)
+        providers.gradleProperty(DEPENDENCIES_STATIC_URL).orElse(localhostStaticUrl)
     )
 }
 
