@@ -2,6 +2,7 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
 import org.apache.tools.ant.filters.ConcatFilter
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.kotlin.cli.common.arguments.K2JSCompilerArguments
 import org.jetbrains.kotlin.compilerRunner.*
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
@@ -256,6 +257,58 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
     }
 }
 
+val bundledRuntimesDir = layout.buildDirectory.dir("tmp/bundledRuntimes")
+
+val bundledRuntimes by tasks.registering(DefaultTask::class) {
+    val inputDir = prepareComposeWasmResources.map { it.destinationDir }
+    inputs.dir(inputDir)
+    val outputDir = bundledRuntimesDir
+    outputs.dir(outputDir)
+
+    val fs = project.serviceOf<FileSystemOperations>()
+
+    doLast {
+        outputDir.get().asFile.mkdirs()
+
+        inputDir.get().listFiles()
+            .filter { it.extension == "wasm" }
+            .forEach { wasmFile ->
+
+                val nameWithoutExtension = wasmFile.nameWithoutExtension
+                val relevantName = nameWithoutExtension.substringBeforeLast("-")
+                val hash = nameWithoutExtension.substringAfterLast("-")
+
+                if (relevantName == "skiko") return@forEach
+
+                val importObject = wasmFile.parentFile.resolve("$relevantName.import-object-${hash}.mjs")
+                val jsBuiltIns = wasmFile.parentFile.resolve("$relevantName.js-builtins-$hash.mjs").takeIf { it.exists() }
+                val mainMjs = wasmFile.parentFile.resolve("$nameWithoutExtension.mjs")
+
+                val resultMjs = mergeWasmOutputIntoOneJs(
+                    jsBuiltIns?.readText(),
+                    importObject.readText(),
+                    mainMjs.readText(),
+                    wasmFile.readBytes(),
+                    relevantName,
+                    hash,
+                    System.getenv(STATIC_URL_ENV_VAR) ?: localhostStaticUrl
+                )
+
+                outputDir.get().asFile.resolve("$nameWithoutExtension.mjs").writeText(resultMjs)
+            }
+
+        fs.copy {
+            from(inputDir) {
+                include {
+                    println(it.name)
+                    it.name.substringBeforeLast("-") == "skiko"
+                }
+            }
+            into(outputDir)
+        }
+    }
+}
+
 val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     isTransitive = false
     isCanBeResolved = false
@@ -268,7 +321,9 @@ val kotlinComposeWasmRuntime: Configuration by configurations.creating {
     }
 
     outgoing.variants.create("all", Action {
-        artifact(prepareComposeWasmResources)
+        artifact(bundledRuntimesDir) {
+            builtBy(bundledRuntimes)
+        }
     })
 }
 
@@ -444,7 +499,10 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
 //            setWorkingDir(binaryenOutputDirectory)
 //            args = newArgs
 //        }
-//
+
+//        binaryenOutputDirectory.mkdirs()
+//        binaryenOutputDirectory.resolve(mainMjs.name).writeText(resultMjs)
+
         fs.copy {
             from(compilerOutputDir)
             into(binaryenOutputDirectory)
