@@ -55,7 +55,6 @@ class KotlinToJSTranslator(
 
     fun translateWasm(
         files: List<ProjectFile>,
-        staticUrl: String,
         debugInfo: Boolean,
         projectType: ProjectType,
         userCompilerArguments: JsCompilerArguments,
@@ -84,7 +83,7 @@ class KotlinToJSTranslator(
                 is NotCompiled -> return TranslationJSResult(compilerDiagnostics = compilationResult.compilerDiagnostics)
             }
             TranslationWasmResult(
-                jsCode = mergeWasmOutputIntoOneJs(wasmCompilationOutput, staticUrl, outputFileName),
+                jsCode = mergeWasmOutputIntoOneJs(wasmCompilationOutput, outputFileName),
                 compilerDiagnostics = compilationResult.compilerDiagnostics
             )
         } catch (e: Exception) {
@@ -203,9 +202,10 @@ class KotlinToJSTranslator(
 
     private fun mergeWasmOutputIntoOneJs(
         wasmOutput: WasmTranslationSuccessfulOutput,
-        staticUrl: String,
         outputFileName: String,
     ): String {
+        val staticUrl = dependenciesUtil.dependenciesStaticUrl
+
         val importObjectJsContent = wasmOutput.importObject
 
         val jsBuitinsAlias = JS_BUILTINS_ALIAS_NAME_REGEX.find(importObjectJsContent)?.groupValues?.get(1)
