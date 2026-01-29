@@ -1573,6 +1573,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xenable-implementing-interfaces-from-typescript",
+      "shortName": null,
+      "description": "Enable exporting of Kotlin interfaces to implement them from JavaScript/TypeScript.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xenable-suspend-function-exporting",
       "shortName": null,
       "description": "Enable exporting suspend functions to JavaScript/TypeScript.",
