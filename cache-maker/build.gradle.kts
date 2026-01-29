@@ -50,6 +50,11 @@ kotlin {
 }
 
 val allRuntimes: Configuration by configurations.creating {
+    isCanBeResolved = false
+    isCanBeConsumed = false
+}
+
+val allRuntimesCompiled: Configuration by configurations.creating {
     isCanBeResolved = true
     isCanBeConsumed = false
     usesPlatformOf(kotlin.wasmJs())
@@ -61,6 +66,7 @@ val allRuntimes: Configuration by configurations.creating {
             "compiled-wasm"
         )
     }
+    extendsFrom(allRuntimes)
 }
 
 val allRuntimesKlibs: Configuration by configurations.creating {
@@ -69,6 +75,7 @@ val allRuntimesKlibs: Configuration by configurations.creating {
     usesPlatformOf(kotlin.wasmJs())
     attributes.attribute(Usage.USAGE_ATTRIBUTE, KotlinUsages.consumerRuntimeUsage(kotlin.wasmJs()))
     attributes.attribute(Category.CATEGORY_ATTRIBUTE, project.categoryByName(Category.LIBRARY))
+    extendsFrom(allRuntimes)
 }
 
 // we don't need to build cache-maker
@@ -83,10 +90,6 @@ dependencies {
     allRuntimes(libs.bundles.compose)
     allRuntimes(libs.kotlinx.coroutines.core.compose.wasm)
     allRuntimes(libs.kotlin.stdlib.wasm.js)
-
-    allRuntimesKlibs(libs.bundles.compose)
-    allRuntimesKlibs(libs.kotlinx.coroutines.core.compose.wasm)
-    allRuntimesKlibs(libs.kotlin.stdlib.wasm.js)
 
     registerTransform(WasmBinaryTransform::class.java) {
         from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "klib")
@@ -145,7 +148,7 @@ dependencies {
 }
 
 val prepareRuntime by tasks.registering(Copy::class) {
-    val allRuntimes: FileCollection = allRuntimes
+    val allRuntimes: FileCollection = allRuntimesCompiled
 
     from(allRuntimes) {
         include {
