@@ -121,7 +121,6 @@ fun MapProperty<String, String>.fillProperties(
 }
 
 val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmRuntime)
     dependsOn(kotlinComposeWasmRuntimeHash)
 
     propertiesFile.fileValue(rootDir.resolve("src/main/resources/${propertyFile}"))
@@ -130,7 +129,6 @@ val propertiesGenerator by tasks.registering(PropertiesGenerator::class) {
 }
 
 val lambdaPropertiesGenerator by tasks.registering(PropertiesGenerator::class) {
-    dependsOn(kotlinComposeWasmRuntime)
     propertiesFile.set(layout.buildDirectory.file("tmp/propertiesGenerator/${propertyFile}"))
 
     propertiesMap.fillProperties(lambdaPrefix)
@@ -167,7 +165,6 @@ val buildLambda by tasks.creating(Zip::class) {
     from(libJVMFolder) { into(libJVM) }
     from(compilerPluginsForJVMFolder) { into(compilerPluginsForJVM) }
     from(libComposeWasmCompilerPluginsFolder) { into(libComposeWasmCompilerPlugins) }
-    dependsOn(kotlinComposeWasmRuntime)
     into("lib") {
         from(configurations.productionRuntimeClasspath) { exclude("tomcat-embed-*") }
     }
