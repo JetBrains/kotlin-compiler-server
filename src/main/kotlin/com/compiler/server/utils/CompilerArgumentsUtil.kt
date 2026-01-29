@@ -271,7 +271,6 @@ class CompilerArgumentsUtil(
         "Wextra" to true,
         "Xwasm" to true,
         "Xir-produce-js" to true,
-//        "Xir-dce" to true,
         "libraries" to Pair(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.joinToString(PATH_SEPARATOR)

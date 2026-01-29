@@ -16,6 +16,8 @@ import org.jetbrains.kotlin.gradle.plugin.usesPlatformOf
 import org.jetbrains.kotlin.gradle.report.ReportingSettings
 import org.jetbrains.kotlin.gradle.targets.js.internal.LibraryFilterCachingService
 import org.jetbrains.kotlin.gradle.targets.js.ir.JsIrBinary
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenEnvSpec
+import org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenPlugin
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompilerExecutionStrategy
 import org.jetbrains.kotlin.gradle.utils.kotlinSessionsDir
@@ -86,6 +88,8 @@ tasks.named("build") {
 val mainCompilation = kotlin.wasmJs().compilations.getByName("main")
 val compileTask = mainCompilation.compileTaskProvider
 
+apply<BinaryenPlugin>()
+
 dependencies {
     allRuntimes(libs.bundles.compose)
     allRuntimes(libs.kotlinx.coroutines.core.compose.wasm)
@@ -134,9 +138,7 @@ dependencies {
                 allRuntimesKlibs
             )
 
-//            BinaryenPlugin.apply(project)
-//            it.binaryenExec.set(project.extensions.findByType(BinaryenEnvSpec::class.java).executable)
-//            it.mode.set(binary.mode)
+            binaryenExec.set(project.the<BinaryenEnvSpec>().executable)
         }
     }
 
@@ -149,6 +151,10 @@ dependencies {
 
 val prepareRuntime by tasks.registering(Copy::class) {
     val allRuntimes: FileCollection = allRuntimesCompiled
+
+    with(project.the<BinaryenEnvSpec>()) {
+        dependsOn(project.binaryenSetupTaskProvider)
+    }
 
     from(allRuntimes) {
         include {
@@ -308,6 +314,7 @@ val bundledRuntimes by tasks.registering(DefaultTask::class) {
                 include {
                     it.name.substringBeforeLast("-") == "skiko"
                 }
+                include("@js-joda-*/**")
             }
             into(outputDir)
         }
@@ -406,6 +413,8 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
 
         @get:Internal
         internal abstract val binaryenExec: Property<String>
+
+
     }
 
     @get:Inject
@@ -493,25 +502,22 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
 
         val binaryenOutputDirectory = outputs.dir(inputFile.name.replace(".klib", "-transformed"))
 
-//        execOps.exec {
-//            executable = parameters.binaryenExec.get()
-//            val inputFileBinaryen = compilerOutputDir.listFiles().first { it.extension == "wasm" }
-//            val newArgs = mutableListOf<String>()
-//            newArgs.addAll(binaryenArgs(false))
-//            newArgs.add(inputFileBinaryen.absolutePath)
-//            newArgs.add("-o")
-//            newArgs.add(binaryenOutputDirectory.resolve(inputFileBinaryen.name).absolutePath)
-//            setWorkingDir(binaryenOutputDirectory)
-//            args = newArgs
-//        }
-
-//        binaryenOutputDirectory.mkdirs()
-//        binaryenOutputDirectory.resolve(mainMjs.name).writeText(resultMjs)
+        execOps.exec {
+            executable = parameters.binaryenExec.get()
+            val inputFileBinaryen = compilerOutputDir.listFiles().first { it.extension == "wasm" }
+            val newArgs = mutableListOf<String>()
+            newArgs.addAll(binaryenArgs())
+            newArgs.add(inputFileBinaryen.absolutePath)
+            newArgs.add("-o")
+            newArgs.add(binaryenOutputDirectory.resolve(inputFileBinaryen.name).absolutePath)
+            workingDir = binaryenOutputDirectory
+            this.args = newArgs
+        }
 
         fs.copy {
             from(compilerOutputDir)
             into(binaryenOutputDirectory)
-            include("*.mjs", "*.js", "*.js.map", "*.wasm")
+            include("*.mjs", "*.js", "*.js.map")
         }
 
     }
@@ -528,5 +534,34 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
 
     private companion object {
         private val LOGGER: Logger = Logging.getLogger(WasmBinaryTransform::class.java)
+
+        private fun binaryenArgs() = listOf(
+            // Proposals
+            "--enable-gc",
+            "--enable-reference-types",
+            "--enable-exception-handling",
+            "--enable-bulk-memory",  // For array initialization from data sections
+
+            // Other options
+            "--enable-nontrapping-float-to-int",
+
+            // Optimizations:
+            // Note the order and repetition of the next options matter.
+            //
+            // About Binaryen optimizations:
+            // GC Optimization Guidebook -- https://github.com/WebAssembly/binaryen/wiki/GC-Optimization-Guidebook
+            // Optimizer Cookbook -- https://github.com/WebAssembly/binaryen/wiki/Optimizer-Cookbook
+            //
+            "--no-inline=kotlin.wasm.internal.throwValue",
+            "--no-inline=kotlin.wasm.internal.getKotlinException",
+            "--no-inline=kotlin.wasm.internal.jsToKotlinStringAdapter",
+            "--inline-functions-with-loops",
+            "--traps-never-happen",
+            "--fast-math",
+            // without "--type-merging" it produces increases the size
+            "--type-ssa",
+            "-O3",
+            "-O3",
+        )
     }
 }
