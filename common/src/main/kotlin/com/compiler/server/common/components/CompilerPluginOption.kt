@@ -1,4 +1,4 @@
-package component
+package com.compiler.server.common.components
 
 data class CompilerPluginOption(
     val id: String,

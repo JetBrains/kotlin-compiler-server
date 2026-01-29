@@ -1,6 +1,6 @@
+import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.provideDelegate
-import org.gradle.accessors.dm.LibrariesForLibs
 import org.gradle.kotlin.dsl.the
 
 val indexes: String by System.getProperties()
@@ -43,3 +43,9 @@ val Project.libComposeWasmFolder
 
 val Project.libComposeWasmCompilerPluginsFolder
     get() = rootProject.layout.projectDirectory.dir(libComposeWasmCompilerPlugins)
+
+const val dependenciesComposeWasm = "dependencies.compose-wasm"
+const val dependenciesStaticUrl = "dependencies.static-url"
+const val DEPENDENCIES_STATIC_URL = "dependencies.static_url"
+const val staticPort = "8081"
+const val localhostStaticUrl = "http://localhost:$staticPort"

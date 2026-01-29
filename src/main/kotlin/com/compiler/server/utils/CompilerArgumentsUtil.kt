@@ -1,26 +1,13 @@
 package com.compiler.server.utils
 
-import com.compiler.server.compiler.components.PATH_SEPARATOR
-import com.compiler.server.model.BooleanExtendedCompilerArgumentValue
-import com.compiler.server.model.ExtendedCompilerArgument
-import com.compiler.server.model.ExtendedCompilerArgumentValue
-import com.compiler.server.model.ListExtendedCompilerArgumentValue
-import com.compiler.server.model.StringExtendedCompilerArgumentValue
+import com.compiler.server.common.components.KotlinEnvironment
+import com.compiler.server.common.components.PATH_SEPARATOR
+import com.compiler.server.model.*
 import com.compiler.server.model.bean.VersionInfo
-import component.KotlinEnvironment
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgument
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArguments
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgumentsLevel
-import org.jetbrains.kotlin.arguments.dsl.types.BooleanType
-import org.jetbrains.kotlin.arguments.dsl.types.IntType
-import org.jetbrains.kotlin.arguments.dsl.types.KlibIrInlinerModeType
-import org.jetbrains.kotlin.arguments.dsl.types.KotlinArgumentValueType
-import org.jetbrains.kotlin.arguments.dsl.types.KotlinExplicitApiModeType
-import org.jetbrains.kotlin.arguments.dsl.types.KotlinJvmTargetType
-import org.jetbrains.kotlin.arguments.dsl.types.KotlinVersionType
-import org.jetbrains.kotlin.arguments.dsl.types.ReturnValueCheckerModeType
-import org.jetbrains.kotlin.arguments.dsl.types.StringArrayType
-import org.jetbrains.kotlin.arguments.dsl.types.StringType
+import org.jetbrains.kotlin.arguments.dsl.types.*
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.springframework.stereotype.Component
 
@@ -269,7 +256,7 @@ class CompilerArgumentsUtil(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.joinToString(PATH_SEPARATOR)
         ),
         "ir-output-name" to WASM_DEFAULT_MODULE_NAME,
-        "XPlugin" to Pair(
+        "Xplugin" to Pair(
             kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS.map { it.split("/").last() },
             kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS
         ),
@@ -284,7 +271,6 @@ class CompilerArgumentsUtil(
         "Wextra" to true,
         "Xwasm" to true,
         "Xir-produce-js" to true,
-        "Xir-dce" to true,
         "libraries" to Pair(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.joinToString(PATH_SEPARATOR)

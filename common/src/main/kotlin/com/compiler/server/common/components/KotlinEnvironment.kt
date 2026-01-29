@@ -1,4 +1,4 @@
-package component
+package com.compiler.server.common.components
 
 import org.jetbrains.kotlin.library.loader.KlibLoader
 import org.jetbrains.kotlin.library.loader.KlibPlatformChecker
@@ -13,6 +13,8 @@ class KotlinEnvironment(
   composeWasmCompilerPlugins: List<File>,
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
+  val dependenciesComposeWasm: String = "",
+  val dependenciesStaticUrl: String = "",
 ) {
   companion object {
     /**

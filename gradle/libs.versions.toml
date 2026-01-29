@@ -7,18 +7,20 @@ aws-serverless-java-container-springboot3 = "2.1.5"
 junit = "4.13.2"
 logstash-logback-encoder = "9.0"
 kotlinx-coroutines = "1.7.3"
+kotlinx-coroutines-compose-wasm = "1.10.2"
 kotlinx-coroutines-test = "1.6.4"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-io = "0.8.2"
 kotlinx-serialization = "1.9.0"
 lsp4j = "0.24.0"
 reactor = "3.8.0"
-skiko = "0.8.15"
+skiko = "0.9.22.2"
 testcontainers = "1.21.3"
 # don't forget to update jackson version in `executor.policy` file.
 jackson = "2.19.2"
 hamcrest = "3.0"
-compose = "1.7.0"
+compose = "1.9.3"
+compose-material3 = "1.9.0"
 gradle-develocity = "3.17.5"
 
 [libraries]
@@ -36,9 +38,10 @@ kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name =
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-dom-api-compat = { group = "org.jetbrains.kotlin", name = "kotlin-dom-api-compat", version.ref = "kotlin" }
-kotlin-compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-compose-compiler-plugin", version.ref = "kotlin" }
+kotlin-compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-compose-compiler-plugin-embeddable", version.ref = "kotlin" }
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core-compose-wasm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-wasm-js", version.ref = "kotlinx-coroutines-compose-wasm" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-io-bytestring = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-bytestring", version.ref = "kotlinx-io" }
@@ -65,7 +68,7 @@ compose-animation = { group = "org.jetbrains.compose.animation", name = "animati
 compose-animation-graphics = { group = "org.jetbrains.compose.animation", name = "animation-graphics", version.ref = "compose" }
 compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "compose" }
 compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "compose" }
-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose-material3" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
 kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
 gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
@@ -102,3 +105,5 @@ testcontainers = [
 kotlin-plugin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-managment" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

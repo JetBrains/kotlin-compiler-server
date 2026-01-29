@@ -852,7 +852,9 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": [
+        "{{PLUGIN_PLACEHOLDER}}"
+      ]
     },
     {
       "name": "Xprofile-phases",
@@ -1992,7 +1994,7 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": "animation-core-wasm-js-1.7.0.klib:animation-graphics-wasm-js-1.7.0.klib:animation-wasm-js-1.7.0.klib:annotation-wasm-js-1.7.0.klib:atomicfu-wasm-js-0.23.2.klib:collection-wasm-js-1.7.0.klib:foundation-layout-wasm-js-1.7.0.klib:foundation-wasm-js-1.7.0.klib:kotlin-stdlib-wasm-js-{{KOTLIN_VERSION_PLACEHOLDER}}.klib:kotlinx-browser-wasm-js-0.1-javadoc.klib:kotlinx-coroutines-core-wasm-js-1.8.0.klib:kotlinx-datetime-wasm-js-0.6.0.klib:kotlinx-serialization-core-wasm-js-1.6.2.klib:library-wasm-js-1.7.0.klib:lifecycle-common-wasm-js-2.8.3.klib:lifecycle-runtime-compose-wasm-js-2.8.3.klib:lifecycle-runtime-wasm-js-2.8.3.klib:lifecycle-viewmodel-wasm-js-2.8.3.klib:material-icons-core-wasm-js-1.7.0.klib:material-ripple-wasm-js-1.7.0.klib:material-wasm-js-1.7.0.klib:material3-wasm-js-1.7.0.klib:runtime-saveable-wasm-js-1.7.0.klib:runtime-wasm-js-1.7.0.klib:skiko-wasm-js-0.8.15.klib:ui-geometry-wasm-js-1.7.0.klib:ui-graphics-wasm-js-1.7.0.klib:ui-text-wasm-js-1.7.0.klib:ui-unit-wasm-js-1.7.0.klib:ui-util-wasm-js-1.7.0.klib:ui-wasm-js-1.7.0.klib"
+      "predefinedValues": "{{CLASSPATH_PLACEHOLDER}}"
     },
     {
       "name": "main",

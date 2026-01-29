@@ -1,0 +1,65 @@
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.ComposeViewport
+import kotlinx.browser.document
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun main() {
+    ComposeViewport(viewportContainer = document.body!!, content = {
+        App()
+    })
+}
+
+@Composable
+fun App() {
+    MaterialTheme {
+        var showContent by remember { mutableStateOf(false) }
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Button(onClick = { showContent = !showContent }) {
+                Text("Click me!")
+            }
+            AnimatedVisibility(showContent) {
+                val greeting = remember { Greeting().greet() }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("Compose: $greeting")
+                }
+            }
+        }
+    }
+}
+
+private val platform = object : Platform {
+
+    override val name: String
+        get() = "Web with Kotlin/Wasm"
+}
+
+fun getPlatform(): Platform = platform
+
+class Greeting {
+    private val platform = getPlatform()
+
+    fun greet(): String {
+        return "Hello, ${platform.name}!"
+    }
+}
+
+interface Platform {
+    val name: String
+}
