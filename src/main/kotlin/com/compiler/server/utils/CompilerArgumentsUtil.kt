@@ -141,7 +141,8 @@ class CompilerArgumentsUtil(
         "Xuse-k2-kapt",
         "Xcompile-builtins-as-part-of-stdlib",
         "Xannotations-in-metadata",
-        "Xwhen-expressions"
+        "Xwhen-expressions",
+        "Xheader-mode-type"
     )
 
     private val ALLOWED_COMMON_KLIB_BASED_ARGUMENTS = setOf(
@@ -517,6 +518,13 @@ class CompilerArgumentsUtil(
                 ListExtendedCompilerArgumentValue(
                     isNullable = type.isNullable.current,
                     defaultValue = type.defaultValue.current?.toList() ?: emptyList<Any>()
+                )
+            }
+
+            is KotlinHeaderModeType -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.modeName
                 )
             }
         }
