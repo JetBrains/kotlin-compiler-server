@@ -589,6 +589,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xheader-mode-type",
+      "shortName": null,
+      "description": "Generates output based on what it is used for:\n-Xheader-mode-type=compilation: Skips the IR generation for modules that don't have inline functions.\n-Xheader-mode-type=any: Can be used for any downstream dependency which doesn't require linking.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "any"
+      },
+      "disabled": false,
+      "predefinedValues": null
+    },
+    {
       "name": "Xignore-const-optimization-errors",
       "shortName": null,
       "description": "Ignore all compilation exceptions while optimizing some constant expressions.",
@@ -853,6 +865,18 @@
       "predefinedValues": [
         {{PLUGIN_PLACEHOLDER}}
       ]
+    },
+    {
+      "name": "Xprint-configuration",
+      "shortName": null,
+      "description": "Print compiler configuration.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
     },
     {
       "name": "Xprofile-phases",
@@ -1318,18 +1342,6 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xcompile-builtins-as-part-of-stdlib",
-      "shortName": null,
-      "description": "Enable behaviour needed to compile builtins as part of JVM stdlib",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
       "predefinedValues": null
     },
     {
