@@ -20,7 +20,7 @@ class CompilerArgumentsConfigurationTest {
         val kotlinCompilerArguments = compilerArgumentsConfiguration.kotlinCompilerArguments()
 
         assertEquals(
-            3, kotlinCompilerArguments.schemaVersion,
+            4, kotlinCompilerArguments.schemaVersion,
             "Unsupported schema version of $COMPILER_ARGUMENTS_JSON"
         )
 
