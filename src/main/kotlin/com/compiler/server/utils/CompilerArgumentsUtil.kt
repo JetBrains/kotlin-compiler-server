@@ -19,11 +19,13 @@ import org.jetbrains.kotlin.arguments.dsl.types.KotlinExplicitApiModeType
 import org.jetbrains.kotlin.arguments.dsl.types.KotlinJvmTargetType
 import org.jetbrains.kotlin.arguments.dsl.types.KotlinHeaderModeType
 import org.jetbrains.kotlin.arguments.dsl.types.KotlinVersionType
+import org.jetbrains.kotlin.arguments.dsl.types.PathType
 import org.jetbrains.kotlin.arguments.dsl.types.ReturnValueCheckerModeType
 import org.jetbrains.kotlin.arguments.dsl.types.StringArrayType
 import org.jetbrains.kotlin.arguments.dsl.types.StringType
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.springframework.stereotype.Component
+import kotlin.io.path.absolutePathString
 
 internal const val COMPILER_ARGUMENTS_JSON = "kotlin-compiler-arguments.json"
 internal const val COMMON_ARGUMENTS_NAME = "commonCompilerArguments"
@@ -539,6 +541,13 @@ class CompilerArgumentsUtil(
                 StringExtendedCompilerArgumentValue(
                     isNullable = type.isNullable.current,
                     defaultValue = type.defaultValue.current?.modeName
+                )
+            }
+
+            is PathType -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.absolutePathString()
                 )
             }
         }
