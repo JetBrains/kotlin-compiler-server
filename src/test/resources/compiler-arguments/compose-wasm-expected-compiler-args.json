@@ -1443,6 +1443,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xwasm-generate-closed-world-multimodule",
+      "shortName": null,
+      "description": "Compile modules in multi-module closed-world mode using module passed in `-include` argument as main module",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xwasm-generate-dwarf",
       "shortName": null,
       "description": "Generate DWARF debug information.",
