@@ -517,6 +517,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xexplicit-context-arguments",
+      "shortName": null,
+      "description": "Enable explicit passing of context arguments using named argument syntax.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xfragment-dependency",
       "shortName": null,
       "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
@@ -1779,7 +1791,7 @@
     {
       "name": "Xprofile",
       "shortName": null,
-      "description": "Debug option: Run the compiler with the async profiler and save snapshots to `outputDir`; `command` is passed to the async profiler on start.\n`profilerPath` is the path to libasyncProfiler.so; async-profiler.jar should be on the compiler classpath.\nIf it's not on the classpath, the compiler will attempt to load async-profiler.jar from the containing directory of profilerPath.\nExample: -Xprofile=<PATH_TO_ASYNC_PROFILER>/async-profiler/build/libasyncProfiler.so:event=cpu,interval=1ms,threads,start:<SNAPSHOT_DIR_PATH>",
+      "description": "Debug option: Run the compiler with the async profiler and save snapshots to `outputDir`; `command` is passed to the async profiler on start.\n`profilerPath` is the path to libasyncProfiler.so; async-profiler.jar should be on the compiler classpath.\nIf it's not on the classpath, the compiler will attempt to load async-profiler.jar from the containing directory of profilerPath. \nIndividual parameter values are separated by the system path separator.\nExample (Unix/Linux): -Xprofile=<PATH_TO_ASYNC_PROFILER>/async-profiler/build/libasyncProfiler.so:event=cpu,interval=1ms,threads,start:<SNAPSHOT_DIR_PATH>\nExample (Windows): -Xprofile=<PATH_TO_ASYNC_PROFILER>\\async-profiler\\build\\libasyncProfiler.so;event=cpu,interval=1ms,threads,start;<SNAPSHOT_DIR_PATH>",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,

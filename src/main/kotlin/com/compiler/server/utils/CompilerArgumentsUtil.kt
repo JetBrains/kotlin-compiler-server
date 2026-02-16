@@ -550,6 +550,13 @@ class CompilerArgumentsUtil(
                     defaultValue = type.defaultValue.current?.absolutePathString()
                 )
             }
+            // TODO(Dmitrii Krasnov): remove else branch when KT-83794 is finished
+            else -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.toString()
+                )
+            }
         }
     }
 
