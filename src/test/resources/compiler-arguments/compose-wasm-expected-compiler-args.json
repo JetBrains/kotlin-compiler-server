@@ -519,6 +519,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xexplicit-context-arguments",
+      "shortName": null,
+      "description": "Enable explicit passing of context arguments using named argument syntax.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xfragment-dependency",
       "shortName": null,
       "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
@@ -1303,7 +1315,7 @@
     {
       "name": "Xklib-relative-path-base",
       "shortName": null,
-      "description": "Provide a base path to compute the source's relative paths in klib (default is empty).",
+      "description": "Relativize all the paths stored in a klib using the given path prefixes.\nThe supplied prefixes should be absolute paths to the directories containing the source code files.\nNote: The prefixes are applied in the same order as they are passed in this CLI argument.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
