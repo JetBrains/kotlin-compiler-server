@@ -188,7 +188,7 @@ class CompilerArgumentsUtil(
     )
 
     // Use Pair if you want to provide different values for user and for actual use.
-    // For example, with XPlugin users need to see only plugins, without an actual path,
+    // For example, with Xplugin users need to see only plugins, without an actual path,
     // but for the compiler we need to pass a full path to the plugin jar.
     // In declared Pair the first element is for the user, the second is for actual use.
     val PREDEFINED_JVM_ARGUMENTS = mapOf(
@@ -276,6 +276,7 @@ class CompilerArgumentsUtil(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.joinToString(PATH_SEPARATOR)
         ),
         "ir-output-name" to WASM_DEFAULT_MODULE_NAME,
+        "Xwasm-included-module-only" to true,
     )
 
     val PREDEFINED_JS_FIRST_PHASE_ARGUMENTS = mapOf(

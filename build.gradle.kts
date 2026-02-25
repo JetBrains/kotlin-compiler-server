@@ -169,10 +169,13 @@ val buildLambda by tasks.creating(Zip::class) {
         from(configurations.productionRuntimeClasspath) { exclude("tomcat-embed-*") }
     }
 
+    // The task prepareComposeWasmResources put all static resources into the specific directory
+    // After buildLambda all static resources are ready
+    // If you want them to be ready only by explicit call of prepareComposeWasmResources, this line can be removed
     dependsOn(prepareComposeWasmResources)
 }
 
-tasks.named<Copy>("processResources") {
+tasks.processResources {
     dependsOn(propertiesGenerator)
 }
 
