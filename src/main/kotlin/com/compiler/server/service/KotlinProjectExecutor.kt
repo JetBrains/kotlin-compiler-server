@@ -71,12 +71,7 @@ class KotlinProjectExecutor(
                     project,
                 ).compilerDiagnostics
 
-            ProjectType.WASM -> convertToWasm(
-                project,
-                debugInfo = false,
-            ).compilerDiagnostics
-
-            ProjectType.COMPOSE_WASM -> convertToWasm(
+            ProjectType.WASM, ProjectType.COMPOSE_WASM -> convertToWasm(
                 project,
                 debugInfo = false,
             ).compilerDiagnostics

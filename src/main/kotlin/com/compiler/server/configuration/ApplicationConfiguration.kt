@@ -1,6 +1,5 @@
 package com.compiler.server.configuration
 
-import com.compiler.server.model.bean.Dependencies
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.bean.VersionInfo
 import org.springframework.beans.factory.annotation.Value
@@ -13,11 +12,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.io.File
 
 @Configuration
-@EnableConfigurationProperties(value = [LibrariesFolderProperties::class, DependenciesProperties::class])
+@EnableConfigurationProperties(value = [LibrariesFolderProperties::class])
 class ApplicationConfiguration(
   @Value("\${kotlin.version}") private val version: String,
   private val librariesFolderProperties: LibrariesFolderProperties,
-  private val dependenciesProperties: DependenciesProperties,
 ) : WebMvcConfigurer {
   override fun addFormatters(registry: FormatterRegistry) {
     registry.addConverter(ProjectConverter())
@@ -28,12 +26,6 @@ class ApplicationConfiguration(
   fun versionInfo() = VersionInfo(
     version = version,
     stdlibVersion = version
-  )
-
-  @Bean
-  fun dependencies() = Dependencies(
-      dependenciesProperties.composeWasm,
-    dependenciesProperties.staticUrl,
   )
 
   @Bean
@@ -55,10 +47,4 @@ class LibrariesFolderProperties {
   lateinit var composeWasm: String
   lateinit var composeWasmCompilerPlugins: String
   lateinit var compilerPlugins: String
-}
-
-@ConfigurationProperties(prefix = "dependencies")
-class DependenciesProperties {
-  lateinit var composeWasm: String
-  lateinit var staticUrl: String
 }
