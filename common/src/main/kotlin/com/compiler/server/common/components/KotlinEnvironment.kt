@@ -13,7 +13,7 @@ class KotlinEnvironment(
   composeWasmCompilerPlugins: List<File>,
   val compilerPlugins: List<File> = emptyList(),
   composeWasmCompilerPluginsOptions: List<CompilerPluginOption>,
-  val dependenciesComposeWasm: String = "",
+  val dependenciesComposeWasmHash: String = "",
   val dependenciesStaticUrl: String = "",
 ) {
   companion object {

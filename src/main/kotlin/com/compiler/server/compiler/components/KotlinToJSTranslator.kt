@@ -1,5 +1,6 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.model.*
 import com.compiler.server.utils.*
@@ -21,7 +22,7 @@ class KotlinToJSTranslator(
     private val jsCompilerArguments: Set<ExtendedCompilerArgument>,
     private val wasmCompilerArguments: Set<ExtendedCompilerArgument>,
     private val composeWasmCompilerArguments: Set<ExtendedCompilerArgument>,
-    private val dependenciesUtil: DependenciesUtil,
+    private val kotlinEnvironment: KotlinEnvironment,
 ) {
     companion object {
         internal const val JS_IR_CODE_BUFFER = "playground.output?.buffer_1;\n"
@@ -66,8 +67,11 @@ class KotlinToJSTranslator(
         ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
+
             val outputFileName = when (projectType) {
                 ProjectType.WASM -> WASM_DEFAULT_MODULE_NAME
+                // The compose wasm compiler transforms klib uniqueName and escapes angle brackets with underscores, 
+                // resulting in a different outputFileName than regular wasm.
                 ProjectType.COMPOSE_WASM -> "_${WASM_DEFAULT_MODULE_NAME}_"
                 else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
             }
@@ -154,9 +158,8 @@ class KotlinToJSTranslator(
                     ProjectType.COMPOSE_WASM -> WasmArguments(
                         composeWasmCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
-                        compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS +
-                                ("Xwasm-included-module-only" to true),
-                        "_${WASM_DEFAULT_MODULE_NAME}_"
+                        compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS,
+                        "_${WASM_DEFAULT_MODULE_NAME}_" // The compose wasm compiler transforms klib uniqueName and escapes angle brackets with underscores
                     )
 
                     else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
@@ -204,7 +207,7 @@ class KotlinToJSTranslator(
         wasmOutput: WasmTranslationSuccessfulOutput,
         outputFileName: String,
     ): String {
-        val staticUrl = dependenciesUtil.dependenciesStaticUrl
+        val staticUrl = kotlinEnvironment.dependenciesStaticUrl
 
         val importObjectJsContent = wasmOutput.importObject
 
@@ -257,7 +260,7 @@ class KotlinToJSTranslator(
 
     private fun String.fixImports(): String = replace(
         ".mjs",
-        "-${dependenciesUtil.dependenciesComposeWasm}.mjs"
+        "-${kotlinEnvironment.dependenciesComposeWasmHash}.mjs"
     )
 }
 
