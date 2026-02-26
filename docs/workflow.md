@@ -45,6 +45,7 @@ This block describes the process of releasing a new version.
      * from the `kotlin-community/<version>` branch, if not exists then
      * from the `kotlin-community/<previous-version>` branch, if it does not exist then
      * from the `<previous-version>` branch.
+     note: <version> means <X.Y.Z> version without any prefix or postfix
 2. Modify [the Kotlin version](https://github.com/JetBrains/kotlin-compiler-server/blob/master/gradle/libs.versions.toml#L2) in the branch.
 3. If the current Kotlin version is bigger than in `master`, then create a pull request to `master`. Otherwise, push your changes to the remote branch and skip the rest of the steps.
    * creating a pull request should be from the separate branch like `merge/2.0.0-RC2`, this `merge/<version>` branch is created from `<version>` branch and then it is rebased as follows:
