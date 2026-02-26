@@ -211,30 +211,12 @@ class KotlinToJSTranslator(
 
         val importObjectJsContent = wasmOutput.importObject
 
-        val jsBuitinsAlias = JS_BUILTINS_ALIAS_NAME_REGEX.find(importObjectJsContent)?.groupValues?.get(1)
+        val jsBuiltinsAlias = JS_BUILTINS_ALIAS_NAME_REGEX.find(importObjectJsContent)?.groupValues?.get(1)
 
         val replacedImportObjectContent =
-            (wasmOutput.jsBuiltins?.toByteArray()?.let { byteContent ->
-                importObjectJsContent
-                    .replace(
-                        JS_BUILTINS_ALIAS_NAME_REGEX,
-                        "const $jsBuitinsAlias = await import(`data:application/javascript;base64, ${
-                            Base64.encode(
-                                byteContent
-                            )
-                        }`)"
-                    )
-            } ?: importObjectJsContent)
-                .let {
-                    val replacedContent = if (staticUrl.isNotEmpty()) {
-                        it.replace(
-                            "from './",
-                            "from '$staticUrl/",
-                        )
-                    } else it
-
-                    replacedContent.fixImports()
-                }
+            wasmOutput.jsBuiltins
+                .mergeBuiltinsToImport(jsBuiltinsAlias!!, importObjectJsContent)
+                .substituteValidStaticUrl(staticUrl)
 
         return wasmOutput.jsCode
             .replace(
@@ -257,6 +239,40 @@ class KotlinToJSTranslator(
                         "  })();"
             ) + "\n export const instantiate = () => Promise.resolve();"
     }
+
+    private fun String?.mergeBuiltinsToImport(
+        jsBuiltinsAlias: String,
+        importObjectJsContent: String,
+    ): String {
+        return this?.toByteArray()?.let { byteContent ->
+            importObjectJsContent
+                .replace(
+                    JS_BUILTINS_ALIAS_NAME_REGEX,
+                    jsBuiltInsContent(jsBuiltinsAlias, byteContent)
+                )
+        } ?: importObjectJsContent
+    }
+
+    private fun String.substituteValidStaticUrl(staticUrl: String): String {
+        val replacedContent = if (staticUrl.isNotEmpty()) {
+            replace(
+                "from './",
+                "from '$staticUrl/",
+            )
+        } else this
+
+        return replacedContent.fixImports()
+    }
+
+    private fun jsBuiltInsContent(
+        jsBuiltinsAlias: String,
+        byteContent: ByteArray,
+    ): String =
+        "const $jsBuiltinsAlias = await import(`data:application/javascript;base64, ${
+            Base64.encode(
+                byteContent
+            )
+        }`)"
 
     private fun String.fixImports(): String = replace(
         ".mjs",
