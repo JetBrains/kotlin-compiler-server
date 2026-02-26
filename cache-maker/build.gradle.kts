@@ -94,59 +94,6 @@ dependencies {
     allRuntimes(libs.bundles.compose)
     allRuntimes(libs.kotlinx.coroutines.core.compose.wasm)
     allRuntimes(libs.kotlin.stdlib.wasm.js)
-
-    registerTransform(WasmBinaryTransform::class.java) {
-        from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "klib")
-        to.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "compiled-wasm")
-
-        val libraryFilterService = LibraryFilterCachingService.registerIfAbsent(project)
-
-
-        parameters {
-            currentJvmJdkToolsJar.set(
-                compileTask.flatMap { it.defaultKotlinJavaToolchain }
-                    .flatMap { it.currentJvmJdkToolsJar }
-            )
-            defaultCompilerClasspath.setFrom(project.configurations.named(COMPILER_CLASSPATH_CONFIGURATION_NAME))
-            kotlinPluginVersion.set(
-                compileTask.map { getKotlinPluginVersion(it.logger) }
-            )
-            pathProvider.set(
-                compileTask.map { it.path }
-            )
-            projectRootFile.set(
-                project.projectDir
-            )
-            val projectName = project.name
-            this.projectName.set(projectName)
-            projectSessionsDir.set(project.kotlinSessionsDir)
-
-            this.buildDir.set(project.layout.buildDirectory.asFile)
-
-            libraryFilterCacheService.set(libraryFilterService)
-
-            compilerOptions.set(
-                compileTask.map {
-                    val args = K2JSCompilerArguments()
-                    KotlinCommonCompilerOptionsHelper.fillCompilerArguments(it.compilerOptions, args)
-                    args
-                }
-            )
-            enhancedFreeCompilerArgs.set(compileTask.flatMap { it.enhancedFreeCompilerArgs })
-
-            classpath.from(
-                allRuntimesKlibs
-            )
-
-            binaryenExec.set(project.the<BinaryenEnvSpec>().executable)
-        }
-    }
-
-    attributesSchema {
-        attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE) {
-            compatibilityRules.add(JarToKlibRule::class)
-        }
-    }
 }
 
 val prepareRuntime by tasks.registering(Copy::class) {
@@ -356,6 +303,64 @@ val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
             builtBy(calculateHash)
         }
     })
+}
+
+
+// This code will be part of Kotlin Gradle plugin, so it is going to be removed on Kotlin version upgrade
+
+dependencies {
+    registerTransform(WasmBinaryTransform::class.java) {
+        from.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "klib")
+        to.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, "compiled-wasm")
+
+        val libraryFilterService = LibraryFilterCachingService.registerIfAbsent(project)
+
+
+        parameters {
+            currentJvmJdkToolsJar.set(
+                compileTask.flatMap { it.defaultKotlinJavaToolchain }
+                    .flatMap { it.currentJvmJdkToolsJar }
+            )
+            defaultCompilerClasspath.setFrom(project.configurations.named(COMPILER_CLASSPATH_CONFIGURATION_NAME))
+            kotlinPluginVersion.set(
+                compileTask.map { getKotlinPluginVersion(it.logger) }
+            )
+            pathProvider.set(
+                compileTask.map { it.path }
+            )
+            projectRootFile.set(
+                project.projectDir
+            )
+            val projectName = project.name
+            this.projectName.set(projectName)
+            projectSessionsDir.set(project.kotlinSessionsDir)
+
+            this.buildDir.set(project.layout.buildDirectory.asFile)
+
+            libraryFilterCacheService.set(libraryFilterService)
+
+            compilerOptions.set(
+                compileTask.map {
+                    val args = K2JSCompilerArguments()
+                    KotlinCommonCompilerOptionsHelper.fillCompilerArguments(it.compilerOptions, args)
+                    args
+                }
+            )
+            enhancedFreeCompilerArgs.set(compileTask.flatMap { it.enhancedFreeCompilerArgs })
+
+            classpath.from(
+                allRuntimesKlibs
+            )
+
+            binaryenExec.set(project.the<BinaryenEnvSpec>().executable)
+        }
+    }
+
+    attributesSchema {
+        attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE) {
+            compatibilityRules.add(JarToKlibRule::class)
+        }
+    }
 }
 
 class JarToKlibRule : AttributeCompatibilityRule<String> {
