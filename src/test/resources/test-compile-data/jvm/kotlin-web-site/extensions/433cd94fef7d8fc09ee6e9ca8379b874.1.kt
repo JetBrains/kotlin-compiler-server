@@ -1,15 +1,14 @@
-fun main() {
+fun main() { 
 //sampleStart
-    open class Shape
-    class Rectangle: Shape()
-    
-    fun Shape.getName() = "Shape"
-    fun Rectangle.getName() = "Rectangle"
-    
-    fun printClassName(s: Shape) {
-        println(s.getName())
-    }
-    
-    printClassName(Rectangle())
-//sampleEnd
+    // builder is an instance of StringBuilder
+    val builder = StringBuilder()
+        // Calls .appendLine() extension function on builder
+        .appendLine("Hello")
+        .appendLine()
+        .appendLine("World")
+    println(builder.toString())
+    // Hello
+    //
+    // World
 }
+//sampleEnd
