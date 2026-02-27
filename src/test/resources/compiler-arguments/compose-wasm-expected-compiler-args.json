@@ -1472,6 +1472,19 @@
       "valueDescription": "{info|warning|error}"
     },
     {
+      "name": "Xskip-library-special-compatibility-checks",
+      "shortName": null,
+      "description": "Skip library compatibility checks for stdlib and kotlin.test library.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null,
+      "valueDescription": null
+    },
+    {
       "name": "Xir-dce-dump-reachability-info-to-file",
       "shortName": null,
       "description": "Dump reachability information collected about declarations while performing DCE to a file. The format will be chosen automatically based on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
@@ -1615,19 +1628,6 @@
       "valueDescription": null
     },
     {
-      "name": "Xwasm-ic-cache-readonly",
-      "shortName": null,
-      "description": "Do not commit IC cache updates.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null,
-      "valueDescription": null
-    },
-    {
       "name": "Xwasm-included-module-only",
       "shortName": null,
       "description": "Compile only a module passed using `-include` option.",
@@ -1676,19 +1676,6 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null,
-      "valueDescription": null
-    },
-    {
-      "name": "Xwasm-preserve-ic-order",
-      "shortName": null,
-      "description": "Preserve wasm file structure between IC runs.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
       "predefinedValues": null,
       "valueDescription": null
     },
