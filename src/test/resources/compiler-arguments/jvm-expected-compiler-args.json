@@ -10,7 +10,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Wextra",
@@ -22,7 +23,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "X",
@@ -34,7 +36,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "help",
@@ -46,7 +49,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "nowarn",
@@ -58,7 +62,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "verbose",
@@ -70,7 +75,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "version",
@@ -82,7 +88,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "P",
@@ -94,7 +101,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "plugin:<pluginId>:<optionName>=<value>"
     },
     {
       "name": "XXLanguage",
@@ -106,7 +114,8 @@
         "defaultValue": []
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "[+-]LanguageFeatureName"
     },
     {
       "name": "XXdebug-level-compiler-checks",
@@ -118,7 +127,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "XXdump-model",
@@ -130,7 +140,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<dir>"
     },
     {
       "name": "XXexplicit-return-types",
@@ -142,7 +153,8 @@
         "defaultValue": "disable"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{strict|warning|disable}"
     },
     {
       "name": "XXlenient-mode",
@@ -154,7 +166,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-any-scripts-in-source-roots",
@@ -166,7 +179,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-condition-implies-returns-contracts",
@@ -178,7 +192,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-contracts-on-more-functions",
@@ -190,7 +205,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-holdsin-contract",
@@ -202,7 +218,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-kotlin-package",
@@ -214,7 +231,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-reified-type-in-catch",
@@ -226,7 +244,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xannotation-default-target",
@@ -238,7 +257,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "first-only|first-only-warn|param-property"
     },
     {
       "name": "Xannotation-target-all",
@@ -250,7 +270,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xcheck-phase-conditions",
@@ -262,7 +283,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xcommon-sources",
@@ -274,7 +296,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xcompiler-plugin",
@@ -286,7 +309,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path1>,<path2>[=<optionName>=<value>,<optionName>=<value>]"
     },
     {
       "name": "Xcompiler-plugin-order",
@@ -298,7 +322,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<pluginId1>><pluginId2>"
     },
     {
       "name": "Xconsistent-data-class-copy-visibility",
@@ -310,7 +335,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xcontext-parameters",
@@ -322,7 +348,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xcontext-receivers",
@@ -334,7 +361,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xcontext-sensitive-resolution",
@@ -346,7 +374,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdata-flow-based-exhaustiveness",
@@ -358,7 +387,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdetailed-perf",
@@ -370,7 +400,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdirect-java-actualization",
@@ -382,7 +413,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdisable-default-scripting-plugin",
@@ -394,7 +426,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdisable-phases",
@@ -406,7 +439,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdont-sort-source-files",
@@ -418,7 +452,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdont-warn-on-error-suppression",
@@ -430,7 +465,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdump-directory",
@@ -442,7 +478,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdump-fqname",
@@ -454,7 +491,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdump-perf",
@@ -466,7 +504,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xenable-incremental-compilation",
@@ -478,7 +517,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xexpect-actual-classes",
@@ -490,7 +530,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xexplicit-api",
@@ -502,7 +543,8 @@
         "defaultValue": "disable"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{strict|warning|disable}"
     },
     {
       "name": "Xexplicit-backing-fields",
@@ -514,7 +556,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xexplicit-context-arguments",
@@ -526,7 +569,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xfragment-dependency",
@@ -538,7 +582,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fragment name>:<path>"
     },
     {
       "name": "Xfragment-friend-dependency",
@@ -550,7 +595,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fragment name>:<path>"
     },
     {
       "name": "Xfragment-refines",
@@ -562,7 +608,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fromModuleName>:<onModuleName>"
     },
     {
       "name": "Xfragment-sources",
@@ -574,7 +621,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fragment name>:<path>"
     },
     {
       "name": "Xfragments",
@@ -586,7 +634,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fragment name>"
     },
     {
       "name": "Xheader-mode",
@@ -598,7 +647,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xheader-mode-type",
@@ -610,7 +660,8 @@
         "defaultValue": "any"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{any|compilation}"
     },
     {
       "name": "Xignore-const-optimization-errors",
@@ -622,7 +673,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xinline-classes",
@@ -634,7 +686,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xintellij-plugin-root",
@@ -646,7 +699,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xlist-phases",
@@ -658,7 +712,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xlocal-type-aliases",
@@ -670,7 +725,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xmetadata-klib",
@@ -682,7 +738,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xmetadata-version",
@@ -694,7 +751,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xmulti-dollar-interpolation",
@@ -706,7 +764,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xmulti-platform",
@@ -718,7 +777,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xname-based-destructuring",
@@ -730,7 +790,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "only-syntax|name-mismatch|complete"
     },
     {
       "name": "Xnested-type-aliases",
@@ -742,7 +803,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xnew-inference",
@@ -754,7 +816,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-check-actual",
@@ -766,7 +829,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-inline",
@@ -778,7 +842,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xnon-local-break-continue",
@@ -790,7 +855,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-dump",
@@ -802,7 +868,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-dump-after",
@@ -814,7 +881,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-dump-before",
@@ -826,7 +894,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-validate",
@@ -838,7 +907,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-validate-after",
@@ -850,7 +920,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xphases-to-validate-before",
@@ -862,7 +933,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xplugin",
@@ -876,7 +948,8 @@
       "disabled": true,
       "predefinedValues": [
         {{PLUGIN_PLACEHOLDER}}
-      ]
+      ],
+      "valueDescription": "<path>"
     },
     {
       "name": "Xprint-configuration",
@@ -888,7 +961,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xprofile-phases",
@@ -900,7 +974,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xrender-internal-diagnostic-names",
@@ -912,7 +987,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xrepl",
@@ -924,7 +1000,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xreport-all-warnings",
@@ -936,7 +1013,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xreport-output-files",
@@ -948,7 +1026,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xreport-perf",
@@ -960,7 +1039,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xreturn-value-checker",
@@ -972,7 +1052,8 @@
         "defaultValue": "disable"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{check|full|disable}"
     },
     {
       "name": "Xseparate-kmp-compilation",
@@ -984,7 +1065,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xskip-metadata-version-check",
@@ -996,7 +1078,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xskip-prerelease-check",
@@ -1008,7 +1091,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xstdlib-compilation",
@@ -1020,7 +1104,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xsuppress-api-version-greater-than-language-version-error",
@@ -1032,7 +1117,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xsuppress-version-warnings",
@@ -1044,7 +1130,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xsuppress-warning",
@@ -1056,7 +1143,8 @@
         "defaultValue": []
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<WARNING_NAME>"
     },
     {
       "name": "Xunrestricted-builder-inference",
@@ -1068,7 +1156,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-fir-experimental-checkers",
@@ -1080,7 +1169,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-fir-ic",
@@ -1092,7 +1182,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-fir-lt",
@@ -1104,7 +1195,8 @@
         "defaultValue": true
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xverbose-phases",
@@ -1116,7 +1208,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xverify-ir",
@@ -1128,7 +1221,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{none|warning|error}"
     },
     {
       "name": "Xverify-ir-nested-offsets",
@@ -1140,7 +1234,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xverify-ir-visibility",
@@ -1152,7 +1247,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xwarning-level",
@@ -1164,7 +1260,8 @@
         "defaultValue": []
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<WARNING_NAME>:(error|warning|disabled)"
     },
     {
       "name": "Xwhen-guards",
@@ -1176,7 +1273,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "api-version",
@@ -1188,7 +1286,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<version>"
     },
     {
       "name": "kotlin-home",
@@ -1200,7 +1299,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "language-version",
@@ -1212,7 +1312,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<version>"
     },
     {
       "name": "opt-in",
@@ -1234,7 +1335,8 @@
         "kotlin.uuid.ExperimentalUuidApi",
         "kotlin.io.encoding.ExperimentalEncodingApi",
         "kotlin.concurrent.atomics.ExperimentalAtomicApi"
-      ]
+      ],
+      "valueDescription": "<fq.name>"
     },
     {
       "name": "progressive",
@@ -1246,7 +1348,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "script",
@@ -1258,7 +1361,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xabi-stability",
@@ -1270,7 +1374,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{stable|unstable}"
     },
     {
       "name": "Xadd-modules",
@@ -1282,7 +1387,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<module[,]>"
     },
     {
       "name": "Xallow-no-source-files",
@@ -1294,7 +1400,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xallow-unstable-dependencies",
@@ -1306,7 +1413,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xannotations-in-metadata",
@@ -1318,7 +1426,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xassertions",
@@ -1330,7 +1439,8 @@
         "defaultValue": "legacy"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{always-enable|always-disable|jvm|legacy}"
     },
     {
       "name": "Xbackend-threads",
@@ -1342,7 +1452,8 @@
         "defaultValue": "1"
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<N>"
     },
     {
       "name": "Xbuild-file",
@@ -1354,7 +1465,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xcompile-java",
@@ -1366,7 +1478,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdebug",
@@ -1378,7 +1491,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xdefault-script-extension",
@@ -1390,7 +1504,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<script filename extension>"
     },
     {
       "name": "Xdisable-standard-script",
@@ -1402,7 +1517,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xemit-jvm-type-annotations",
@@ -1414,7 +1530,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xenhance-type-parameter-types-to-def-not-null",
@@ -1426,7 +1543,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xenhanced-coroutines-debugging",
@@ -1438,7 +1556,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xfriend-paths",
@@ -1450,7 +1569,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xgenerate-strict-metadata-version",
@@ -1462,7 +1582,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xignored-annotations-for-bridges",
@@ -1474,7 +1595,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fq.name>|*"
     },
     {
       "name": "Xindy-allow-annotated-lambdas",
@@ -1486,7 +1608,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xir-do-not-clear-binding-context",
@@ -1498,7 +1621,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xjava-package-prefix",
@@ -1510,7 +1634,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xjava-source-roots",
@@ -1522,7 +1647,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xjavac-arguments",
@@ -1534,7 +1660,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<option[,]>"
     },
     {
       "name": "Xjdk-release",
@@ -1546,7 +1673,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<version>"
     },
     {
       "name": "Xjspecify-annotations",
@@ -1558,7 +1686,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "ignore|strict|warn"
     },
     {
       "name": "Xjsr305",
@@ -1570,7 +1699,8 @@
         "defaultValue": []
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{ignore/strict/warn}|under-migration:{ignore/strict/warn}|@<fq.name>:{ignore/strict/warn}"
     },
     {
       "name": "Xjvm-default",
@@ -1582,7 +1712,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{all|all-compatibility|disable}"
     },
     {
       "name": "Xjvm-enable-preview",
@@ -1594,7 +1725,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xjvm-expose-boxed",
@@ -1606,7 +1738,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xklib",
@@ -1618,7 +1751,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xlambdas",
@@ -1630,7 +1764,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{class|indy}"
     },
     {
       "name": "Xlink-via-signatures",
@@ -1642,7 +1777,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xmodule-path",
@@ -1654,7 +1790,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "Xmultifile-parts-inherit",
@@ -1666,7 +1803,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-call-assertions",
@@ -1678,7 +1816,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-new-java-annotation-targets",
@@ -1690,7 +1829,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-optimize",
@@ -1702,7 +1842,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-param-assertions",
@@ -1714,7 +1855,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-receiver-assertions",
@@ -1726,7 +1868,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-reset-jar-timestamps",
@@ -1738,7 +1881,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-source-debug-extension",
@@ -1750,7 +1894,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xno-unified-null-checks",
@@ -1762,7 +1907,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xnullability-annotations",
@@ -1774,7 +1920,8 @@
         "defaultValue": []
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "@<fq.name>:{ignore/strict/warn}"
     },
     {
       "name": "Xoutput-builtins-metadata",
@@ -1786,7 +1933,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xprofile",
@@ -1798,7 +1946,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<profilerPath:command:outputDir>"
     },
     {
       "name": "Xsam-conversions",
@@ -1810,7 +1959,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{class|indy}"
     },
     {
       "name": "Xsanitize-parentheses",
@@ -1822,7 +1972,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xscript-resolver-environment",
@@ -1834,7 +1985,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<key=value[,]>"
     },
     {
       "name": "Xserialize-ir",
@@ -1846,7 +1998,8 @@
         "defaultValue": "none"
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{none|inline|all}"
     },
     {
       "name": "Xstring-concat",
@@ -1858,7 +2011,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{indy-with-constants|indy|inline}"
     },
     {
       "name": "Xsupport-compatqual-checker-framework-annotations",
@@ -1870,7 +2024,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "enable|disable"
     },
     {
       "name": "Xsuppress-deprecated-jvm-target-warning",
@@ -1882,7 +2037,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xsuppress-missing-builtins-error",
@@ -1894,7 +2050,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xtype-enhancement-improvements-strict-mode",
@@ -1906,7 +2063,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-14-inline-classes-mangling-scheme",
@@ -1918,7 +2076,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-fast-jar-file-system",
@@ -1930,7 +2089,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-inline-scopes-numbers",
@@ -1942,7 +2102,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-javac",
@@ -1954,7 +2115,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-old-class-files-reading",
@@ -1966,7 +2128,8 @@
         "defaultValue": false
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xuse-type-table",
@@ -1978,7 +2141,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xvalidate-bytecode",
@@ -1990,7 +2154,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xvalue-classes",
@@ -2002,7 +2167,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "Xwhen-expressions",
@@ -2014,7 +2180,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{indy|inline}"
     },
     {
       "name": "classpath",
@@ -2026,7 +2193,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": "{{CLASSPATH_PLACEHOLDER}}"
+      "predefinedValues": "{{CLASSPATH_PLACEHOLDER}}",
+      "valueDescription": "<path>"
     },
     {
       "name": "d",
@@ -2038,7 +2206,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<directory|jar>"
     },
     {
       "name": "expression",
@@ -2050,7 +2219,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "include-runtime",
@@ -2062,7 +2232,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "java-parameters",
@@ -2074,7 +2245,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "jdk-home",
@@ -2086,7 +2258,8 @@
         "defaultValue": null
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<path>"
     },
     {
       "name": "jvm-default",
@@ -2098,7 +2271,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "{enable|no-compatibility|disable}"
     },
     {
       "name": "jvm-target",
@@ -2110,7 +2284,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<version>"
     },
     {
       "name": "module-name",
@@ -2122,7 +2297,8 @@
         "defaultValue": null
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<name>"
     },
     {
       "name": "no-jdk",
@@ -2134,7 +2310,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "no-reflect",
@@ -2146,7 +2323,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "no-stdlib",
@@ -2158,7 +2336,8 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": null
     },
     {
       "name": "script-templates",
@@ -2170,7 +2349,8 @@
         "defaultValue": []
       },
       "disabled": true,
-      "predefinedValues": null
+      "predefinedValues": null,
+      "valueDescription": "<fully qualified class name[,]>"
     }
   ]
 }
