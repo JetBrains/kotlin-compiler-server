@@ -475,7 +475,8 @@ class CompilerArgumentsUtil(
                 disabled = disabled,
                 predefinedValues = (predefinedArguments[arg.name] as? Pair<*, *>)?.first
                     ?: predefinedArguments[arg.name] as? List<*>,
-                supportedOnCurrentVersion = arg.isSupportedOnCurrentVersion()
+                supportedOnCurrentVersion = arg.isSupportedOnCurrentVersion(),
+                valueDescription = arg.argumentTypeDescription.current
             )
         }.toSet()
 

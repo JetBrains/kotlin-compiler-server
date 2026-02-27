@@ -114,7 +114,8 @@ class CompilerRestController(
                         it.description,
                         it.type,
                         it.disabled,
-                        it.predefinedValues
+                        it.predefinedValues,
+                        it.valueDescription
                     )
                 }
         )

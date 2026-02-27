@@ -10,7 +10,8 @@ data class ExtendedCompilerArgument(
     val type: ExtendedCompilerArgumentValue<*>,
     val disabled: Boolean,
     val predefinedValues: Any?,
-    val supportedOnCurrentVersion: Boolean
+    val supportedOnCurrentVersion: Boolean,
+    val valueDescription: String?
 )
 
 /**
