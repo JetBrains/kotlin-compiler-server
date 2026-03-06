@@ -1,5 +1,8 @@
 package com.compiler.server.compiler.components
 
+import com.compiler.server.common.components.KotlinEnvironment
+import com.compiler.server.common.components.PATH_SEPARATOR
+import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
 import com.compiler.server.model.CompilerDiagnostics
@@ -10,7 +13,6 @@ import com.compiler.server.model.ProjectFile
 import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
-import component.KotlinEnvironment
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi

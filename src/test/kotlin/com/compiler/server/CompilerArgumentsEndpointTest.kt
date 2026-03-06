@@ -1,9 +1,9 @@
 package com.compiler.server
 
+import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.model.ProjectType
 import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.databind.ObjectMapper
-import component.KotlinEnvironment
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
+import java.io.File
 import java.net.InetAddress
 import java.net.URI
 import java.nio.file.Paths
@@ -55,11 +56,21 @@ class CompilerArgumentsEndpointTest {
             ProjectType.COMPOSE_WASM -> "compose-wasm"
         }
 
+        val pluginPlaceholder = when (projectType) {
+            ProjectType.JAVA, ProjectType.JUNIT -> kotlinEnvironment.compilerPlugins
+            ProjectType.COMPOSE_WASM -> kotlinEnvironment.COMPOSE_WASM_COMPILER_PLUGINS.map { File(it) }
+            else -> emptyList()
+        }.joinToString(",") { it.name }
+
+        val classpathPlaceholder = when (projectType) {
+            ProjectType.JAVA, ProjectType.JUNIT -> kotlinEnvironment.classpath
+            ProjectType.COMPOSE_WASM -> kotlinEnvironment.COMPOSE_WASM_LIBRARIES.map { File(it) }.sorted()
+            else -> emptyList()
+        }.joinToString(":") { it.name }
+
         val expectedResponseBody = Paths.get("src/test/resources/compiler-arguments/$projectTypeId-expected-compiler-args.json").readText()
-            .replace(
-                "{{PLUGIN_PLACEHOLDER}}",
-                kotlinEnvironment.compilerPlugins.joinToString(",") { "\"" + it.name } + "\"")
-            .replace("{{CLASSPATH_PLACEHOLDER}}", kotlinEnvironment.classpath.joinToString(":") { it.name })
+            .replace("{{PLUGIN_PLACEHOLDER}}", pluginPlaceholder)
+            .replace("{{CLASSPATH_PLACEHOLDER}}", classpathPlaceholder)
             .replace("{{KOTLIN_VERSION_PLACEHOLDER}}", version)
 
         urls.forEach { path ->

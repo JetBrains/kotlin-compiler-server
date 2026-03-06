@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
   implementation(libs.junit)
+  implementation(libs.jackson.module.kotlin)
 }
 
 tasks.withType<Jar>().getByName("jar") {
