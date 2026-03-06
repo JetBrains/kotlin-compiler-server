@@ -215,7 +215,7 @@ class KotlinToJSTranslator(
 
         val replacedImportObjectContent =
             wasmOutput.jsBuiltins
-                .mergeBuiltinsToImport(jsBuiltinsAlias!!, importObjectJsContent)
+                .mergeBuiltinsToImport(jsBuiltinsAlias, importObjectJsContent)
                 .substituteValidStaticUrl(staticUrl)
 
         return wasmOutput.jsCode
@@ -241,14 +241,14 @@ class KotlinToJSTranslator(
     }
 
     private fun String?.mergeBuiltinsToImport(
-        jsBuiltinsAlias: String,
+        jsBuiltinsAlias: String?,
         importObjectJsContent: String,
     ): String {
         return this?.toByteArray()?.let { byteContent ->
             importObjectJsContent
                 .replace(
                     JS_BUILTINS_ALIAS_NAME_REGEX,
-                    jsBuiltInsContent(jsBuiltinsAlias, byteContent)
+                    jsBuiltInsContent(jsBuiltinsAlias!!, byteContent)
                 )
         } ?: importObjectJsContent
     }
