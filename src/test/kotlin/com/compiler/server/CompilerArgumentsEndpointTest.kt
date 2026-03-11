@@ -9,6 +9,8 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.exchange
 import org.springframework.http.HttpMethod
 import org.springframework.http.RequestEntity
 import org.springframework.web.client.RestTemplate
@@ -30,6 +32,9 @@ class CompilerArgumentsEndpointTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var restTemplate: TestRestTemplate
 
     @Value("\${local.server.port}")
     private var port = 0
@@ -74,9 +79,8 @@ class CompilerArgumentsEndpointTest {
             .replace("{{KOTLIN_VERSION_PLACEHOLDER}}", version)
 
         urls.forEach { path ->
-            val response = client.exchange(
-                RequestEntity<Any>(HttpMethod.GET, URI.create(baseUrl() + path)),
-                String::class.java
+            val response = restTemplate.exchange<String>(
+                RequestEntity<Any>(HttpMethod.GET, URI.create(path))
             )
 
             val body = response.body

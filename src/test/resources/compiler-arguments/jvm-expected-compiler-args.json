@@ -265,6 +265,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xcollection-literals",
+      "shortName": null,
+      "description": "Enable experimental language support for collection literals.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xcommon-sources",
       "shortName": null,
       "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",

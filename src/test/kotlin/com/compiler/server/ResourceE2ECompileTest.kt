@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.client.RestTemplate
 import java.io.File
 import java.net.InetAddress
 import kotlin.io.path.absolutePathString
@@ -33,6 +33,9 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var restTemplate: TestRestTemplate
 
     @Value("\${local.server.port}")
     private var port = 0
@@ -64,8 +67,8 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
             ProjectType.JS, ProjectType.CANVAS, ProjectType.JS_IR -> TranslationJSResult::class.java
             ProjectType.WASM, ProjectType.COMPOSE_WASM -> TranslationWasmResult::class.java
         }
-        val result = RestTemplate().postForObject(
-            "${getHost()}$url", HttpEntity(body, headers), resultClass
+        val result = restTemplate.postForObject(
+            url, HttpEntity(body, headers), resultClass
         )
 
         return result ?: throw IllegalStateException("Result is null")
