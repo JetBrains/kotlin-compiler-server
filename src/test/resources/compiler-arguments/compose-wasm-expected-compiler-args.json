@@ -267,6 +267,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xcollection-literals",
+      "shortName": null,
+      "description": "Enable experimental language support for collection literals.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xcommon-sources",
       "shortName": null,
       "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",
@@ -1361,6 +1373,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xskip-library-special-compatibility-checks",
+      "shortName": null,
+      "description": "Skip library compatibility checks for stdlib and kotlin.test library.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xir-dce-dump-reachability-info-to-file",
       "shortName": null,
       "description": "Dump reachability information collected about declarations while performing DCE to a file. The format will be chosen automatically based on the file extension. Supported output formats include JSON for .json, a JS const initialized with a plain object containing information for .js, and plain text for all other file types.",
@@ -1493,18 +1517,6 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-ic-cache-readonly",
-      "shortName": null,
-      "description": "Do not commit IC cache updates.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
-      "predefinedValues": null
-    },
-    {
       "name": "Xwasm-included-module-only",
       "shortName": null,
       "description": "Compile only a module passed using `-include` option.",
@@ -1550,18 +1562,6 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-preserve-ic-order",
-      "shortName": null,
-      "description": "Preserve wasm file structure between IC runs.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
       "predefinedValues": null
     },
     {
