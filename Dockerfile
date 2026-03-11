@@ -1,4 +1,4 @@
-FROM amazoncorretto:17 as build
+FROM amazoncorretto:17-al2023 AS build
 
 ARG KOTLIN_VERSION
 ARG DEVELOCITY_ACCESS_KEY
@@ -15,6 +15,8 @@ ENV KOTLIN_LIB_WASM=${KOTLIN_VERSION}-wasm
 ENV KOTLIN_LIB_COMPOSE_WASM=${KOTLIN_VERSION}-compose-wasm
 ENV KOTLIN_COMPOSE_WASM_COMPILER_PLUGINS=${KOTLIN_VERSION}-compose-wasm-compiler-plugins
 
+RUN yum install -y findutils libatomic && yum clean all
+
 RUN mkdir -p /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
 ADD . /kotlin-compiler-server
@@ -22,7 +24,7 @@ ADD . /kotlin-compiler-server
 RUN ./gradlew build -x test
 RUN mkdir -p /build/libs && (cd /build/libs;  jar -xf /kotlin-compiler-server/build/libs/kotlin-compiler-server-${KOTLIN_LIB}-SNAPSHOT.jar)
 
-FROM amazoncorretto:17
+FROM amazoncorretto:17-al2023
 
 RUN mkdir /kotlin-compiler-server
 WORKDIR /kotlin-compiler-server
