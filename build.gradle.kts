@@ -187,9 +187,12 @@ tasks.withType<Test> {
         languageVersion.set(JavaLanguageVersion.of(17))
         vendor.set(JvmVendorSpec.AMAZON)
     })
-    val executablePath = rootProject.kotlinNodeJsEnvSpec.executable.get()
+    dependsOn(prepareComposeWasmResources)
+    val executablePath = rootProject.kotlinNodeJsEnvSpec.executable
+    val composeWasmResourcesPath = prepareComposeWasmResources.map { it.destinationDir.absolutePath }
     doFirst {
-        this@withType.environment("kotlin.wasm.node.path", executablePath)
+        this@withType.environment("kotlin.wasm.node.path", executablePath.get())
+        this@withType.environment("kotlin.compose.wasm.resources.path", composeWasmResourcesPath.get())
     }
 
     // We disable this on TeamCity, because we don't want to fail this test,

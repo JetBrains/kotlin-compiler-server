@@ -46,6 +46,12 @@ class BaseExecutorTest {
     contains: String
   ) = testRunner.runWasm(code, contains)
 
+  fun runComposeWasm(
+    @Language("kotlin")
+    code: String,
+    contains: String
+  ) = testRunner.runComposeWasm(code, contains)
+
   fun translateToJsIr(@Language("kotlin") code: String) = testRunner.translateToJsIr(code)
 
   fun runWithException(@Language("kotlin") code: String, contains: String, message: String? = null, addByteCode: Boolean = false) =
