@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class KotlinProjectExecutor(
     private val kotlinCompiler: KotlinCompiler,
-    private val environment: KotlinEnvironment,
+    internal val environment: KotlinEnvironment,
     private val version: VersionInfo,
     private val kotlinToJSTranslator: KotlinToJSTranslator,
     private val loggerDetailsStreamer: LoggerDetailsStreamer? = null,
