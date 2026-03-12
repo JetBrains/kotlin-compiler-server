@@ -3,6 +3,7 @@ package com.compiler.server.generator
 import com.compiler.server.base.filterOnlyErrors
 import com.compiler.server.base.hasErrors
 import com.compiler.server.base.renderErrorDescriptors
+import com.compiler.server.base.replaceStaticUrlInJs
 import com.compiler.server.base.startNodeJsApp
 import com.compiler.server.model.CompilerDiagnostics
 import com.compiler.server.model.ExecutionResult
@@ -71,6 +72,15 @@ class TestProjectRunner {
     ) {
         val project = generateSingleProject(text = code, projectType = ProjectType.WASM)
         convertWasmAndTest(project, contains)
+    }
+
+    fun runComposeWasm(
+        @Language("kotlin")
+        code: String,
+        contains: String,
+    ) {
+        val project = generateSingleProject(text = code, projectType = ProjectType.COMPOSE_WASM)
+        convertComposeWasmAndTest(project, contains)
     }
 
     fun translateToJsIr(@Language("kotlin") code: String): TranslationResultWithJsCode {
@@ -185,6 +195,72 @@ class TestProjectRunner {
         val textResult = startNodeJsApp(
             System.getenv("kotlin.wasm.node.path"),
             jsMain.normalize().absolutePathString(),
+            bootstrapBrowser.normalize().absolutePathString(),
+        )
+        tmpDir.toFile().deleteRecursively()
+
+        Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
+        return result
+    }
+
+    private fun convertComposeWasmAndTest(
+        project: Project,
+        contains: String,
+    ): ExecutionResult {
+        val result = kotlinProjectExecutor.convertToWasm(
+            project,
+            debugInfo = true,
+        )
+
+        if (result !is TranslationWasmResult) {
+            Assertions.assertFalse(result.hasErrors) {
+                "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
+            }
+        }
+
+        result as TranslationWasmResult
+
+        Assertions.assertNotNull(result, "Test result should not be a null")
+
+        val resourcesPath = System.getenv("kotlin.compose.wasm.resources.path")
+            ?: error("kotlin.compose.wasm.resources.path env variable is not set")
+
+        val tmpDir = createTempDirectory()
+        val staticUrl = kotlinProjectExecutor.environment.dependenciesStaticUrl
+        val fileUrl = "file://${tmpDir.normalize().absolutePathString()}"
+
+        // Copy compose-wasm runtime files to temp dir and replace static URL with file:// path
+        val resourcesDir = java.io.File(resourcesPath)
+        resourcesDir.walkTopDown().filter { it.isFile }.forEach { file ->
+            val relativePath = file.relativeTo(resourcesDir).toPath()
+            val target = tmpDir.resolve(relativePath)
+            target.parent?.let { java.nio.file.Files.createDirectories(it) }
+            if (file.extension == "mjs") {
+                val content = file.readText()
+                target.writeText(replaceStaticUrlInJs(content, staticUrl, fileUrl))
+            } else {
+                file.toPath().let { java.nio.file.Files.copy(it, target) }
+            }
+        }
+
+        // Write user's translated JS with static URL replaced
+        val jsMain = tmpDir.resolve("playground.mjs")
+        jsMain.writeText(replaceStaticUrlInJs(result.jsCode!!, staticUrl, fileUrl))
+
+        val run = tmpDir.resolve("run.mjs")
+        run.writeText(
+            """
+                import './playground.mjs';
+                
+                console.log(globalThis.bufferedOutput.buffer);
+            """.trimIndent()
+        )
+
+        val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
+
+        val textResult = startNodeJsApp(
+            System.getenv("kotlin.wasm.node.path"),
+            run.normalize().absolutePathString(),
             bootstrapBrowser.normalize().absolutePathString(),
         )
         tmpDir.toFile().deleteRecursively()
