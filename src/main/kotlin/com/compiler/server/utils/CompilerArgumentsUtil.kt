@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgumentsLevel
 import org.jetbrains.kotlin.arguments.dsl.types.*
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.springframework.stereotype.Component
+import kotlin.io.path.absolutePathString
 
 internal const val COMPILER_ARGUMENTS_JSON = "kotlin-compiler-arguments.json"
 internal const val COMMON_ARGUMENTS_NAME = "commonCompilerArguments"
@@ -141,7 +142,8 @@ class CompilerArgumentsUtil(
         "Xuse-k2-kapt",
         "Xcompile-builtins-as-part-of-stdlib",
         "Xannotations-in-metadata",
-        "Xwhen-expressions"
+        "Xwhen-expressions",
+        "Xheader-mode-type"
     )
 
     private val ALLOWED_COMMON_KLIB_BASED_ARGUMENTS = setOf(
@@ -517,6 +519,27 @@ class CompilerArgumentsUtil(
                 ListExtendedCompilerArgumentValue(
                     isNullable = type.isNullable.current,
                     defaultValue = type.defaultValue.current?.toList() ?: emptyList<Any>()
+                )
+            }
+
+            is KotlinHeaderModeType -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.modeName
+                )
+            }
+
+            is PathType -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.absolutePathString()
+                )
+            }
+            // TODO(Dmitrii Krasnov): remove else branch when KT-83794 is finished
+            else -> {
+                StringExtendedCompilerArgumentValue(
+                    isNullable = type.isNullable.current,
+                    defaultValue = type.defaultValue.current?.toString()
                 )
             }
         }

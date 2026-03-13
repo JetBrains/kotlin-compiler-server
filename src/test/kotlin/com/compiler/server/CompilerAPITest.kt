@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.postForObject
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.web.client.RestTemplate
 import java.net.InetAddress
 import kotlin.test.assertContains
 import kotlin.test.assertNotNull
@@ -24,6 +25,10 @@ class CompilerAPITest {
 
   @Value("\${local.server.port}")
   private var port = 0
+
+
+  @Autowired
+  private lateinit var restTemplate: TestRestTemplate
 
   private val host: String = InetAddress.getLocalHost().hostAddress
 
@@ -44,15 +49,14 @@ class CompilerAPITest {
 
       val headers = HttpHeaders()
       headers.contentType = MediaType.APPLICATION_JSON
-      val response = RestTemplate().postForObject(
-        getHost() + url,
+      val response = restTemplate.postForObject<JvmExecutionResult>(
+        url,
         HttpEntity(
           jacksonObjectMapper().writeValueAsString(
             RunRequest(files = listOf(ProjectFileRequestDto(text = PROGRAM_RUN, name = "File.kt")),)
           ),
           headers
-        ),
-        JvmExecutionResult::class.java
+        )
       )
       assertNotNull(response, "Empty response!")
       assertContains(

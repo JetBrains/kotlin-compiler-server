@@ -267,6 +267,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xcollection-literals",
+      "shortName": null,
+      "description": "Enable experimental language support for collection literals.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xcommon-sources",
       "shortName": null,
       "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",
@@ -519,6 +531,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xexplicit-context-arguments",
+      "shortName": null,
+      "description": "Enable explicit passing of context arguments using named argument syntax.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xfragment-dependency",
       "shortName": null,
       "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
@@ -586,6 +610,18 @@
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
         "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xheader-mode-type",
+      "shortName": null,
+      "description": "Generates output based on what it is used for:\n-Xheader-mode-type=compilation: Skips the IR generation for modules that don't have inline functions.\n-Xheader-mode-type=any: Can be used for any downstream dependency which doesn't require linking.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "any"
       },
       "disabled": true,
       "predefinedValues": null
@@ -855,6 +891,18 @@
       "predefinedValues": [
         "{{PLUGIN_PLACEHOLDER}}"
       ]
+    },
+    {
+      "name": "Xprint-configuration",
+      "shortName": null,
+      "description": "Print compiler configuration.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
     },
     {
       "name": "Xprofile-phases",
@@ -1279,7 +1327,7 @@
     {
       "name": "Xklib-relative-path-base",
       "shortName": null,
-      "description": "Provide a base path to compute the source's relative paths in klib (default is empty).",
+      "description": "Relativize all the paths stored in a klib using the given path prefixes.\nThe supplied prefixes should be absolute paths to the directories containing the source code files.\nNote: The prefixes are applied in the same order as they are passed in this CLI argument.",
       "type": {
         "type": "com.compiler.server.model.ListExtendedCompilerArgumentValue",
         "isNullable": true,
@@ -1322,6 +1370,18 @@
         "defaultValue": null
       },
       "disabled": false,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xskip-library-special-compatibility-checks",
+      "shortName": null,
+      "description": "Skip library compatibility checks for stdlib and kotlin.test library.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
       "predefinedValues": null
     },
     {
@@ -1421,6 +1481,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xwasm-generate-closed-world-multimodule",
+      "shortName": null,
+      "description": "Compile modules in multi-module closed-world mode using module passed in `-include` argument as main module",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xwasm-generate-dwarf",
       "shortName": null,
       "description": "Generate DWARF debug information.",
@@ -1445,9 +1517,9 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-ic-cache-readonly",
+      "name": "Xwasm-included-module-only",
       "shortName": null,
-      "description": "Do not commit IC cache updates.",
+      "description": "Compile only a module passed using `-include` option.",
       "type": {
         "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
         "isNullable": false,
@@ -1457,13 +1529,13 @@
       "predefinedValues": null
     },
     {
-      "name": "Xwasm-included-module-only",
+      "name": "Xwasm-internal-local-variable-prefix",
       "shortName": null,
-      "description": "Compile only a module passed using `-include` option.",
+      "description": "Prefix to use for internally generated local variables.",
       "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": false,
-        "defaultValue": false
+        "defaultValue": "~"
       },
       "disabled": true,
       "predefinedValues": null
@@ -1490,18 +1562,6 @@
         "defaultValue": false
       },
       "disabled": false,
-      "predefinedValues": null
-    },
-    {
-      "name": "Xwasm-preserve-ic-order",
-      "shortName": null,
-      "description": "Preserve wasm file structure between IC runs.",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": true,
       "predefinedValues": null
     },
     {

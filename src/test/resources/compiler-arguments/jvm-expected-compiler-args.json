@@ -265,6 +265,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xcollection-literals",
+      "shortName": null,
+      "description": "Enable experimental language support for collection literals.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xcommon-sources",
       "shortName": null,
       "description": "Sources of the common module that need to be compiled together with this module in multiplatform mode.\nThey should be a subset of sources passed as free arguments.",
@@ -517,6 +529,18 @@
       "predefinedValues": null
     },
     {
+      "name": "Xexplicit-context-arguments",
+      "shortName": null,
+      "description": "Enable explicit passing of context arguments using named argument syntax.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
+    },
+    {
       "name": "Xfragment-dependency",
       "shortName": null,
       "description": "Declare common klib dependencies for the specific fragment.\nThis argument is required for any HMPP module except the platform leaf module: it takes dependencies from -cp/-libraries.\nThe argument should be used only if the new compilation scheme is enabled with -Xseparate-kmp-compilation\n",
@@ -586,6 +610,18 @@
         "defaultValue": false
       },
       "disabled": true,
+      "predefinedValues": null
+    },
+    {
+      "name": "Xheader-mode-type",
+      "shortName": null,
+      "description": "Generates output based on what it is used for:\n-Xheader-mode-type=compilation: Skips the IR generation for modules that don't have inline functions.\n-Xheader-mode-type=any: Can be used for any downstream dependency which doesn't require linking.",
+      "type": {
+        "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": "any"
+      },
+      "disabled": false,
       "predefinedValues": null
     },
     {
@@ -853,6 +889,18 @@
       "predefinedValues": [
         "{{PLUGIN_PLACEHOLDER}}"
       ]
+    },
+    {
+      "name": "Xprint-configuration",
+      "shortName": null,
+      "description": "Print compiler configuration.",
+      "type": {
+        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
+        "isNullable": false,
+        "defaultValue": false
+      },
+      "disabled": true,
+      "predefinedValues": null
     },
     {
       "name": "Xprofile-phases",
@@ -1321,18 +1369,6 @@
       "predefinedValues": null
     },
     {
-      "name": "Xcompile-builtins-as-part-of-stdlib",
-      "shortName": null,
-      "description": "Enable behaviour needed to compile builtins as part of JVM stdlib",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
       "name": "Xcompile-java",
       "shortName": null,
       "description": "Reuse 'javac' analysis and compile Java source files.",
@@ -1767,7 +1803,7 @@
     {
       "name": "Xprofile",
       "shortName": null,
-      "description": "Debug option: Run the compiler with the async profiler and save snapshots to `outputDir`; `command` is passed to the async profiler on start.\n`profilerPath` is the path to libasyncProfiler.so; async-profiler.jar should be on the compiler classpath.\nIf it's not on the classpath, the compiler will attempt to load async-profiler.jar from the containing directory of profilerPath.\nExample: -Xprofile=<PATH_TO_ASYNC_PROFILER>/async-profiler/build/libasyncProfiler.so:event=cpu,interval=1ms,threads,start:<SNAPSHOT_DIR_PATH>",
+      "description": "Debug option: Run the compiler with the async profiler and save snapshots to `outputDir`; `command` is passed to the async profiler on start.\n`profilerPath` is the path to libasyncProfiler.so; async-profiler.jar should be on the compiler classpath.\nIf it's not on the classpath, the compiler will attempt to load async-profiler.jar from the containing directory of profilerPath. \nIndividual parameter values are separated by the system path separator.\nExample (Unix/Linux): -Xprofile=<PATH_TO_ASYNC_PROFILER>/async-profiler/build/libasyncProfiler.so:event=cpu,interval=1ms,threads,start:<SNAPSHOT_DIR_PATH>\nExample (Windows): -Xprofile=<PATH_TO_ASYNC_PROFILER>\\async-profiler\\build\\libasyncProfiler.so;event=cpu,interval=1ms,threads,start;<SNAPSHOT_DIR_PATH>",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
