@@ -16,14 +16,13 @@ kotlin {
         binaries.executable().forEach { binary: JsIrBinary ->
             binary.linkTask.configure {
                 compilerOptions.freeCompilerArgs.add("-Xir-dce=false")
-                compilerOptions.freeCompilerArgs.add("-Xwasm-multimodule-mode=master")
             }
 
             (binary as WasmBinary).optimizeTask.configure {
                 inputFileProperty.fileProvider(
                     binary.mainFile.map {
                         val file = it.asFile
-                        file.resolveSibling("${file.nameWithoutExtension}_master.wasm")
+                        file.resolveSibling("${file.nameWithoutExtension}.wasm")
                     }
                 )
             }
@@ -46,7 +45,7 @@ val compileProductionExecutableKotlinWasmJs: TaskProvider<KotlinJsIrLink> by tas
 val composeWasmStdlib: Provider<Directory> = compileProductionExecutableKotlinWasmJs
     .flatMap { it.destinationDirectory.locationOnly }
 val composeWasmStdlibFile: Provider<RegularFile> = composeWasmStdlib
-    .map { it.file("stdlib_master.wasm") }
+    .map { it.file("stdlib.wasm") }
 
 rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootPlugin> {
     rootProject.the<BinaryenRootEnvSpec>().version = "122"

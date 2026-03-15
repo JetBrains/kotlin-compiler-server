@@ -101,7 +101,7 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
     val propertiesFile = propertiesGenerator.flatMap { it.propertiesFile }
 
     from(kotlinComposeWasmStdlib) {
-        include("stdlib_master.uninstantiated.mjs", "stdlib_master.wasm")
+        include("stdlib.uninstantiated.mjs", "stdlib.wasm")
 
         rename { original ->
             val properties = FileInputStream(propertiesFile.get().asFile).use {
@@ -109,7 +109,7 @@ val prepareComposeWasmResources by tasks.registering(Sync::class) {
                     load(it)
                 }
             }
-            val regex = Regex("stdlib_master(\\.uninstantiated)*\\.(.*)")
+            val regex = Regex("stdlib(\\.uninstantiated)*\\.(.*)")
             regex.find(original)?.groupValues?.get(2)?.let { extension ->
                 "stdlib-${properties["dependencies.compose.wasm"]}.$extension"
             } ?: original
