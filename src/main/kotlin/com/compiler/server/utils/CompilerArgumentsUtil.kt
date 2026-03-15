@@ -139,7 +139,6 @@ class CompilerArgumentsUtil(
         "Xir-inliner",
         "Xuse-inline-scopes-numbers",
         "Xuse-k2-kapt",
-        "Xcompile-builtins-as-part-of-stdlib",
         "Xannotations-in-metadata",
         "Xwhen-expressions"
     )

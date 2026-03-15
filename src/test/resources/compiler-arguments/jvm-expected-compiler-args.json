@@ -1321,18 +1321,6 @@
       "predefinedValues": null
     },
     {
-      "name": "Xcompile-builtins-as-part-of-stdlib",
-      "shortName": null,
-      "description": "Enable behaviour needed to compile builtins as part of JVM stdlib",
-      "type": {
-        "type": "com.compiler.server.model.BooleanExtendedCompilerArgumentValue",
-        "isNullable": false,
-        "defaultValue": false
-      },
-      "disabled": false,
-      "predefinedValues": null
-    },
-    {
       "name": "Xcompile-java",
       "shortName": null,
       "description": "Reuse 'javac' analysis and compile Java source files.",
