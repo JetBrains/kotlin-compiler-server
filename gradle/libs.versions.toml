@@ -22,6 +22,7 @@ hamcrest = "3.0"
 compose = "1.9.3"
 compose-material3 = "1.9.0"
 gradle-develocity = "3.17.5"
+mockito = "6.2.3"
 
 [libraries]
 kotlin-reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "kotlin" }
@@ -30,8 +31,9 @@ kotlin-stdlib-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-js", 
 kotlin-stdlib-wasm-js = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-wasm-js", version.ref = "kotlin" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "kotlin"}
-kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "kotlin"}
+kotlin-mockito = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
+kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "kotlin" }
+kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "kotlin" }
 kotlin-compiler-embeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-tooling-core = { group = "org.jetbrains.kotlin", name = "kotlin-tooling-core", version.ref = "kotlin" }
 kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-arguments-description", version.ref = "kotlin" }
@@ -72,14 +74,17 @@ compose-foundation = { group = "org.jetbrains.compose.foundation", name = "found
 compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "compose" }
 compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose-material3" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose" }
-kotlin-serialization-plugin = {group= "org.jetbrains.kotlin", name="kotlin-serialization-compiler-plugin", version.ref = "kotlin"}
-gradle-develocity = {group = "com.gradle", name= "develocity-gradle-plugin", version.ref = "gradle-develocity"}
-testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers"}
-gson = { group = "com.google.code.gson", name = "gson"}
+kotlin-serialization-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-serialization-compiler-plugin", version.ref = "kotlin" }
+gradle-develocity = { group = "com.gradle", name = "develocity-gradle-plugin", version.ref = "gradle-develocity" }
+testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+spring-boot-starter-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
+spring-boot-starter-data-redis = { group = "org.springframework.boot", name = "spring-boot-starter-data-redis" }
+gson = { group = "com.google.code.gson", name = "gson" }
 
 #spring stack dependencies
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
-spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer"}
+spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer" }
 springdoc-webmvc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 springdoc-webflux = { group = "org.springdoc", name = "springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
 
