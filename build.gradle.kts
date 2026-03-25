@@ -50,8 +50,9 @@ val kotlinComposeWasmRuntimeHash: Configuration by configurations.creating {
 
 dependencies {
     annotationProcessor(libs.spring.context.indexer)
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.data.redis)
     implementation(libs.aws.springboot.container)
     implementation(libs.springdoc.webmvc)
     implementation(libs.gson)
@@ -73,6 +74,8 @@ dependencies {
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.testcontainers)
+    testImplementation(libs.kotlin.mockito)
 
     kotlinComposeWasmCache(project(":cache-maker"))
 }
@@ -94,6 +97,12 @@ fun Project.generateProperties(
     "server.compression.enabled" to "true",
     "server.compression.mime-types" to "application/json,text/javascript,application/wasm",
     "springdoc.swagger-ui.path" to "/api-docs/swagger-ui.html",
+    "wasm.compose.cache.enabled" to "\${CACHE_NAMESPACE:false}",
+    "spring.data.redis.host" to "=\${SPRING_DATA_REDIS_HOST:}",
+    "spring.data.redis.port" to "\${SPRING_DATA_REDIS_SSL_ENABLED:6379}",
+    "speing.data.redis.ssl.enabled" to "\${SPRING_DATA_REDIS_SSL_ENABLED:false}",
+    "spring.data.redis.connectTimeout" to "1000",
+    "spring.data.redis.timeout" to "1000"
 )
 
 fun MapProperty<String, String>.fillProperties(
