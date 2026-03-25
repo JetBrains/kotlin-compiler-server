@@ -1,18 +1,22 @@
 package com.compiler.server.controllers
 
 import com.compiler.server.api.*
+import com.compiler.server.enums.CacheEndpointType
 import com.compiler.server.model.*
 import com.compiler.server.service.CompilerArgumentsService
 import com.compiler.server.service.KotlinProjectExecutor
+import com.compiler.server.service.WasmComposeCacheService
 import jakarta.validation.Valid
 import org.jetbrains.kotlin.utils.mapToSetOrEmpty
+import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
 class CompilerRestController(
     private val kotlinProjectExecutor: KotlinProjectExecutor,
-    private val compilerArgumentsService: CompilerArgumentsService
+    private val compilerArgumentsService: CompilerArgumentsService,
+    private val cacheService: WasmComposeCacheService? = null,
 ) {
 
     @PostMapping("/run")
@@ -72,6 +76,8 @@ class CompilerRestController(
     fun translateWasmCompose(
         @RequestBody @Valid request: TranslateComposeWasmRequest,
     ): TranslationResultWithJsCode {
+        cacheService?.get(request, CacheEndpointType.COMPOSE_WASM_V2)?.let { return it }
+
         return kotlinProjectExecutor.convertToWasm(
             Project(
                 args = request.args,
@@ -79,7 +85,9 @@ class CompilerRestController(
                 confType = ProjectType.COMPOSE_WASM,
                 compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments)
             ),
-        )
+        ).also { result ->
+            if (result is TranslationWasmResult && !result.hasErrors()) cacheService?.put(request, result, CacheEndpointType.COMPOSE_WASM_V2)
+        }
     }
 
     @PostMapping("/highlight")
@@ -112,17 +120,23 @@ class CompilerRestController(
         @RequestParam(defaultValue = "js") compiler: String,
         @RequestParam(defaultValue = "false") debugInfo: Boolean
     ): TranslationResultWithJsCode {
-        return when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
+        val code = when (KotlinTranslatableCompiler.valueOf(compiler.uppercase().replace("-", "_"))) {
             KotlinTranslatableCompiler.JS -> kotlinProjectExecutor.convertToJsIr(project)
             KotlinTranslatableCompiler.WASM -> kotlinProjectExecutor.convertToWasm(
                 project,
                 debugInfo,
             )
 
-            KotlinTranslatableCompiler.COMPOSE_WASM -> kotlinProjectExecutor.convertToWasm(
-                project,
-                debugInfo,
-            )
+            KotlinTranslatableCompiler.COMPOSE_WASM -> {
+                cacheService?.get(project, CacheEndpointType.COMPOSE_WASM_V1)?.let { return it }
+                kotlinProjectExecutor.convertToWasm(
+                    project,
+                    debugInfo,
+                ).also { result ->
+                    if (result is TranslationWasmResult && !result.hasErrors()) cacheService?.put(project, result, CacheEndpointType.COMPOSE_WASM_V1)
+                }
+            }
         }
+        return code
     }
 }
