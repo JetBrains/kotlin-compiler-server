@@ -2,23 +2,31 @@ package com.compiler.server.utils
 
 import com.compiler.server.common.components.KotlinEnvironment
 import com.compiler.server.common.components.PATH_SEPARATOR
-import com.compiler.server.model.*
+import com.compiler.server.model.BooleanExtendedCompilerArgumentValue
+import com.compiler.server.model.ExtendedCompilerArgument
+import com.compiler.server.model.ExtendedCompilerArgumentValue
+import com.compiler.server.model.ListExtendedCompilerArgumentValue
+import com.compiler.server.model.StringExtendedCompilerArgumentValue
 import com.compiler.server.model.bean.VersionInfo
+import org.jetbrains.kotlin.arguments.description.CompilerArgumentsLevelNames.jsArguments
+import org.jetbrains.kotlin.arguments.description.CompilerArgumentsLevelNames.jvmCompilerArguments
+import org.jetbrains.kotlin.arguments.description.CompilerArgumentsLevelNames.wasmArguments
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgument
-import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArguments
-import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgumentsLevel
-import org.jetbrains.kotlin.arguments.dsl.types.*
+import org.jetbrains.kotlin.arguments.dsl.types.BooleanType
+import org.jetbrains.kotlin.arguments.dsl.types.IntType
+import org.jetbrains.kotlin.arguments.dsl.types.KlibIrInlinerModeType
+import org.jetbrains.kotlin.arguments.dsl.types.KotlinArgumentValueType
+import org.jetbrains.kotlin.arguments.dsl.types.KotlinExplicitApiModeType
+import org.jetbrains.kotlin.arguments.dsl.types.KotlinHeaderModeType
+import org.jetbrains.kotlin.arguments.dsl.types.KotlinJvmTargetType
+import org.jetbrains.kotlin.arguments.dsl.types.KotlinVersionType
+import org.jetbrains.kotlin.arguments.dsl.types.PathType
+import org.jetbrains.kotlin.arguments.dsl.types.ReturnValueCheckerModeType
+import org.jetbrains.kotlin.arguments.dsl.types.StringArrayType
+import org.jetbrains.kotlin.arguments.dsl.types.StringType
 import org.jetbrains.kotlin.tooling.core.KotlinToolingVersion
 import org.springframework.stereotype.Component
 import kotlin.io.path.absolutePathString
-
-internal const val COMPILER_ARGUMENTS_JSON = "kotlin-compiler-arguments.json"
-internal const val COMMON_ARGUMENTS_NAME = "commonCompilerArguments"
-internal const val JVM_ARGUMENTS_NAME = "jvmCompilerArguments"
-internal const val COMMON_KLIB_BASED_ARGUMENTS_NAME = "commonKlibBasedArguments"
-internal const val JS_ARGUMENTS_NAME = "jsArguments"
-internal const val WASM_ARGUMENTS_NAME = "wasmArguments"
-internal const val METADATA_ARGUMENTS_NAME = "metadataArguments"
 
 internal const val JS_DEFAULT_MODULE_NAME = "playground"
 internal const val WASM_DEFAULT_MODULE_NAME = "playground"
@@ -31,13 +39,13 @@ class CompilerArgumentsUtil(
     kotlinEnvironment: KotlinEnvironment
 ) {
 
-    private val ALLOWED_COMMON_TOOL_ARGUMENTS = setOf(
+    internal val ALLOWED_COMMON_TOOL_ARGUMENTS = setOf(
         "nowarn",
         "Werror",
         "Wextra"
     )
 
-    private val ALLOWED_COMMON_ARGUMENTS = setOf(
+    internal val ALLOWED_COMMON_ARGUMENTS = setOf(
         "XXLanguage",
         "Xexplicit-backing-fields",
         "progressive",
@@ -91,7 +99,7 @@ class CompilerArgumentsUtil(
         "Xallow-holdsin-contract"
     )
 
-    private val ALLOWED_JVM_ARGUMENTS = setOf(
+    internal val ALLOWED_JVM_ARGUMENTS = ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + setOf(
         // file paths and environment settings
         "include-runtime",
         "no-jdk",
@@ -146,7 +154,7 @@ class CompilerArgumentsUtil(
         "Xheader-mode-type"
     )
 
-    private val ALLOWED_COMMON_KLIB_BASED_ARGUMENTS = setOf(
+    internal val ALLOWED_COMMON_KLIB_BASED_ARGUMENTS = setOf(
         "Xklib-enable-signature-clash-checks",
         "Xpartial-linkage",
         "Xpartial-linkage-loglevel",
@@ -154,40 +162,42 @@ class CompilerArgumentsUtil(
         "Xklib-ir-inliner"
     )
 
-    private val ALLOWED_JS_ARGUMENTS = setOf(
-        // file paths and environment settings
-        "Xir-keep",
-        "main",
-        "Xir-dce",
-        "Xir-dce-runtime-diagnostic",
-        "Xir-property-lazy-initialization",
-        "Xir-minimized-member-names",
-        "Xir-generate-inline-anonymous-functions",
-        "Xgenerate-polyfills",
-        "Xes-classes",
-        "Xplatform-arguments-in-main-function",
-        "Xes-generators",
-        "Xes-arrow-functions",
-        "Xes-long-as-bigint",
-        "Xtyped-arrays",
-        "Xenable-extension-functions-in-externals",
-        "Xenable-suspend-function-exporting",
-        "Xfake-override-validator",
-        "Xoptimize-generated-js",
-    )
+    internal val ALLOWED_JS_ARGUMENTS =
+        ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + ALLOWED_COMMON_KLIB_BASED_ARGUMENTS + setOf(
+            // file paths and environment settings
+            "Xir-keep",
+            "main",
+            "Xir-dce",
+            "Xir-dce-runtime-diagnostic",
+            "Xir-property-lazy-initialization",
+            "Xir-minimized-member-names",
+            "Xir-generate-inline-anonymous-functions",
+            "Xgenerate-polyfills",
+            "Xes-classes",
+            "Xplatform-arguments-in-main-function",
+            "Xes-generators",
+            "Xes-arrow-functions",
+            "Xes-long-as-bigint",
+            "Xtyped-arrays",
+            "Xenable-extension-functions-in-externals",
+            "Xenable-suspend-function-exporting",
+            "Xfake-override-validator",
+            "Xoptimize-generated-js",
+        )
 
-    private val ALLOWED_WASM_ARGUMENTS = setOf(
-        // file paths and environment settings
-        "Xwasm-debug-info",
-        "Xwasm-debug-friendly",
-        "Xwasm-kclass-fqn",
-        "Xwasm-enable-array-range-checks",
-        "Xwasm-enable-asserts",
-        "Xwasm-use-traps-instead-of-exceptions",
-        "Xwasm-use-new-exception-proposal",
-        "Xwasm-no-jstag",
-        "Xwasm-source-map-include-mappings-from-unavailable-sources"
-    )
+    internal val ALLOWED_WASM_ARGUMENTS =
+        ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + ALLOWED_COMMON_KLIB_BASED_ARGUMENTS + setOf(
+            // file paths and environment settings
+            "Xwasm-debug-info",
+            "Xwasm-debug-friendly",
+            "Xwasm-kclass-fqn",
+            "Xwasm-enable-array-range-checks",
+            "Xwasm-enable-asserts",
+            "Xwasm-use-traps-instead-of-exceptions",
+            "Xwasm-use-new-exception-proposal",
+            "Xwasm-no-jstag",
+            "Xwasm-source-map-include-mappings-from-unavailable-sources"
+        )
 
     // Use Pair if you want to provide different values for user and for actual use.
     // For example, with Xplugin users need to see only plugins, without an actual path,
@@ -341,110 +351,43 @@ class CompilerArgumentsUtil(
     }
 
     fun collectJvmArguments(
-        kotlinCompilerArguments: KotlinCompilerArguments
+        kotlinTargetCompilerArgumentsByName: Map<String, Set<KotlinCompilerArgument>>
     ): Set<ExtendedCompilerArgument> {
-        val commonArgumentsLevel = kotlinCompilerArguments.getCommonArgumentsLevel()
-        val jvmLevel = commonArgumentsLevel
-            .nestedLevels
-            .first { nestedArguments -> nestedArguments.name == JVM_ARGUMENTS_NAME }
-        return (kotlinCompilerArguments.topLevel.arguments +
-                commonArgumentsLevel.arguments +
-                jvmLevel.arguments)
-            .processCompilerArgs(
-                predefinedArguments = PREDEFINED_JVM_ARGUMENTS,
-                allowedArguments = ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + ALLOWED_JVM_ARGUMENTS,
-            )
+        return kotlinTargetCompilerArgumentsByName[jvmCompilerArguments]?.processCompilerArgs(
+            predefinedArguments = PREDEFINED_JVM_ARGUMENTS,
+            allowedArguments = ALLOWED_JVM_ARGUMENTS,
+        ) ?: throw IllegalStateException("Kotlin compiler arguments for JVM target not found")
     }
 
     fun collectWasmArguments(
-        kotlinCompilerArguments: KotlinCompilerArguments
+        kotlinTargetCompilerArgumentsByName: Map<String, Set<KotlinCompilerArgument>>
     ): Set<ExtendedCompilerArgument> {
-        val commonArgumentsLevel = kotlinCompilerArguments.getCommonArgumentsLevel()
-        val commonKlibBasedArgumentsLevel = getCommonKlibBasedArgumentsLevel(kotlinCompilerArguments)
-        val wasmLevel = getWasmLevel(commonKlibBasedArgumentsLevel)
-        val jsLevel = wasmLevel.nestedLevels.first { nestedArguments -> nestedArguments.name == JS_ARGUMENTS_NAME }
-        return (kotlinCompilerArguments.topLevel.arguments +
-                commonArgumentsLevel.arguments +
-                commonKlibBasedArgumentsLevel.arguments +
-                wasmLevel.arguments +
-                jsLevel.arguments)
-            .processCompilerArgs(
-                predefinedArguments = PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
-                allowedArguments =
-                    ALLOWED_COMMON_TOOL_ARGUMENTS +
-                            ALLOWED_COMMON_ARGUMENTS +
-                            ALLOWED_COMMON_KLIB_BASED_ARGUMENTS +
-                            ALLOWED_WASM_ARGUMENTS +
-                            ALLOWED_JS_ARGUMENTS
-            )
+        return kotlinTargetCompilerArgumentsByName[wasmArguments]?.processCompilerArgs(
+            predefinedArguments = PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
+            allowedArguments = ALLOWED_JS_ARGUMENTS
+        ) ?: throw IllegalStateException("Kotlin compiler arguments for WASM target not found")
 
     }
 
     fun collectComposeWasmArguments(
-        kotlinCompilerArguments: KotlinCompilerArguments
+        kotlinTargetCompilerArgumentsByName: Map<String, Set<KotlinCompilerArgument>>
     ): Set<ExtendedCompilerArgument> {
-        val commonArgumentsLevel = kotlinCompilerArguments.getCommonArgumentsLevel()
-        val commonKlibBasedArgumentsLevel = getCommonKlibBasedArgumentsLevel(kotlinCompilerArguments)
-        val wasmLevel = getWasmLevel(commonKlibBasedArgumentsLevel)
-        val jsLevel = wasmLevel.nestedLevels.first { nestedArguments -> nestedArguments.name == JS_ARGUMENTS_NAME }
-        return (kotlinCompilerArguments.topLevel.arguments +
-                commonArgumentsLevel.arguments +
-                commonKlibBasedArgumentsLevel.arguments +
-                wasmLevel.arguments +
-                jsLevel.arguments)
-            .processCompilerArgs(
-                predefinedArguments = PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
-                allowedArguments =
-                    ALLOWED_COMMON_TOOL_ARGUMENTS +
-                            ALLOWED_COMMON_ARGUMENTS +
-                            ALLOWED_COMMON_KLIB_BASED_ARGUMENTS +
-                            ALLOWED_WASM_ARGUMENTS +
-                            ALLOWED_JS_ARGUMENTS
-            )
+        return kotlinTargetCompilerArgumentsByName[wasmArguments]?.processCompilerArgs(
+            predefinedArguments = PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
+            allowedArguments = ALLOWED_WASM_ARGUMENTS
+        ) ?: throw IllegalStateException("Kotlin compiler arguments for COMPOSE WASM target not found")
 
     }
 
     fun collectJsArguments(
-        kotlinCompilerArguments: KotlinCompilerArguments
+        kotlinTargetCompilerArgumentsByName: Map<String, Set<KotlinCompilerArgument>>
     ): Set<ExtendedCompilerArgument> {
-        val commonArgumentsLevel = kotlinCompilerArguments.getCommonArgumentsLevel()
-        val commonKlibBasedArgumentsLevel = getCommonKlibBasedArgumentsLevel(kotlinCompilerArguments)
-
-        val wasmLevel = getWasmLevel(commonKlibBasedArgumentsLevel)
-
-        val jsLevel = wasmLevel.nestedLevels.first { nestedArguments -> nestedArguments.name == JS_ARGUMENTS_NAME }
-
-        return (kotlinCompilerArguments.topLevel.arguments +
-                commonArgumentsLevel.arguments +
-                commonKlibBasedArgumentsLevel.arguments +
-                wasmLevel.arguments +
-                jsLevel.arguments
-                )
-            .processCompilerArgs(
-                predefinedArguments = PREDEFINED_JS_FIRST_PHASE_ARGUMENTS,
-                allowedArguments =
-                    ALLOWED_COMMON_TOOL_ARGUMENTS +
-                            ALLOWED_COMMON_ARGUMENTS +
-                            ALLOWED_COMMON_KLIB_BASED_ARGUMENTS +
-                            ALLOWED_WASM_ARGUMENTS +
-                            ALLOWED_JS_ARGUMENTS
-            )
+        return kotlinTargetCompilerArgumentsByName[jsArguments]?.processCompilerArgs(
+            predefinedArguments = PREDEFINED_JS_FIRST_PHASE_ARGUMENTS,
+            allowedArguments = ALLOWED_WASM_ARGUMENTS
+        ) ?: throw IllegalStateException("Kotlin compiler arguments for JS target not found")
 
     }
-
-    private fun getWasmLevel(commonKlibBasedArgumentsLevel: KotlinCompilerArgumentsLevel): KotlinCompilerArgumentsLevel =
-        commonKlibBasedArgumentsLevel
-            .nestedLevels
-            .first { nestedArguments -> nestedArguments.name == WASM_ARGUMENTS_NAME }
-
-    private fun getCommonKlibBasedArgumentsLevel(kotlinCompilerArguments: KotlinCompilerArguments): KotlinCompilerArgumentsLevel {
-        val commonArgumentsLayer = kotlinCompilerArguments.getCommonArgumentsLevel()
-        val commonKlibBasedArgumentsLayer =
-            commonArgumentsLayer.nestedLevels.first { nestedArguments -> nestedArguments.name == COMMON_KLIB_BASED_ARGUMENTS_NAME }
-        return commonKlibBasedArgumentsLayer
-    }
-
-    private fun KotlinCompilerArguments.getCommonArgumentsLevel() = this.topLevel.nestedLevels.first()
 
     private fun Collection<KotlinCompilerArgument>.processCompilerArgs(
         allowedArguments: Set<String> = emptySet(),
