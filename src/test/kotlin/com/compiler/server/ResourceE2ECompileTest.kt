@@ -16,14 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import java.io.File
-import java.net.InetAddress
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
@@ -36,11 +34,6 @@ class ResourceE2ECompileTest : BaseResourceCompileTest {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
-
-    @Value("\${local.server.port}")
-    private var port = 0
-    private val host: String = InetAddress.getLocalHost().hostAddress
-    private fun getHost(): String = "http://$host:$port"
 
     override fun request(code: String, platform: ProjectType): ExecutionResult {
         val (url, requestBody) = when (platform) {
