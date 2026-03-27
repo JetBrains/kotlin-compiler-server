@@ -138,8 +138,9 @@ class KotlinCompiler(
 
         val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
         val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
-        val operation = jvmToolchain.createJvmCompilationOperation(sources, outputDir)
-        operation.compilerArguments.applyArgumentStrings(arguments)
+        val operationBuilder = jvmToolchain.jvmCompilationOperationBuilder(sources, outputDir)
+        operationBuilder.compilerArguments.applyArgumentStrings(arguments)
+        val operation = operationBuilder.build()
 
         toolchains.createBuildSession().use { session ->
             val result = try {

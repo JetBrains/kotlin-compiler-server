@@ -203,13 +203,4 @@ tasks.withType<Test> {
         this@withType.environment("kotlin.wasm.node.path", executablePath.get())
         this@withType.environment("kotlin.compose.wasm.resources.path", composeWasmResourcesPath.get())
     }
-
-    // We disable this on TeamCity, because we don't want to fail this test,
-    // when compiler server's test run as a K2 user project.
-    // But for our pull requests we still need to run this test, so we add it to our GitHub action.
-    if (System.getenv("TEAMCITY_VERSION") != null) {
-        filter {
-            excludeTestsMatching("com.compiler.server.CompilerArguments*")
-        }
-    }
 }

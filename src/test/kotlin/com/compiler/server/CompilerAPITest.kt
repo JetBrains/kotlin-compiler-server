@@ -7,7 +7,6 @@ import com.compiler.server.model.bean.VersionInfo
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.postForObject
@@ -22,10 +21,6 @@ import kotlin.test.assertNotNull
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 class CompilerAPITest {
-
-  @Value("\${local.server.port}")
-  private var port = 0
-
 
   @Autowired
   private lateinit var restTemplate: TestRestTemplate
@@ -65,8 +60,4 @@ class CompilerAPITest {
       )
     }
   }
-
-
-  private fun getHost(): String = "http://$host:$port"
-
 }
