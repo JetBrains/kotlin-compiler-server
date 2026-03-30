@@ -6,6 +6,7 @@ import com.compiler.server.model.*
 import com.compiler.server.utils.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
+import org.jetbrains.kotlin.cli.js.KotlinWasmCompiler
 import org.springframework.stereotype.Service
 import kotlin.io.encoding.Base64
 import kotlin.io.path.div
@@ -103,7 +104,6 @@ class KotlinToJSTranslator(
         usingTempDirectory { inputDir ->
             usingTempDirectory { outputDir ->
                 val ioFiles = files.writeToIoFiles(inputDir)
-                val k2JSCompiler = K2JSCompiler()
                 val filePaths = ioFiles.map { it.toFile().canonicalPath }
                 val klibPath = (outputDir / "klib").toFile().canonicalPath
                 val additionalCompilerArgumentsForKLib =
@@ -112,6 +112,7 @@ class KotlinToJSTranslator(
                         compilerArgumentsUtil.PREDEFINED_JS_FIRST_PHASE_ARGUMENTS,
                         userCompilerArguments.firstPhase
                     ) + "-ir-output-dir=$klibPath"
+                val k2JSCompiler = if (additionalCompilerArgumentsForKLib.contains("-Xwasm")) KotlinWasmCompiler() else K2JSCompiler()
                 k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
                     .flatMap {
                         val secondPhaseArguments =
@@ -165,7 +166,6 @@ class KotlinToJSTranslator(
                     else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
                 }
                 val ioFiles = files.writeToIoFiles(inputDir)
-                val k2JSCompiler = K2JSCompiler()
                 val filePaths = ioFiles.map { it.toFile().canonicalPath }
                 val klibPath = (outputDir / "klib").toFile().canonicalPath
 
@@ -175,7 +175,7 @@ class KotlinToJSTranslator(
                         firstPhasePredefinedArguments,
                         userCompilerArguments.firstPhase
                     ) + "-ir-output-dir=$klibPath"
-
+                val k2JSCompiler = if (additionalCompilerArgumentsForKLib.contains("-Xwasm")) KotlinWasmCompiler() else K2JSCompiler()
                 k2JSCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
                     .flatMap {
                         val secondPhaseArguments = (compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
