@@ -1351,7 +1351,7 @@
     {
       "name": "Xpartial-linkage",
       "shortName": null,
-      "description": "Use partial linkage mode.",
+      "description": "This option is deprecated and will be deleted in future versions.\nThe partial linkage engine is always turned on.\nIf you would like to adjust the compile-time log level for partial linkage, use -Xpartial-linkage-loglevel.",
       "type": {
         "type": "com.compiler.server.model.StringExtendedCompilerArgumentValue",
         "isNullable": true,
