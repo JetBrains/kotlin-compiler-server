@@ -24,7 +24,7 @@ class CompilerArgumentsUtilTest {
         val predefinedJvmArgumentNames = compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS.keys
         assertTrue(
             jvmArgumentNames.containsAll(predefinedJvmArgumentNames),
-            "Some predefined arguments are missing in $jvmCompilerArguments: ${predefinedJvmArgumentNames - jvmArgumentNames}"
+            "Some predefined jvm arguments are missing in compiler argument: ${predefinedJvmArgumentNames - jvmArgumentNames}"
         )
     }
 
@@ -34,13 +34,13 @@ class CompilerArgumentsUtilTest {
         val predefinedJsFirstPhaseArgumentNames = compilerArgumentsUtil.PREDEFINED_JS_FIRST_PHASE_ARGUMENTS.keys
         assertTrue(
             jsArgumentNames.containsAll(predefinedJsFirstPhaseArgumentNames),
-            "Some predefined first phase arguments are missing in $jsArguments: ${predefinedJsFirstPhaseArgumentNames - jsArguments}"
+            "Some predefined js first phase arguments are missing in js arguments: ${predefinedJsFirstPhaseArgumentNames - jsArguments}"
         )
 
         val predefinedJsSecondPhaseArgumentNames = compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS.keys
         assertTrue(
             jsArgumentNames.containsAll(predefinedJsSecondPhaseArgumentNames),
-            "Some predefined second phase arguments are missing in $jsArguments: ${predefinedJsSecondPhaseArgumentNames - jsArguments}"
+            "Some predefined js second phase arguments are missing in js  rguments: ${predefinedJsSecondPhaseArgumentNames - jsArguments}"
         )
     }
 
@@ -50,13 +50,13 @@ class CompilerArgumentsUtilTest {
         val predefinedWasmFirstPhaseArgumentNames = compilerArgumentsUtil.PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS.keys
         assertTrue(
             wasmArgumentNames.containsAll(predefinedWasmFirstPhaseArgumentNames),
-            "Some predefined first phase arguments are missing in $wasmArguments: ${predefinedWasmFirstPhaseArgumentNames - jsArguments}"
+            "Some predefined wasm first phase arguments are missing in wasm arguments: ${predefinedWasmFirstPhaseArgumentNames - jsArguments}"
         )
 
         val predefinedWasmSecondPhaseArgumentNames = compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS.keys
         assertTrue(
             wasmArgumentNames.containsAll(predefinedWasmSecondPhaseArgumentNames),
-            "Some predefined second phase arguments are missing in $wasmArguments: ${predefinedWasmSecondPhaseArgumentNames - jsArguments}"
+            "Some predefined wasm second phase arguments are missing in wasm arguments: ${predefinedWasmSecondPhaseArgumentNames - jsArguments}"
         )
     }
 
@@ -68,14 +68,14 @@ class CompilerArgumentsUtilTest {
             compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS.keys
         assertTrue(
             composeWasmArgumentNames.containsAll(predefinedComposeWasmFirstPhaseArgumentNames),
-            "Some predefined first phase arguments are missing in compose $wasmArguments: ${predefinedComposeWasmFirstPhaseArgumentNames - jsArguments}"
+            "Some predefined compose wasm first phase arguments are missing in compose wasm arguments: ${predefinedComposeWasmFirstPhaseArgumentNames - jsArguments}"
         )
 
         val predefinedComposeWasmSecondPhaseArgumentNames =
             compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS.keys
         assertTrue(
             composeWasmArgumentNames.containsAll(predefinedComposeWasmSecondPhaseArgumentNames),
-            "Some predefined second phase arguments are missing in compose $wasmArguments: ${predefinedComposeWasmSecondPhaseArgumentNames - jsArguments}"
+            "Some predefined compose wasm second phase arguments are missing in compose wasm arguments: ${predefinedComposeWasmSecondPhaseArgumentNames - jsArguments}"
         )
     }
 
@@ -85,7 +85,7 @@ class CompilerArgumentsUtilTest {
         val allowedJvmArgumentNames = compilerArgumentsUtil.ALLOWED_JVM_ARGUMENTS
         assertTrue(
             jvmArgumentNames.containsAll(allowedJvmArgumentNames),
-            "Some allowed arguments are missing in $jvmCompilerArguments: ${allowedJvmArgumentNames - jvmArgumentNames}"
+            "Some allowed js arguments are missing in jvm compiler arguments: ${allowedJvmArgumentNames - jvmArgumentNames}"
         )
     }
 
@@ -95,7 +95,7 @@ class CompilerArgumentsUtilTest {
         val allowedJsArgumentNames = compilerArgumentsUtil.ALLOWED_JS_ARGUMENTS
         assertTrue(
             jsArgumentNames.containsAll(allowedJsArgumentNames),
-            "Some allowed arguments are missing in $jsArguments: ${allowedJsArgumentNames - jsArgumentNames}"
+            "Some allowed js arguments are missing in js arguments: ${allowedJsArgumentNames - jsArgumentNames}"
         )
     }
 
@@ -105,7 +105,7 @@ class CompilerArgumentsUtilTest {
         val allowedWasmArgumentNames = compilerArgumentsUtil.ALLOWED_WASM_ARGUMENTS
         assertTrue(
             wasmArgumentNames.containsAll(allowedWasmArgumentNames),
-            "Some allowed arguments are missing in $wasmArguments: ${allowedWasmArgumentNames - wasmArgumentNames}"
+            "Some allowed wasm arguments are missing in wasm arguments: ${allowedWasmArgumentNames - wasmArgumentNames}"
         )
     }
 }
