@@ -1,9 +1,9 @@
 fun main() {
 //sampleStart
-    val a: Int = 100
-    val boxedA: Int? = a
-    val anotherBoxedA: Int? = a
+    val score: Int = 100
+    val savedScore: Int? = score
+    val displayedScore: Int? = score
     
-    println(boxedA === anotherBoxedA) // true
+    println(savedScore === displayedScore) // true
 //sampleEnd
 }
