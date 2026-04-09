@@ -24,7 +24,6 @@ import org.jetbrains.org.objectweb.asm.ClassVisitor
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes.*
 import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.io.File
 import java.io.PrintWriter
@@ -39,11 +38,9 @@ class KotlinCompiler(
     private val kotlinEnvironment: KotlinEnvironment,
     private val javaExecutor: JavaExecutor,
     private val librariesFile: LibrariesFile,
-    @Value("\${policy.file}") private val policyFileName: String,
     private val compilerArgumentsUtil: CompilerArgumentsUtil,
     private val jvmCompilerArguments: Set<ExtendedCompilerArgument>,
 ) {
-    private val policyFile = File(policyFileName)
 
     data class JvmClasses(
         val files: Map<String, ByteArray> = emptyMap(),
@@ -68,7 +65,7 @@ class KotlinCompiler(
             ?.joinToString("\n\n")
     }
 
-    fun run(
+    fun  run(
         files: List<ProjectFile>,
         addByteCode: Boolean,
         args: String,
@@ -223,11 +220,6 @@ class KotlinCompiler(
     }
 
     private fun write(classes: JvmClasses, outputDir: Path): OutputDirectory {
-        val libDir = librariesFile.jvm.absolutePath
-        val policy = policyFile.readText()
-            .replace("%%GENERATED%%", outputDir.toString().replace('\\', '/'))
-            .replace("%%LIB_DIR%%", libDir.replace('\\', '/'))
-        (outputDir / policyFile.name).apply { parent.toFile().mkdirs() }.toFile().writeText(policy)
         return OutputDirectory(outputDir, classes.files.map { (name, bytes) ->
             (outputDir / name).let { path ->
                 path.parent.toFile().mkdirs()
@@ -244,11 +236,9 @@ class KotlinCompiler(
         val classPaths =
             (kotlinEnvironment.classpath.map { it.absolutePath } + outputDirectory.path.toAbsolutePath().toString())
                 .joinToString(PATH_SEPARATOR)
-        val policy = (outputDirectory.path / policyFile.name).toAbsolutePath()
         return CommandLineArgument(
             classPaths = classPaths,
             mainClass = mainClass,
-            policy = policy,
             memoryLimit = 32,
             arguments = args
         ).toList()

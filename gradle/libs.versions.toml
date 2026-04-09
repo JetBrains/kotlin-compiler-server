@@ -3,6 +3,7 @@ kotlin = "2.4.0-Beta1"
 spring-boot = "3.5.7"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.14"
+aws-secretsmanager = "2.29.0"
 aws-serverless-java-container-springboot3 = "2.1.5"
 junit = "4.13.2"
 logstash-logback-encoder = "9.0"
@@ -16,7 +17,6 @@ lsp4j = "0.24.0"
 reactor = "3.8.0"
 skiko = "0.9.22.2"
 testcontainers = "2.0.3"
-# don't forget to update jackson version in `executor.policy` file.
 jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.9.3"
@@ -44,7 +44,6 @@ kotlin-compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "kotli
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
 # Needed to pin a coroutines version compatible with Compose WASM
-# WASM runs on the client side, so it doesn't interact with our server-side `executor.policy`
 kotlinx-coroutines-core-compose-wasm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-wasm-js", version.ref = "kotlinx-coroutines-compose-wasm" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -83,6 +82,7 @@ spring-boot-starter-data-redis = { group = "org.springframework.boot", name = "s
 gson = { group = "com.google.code.gson", name = "gson" }
 
 #spring stack dependencies
+aws-secretsmanager = { group = "software.amazon.awssdk", name = "secretsmanager", version.ref = "aws-secretsmanager" }
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer" }
 springdoc-webmvc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }

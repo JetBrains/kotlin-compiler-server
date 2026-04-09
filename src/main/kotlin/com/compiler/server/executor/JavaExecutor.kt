@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -17,10 +16,13 @@ class JavaExecutor {
   companion object {
     const val MAX_OUTPUT_SIZE = 100 * 1024
     const val EXECUTION_TIMEOUT = 10000L
+
   }
 
   fun execute(args: List<String>): ProgramOutput {
-    return Runtime.getRuntime().exec(args.toTypedArray()).use {
+    val processBuilder = ProcessBuilder(args)
+    processBuilder.environment().clear()
+    return processBuilder.start().use {
       outputStream.close()
 
       val standardOut = InputStreamReader(this.inputStream).buffered()
@@ -105,7 +107,6 @@ class JavaExecutor {
 class CommandLineArgument(
     val classPaths: String,
     val mainClass: String?,
-    val policy: Path,
     val memoryLimit: Int,
     val arguments: List<String>,
 ) {
@@ -113,8 +114,6 @@ class CommandLineArgument(
         return (listOf(
             getJavaPath(),
             "-Xmx" + memoryLimit + "M",
-            "-Djava.security.manager",
-            "-Djava.security.policy=$policy",
             "-ea",
             "-classpath"
         ) + classPaths + mainClass + arguments).filterNotNull()
