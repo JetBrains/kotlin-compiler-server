@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
-val policy: String by System.getProperties()
-
 group = "com.compiler.server"
 version = "${libs.versions.kotlin.get()}-SNAPSHOT"
 
@@ -86,7 +84,6 @@ fun Project.generateProperties(
     "server.error.include-message" to "always",
     "server.error.include-binding-errors" to "always",
     "kotlin.version" to kotlinVersion,
-    "policy.file" to prefix + policy,
     "libraries.folder.jvm" to prefix + libJVM,
     "libraries.folder.js" to prefix + libJS,
     "libraries.folder.wasm" to prefix + libWasm,
@@ -99,8 +96,8 @@ fun Project.generateProperties(
     "springdoc.swagger-ui.path" to "/api-docs/swagger-ui.html",
     "wasm.compose.cache.enabled" to "\${CACHE_NAMESPACE:false}",
     "spring.data.redis.host" to "=\${SPRING_DATA_REDIS_HOST:}",
-    "spring.data.redis.port" to "\${SPRING_DATA_REDIS_SSL_ENABLED:6379}",
-    "speing.data.redis.ssl.enabled" to "\${SPRING_DATA_REDIS_SSL_ENABLED:false}",
+    "spring.data.redis.port" to "\${SPRING_DATA_REDIS_PORT:6379}",
+    "spring.data.redis.ssl.enabled" to "\${SPRING_DATA_REDIS_SSL_ENABLED:false}",
     "spring.data.redis.connectTimeout" to "1000",
     "spring.data.redis.timeout" to "1000"
 )
@@ -167,7 +164,6 @@ val buildLambda by tasks.creating(Zip::class) {
         exclude(propertyFile)
     }
     from(lambdaPropertiesGenerator)
-    from(policy)
     from(libJSFolder) { into(libJS) }
     from(libWasmFolder) { into(libWasm) }
     from(libComposeWasmFolder) { into(libComposeWasm) }

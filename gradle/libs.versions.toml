@@ -16,7 +16,6 @@ lsp4j = "0.24.0"
 reactor = "3.8.0"
 skiko = "0.9.22.2"
 testcontainers = "2.0.3"
-# don't forget to update jackson version in `executor.policy` file.
 jackson = "2.19.2"
 hamcrest = "3.0"
 compose = "1.9.3"
@@ -44,7 +43,6 @@ kotlin-compose-compiler-plugin = { group = "org.jetbrains.kotlin", name = "kotli
 kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
 # Needed to pin a coroutines version compatible with Compose WASM
-# WASM runs on the client side, so it doesn't interact with our server-side `executor.policy`
 kotlinx-coroutines-core-compose-wasm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-wasm-js", version.ref = "kotlinx-coroutines-compose-wasm" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
