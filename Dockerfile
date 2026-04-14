@@ -37,7 +37,6 @@ COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_JS} /kotlin-compiler-serv
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_WASM} /kotlin-compiler-server/${KOTLIN_LIB_WASM}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_LIB_COMPOSE_WASM} /kotlin-compiler-server/${KOTLIN_LIB_COMPOSE_WASM}
 COPY --from=build /kotlin-compiler-server/${KOTLIN_COMPOSE_WASM_COMPILER_PLUGINS} /kotlin-compiler-server/${KOTLIN_COMPOSE_WASM_COMPILER_PLUGINS}
-COPY --from=build /kotlin-compiler-server/executor.policy /kotlin-compiler-server/
 
 ENV PORT=8080
 
