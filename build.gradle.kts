@@ -95,7 +95,7 @@ fun Project.generateProperties(
     "server.compression.mime-types" to "application/json,text/javascript,application/wasm",
     "springdoc.swagger-ui.path" to "/api-docs/swagger-ui.html",
     "wasm.compose.cache.enabled" to "\${CACHE_NAMESPACE:false}",
-    "spring.data.redis.host" to "=\${SPRING_DATA_REDIS_HOST:}",
+    "spring.data.redis.host" to "\${SPRING_DATA_REDIS_HOST:}",
     "spring.data.redis.port" to "\${SPRING_DATA_REDIS_PORT:6379}",
     "spring.data.redis.ssl.enabled" to "\${SPRING_DATA_REDIS_SSL_ENABLED:false}",
     "spring.data.redis.connectTimeout" to "1000",
