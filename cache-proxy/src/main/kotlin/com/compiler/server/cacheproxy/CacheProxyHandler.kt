@@ -3,6 +3,7 @@ package com.compiler.server.cacheproxy
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler
+import com.compiler.server.cacheproxy.dto.ComposeWasmV2Request
 import com.compiler.server.cacheproxy.dto.ProjectRequest
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -43,30 +44,43 @@ class CacheProxyHandler : RequestStreamHandler {
         val compiler = queryParams?.get("compiler")?.asText()
         log.log("cache-proxy: path=$path compiler=$compiler bodyLength=${body?.length ?: 0}\n")
 
-        // Only cache compose-wasm requests; forward everything else directly
-        if (compiler != "compose-wasm" || body == null) {
+        val cacheKey = when {
+            // V2: dedicated /translate/compose-wasm endpoint
+            path.endsWith("/translate/compose-wasm") && body != null -> {
+                try {
+                    val request = mapper.readValue<ComposeWasmV2Request>(body)
+                    buildV2CacheKey(request)
+                } catch (e: Exception) {
+                    log.log("cache-proxy: V2 parse failed: ${e.message}\n")
+                    null
+                }
+            }
+            // V1: /translate?compiler=compose-wasm
+            compiler == "compose-wasm" && body != null -> {
+                try {
+                    val request = mapper.readValue<ProjectRequest>(body)
+                    buildV1CacheKey(request)
+                } catch (e: Exception) {
+                    log.log("cache-proxy: V1 parse failed: ${e.message}\n")
+                    null
+                }
+            }
+            else -> null
+        }
+
+        if (cacheKey == null) {
             log.log("cache-proxy: not cacheable, forwarding\n")
             val response = forward(event.toString(), log)
             output.write(response.toByteArray())
             return
         }
 
-        // Parse request for cache key
-        val request = try {
-            mapper.readValue<ProjectRequest>(body)
-        } catch (e: Exception) {
-            log.log("cache-proxy: parse failed: ${e.message}\n")
-            val response = forward(event.toString(), log)
-            output.write(response.toByteArray())
-            return
-        }
-        val key = buildCacheKey(request)
-        log.log("cache-proxy: key=$key\n")
+        log.log("cache-proxy: key=$cacheKey\n")
 
         // Check cache
         try {
-            redis.get(key)?.let { cached ->
-                redis.expire(key, ttlSeconds)
+            redis.get(cacheKey)?.let { cached ->
+                redis.expire(cacheKey, ttlSeconds)
                 log.log("cache-proxy: HIT (${cached.length} bytes)\n")
                 val hit = mapper.writeValueAsString(mapOf(
                     "statusCode" to 200,
@@ -94,7 +108,7 @@ class CacheProxyHandler : RequestStreamHandler {
                 val errors = hasErrors(responseBody)
                 log.log("cache-proxy: hasErrors=$errors responseLength=${responseBody.length}\n")
                 if (!errors) {
-                    redis.setex(key, ttlSeconds, responseBody)
+                    redis.setex(cacheKey, ttlSeconds, responseBody)
                     log.log("cache-proxy: PUT OK\n")
                 }
             } catch (e: Exception) {
@@ -124,16 +138,30 @@ class CacheProxyHandler : RequestStreamHandler {
         return payload
     }
 
-    private fun buildCacheKey(request: ProjectRequest): String {
+    internal fun buildV1CacheKey(request: ProjectRequest): String {
         val normalized = mapOf(
             "args" to request.args,
             "files" to request.files.sortedBy { it.name },
             "compilerArguments" to request.compilerArguments,
         )
+        return buildCacheKey("compose-wasm-v1", normalized)
+    }
+
+    internal fun buildV2CacheKey(request: ComposeWasmV2Request): String {
+        val normalized = mapOf(
+            "args" to request.args,
+            "files" to request.files.sortedBy { it.name },
+            "firstPhaseCompilerArguments" to request.firstPhaseCompilerArguments,
+            "secondPhaseCompilerArguments" to request.secondPhaseCompilerArguments,
+        )
+        return buildCacheKey("compose-wasm-V2", normalized)
+    }
+
+    private fun buildCacheKey(prefix: String, normalized: Map<String, Any>): String {
         val hash = MessageDigest.getInstance("SHA-256")
             .digest(idempotentMapper.writeValueAsString(normalized).toByteArray())
             .joinToString("") { "%02x".format(it) }
-        return "compose-wasm-v1:$cacheNamespace:v$kotlinVersion:$hash"
+        return "$prefix:$cacheNamespace:v$kotlinVersion:$hash"
     }
 
     private fun hasErrors(body: String): Boolean {
