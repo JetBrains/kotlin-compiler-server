@@ -10,4 +10,12 @@ data class ProjectRequest(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+data class ComposeWasmV2Request(
+    val args: String = "",
+    val files: List<FileDto> = listOf(),
+    val firstPhaseCompilerArguments: Map<String, Any> = emptyMap(),
+    val secondPhaseCompilerArguments: Map<String, Any> = emptyMap(),
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class FileDto(val text: String = "", val name: String = "")
