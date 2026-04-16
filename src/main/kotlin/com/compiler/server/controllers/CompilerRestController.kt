@@ -1,22 +1,34 @@
 package com.compiler.server.controllers
 
-import com.compiler.server.api.*
-import com.compiler.server.enums.CacheEndpointType
-import com.compiler.server.model.*
+import com.compiler.server.api.CompilerArgumentResponse
+import com.compiler.server.api.RunRequest
+import com.compiler.server.api.TestRequest
+import com.compiler.server.api.TranslateComposeWasmRequest
+import com.compiler.server.api.TranslateJsRequest
+import com.compiler.server.api.TranslateWasmRequest
+import com.compiler.server.model.CompilerDiagnostics
+import com.compiler.server.model.ExecutionResult
+import com.compiler.server.model.KotlinTranslatableCompiler
+import com.compiler.server.model.Project
+import com.compiler.server.model.ProjectFile
+import com.compiler.server.model.ProjectType
+import com.compiler.server.model.TranslationResultWithJsCode
 import com.compiler.server.service.CompilerArgumentsService
 import com.compiler.server.service.KotlinProjectExecutor
-import com.compiler.server.service.WasmComposeCacheService
 import jakarta.validation.Valid
 import org.jetbrains.kotlin.utils.mapToSetOrEmpty
-import org.slf4j.LoggerFactory
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping(value = ["/api/compiler", "/api/**/compiler"])
 class CompilerRestController(
     private val kotlinProjectExecutor: KotlinProjectExecutor,
     private val compilerArgumentsService: CompilerArgumentsService,
-    private val cacheService: WasmComposeCacheService? = null,
 ) {
 
     @PostMapping("/run")
@@ -76,8 +88,6 @@ class CompilerRestController(
     fun translateWasmCompose(
         @RequestBody @Valid request: TranslateComposeWasmRequest,
     ): TranslationResultWithJsCode {
-        cacheService?.get(request, CacheEndpointType.COMPOSE_WASM_V2)?.let { return it }
-
         return kotlinProjectExecutor.convertToWasm(
             Project(
                 args = request.args,
@@ -85,9 +95,7 @@ class CompilerRestController(
                 confType = ProjectType.COMPOSE_WASM,
                 compilerArguments = listOf(request.firstPhaseCompilerArguments, request.secondPhaseCompilerArguments)
             ),
-        ).also { result ->
-            if (result is TranslationWasmResult && !result.hasErrors()) cacheService?.put(request, result, CacheEndpointType.COMPOSE_WASM_V2)
-        }
+        )
     }
 
     @PostMapping("/highlight")
@@ -128,13 +136,10 @@ class CompilerRestController(
             )
 
             KotlinTranslatableCompiler.COMPOSE_WASM -> {
-                cacheService?.get(project, CacheEndpointType.COMPOSE_WASM_V1)?.let { return it }
                 kotlinProjectExecutor.convertToWasm(
                     project,
                     debugInfo,
-                ).also { result ->
-                    if (result is TranslationWasmResult && !result.hasErrors()) cacheService?.put(project, result, CacheEndpointType.COMPOSE_WASM_V1)
-                }
+                )
             }
         }
         return code
