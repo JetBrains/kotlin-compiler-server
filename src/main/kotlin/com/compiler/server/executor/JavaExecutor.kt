@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
@@ -20,11 +19,13 @@ class JavaExecutor {
   }
 
   fun execute(args: List<String>): ProgramOutput {
-    return Runtime.getRuntime().exec(args.toTypedArray()).use {
+    val processBuilder = ProcessBuilder(args)
+    processBuilder.environment().clear()
+    return processBuilder.start().use {
       outputStream.close()
 
-      val standardOut = InputStreamReader(this.inputStream).buffered()
-      val standardError = InputStreamReader(this.errorStream).buffered()
+      val standardOut = InputStreamReader(this.inputStream, Charsets.UTF_8).buffered()
+      val standardError = InputStreamReader(this.errorStream, Charsets.UTF_8).buffered()
 
       val standardOutput = asyncBufferedOutput(standardOut, limit = MAX_OUTPUT_SIZE)
       val errorOutput = asyncBufferedOutput(standardError, limit = MAX_OUTPUT_SIZE)
@@ -105,7 +106,6 @@ class JavaExecutor {
 class CommandLineArgument(
     val classPaths: String,
     val mainClass: String?,
-    val policy: Path,
     val memoryLimit: Int,
     val arguments: List<String>,
 ) {
@@ -113,8 +113,7 @@ class CommandLineArgument(
         return (listOf(
             getJavaPath(),
             "-Xmx" + memoryLimit + "M",
-            "-Djava.security.manager",
-            "-Djava.security.policy=$policy",
+            "-Dfile.encoding=UTF-8",
             "-ea",
             "-classpath"
         ) + classPaths + mainClass + arguments).filterNotNull()
