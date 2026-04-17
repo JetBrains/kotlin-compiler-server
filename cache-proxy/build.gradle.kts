@@ -10,6 +10,8 @@ dependencies {
     implementation(libs.jackson.module.kotlin)
 
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlin.mockito)
+    testImplementation(libs.testcontainers)
 }
 
 tasks.withType<Test>().configureEach { useJUnitPlatform() }
