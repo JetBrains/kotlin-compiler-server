@@ -6,7 +6,7 @@ dependencies {
     implementation(libs.aws.lambda.core)
     implementation(libs.aws.lambda.sdk)
     implementation(libs.lettuce.core)
-    implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation(libs.slf4j.simple)
     implementation(libs.jackson.module.kotlin)
 
     testImplementation(libs.kotlin.test)
