@@ -24,8 +24,8 @@ class JavaExecutor {
     return processBuilder.start().use {
       outputStream.close()
 
-      val standardOut = InputStreamReader(this.inputStream).buffered()
-      val standardError = InputStreamReader(this.errorStream).buffered()
+      val standardOut = InputStreamReader(this.inputStream, Charsets.UTF_8).buffered()
+      val standardError = InputStreamReader(this.errorStream, Charsets.UTF_8).buffered()
 
       val standardOutput = asyncBufferedOutput(standardOut, limit = MAX_OUTPUT_SIZE)
       val errorOutput = asyncBufferedOutput(standardError, limit = MAX_OUTPUT_SIZE)
@@ -113,6 +113,7 @@ class CommandLineArgument(
         return (listOf(
             getJavaPath(),
             "-Xmx" + memoryLimit + "M",
+            "-Dfile.encoding=UTF-8",
             "-ea",
             "-classpath"
         ) + classPaths + mainClass + arguments).filterNotNull()
