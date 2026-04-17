@@ -7,24 +7,25 @@ import com.compiler.server.cacheproxy.service.CacheService
 import com.compiler.server.cacheproxy.service.createRedisConnectionFromEnv
 import com.compiler.server.cacheproxy.service.forwardEvent
 import com.compiler.server.cacheproxy.service.parseComposeRequest
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import software.amazon.awssdk.services.lambda.LambdaClient
 import java.io.InputStream
 import java.io.OutputStream
 import java.time.Duration
 
-class CacheProxyHandler : RequestStreamHandler {
-
-    private val mapper = jacksonObjectMapper()
-
-    private val cacheService = CacheService(
+// @JvmOverloads generates a no-arg constructor using default parameter values, which is required for Lambda
+class CacheProxyHandler @JvmOverloads constructor(
+    private val cacheService: CacheService = CacheService(
         redis = createRedisConnectionFromEnv(),
         kotlinVersion = System.getenv("KOTLIN_VERSION"),
         cacheNamespace = System.getenv("CACHE_NAMESPACE") ?: "default",
         ttl = Duration.ofHours(24),
-    )
-    private val lambdaClient: LambdaClient = LambdaClient.create()
-    private val targetLambda: String = System.getenv("TARGET_LAMBDA_NAME")
+    ),
+    private val lambdaClient: LambdaClient = LambdaClient.create(),
+    private val targetLambda: String = System.getenv("TARGET_LAMBDA_NAME"),
+    private val mapper: ObjectMapper = jacksonObjectMapper(),
+) : RequestStreamHandler {
 
     override fun handleRequest(input: InputStream, output: OutputStream, context: Context) {
         val log = context.logger
