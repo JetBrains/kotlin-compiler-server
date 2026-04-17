@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":common", configuration = "default"))
     implementation(libs.aws.lambda.core)
     implementation(libs.aws.lambda.sdk)
     implementation(libs.lettuce.core)
