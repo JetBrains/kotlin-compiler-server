@@ -1,9 +1,9 @@
 package com.compiler.server.cacheproxy.service
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger
-import com.compiler.server.cacheproxy.dto.ComposeWasmRequest
-import com.compiler.server.cacheproxy.dto.ComposeWasmV2Request
-import com.compiler.server.cacheproxy.dto.ProjectRequest
+import com.compiler.server.api.CacheableRequest
+import com.compiler.server.api.TranslateComposeWasmRequest
+import com.compiler.server.model.Project
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
@@ -23,7 +23,7 @@ class CacheService(
         .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
         .build()
 
-    fun get(request: ComposeWasmRequest, log: LambdaLogger): String? {
+    fun get(request: CacheableRequest, log: LambdaLogger): String? {
         val key = buildKey(request)
         return withRetryOnConnectionLoss("GET", log) {
             redis.get(key)?.also {
@@ -33,7 +33,7 @@ class CacheService(
         }
     }
 
-    fun put(request: ComposeWasmRequest, responseBody: String, log: LambdaLogger) {
+    fun put(request: CacheableRequest, responseBody: String, log: LambdaLogger) {
         val key = buildKey(request)
         withRetryOnConnectionLoss("SET", log) {
             redis.setex(key, ttl.seconds, responseBody)
@@ -61,19 +61,20 @@ class CacheService(
             null
         }
 
-    internal fun buildKey(request: ComposeWasmRequest): String {
+    internal fun buildKey(request: CacheableRequest): String {
         val (endpointType, normalized) = when (request) {
-            is ComposeWasmV2Request -> CacheEndpointType.COMPOSE_WASM_V2 to mapOf(
+            is TranslateComposeWasmRequest -> CacheEndpointType.COMPOSE_WASM_V2 to mapOf(
                 "args" to request.args,
                 "files" to request.files.sortedBy { it.name },
                 "firstPhaseCompilerArguments" to request.firstPhaseCompilerArguments,
                 "secondPhaseCompilerArguments" to request.secondPhaseCompilerArguments,
             )
-            is ProjectRequest -> CacheEndpointType.COMPOSE_WASM_V1 to mapOf(
+            is Project -> CacheEndpointType.COMPOSE_WASM_V1 to mapOf(
                 "args" to request.args,
                 "files" to request.files.sortedBy { it.name },
                 "compilerArguments" to request.compilerArguments,
             )
+            else -> error("Unsupported cacheable request type: ${request::class.simpleName}")
         }
         val hash = MessageDigest.getInstance("SHA-256")
             .digest(idempotentMapper.writeValueAsString(normalized).toByteArray())
