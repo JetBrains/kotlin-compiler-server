@@ -6,7 +6,8 @@ springdoc = "2.8.14"
 aws-sdk = "2.29.0"
 aws-serverless-java-container-springboot3 = "2.1.5"
 aws-lambda-java = "1.2.3"
-lettuce = "6.5.5.RELEASE"
+lettuce = "6.8.2.RELEASE"
+slf4j = "1.7.36"
 junit = "4.13.2"
 logstash-logback-encoder = "9.0"
 kotlinx-coroutines = "1.7.3"
@@ -87,6 +88,7 @@ gson = { group = "com.google.code.gson", name = "gson" }
 aws-lambda-sdk = { group = "software.amazon.awssdk", name = "lambda", version.ref = "aws-sdk" }
 aws-lambda-core = { group = "com.amazonaws", name = "aws-lambda-java-core", version.ref = "aws-lambda-java" }
 lettuce-core = { group = "io.lettuce", name = "lettuce-core", version.ref = "lettuce" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
 aws-springboot-container = { group = "com.amazonaws.serverless", name = "aws-serverless-java-container-springboot3", version.ref = "aws-serverless-java-container-springboot3" }
 spring-context-indexer = { group = "org.springframework", name = "spring-context-indexer" }
 springdoc-webmvc = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
