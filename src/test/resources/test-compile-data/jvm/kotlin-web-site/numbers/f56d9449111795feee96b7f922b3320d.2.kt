@@ -1,10 +1,10 @@
 fun main() {
 //sampleStart
-    val b: Int = 10000
-    val boxedB: Int? = b
-    val anotherBoxedB: Int? = b
-    
-    println(boxedB === anotherBoxedB) // false
-    println(boxedB == anotherBoxedB) // true
+    val score: Int = 10000
+    val savedScore: Int? = score
+    val displayedScore: Int? = score
+
+    println(savedScore === displayedScore) // false
+    println(savedScore == displayedScore)  // true
 //sampleEnd
 }
