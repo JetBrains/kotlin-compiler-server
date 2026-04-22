@@ -14,9 +14,10 @@ import kotlin.test.assertNotEquals
 
 class CacheKeyCompatibilityTest {
 
+    private val kotlinVersion = "2.3.20"
+
     private val cacheService = CacheService(
         redis = mock<RedisCommands<String, String>>(),
-        kotlinVersion = "2.3.20",
         cacheNamespace = "prod",
         ttl = Duration.ofHours(24),
     )
@@ -29,7 +30,7 @@ class CacheKeyCompatibilityTest {
             args = "",
             files = listOf(ProjectFile(text = "fun main() {}", name = "Main.kt")),
         )
-        val key = cacheService.buildKey(request)
+        val key = cacheService.buildKey(request, kotlinVersion)
         assert(key.startsWith("compose-wasm-v1:prod:v2.3.20:")) { "Key prefix mismatch: $key" }
         assert(key.substringAfterLast(":").length == 64) { "Hash should be 64 hex chars: $key" }
     }
@@ -48,21 +49,27 @@ class CacheKeyCompatibilityTest {
                 ProjectFile(text = "class A", name = "A.kt"),
             ),
         )
-        assertEquals(cacheService.buildKey(request1), cacheService.buildKey(request2))
+        assertEquals(cacheService.buildKey(request1, kotlinVersion), cacheService.buildKey(request2, kotlinVersion))
     }
 
     @Test
     fun `V1 different content produces different keys`() {
         val request1 = Project(files = listOf(ProjectFile(text = "fun a() {}", name = "Main.kt")))
         val request2 = Project(files = listOf(ProjectFile(text = "fun b() {}", name = "Main.kt")))
-        assertNotEquals(cacheService.buildKey(request1), cacheService.buildKey(request2))
+        assertNotEquals(cacheService.buildKey(request1, kotlinVersion), cacheService.buildKey(request2, kotlinVersion))
     }
 
     @Test
     fun `V1 compiler arguments are included in key`() {
         val base = Project(files = listOf(ProjectFile(text = "fun main() {}", name = "Main.kt")))
         val withArgs = base.copy(compilerArguments = listOf(mapOf("opt" to true)))
-        assertNotEquals(cacheService.buildKey(base), cacheService.buildKey(withArgs))
+        assertNotEquals(cacheService.buildKey(base, kotlinVersion), cacheService.buildKey(withArgs, kotlinVersion))
+    }
+
+    @Test
+    fun `V1 different kotlin versions produce different keys`() {
+        val request = Project(files = listOf(ProjectFile(text = "fun main() {}", name = "Main.kt")))
+        assertNotEquals(cacheService.buildKey(request, "2.3.20"), cacheService.buildKey(request, "2.2.0"))
     }
 
     // --- V2 tests ---
@@ -73,7 +80,7 @@ class CacheKeyCompatibilityTest {
             args = "",
             files = listOf(ProjectFileRequestDto(text = "fun main() {}", name = "Main.kt")),
         )
-        val key = cacheService.buildKey(request)
+        val key = cacheService.buildKey(request, kotlinVersion)
         assert(key.startsWith("compose-wasm-V2:prod:v2.3.20:")) { "Key prefix mismatch: $key" }
         assert(key.substringAfterLast(":").length == 64) { "Hash should be 64 hex chars: $key" }
     }
@@ -92,14 +99,14 @@ class CacheKeyCompatibilityTest {
                 ProjectFileRequestDto(text = "class A", name = "A.kt"),
             ),
         )
-        assertEquals(cacheService.buildKey(request1), cacheService.buildKey(request2))
+        assertEquals(cacheService.buildKey(request1, kotlinVersion), cacheService.buildKey(request2, kotlinVersion))
     }
 
     @Test
     fun `V2 different content produces different keys`() {
         val request1 = TranslateComposeWasmRequest(files = listOf(ProjectFileRequestDto(text = "fun a() {}", name = "Main.kt")))
         val request2 = TranslateComposeWasmRequest(files = listOf(ProjectFileRequestDto(text = "fun b() {}", name = "Main.kt")))
-        assertNotEquals(cacheService.buildKey(request1), cacheService.buildKey(request2))
+        assertNotEquals(cacheService.buildKey(request1, kotlinVersion), cacheService.buildKey(request2, kotlinVersion))
     }
 
     @Test
@@ -117,17 +124,17 @@ class CacheKeyCompatibilityTest {
             firstPhaseCompilerArguments = base.firstPhaseCompilerArguments,
             secondPhaseCompilerArguments = mapOf("opt" to true),
         )
-        assertNotEquals(cacheService.buildKey(base), cacheService.buildKey(withFirstPhase))
-        assertNotEquals(cacheService.buildKey(base), cacheService.buildKey(withSecondPhase))
-        assertNotEquals(cacheService.buildKey(withFirstPhase), cacheService.buildKey(withSecondPhase))
+        assertNotEquals(cacheService.buildKey(base, kotlinVersion), cacheService.buildKey(withFirstPhase, kotlinVersion))
+        assertNotEquals(cacheService.buildKey(base, kotlinVersion), cacheService.buildKey(withSecondPhase, kotlinVersion))
+        assertNotEquals(cacheService.buildKey(withFirstPhase, kotlinVersion), cacheService.buildKey(withSecondPhase, kotlinVersion))
     }
 
     @Test
     fun `V1 and V2 keys use different prefixes`() {
         val v1 = Project(files = listOf(ProjectFile(text = "fun main() {}", name = "Main.kt")))
         val v2 = TranslateComposeWasmRequest(files = listOf(ProjectFileRequestDto(text = "fun main() {}", name = "Main.kt")))
-        val v1Key = cacheService.buildKey(v1)
-        val v2Key = cacheService.buildKey(v2)
+        val v1Key = cacheService.buildKey(v1, kotlinVersion)
+        val v2Key = cacheService.buildKey(v2, kotlinVersion)
         assert(v1Key.startsWith("compose-wasm-v1:")) { "V1 key should start with compose-wasm-v1:" }
         assert(v2Key.startsWith("compose-wasm-V2:")) { "V2 key should start with compose-wasm-V2:" }
         assertNotEquals(v1Key, v2Key)
