@@ -1,4 +1,4 @@
-package com.compiler.server.cacheproxy.service
+package com.compiler.server.cacheproxy.enums
 
 enum class CacheEndpointType(val cacheName: String) {
     COMPOSE_WASM_V2("compose-wasm-V2"),
