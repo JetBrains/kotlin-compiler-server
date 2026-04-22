@@ -1,4 +1,4 @@
-package com.compiler.server.cacheproxy.service
+package com.compiler.server.cacheproxy.utils
 
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI

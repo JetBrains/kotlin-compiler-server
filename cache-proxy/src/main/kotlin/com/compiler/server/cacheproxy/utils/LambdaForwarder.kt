@@ -1,4 +1,4 @@
-package com.compiler.server.cacheproxy.service
+package com.compiler.server.cacheproxy.utils
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.fasterxml.jackson.databind.ObjectMapper

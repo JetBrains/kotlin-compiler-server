@@ -1,4 +1,4 @@
-package com.compiler.server.cacheproxy.service
+package com.compiler.server.cacheproxy.utils
 
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.compiler.server.api.CacheableRequest
@@ -8,8 +8,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 
-fun parseComposeRequest(event: JsonNode, mapper: ObjectMapper, log: LambdaLogger): CacheableRequest? {
-    val path = event.get("path")?.asText() ?: ""
+private val versionInPath = Regex("""^/api/([^/]+)/compose/""")
+
+fun extractKotlinVersion(event: JsonNode): String? =
+    versionInPath.find(event.get("path")?.asText() ?: "")?.groupValues?.get(1)
+
+fun parseCacheableBody(event: JsonNode, mapper: ObjectMapper, log: LambdaLogger): CacheableRequest? {
+    val path = event.get("path")?.asText() ?: return null
     val body = event.get("body")?.asText() ?: return null
     val compiler = event.get("queryStringParameters")?.get("compiler")?.asText()
 

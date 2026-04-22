@@ -43,7 +43,6 @@ class CacheProxyHandlerIntegrationTest {
 
     private val cacheService = CacheService(
         redis = redis,
-        kotlinVersion = "2.3.20",
         cacheNamespace = "integ",
         ttl = Duration.ofHours(24),
     )
@@ -53,7 +52,7 @@ class CacheProxyHandlerIntegrationTest {
     private val handler = CacheProxyHandler(
         cacheService = cacheService,
         lambdaClient = lambdaClient,
-        targetLambda = "test-target-lambda",
+        targetLambdas = mapOf("2.3.20" to "test-target-lambda"),
         mapper = mapper,
     )
 
@@ -75,7 +74,7 @@ class CacheProxyHandlerIntegrationTest {
         )
         val event = mapper.writeValueAsString(
             mapOf(
-                "path" to "/translate/compose-wasm",
+                "path" to "/api/2.3.20/compose/translate/compose-wasm",
                 "body" to requestBody,
             )
         )
