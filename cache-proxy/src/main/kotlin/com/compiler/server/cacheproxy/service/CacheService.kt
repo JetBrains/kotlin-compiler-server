@@ -3,6 +3,7 @@ package com.compiler.server.cacheproxy.service
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.compiler.server.api.CacheableRequest
 import com.compiler.server.api.TranslateComposeWasmRequest
+import com.compiler.server.cacheproxy.enums.CacheEndpointType
 import com.compiler.server.model.Project
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -14,7 +15,6 @@ import java.time.Duration
 
 class CacheService(
     private val redis: RedisCommands<String, String>,
-    private val kotlinVersion: String,
     private val cacheNamespace: String,
     private val ttl: Duration,
 ) {
@@ -23,8 +23,8 @@ class CacheService(
         .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
         .build()
 
-    fun get(request: CacheableRequest, log: LambdaLogger): String? {
-        val key = buildKey(request)
+    fun get(request: CacheableRequest, kotlinVersion: String, log: LambdaLogger): String? {
+        val key = buildKey(request, kotlinVersion)
         return withRetryOnConnectionLoss("GET", log) {
             redis.get(key)?.also {
                 redis.expire(key, ttl.seconds)
@@ -33,8 +33,8 @@ class CacheService(
         }
     }
 
-    fun put(request: CacheableRequest, responseBody: String, log: LambdaLogger) {
-        val key = buildKey(request)
+    fun put(request: CacheableRequest, kotlinVersion: String, responseBody: String, log: LambdaLogger) {
+        val key = buildKey(request, kotlinVersion)
         withRetryOnConnectionLoss("SET", log) {
             redis.setex(key, ttl.seconds, responseBody)
             log.log("cache-proxy: PUT OK key=$key\n")
@@ -61,7 +61,7 @@ class CacheService(
             null
         }
 
-    internal fun buildKey(request: CacheableRequest): String {
+    internal fun buildKey(request: CacheableRequest, kotlinVersion: String): String {
         val (endpointType, normalized) = when (request) {
             is TranslateComposeWasmRequest -> CacheEndpointType.COMPOSE_WASM_V2 to mapOf(
                 "args" to request.args,
