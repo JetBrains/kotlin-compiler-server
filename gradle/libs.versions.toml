@@ -17,7 +17,7 @@ reactor = "3.8.0"
 skiko = "0.9.22.2"
 testcontainers = "2.0.3"
 # don't forget to update jackson version in `executor.policy` file.
-jackson = "2.19.2"
+jackson = "2.21"
 hamcrest = "3.0"
 compose = "1.9.3"
 compose-material3 = "1.9.0"
