@@ -11,5 +11,5 @@ fun main() {
     // Operands used through a non-floating-point static type
     println(generalizedEquals(Double.NaN, Double.NaN)) // true
     println(generalizedEquals(0.0, -0.0)) // false
-//sampleEnd  
 }
+//sampleEnd  
