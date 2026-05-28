@@ -15,6 +15,7 @@ import com.compiler.server.model.ProjectType
 import com.compiler.server.model.TranslationResultWithJsCode
 import com.compiler.server.service.CompilerArgumentsService
 import com.compiler.server.service.KotlinProjectExecutor
+import com.compiler.server.validation.CompilerArgumentsValidator
 import jakarta.validation.Valid
 import org.jetbrains.kotlin.utils.mapToSetOrEmpty
 import org.springframework.web.bind.annotation.GetMapping
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController
 class CompilerRestController(
     private val kotlinProjectExecutor: KotlinProjectExecutor,
     private val compilerArgumentsService: CompilerArgumentsService,
+    private val compilerArgumentsValidator: CompilerArgumentsValidator,
 ) {
 
     @PostMapping("/run")
@@ -86,8 +88,13 @@ class CompilerRestController(
 
     @PostMapping("/translate/compose-wasm")
     fun translateWasmCompose(
-        @RequestBody @Valid request: TranslateComposeWasmRequest,
+        @RequestBody request: TranslateComposeWasmRequest,
     ): TranslationResultWithJsCode {
+        compilerArgumentsValidator.ensureValid(
+            ProjectType.COMPOSE_WASM,
+            request.firstPhaseCompilerArguments,
+            request.secondPhaseCompilerArguments,
+        )
         return kotlinProjectExecutor.convertToWasm(
             Project(
                 args = request.args,
