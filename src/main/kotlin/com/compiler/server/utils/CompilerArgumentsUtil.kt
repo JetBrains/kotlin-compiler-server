@@ -397,6 +397,7 @@ class CompilerArgumentsUtil(
                 name = arg.name,
                 shortName = arg.shortName,
                 description = arg.description.current,
+                valueDescription = arg.valueDescription.current,
                 type = convertKotlinArgumentValueTypeToExtendedCompilerArgumentValue(arg.valueType),
                 disabled = disabled,
                 predefinedValues = (predefinedArguments[arg.name] as? Pair<*, *>)?.first
