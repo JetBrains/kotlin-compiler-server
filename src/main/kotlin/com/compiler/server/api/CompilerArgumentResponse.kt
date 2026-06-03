@@ -12,7 +12,8 @@ data class CompilerArgumentResponse(val compilerArguments: Set<CompilerArgument>
         @field:JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
         val type: ExtendedCompilerArgumentValue<*>,
         val disabled: Boolean,
-        val predefinedValues: Any?
+        val predefinedValues: Any?,
+        val valueDescription: String?
     )
 }
 
