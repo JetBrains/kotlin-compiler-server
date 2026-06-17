@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptionsHelper
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.plugin.COMPILER_CLASSPATH_CONFIGURATION_NAME
 import org.jetbrains.kotlin.gradle.plugin.categoryByName
+import org.jetbrains.kotlin.gradle.plugin.diagnostics.UsesKotlinToolingDiagnosticsParameters
 import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinUsages
 import org.jetbrains.kotlin.gradle.plugin.usesPlatformOf
@@ -379,7 +380,7 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
     /**
      * Parameters for the [WasmBinaryTransform].
      */
-    abstract class Parameters : TransformParameters {
+    abstract class Parameters : TransformParameters, UsesKotlinToolingDiagnosticsParameters {
         @get:Internal
         abstract val compilerOptions: Property<K2JSCompilerArguments>
 
@@ -502,7 +503,8 @@ internal abstract class WasmBinaryTransform : TransformAction<WasmBinaryTransfor
         )
 
         GradleKotlinCompilerWork(
-            workArgs
+            workArgs,
+            parameters,
         ).run()
 
         val binaryenOutputDirectory = outputs.dir(inputFile.name.replace(".klib", "-transformed"))
