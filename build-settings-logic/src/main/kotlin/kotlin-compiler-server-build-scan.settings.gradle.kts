@@ -5,28 +5,29 @@ plugins {
 }
 
 develocity {
-    if (buildScanEnabled.get()) {
-        val overriddenName = buildScanUsername.orNull
-        server = "https://ge.jetbrains.com/"
-        buildScan {
-            publishing.onlyIf { true }
-            capture {
-                fileFingerprints = true
-                buildLogging = true
-                uploadInBackground = true
-            }
-            obfuscation {
-                ipAddresses { _ -> listOf("0.0.0.0") }
-                hostname { _ -> "concealed" }
-                username { originalUsername ->
-                    when {
-                        buildingOnTeamCity -> "TeamCity"
-                        buildingOnGitHub -> "GitHub"
-                        buildingOnCi -> "CI"
-                        !overriddenName.isNullOrBlank() && overriddenName != DEFAULT_KOTLIN_COMPILER_SERVER_USER_NAME -> overriddenName
-                        overriddenName == DEFAULT_KOTLIN_COMPILER_SERVER_USER_NAME -> originalUsername
-                        else -> "unknown"
-                    }
+    val overriddenName = buildScanUsername.orNull
+    val buildScanEnabled = buildScanEnabled
+    server = "https://ge.jetbrains.com/"
+    buildScan {
+        publishing.onlyIf {
+            buildScanEnabled.get()
+        }
+        capture {
+            fileFingerprints = true
+            buildLogging = true
+            uploadInBackground = true
+        }
+        obfuscation {
+            ipAddresses { _ -> listOf("0.0.0.0") }
+            hostname { _ -> "concealed" }
+            username { originalUsername ->
+                when {
+                    buildingOnTeamCity -> "TeamCity"
+                    buildingOnGitHub -> "GitHub"
+                    buildingOnCi -> "CI"
+                    !overriddenName.isNullOrBlank() && overriddenName != DEFAULT_KOTLIN_COMPILER_SERVER_USER_NAME -> overriddenName
+                    overriddenName == DEFAULT_KOTLIN_COMPILER_SERVER_USER_NAME -> originalUsername
+                    else -> "unknown"
                 }
             }
         }
