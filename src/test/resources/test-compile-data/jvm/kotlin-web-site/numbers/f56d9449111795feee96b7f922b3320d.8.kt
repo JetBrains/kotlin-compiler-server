@@ -1,8 +1,7 @@
-fun main() {
+fun main(){
 //sampleStart
-    val large: Int = 130
-    val narrowed: Byte = large.toByte()
-
-    println(narrowed) // -126
-//sampleEnd
+    val intNumber: Int = 2147483647
+    // Max Int value is 2147483647
+    println(intNumber + 1) // -2147483648
+//sampleEnd    
 }

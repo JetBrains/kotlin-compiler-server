@@ -1,8 +1,8 @@
 fun main() {
 //sampleStart
-    val x = 1
-    
-    println(x shl 2) // 4
-    println(x and 0x000FF000) // 0
+    val large: Int = 130
+    val narrowed: Byte = large.toByte()
+
+    println(narrowed) // -126
 //sampleEnd
 }

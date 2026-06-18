@@ -1,5 +1,6 @@
-fun main() {
+fun main(){
 //sampleStart
-    println(Double.MAX_VALUE * 2) // Infinity
+    val min = Int.MIN_VALUE
+    println(-min) // -2147483648
 //sampleEnd    
 }
