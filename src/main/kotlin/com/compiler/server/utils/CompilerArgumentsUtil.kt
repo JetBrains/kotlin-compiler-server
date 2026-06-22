@@ -237,7 +237,6 @@ class CompilerArgumentsUtil(
     val PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xwasm" to true,
         "nopack" to true,
         "libraries" to Pair(
             kotlinEnvironment.WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
@@ -249,7 +248,6 @@ class CompilerArgumentsUtil(
     val PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xwasm" to true,
         "Xir-produce-js" to true,
         "Xir-dce" to true,
         "libraries" to Pair(
@@ -262,7 +260,6 @@ class CompilerArgumentsUtil(
     val PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xwasm" to true,
         "nopack" to true,
         "libraries" to Pair(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
@@ -282,7 +279,6 @@ class CompilerArgumentsUtil(
     val PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xwasm" to true,
         "Xir-produce-js" to true,
         "libraries" to Pair(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
