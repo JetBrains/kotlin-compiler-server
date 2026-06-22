@@ -235,7 +235,7 @@ class CompilerArgumentsUtil(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
         "Xwasm" to true,
-        "Xir-produce-klib-dir" to true,
+        "nopack" to true,
         "libraries" to Pair(
             kotlinEnvironment.WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
             kotlinEnvironment.WASM_LIBRARIES.joinToString(PATH_SEPARATOR)
@@ -260,7 +260,7 @@ class CompilerArgumentsUtil(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
         "Xwasm" to true,
-        "Xir-produce-klib-dir" to true,
+        "nopack" to true,
         "libraries" to Pair(
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
             kotlinEnvironment.COMPOSE_WASM_LIBRARIES.joinToString(PATH_SEPARATOR)
@@ -292,7 +292,7 @@ class CompilerArgumentsUtil(
     val PREDEFINED_JS_FIRST_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xir-produce-klib-dir" to true,
+        "nopack" to true,
         "libraries" to Pair(
             kotlinEnvironment.JS_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
             kotlinEnvironment.JS_LIBRARIES.joinToString(PATH_SEPARATOR)
