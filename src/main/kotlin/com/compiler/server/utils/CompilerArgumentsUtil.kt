@@ -94,7 +94,10 @@ class CompilerArgumentsUtil(
         "Xallow-reified-type-in-catch",
         "Xallow-contracts-on-more-functions",
         "Xallow-condition-implies-returns-contracts",
-        "Xallow-holdsin-contract"
+        "Xallow-holdsin-contract",
+        "Xexplicit-context-arguments",
+        "Xcollection-literals",
+        "Xallow-returns-result-of",
     )
 
     internal val ALLOWED_JVM_ARGUMENTS = ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + setOf(
