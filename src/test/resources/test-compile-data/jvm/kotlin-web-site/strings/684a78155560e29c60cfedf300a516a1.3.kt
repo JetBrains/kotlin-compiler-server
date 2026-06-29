@@ -1,7 +1,7 @@
-fun main() {
+fun main() { 
 //sampleStart
-    val s = "abc" + 1
-    println(s + "def")
-    // abc1def    
+    val name = "Kotlin"
+    println("Hello, $name") 
+    // Hello, Kotlin
 //sampleEnd
 }
