@@ -1,11 +1,10 @@
 fun main() {
 //sampleStart
-    var riversArray = arrayOf("Nile", "Amazon", "Yangtze")
+    val simpleArray = arrayOf("a", "b", "c")
 
-    // Using the += assignment operation creates a new riversArray,
-    // copies over the original elements and adds "Mississippi"
-    riversArray += "Mississippi"
-    println(riversArray.joinToString())
-    // Nile, Amazon, Yangtze, Mississippi
+    val list = simpleArray.asList()
+    simpleArray[0] = "d"
+    println(list)
+    // [d, b, c]
 //sampleEnd
 }
