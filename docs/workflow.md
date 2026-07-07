@@ -47,15 +47,19 @@ This block describes the process of releasing a new version.
      * from the `<previous-version>` branch.
      note: <version> means <X.Y.Z> version without any prefix or postfix
 2. Modify [the Kotlin version](https://github.com/JetBrains/kotlin-compiler-server/blob/master/gradle/libs.versions.toml#L2) in the branch.
-3. If the current Kotlin version is bigger than in `master`, then create a pull request to `master`. Otherwise, push your changes to the remote branch and skip the rest of the steps.
-   * creating a pull request should be from the separate branch like `merge/2.0.0-RC2`, this `merge/<version>` branch is created from `<version>` branch and then it is rebased as follows:
+3. If the current version is less than in `master`, push your changes to the remote branch and skip the rest of the steps.
+4. Create a pull request to `master`:
+   * creating a pull request should be from the separate branch like `merge/2.3.0-RC3`, this `merge/<version>` branch is created from `<version>` branch and then it is rebased as follows:
    * use **rebase** instead of **merge** for resolving conflicts. It make sense to use [rebase --onto](https://git-scm.com/docs/git-rebase#_transplanting_a_topic_branch_with_onto), when you have too many conflicts, just because of the changed commit hash. Example:
    ```bash
+   # Let's say <version> is 2.3.0-RC3
+   # `Version in master` is 2.3.0-Beta2
+   # Now we need to do `rebase --onto` so that hashes in the pull request are the same as in master
     git rebase --onto origin/master origin/2.3.0-Beta2 merge/2.3.0-RC3
    ```
    * after the pull request is merged, delete the `merge/*` branch.
-4. Wait until the tests are completed successfully.
-5. Merge the branch to master.
+5. Wait until the tests are completed successfully.
+6. Merge the branch to master.
 
 ## Hotfix Flow
 1. Create a branch from `<version>`:
