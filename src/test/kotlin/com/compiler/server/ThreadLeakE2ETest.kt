@@ -122,12 +122,22 @@ class ThreadLeakE2ETest {
             val payload = response.body() ?: ""
             val marker = NATIVE_THREAD_MARKERS.firstOrNull { payload.contains(it, ignoreCase = true) }
 
-            if (response.statusCode() != 200 || marker != null || !payload.contains("ok")) {
+            if (marker != null || response.statusCode() >= 500) {
                 fail<Nothing>(
                     """
-                    Native-thread leak (or unexpected response) at iteration $iteration/$MAX_ITERATIONS.
-                    HTTP status : ${response.statusCode()} (expected 200)
-                    Marker      : ${marker ?: "none"}
+                    Native-thread leak reproduced at iteration $iteration/$MAX_ITERATIONS.
+                    HTTP status : ${response.statusCode()}
+                    Marker      : ${marker ?: "HTTP ${response.statusCode()}"}
+                    Body        : ${payload.take(2000)}
+                    """.trimIndent()
+                )
+            }
+
+            if (response.statusCode() != 200 || !payload.contains("ok")) {
+                fail<Nothing>(
+                    """
+                    Unexpected response at iteration $iteration/$MAX_ITERATIONS (expected HTTP 200 with program output "ok").
+                    HTTP status : ${response.statusCode()}
                     Body        : ${payload.take(2000)}
                     """.trimIndent()
                 )
