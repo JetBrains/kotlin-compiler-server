@@ -1,5 +1,7 @@
 package com.compiler.server
 
+import com.compiler.server.api.ProjectFileRequestDto
+import com.compiler.server.api.RunRequest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
@@ -20,7 +22,7 @@ import java.time.Duration
  * KTL-4631 — e2e reproduction of the `JavaExecutor` native-thread leak.
  * Hammers `/api/compiler/run` in a pid-capped container: buggy code leaks 2 threads/run,
  * crosses [PIDS_LIMIT] and fails; after the `shutdown()` fix all runs stay clean.
- * Heavy + slow. Excluded from the default `test` task; run with `./gradlew leakTest`.
+ * Heavy + slow (~1m): builds the boot jar and a pid-capped container, part of the `test` task.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ThreadLeakE2ETest {
@@ -49,8 +51,8 @@ class ThreadLeakE2ETest {
     }
 
     private val kotlinVersion: String =
-        System.getProperty("e2e.kotlin.version")
-            ?: error("System property 'e2e.kotlin.version' is not set (configured by the 'leakTest' Gradle task).")
+        System.getProperty("kotlin.version")
+            ?: error("System property 'kotlin.version' is not set (configured by the 'test' Gradle task).")
 
     private val jarPath: Path =
         Paths.get("build/libs/kotlin-compiler-server-$kotlinVersion-SNAPSHOT.jar").toAbsolutePath()
@@ -73,7 +75,7 @@ class ThreadLeakE2ETest {
         .withCreateContainerCmdModifier { cmd ->
             cmd.hostConfig
                 ?.withPidsLimit(PIDS_LIMIT)
-                ?.withMemory(4L * 1024 * 1024 * 1024) // 4 GiB: comfortable heap so the leak surfaces as pid exhaustion, not heap OOM
+                ?.withMemory(2L * 1024 * 1024 * 1024) // 2 GiB: matches production lambda memory;
         }
         .waitingFor(
             Wait.forHttp("/health")
@@ -93,10 +95,9 @@ class ThreadLeakE2ETest {
 
         val baseUrl = "http://${container.host}:${container.getMappedPort(PORT)}"
         val body = jacksonObjectMapper().writeValueAsString(
-            mapOf(
-                "args" to "",
-                "files" to listOf(mapOf("name" to "File.kt", "text" to "fun main() { println(\"ok\") }")),
-                "compilerArguments" to emptyMap<String, Any>(),
+            RunRequest(
+                args = "",
+                files = listOf(ProjectFileRequestDto(name = "File.kt", text = "fun main() { println(\"ok\") }")),
             )
         )
 
@@ -121,12 +122,12 @@ class ThreadLeakE2ETest {
             val payload = response.body() ?: ""
             val marker = NATIVE_THREAD_MARKERS.firstOrNull { payload.contains(it, ignoreCase = true) }
 
-            if (response.statusCode() >= 500 || marker != null) {
+            if (response.statusCode() != 200 || marker != null || !payload.contains("ok")) {
                 fail<Nothing>(
                     """
-                    Native-thread leak reproduced at iteration $iteration/$MAX_ITERATIONS.
-                    HTTP status : ${response.statusCode()}
-                    Marker      : ${marker ?: "HTTP ${response.statusCode()}"}
+                    Native-thread leak (or unexpected response) at iteration $iteration/$MAX_ITERATIONS.
+                    HTTP status : ${response.statusCode()} (expected 200)
+                    Marker      : ${marker ?: "none"}
                     Body        : ${payload.take(2000)}
                     """.trimIndent()
                 )

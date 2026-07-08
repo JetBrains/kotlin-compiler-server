@@ -194,22 +194,9 @@ tasks.withType<Test> {
     }
 }
 
-// TODO move this somewhere appropriate
-// KTL-4631: heavy container-based reproduction of the JavaExecutor native-thread leak.
-// Excluded from the default `test` task; run explicitly via `./gradlew leakTest`.
 tasks.named<Test>("test") {
-    exclude("**/ThreadLeakE2ETest*")
-}
-
-val leakTest by tasks.registering(Test::class) {
-    description = "KTL-4631 e2e: reproduce the JavaExecutor native-thread leak in a pid-capped container."
-    group = "verification"
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = sourceSets["test"].runtimeClasspath
-    include("**/ThreadLeakE2ETest*")
-    systemProperty("e2e.kotlin.version", libs.versions.kotlin.get())
+    // ThreadLeakE2ETest needs the Kotlin version to locate the boot jar
+    systemProperty("kotlin.version", libs.versions.kotlin.get())
     // Slim image copies the host-built boot jar, so build it first.
     dependsOn(tasks.named("bootJar"))
-    // Always re-run: the outcome depends on the live container, not on inputs.
-    outputs.upToDateWhen { false }
 }
