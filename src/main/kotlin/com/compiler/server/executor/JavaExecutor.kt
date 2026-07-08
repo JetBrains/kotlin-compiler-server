@@ -30,9 +30,13 @@ class JavaExecutor {
       val standardOutput = asyncBufferedOutput(standardOut, limit = MAX_OUTPUT_SIZE)
       val errorOutput = asyncBufferedOutput(standardError, limit = MAX_OUTPUT_SIZE)
 
+      // one thread per output; must be shut down after use, otherwise its non-daemon
+      // worker threads linger and leak (KTL-4631: "unable to create native thread").
+      val outputPool = Executors.newFixedThreadPool(2)
+
       try {
         val currTime = System.currentTimeMillis()
-        val futuresList = Executors.newFixedThreadPool(2) // one thread per output
+        val futuresList = outputPool
           .invokeAll(listOf(standardOutput, errorOutput), EXECUTION_TIMEOUT, TimeUnit.MILLISECONDS)
         // we do not wait for process to end, while either time-limit or output-limit triggered
         // program itself will be destroyed right after we'll leave this method
@@ -68,6 +72,7 @@ class JavaExecutor {
         // all sort of things may happen, so we better be aware
         ProgramOutput(exception = any)
       } finally {
+        outputPool.shutdownNow()
         try {
           // don't need this process any more. It will not allow to close IO handlers if not destroyed or finished
           this.destroy()
