@@ -72,6 +72,7 @@ dependencies {
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotlin.mockito)
+    testImplementation(libs.bundles.testcontainers)
 
     kotlinComposeWasmCache(project(":cache-maker"))
 }
@@ -191,4 +192,11 @@ tasks.withType<Test> {
         this@withType.environment("kotlin.wasm.node.path", executablePath.get())
         this@withType.environment("kotlin.compose.wasm.resources.path", composeWasmResourcesPath.get())
     }
+}
+
+tasks.named<Test>("test") {
+    // ThreadLeakE2ETest needs the Kotlin version to locate the boot jar
+    systemProperty("kotlin.version", libs.versions.kotlin.get())
+    // Slim image copies the host-built boot jar, so build it first.
+    dependsOn(tasks.named("bootJar"))
 }
