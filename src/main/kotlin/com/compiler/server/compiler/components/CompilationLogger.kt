@@ -39,7 +39,9 @@ class CompilationLogger(
         if (isDebugEnabled) println("[ERROR] $msg" + (throwable?.let { ": ${it.message}" } ?: ""))
         try {
             addCompilationLog(msg, ProjectSeveriry.ERROR, classNameOverride = null)
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+            addFallbackCompilationLog(msg, throwable)
+        }
     }
 
     override fun info(msg: String) {
@@ -83,5 +85,33 @@ class CompilationLogger(
             classNameOverride ?: className
         )
         compilationLogs["$className.kt"]?.add(ed)
+    }
+
+    /**
+     * Adds a compilation log entry for messages that don't follow the `path:line:column` format,
+     * for example internal compiler errors reported as plain stack traces.
+     *
+     * Since such messages have no parsable file location, the entry is recorded without
+     * a text interval and attached to the first known source file.
+     *
+     * @param msg The raw log message.
+     * @param throwable An optional throwable whose stack trace will be appended to the message.
+     */
+    private fun addFallbackCompilationLog(msg: String, throwable: Throwable?) {
+        val message = buildString {
+            append(msg)
+            if (throwable != null) {
+                if (isNotEmpty()) append("\n")
+                append(throwable.stackTraceToString())
+            }
+        }
+        if (message.isEmpty()) return
+        val ed = ErrorDescriptor(
+            interval = null,
+            message = message,
+            severity = ProjectSeveriry.ERROR,
+            className = ProjectSeveriry.ERROR.name
+        )
+        compilationLogs.values.firstOrNull()?.add(ed)
     }
 }
