@@ -2,10 +2,12 @@ package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
 import com.compiler.server.model.JvmExecutionResult
+import com.compiler.server.model.ProjectSeveriry
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class JvmRunnerTest : BaseExecutorTest() {
 
@@ -121,6 +123,25 @@ class JvmRunnerTest : BaseExecutorTest() {
     )
 
     assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
+  }
+
+  @Test
+  fun `internal compiler error is reported in errors map`() {
+    val result = run(
+      code = "fun <T, T> f() {\n        when (T) {\n        }\n    }\n\n\nfun main() {\n    println(\"Hello\")\n}",
+      contains = ""
+    )
+
+    assertNull(result.exception, "Exception should be null, compiler errors are expected in 'errors' map")
+    val fileErrors = result.compilerDiagnostics.map["File.kt"].orEmpty()
+    assertTrue(
+      fileErrors.any {
+        it.severity == ProjectSeveriry.ERROR &&
+          it.message.contains("Not supported") &&
+          it.message.contains("FirTypeParameterImpl")
+      },
+      "Expected internal compiler error for File.kt, but got: ${result.compilerDiagnostics}"
+    )
   }
 
   @Test
