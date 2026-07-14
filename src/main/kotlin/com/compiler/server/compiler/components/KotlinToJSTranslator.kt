@@ -228,6 +228,7 @@ class KotlinToJSTranslator(
                     )
                 }`) "
             )
+            .substituteValidStaticUrl(staticUrl)
             .replace(
                 "wasmInstance = (await WebAssembly.instantiateStreaming(fetch(new URL('./${outputFileName}.wasm',import.meta.url).href), importObject, wasmOptions)).instance;",
                 "wasmInstance = await (async () => {\n" +
@@ -275,10 +276,16 @@ class KotlinToJSTranslator(
             )
         }`)"
 
-    private fun String.fixImports(): String = replace(
-        ".mjs",
-        "-${kotlinEnvironment.dependenciesComposeWasmHash}.mjs"
-    )
+
+    private fun String.fixImports(): String =
+        lineSequence()
+            .joinToString("\n") { line ->
+                if (line.trimStart().startsWith("import")) {
+                    line.replace(".mjs", "-${kotlinEnvironment.dependenciesComposeWasmHash}.mjs")
+                } else {
+                    line
+                }
+            }
 }
 
 private fun String.withMainArgumentsIr(arguments: List<String>): String {
