@@ -167,7 +167,7 @@ private fun executeJsCode(jsCode: String): String {
     val jsMain = tmpDir.resolve("playground.js")
     jsMain.writeText(jsCode)
 
-    val textResult = startNodeJsApp(
+    val (textResult, _) = startNodeJsApp(
         System.getenv("kotlin.wasm.node.path"),
         jsMain.normalize().absolutePathString()
     )

@@ -166,14 +166,14 @@ class TestProjectRunner {
         Assertions.assertTrue(result.jsCode!!.contains(contains), "Actual: ${result.jsCode}. \n Expected: $contains")
     }
 
-  private fun convertWasmAndTest(
-    project: Project,
-    contains: String,
-  ): ExecutionResult {
-    val result = kotlinProjectExecutor.convertToWasm(
-      project,
-      debugInfo = true,
-    )
+    private fun convertWasmAndTest(
+        project: Project,
+        contains: String,
+    ): ExecutionResult {
+        val result = kotlinProjectExecutor.convertToWasm(
+            project,
+            debugInfo = true,
+        )
 
         if (result !is TranslationWasmResult) {
             Assertions.assertFalse(result.hasErrors) {
@@ -192,13 +192,17 @@ class TestProjectRunner {
         // this script simulates the env like in browser inside the node js
         val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
 
-        val textResult = startNodeJsApp(
+        val (textResult, errorResult) = startNodeJsApp(
             System.getenv("kotlin.wasm.node.path"),
             jsMain.normalize().absolutePathString(),
             bootstrapBrowser.normalize().absolutePathString(),
         )
         tmpDir.toFile().deleteRecursively()
 
+        Assertions.assertTrue(
+            errorResult.isEmpty(),
+            "Unexpected error during wasm execution happened. \n${errorResult}"
+        )
         Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
         return result
     }
@@ -258,13 +262,17 @@ class TestProjectRunner {
 
         val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
 
-        val textResult = startNodeJsApp(
+        val (textResult, errorResult) = startNodeJsApp(
             System.getenv("kotlin.wasm.node.path"),
             run.normalize().absolutePathString(),
             bootstrapBrowser.normalize().absolutePathString(),
         )
         tmpDir.toFile().deleteRecursively()
 
+        Assertions.assertTrue(
+            errorResult.isEmpty(),
+            "Unexpected error during wasm execution happened. \n${errorResult}"
+        )
         Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
         return result
     }
