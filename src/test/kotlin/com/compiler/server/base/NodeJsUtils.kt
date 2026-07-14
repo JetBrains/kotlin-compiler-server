@@ -10,7 +10,7 @@ fun startNodeJsApp(
     pathToBinNode: String?,
     pathToAppScript: String?,
     additionalScript: String? = null
-): String {
+): Pair<String, String> {
     val processBuilder = ProcessBuilder()
     if (additionalScript != null)
         processBuilder.command(pathToBinNode, "--import", additionalScript, pathToAppScript)
@@ -18,8 +18,9 @@ fun startNodeJsApp(
         processBuilder.command(pathToBinNode, pathToAppScript)
     val process = processBuilder.start()
     val inputStream = process.inputStream
+    val errorStream = process.errorStream
     process.waitFor()
-    return inputStream.reader().readText()
+    return Pair(inputStream.reader().readText(), errorStream.reader().readText())
 }
 
 private val BASE64_DATA_URI_REGEX =
