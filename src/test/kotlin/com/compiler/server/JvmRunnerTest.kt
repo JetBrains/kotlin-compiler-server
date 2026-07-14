@@ -127,8 +127,13 @@ class JvmRunnerTest : BaseExecutorTest() {
 
   @Test
   fun `internal compiler error is reported in errors map`() {
+    val code = buildString {
+      appendLine("fun main() {")
+      repeat(10_000) { appendLine("  println($it)") }
+      appendLine("}")
+    }
     val result = run(
-      code = "fun <T, T> f() {\n        when (T) {\n        }\n    }\n\n\nfun main() {\n    println(\"Hello\")\n}",
+      code = code,
       contains = ""
     )
 
@@ -137,10 +142,11 @@ class JvmRunnerTest : BaseExecutorTest() {
     assertTrue(
       fileErrors.any {
         it.severity == ProjectSeveriry.ERROR &&
-          it.message.contains("Not supported") &&
-          it.message.contains("FirTypeParameterImpl")
+          it.interval == null &&
+          it.className == ProjectSeveriry.ERROR.name &&
+          it.message.contains("MethodTooLargeException")
       },
-      "Expected internal compiler error for File.kt, but got: ${result.compilerDiagnostics}"
+      "Expected fallback compiler error for File.kt, but got: ${result.compilerDiagnostics}"
     )
   }
 
