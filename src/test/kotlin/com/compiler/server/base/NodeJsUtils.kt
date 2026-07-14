@@ -37,5 +37,5 @@ fun replaceStaticUrlInJs(jsContent: String, staticUrl: String, replacement: Stri
         } else {
             match.value
         }
-    }
+    }.replace(staticUrl, replacement)
 }
