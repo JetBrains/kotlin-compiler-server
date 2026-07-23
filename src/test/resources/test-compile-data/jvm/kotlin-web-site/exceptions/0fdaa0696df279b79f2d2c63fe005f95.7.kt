@@ -1,34 +1,25 @@
-class MockResource { 
-    fun use() { 
-        println("Resource being used") 
-        // Simulate a resource being used 
-        // This throws an ArithmeticException if division by zero occurs
-        val result = 100 / 0
-        
-        // This line is not executed if an exception is thrown
-        println("Result: $result") 
+fun divideOrNull(a: Int): Int {
+    
+    // The try block is always executed
+    // An exception here (division by zero) causes an immediate jump to the catch block
+    try {
+        val b = 44 / a
+        println("try block: Executing division: $b")
+        return b
     }
     
-    fun close() { 
-        println("Resource closed") 
+    // The catch block is executed due to the ArithmeticException (division by zero if a ==0)
+    catch (e: ArithmeticException) {
+        println("catch block: Encountered ArithmeticException $e")
+        return -1
+    }
+    finally {
+        println("finally block: The finally block is always executed")
     }
 }
 
-fun main() { 
-    val resource = MockResource()
-//sampleStart 
-    try {
-        
-        // Attempts to use the resource 
-        resource.use()
-        
-    } finally {
-        
-        // Ensures that the resource is always closed, even if an exception occurs 
-        resource.close()
-    }
-
-    // This line is not printed if an exception is thrown
-    println("End of the program")
-//sampleEnd
+fun main() {
+    
+    // Change this value to get a different result. An ArithmeticException will return: -1
+    divideOrNull(0)
 }

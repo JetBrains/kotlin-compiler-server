@@ -1,23 +1,22 @@
-class Temperature {
-    // Backing property storing temperature in Celsius
-    private var _celsius: Double = 0.0
+class UserDirectory {
+    private val _users = mutableListOf(
+        "sarah",
+        "mike",
+        "emma"
+    )
 
-    var celsius: Double
-        get() = _celsius
-        set(value) { _celsius = value }
+    val users: List<String>
+        get() = _users.sorted()
 
-    var fahrenheit: Double
-        get() = _celsius * 9 / 5 + 32
-        set(value) { _celsius = (value - 32) * 5 / 9 }
+    fun addUser(username: String) {
+        _users.add(username)
+    }
 }
 
 fun main() {
-    val temp = Temperature()
-    temp.celsius = 25.0
-    println("${temp.celsius}°C = ${temp.fahrenheit}°F") 
-    // 25.0°C = 77.0°F
+    val directory = UserDirectory()
 
-    temp.fahrenheit = 212.0
-    println("${temp.celsius}°C = ${temp.fahrenheit}°F") 
-    // 100.0°C = 212.0°F
+    directory.addUser("alex")
+    println(directory.users)
+    // [alex, emma, mike, sarah]
 }
