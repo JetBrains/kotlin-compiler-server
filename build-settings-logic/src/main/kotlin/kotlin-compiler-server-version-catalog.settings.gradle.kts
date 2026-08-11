@@ -4,12 +4,20 @@ pluginManagement {
         mavenCentral()
         google()
 
-        val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
-        if (additionalRepositoryProperty.isPresent) {
-            maven(additionalRepositoryProperty.get()) {
-                name = "KotlinDevRepo"
+        val kotlinRepoUrl = providers.gradleProperty("kotlin_repo_url")
+        val kotlinVersion = providers.gradleProperty("kotlin_version")
+        if (!kotlinRepoUrl.orNull.isNullOrEmpty() && !kotlinVersion.orNull.isNullOrEmpty()) {
+            exclusiveContent {
+                forRepository {
+                    maven(kotlinRepoUrl.get()) {
+                        name = "KotlinDevRepo"
+                    }
+                }
+                filter {
+                    includeVersionByRegex("org\\.jetbrains\\.kotlin.*", ".*", kotlinVersion.get())
+                }
             }
-            logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
+            logger.info("A custom Kotlin repository ${kotlinRepoUrl.get()} was added")
         }
         maven("https://redirector.kotlinlang.org/maven/dev")
         mavenLocal()
@@ -23,12 +31,20 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         google()
 
-        val additionalRepositoryProperty = providers.gradleProperty("kotlin_repo_url")
-        if (additionalRepositoryProperty.isPresent) {
-            maven(additionalRepositoryProperty.get()) {
-                name = "KotlinDevRepo"
+        val kotlinRepoUrl = providers.gradleProperty("kotlin_repo_url")
+        val kotlinVersion = providers.gradleProperty("kotlin_version")
+        if (!kotlinRepoUrl.orNull.isNullOrEmpty() && !kotlinVersion.orNull.isNullOrEmpty()) {
+            exclusiveContent {
+                forRepository {
+                    maven(kotlinRepoUrl.get()) {
+                        name = "KotlinDevRepo"
+                    }
+                }
+                filter {
+                    includeVersionByRegex("org\\.jetbrains\\.kotlin.*", ".*", kotlinVersion.get())
+                }
             }
-            logger.info("A custom Kotlin repository ${additionalRepositoryProperty.get()} was added")
+            logger.info("A custom Kotlin repository ${kotlinRepoUrl.get()} was added")
         }
         maven("https://redirector.kotlinlang.org/maven/dev")
         mavenLocal()
