@@ -122,19 +122,6 @@ This section is only relevant for JetBrains employees.
 And includes information about working with branches and releases.
 You can find information about the development workflow in [workflow.md](docs/workflow.md).
 
-## Kotlin release guide :rocket:
-
-1) Update the kotlin version
-   in [libs.versions.toml](https://github.com/JetBrains/kotlin-compiler-server/blob/master/gradle/libs.versions.toml)
-2) Make sure everything is going well via the task:
-
-```shell script
-$ ./gradlew build
-```
-
-3) Save branch with the name of the kotlin version. Pattern: `/^[0-9.]+$/`  (optional)
-4) Bump version on GitHub [releases](https://github.com/JetBrains/kotlin-compiler-server/releases) (optional)
-
 ### Gradle Build Scans
 
 [Gradle Build Scans](https://scans.gradle.com/) can provide insights into an Kotlin Compiler Server Build.
