@@ -1,9 +1,19 @@
+@OptIn(ExperimentalStdlibApi::class)
 fun main() {
 //sampleStart
-    val numbersMap = mutableMapOf("one" to 1, "two" to 2, "three" to 3)
-    numbersMap.remove("one")
-    println(numbersMap)
-    numbersMap.remove("three", 4)            //doesn't remove anything
-    println(numbersMap)
+    val mapForNull = mutableMapOf<String, Int?>("one" to null)
+    val mapForMissing = mutableMapOf<String, Int?>("one" to null)
+
+    // Replaces the value if "one" has a null value
+    mapForNull.getOrPutIfNull("one") { 1 }
+
+    println(mapForNull)
+    // {one=1}
+
+    // Keeps the null value because "one" exists in the map
+    mapForMissing.getOrPutIfMissing("one") { 1 }
+
+    println(mapForMissing)
+    // {one=null}
 //sampleEnd
 }

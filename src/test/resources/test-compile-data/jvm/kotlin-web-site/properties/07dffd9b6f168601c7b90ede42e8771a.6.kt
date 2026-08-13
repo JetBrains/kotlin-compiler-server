@@ -1,17 +1,14 @@
 class ShoppingCart {
-    // Backing property
-    private val _items = mutableListOf<String>()
-
-    // Public read-only view
+    // Public read-only view with explicit backing field
     val items: List<String>
-        get() = _items
-
+        field = mutableListOf()
+    
     fun addItem(item: String) {
-        _items.add(item)
+        items.add(item)
     }
 
     fun removeItem(item: String) {
-        _items.remove(item)
+        items.remove(item)
     }
 }
 

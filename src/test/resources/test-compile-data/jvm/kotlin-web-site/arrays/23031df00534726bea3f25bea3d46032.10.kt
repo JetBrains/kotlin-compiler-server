@@ -1,13 +1,14 @@
 fun main() {
 //sampleStart
-    val simpleArray = arrayOf("a", "b", "c", "c")
+    val simpleArray = arrayOf(1, 2, 3)
 
-    // Converts to a Set
-    println(simpleArray.toSet())
-    // [a, b, c]
-
-    // Converts to a List
-    println(simpleArray.toList())
-    // [a, b, c, c]
+    // Randomly shuffles elements
+    simpleArray.shuffle()
+    println(simpleArray.joinToString())
+  
+    // Sorts elements
+    simpleArray.sort()
+    println(simpleArray.joinToString())
+    // 1, 2, 3
 //sampleEnd
 }

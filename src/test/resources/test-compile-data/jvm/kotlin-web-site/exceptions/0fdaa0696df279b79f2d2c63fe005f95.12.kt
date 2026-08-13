@@ -1,5 +1,9 @@
+fun notImplementedFunction(): Int {
+    TODO("This function is not yet implemented")
+}
+
 fun main() {
-//sampleStart    
-    throw ArithmeticException("This is an arithmetic exception!")
-//sampleEnd    
+    val result = notImplementedFunction()
+    // This throws a NotImplementedError
+    println(result)
 }

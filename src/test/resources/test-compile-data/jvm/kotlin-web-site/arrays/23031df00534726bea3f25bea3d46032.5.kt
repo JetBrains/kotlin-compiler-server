@@ -8,7 +8,9 @@ fun main() {
     twoDArray[0][0] = 2
 
     // Prints the modified element
-    println(simpleArray[0].toString()) // 10
-    println(twoDArray[0][0].toString()) // 2
+    println(simpleArray[0]) 
+    // 10
+    println(twoDArray[0][0]) 
+    // 2
 //sampleEnd
 }
