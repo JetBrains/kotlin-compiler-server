@@ -64,26 +64,6 @@ task called `kotlinDependency`:
  kotlinDependency "your dependency"
 ```
 
-NOTE: If the library you're adding uses reflection, accesses the file system, or performs any other type of
-security-sensitive operations, don't forget to
-configure
-the [executor.policy](https://github.com/JetBrains/kotlin-compiler-server/blob/master/executor.policy)
-. [Click here](https://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html) for more information
-about *Java Security Policy*.
-
-**How to set Java Security Policy in `executors.policy`**
-
-If you want to configure a custom dependency, use the marker `@LIB_DIR@`:
-
-```
-grant codeBase "file:%%LIB_DIR%%/junit-4.12.jar"{
-  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
-  permission java.lang.RuntimePermission "setIO";
-  permission java.io.FilePermission "<<ALL FILES>>", "read";
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
-};
-```
-
 ## CORS configuration
 
 Set the environment variables
