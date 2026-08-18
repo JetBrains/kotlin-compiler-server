@@ -169,47 +169,33 @@ class TestProjectRunner {
     private fun convertWasmAndTest(
         project: Project,
         contains: String,
-    ): ExecutionResult {
-        val result = kotlinProjectExecutor.convertToWasm(
-            project,
-            debugInfo = true,
-        )
-
-        if (result !is TranslationWasmResult) {
-            Assertions.assertFalse(result.hasErrors) {
-                "Test contains errors!\n\n" + renderErrorDescriptors(result.compilerDiagnostics.filterOnlyErrors)
-            }
-        }
-
-        result as TranslationWasmResult
-
-        Assertions.assertNotNull(result, "Test result should no be a null")
-
-        val tmpDir = createTempDirectory()
-        val jsMain = tmpDir.resolve("playground.mjs")
-        jsMain.writeText(result.jsCode!!)
-
-        // this script simulates the env like in browser inside the node js
-        val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
-
-        val (textResult, errorResult) = startNodeJsApp(
-            System.getenv("kotlin.wasm.node.path"),
-            jsMain.normalize().absolutePathString(),
-            bootstrapBrowser.normalize().absolutePathString(),
-        )
-        tmpDir.toFile().deleteRecursively()
-
-        Assertions.assertTrue(
-            errorResult.isEmpty(),
-            "Unexpected error during wasm execution happened. \n${errorResult}"
-        )
-        Assertions.assertTrue(textResult.contains(contains), "Actual: ${textResult}. \n Expected: $contains")
-        return result
-    }
+    ): ExecutionResult = convertWasmAndTest(project, contains) { _, jsMain -> jsMain }
 
     private fun convertComposeWasmAndTest(
         project: Project,
         contains: String,
+    ): ExecutionResult = convertWasmAndTest(project, contains) { tmpDir, _ ->
+        val run = tmpDir.resolve("run.mjs")
+        run.writeText(
+            """
+                import './playground.mjs';
+                
+                console.log(globalThis.bufferedOutput.buffer);
+            """.trimIndent()
+        )
+        run
+    }
+
+    /**
+     * Compiles the given [project] to WASM and runs the produced glue code with Node.js.
+     *
+     * [prepareEntryPoint] receives the temp directory and the written `playground.mjs` and returns the script that
+     * should be executed by Node (e.g. `playground.mjs` itself for plain WASM, or a `run.mjs` wrapper for Compose WASM).
+     */
+    private fun convertWasmAndTest(
+        project: Project,
+        contains: String,
+        prepareEntryPoint: (tmpDir: Path, jsMain: Path) -> Path,
     ): ExecutionResult {
         val result = kotlinProjectExecutor.convertToWasm(
             project,
@@ -233,7 +219,7 @@ class TestProjectRunner {
         val staticUrl = kotlinProjectExecutor.environment.dependenciesStaticUrl
         val fileUrl = "file://${tmpDir.normalize().absolutePathString()}"
 
-        // Copy compose-wasm runtime files to temp dir and replace static URL with file:// path
+        // Copy wasm runtime files to temp dir and replace static URL with file:// path
         val resourcesDir = java.io.File(resourcesPath)
         resourcesDir.walkTopDown().filter { it.isFile }.forEach { file ->
             val relativePath = file.relativeTo(resourcesDir).toPath()
@@ -251,20 +237,14 @@ class TestProjectRunner {
         val jsMain = tmpDir.resolve("playground.mjs")
         jsMain.writeText(replaceStaticUrlInJs(result.jsCode!!, staticUrl, fileUrl))
 
-        val run = tmpDir.resolve("run.mjs")
-        run.writeText(
-            """
-                import './playground.mjs';
-                
-                console.log(globalThis.bufferedOutput.buffer);
-            """.trimIndent()
-        )
+        val entryPoint = prepareEntryPoint(tmpDir, jsMain)
 
+        // this script simulates the env like in browser inside the node js
         val bootstrapBrowser = prepareBrowserSimulatorScript(tmpDir)
 
         val (textResult, errorResult) = startNodeJsApp(
             System.getenv("kotlin.wasm.node.path"),
-            run.normalize().absolutePathString(),
+            entryPoint.normalize().absolutePathString(),
             bootstrapBrowser.normalize().absolutePathString(),
         )
         tmpDir.toFile().deleteRecursively()
