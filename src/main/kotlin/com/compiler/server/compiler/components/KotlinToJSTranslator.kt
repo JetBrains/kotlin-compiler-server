@@ -219,15 +219,21 @@ class KotlinToJSTranslator(
                 .mergeBuiltinsToImport(jsBuiltinsAlias, importObjectJsContent)
                 .substituteValidStaticUrl(staticUrl)
 
+        // The set of named imports produced by the compiler for the import-object module may change between
+        // compiler versions (e.g. `{ importObject, setWasmExports }` vs. `{ importObject }`), so we match them
+        // with a regex and reuse whatever names were requested when inlining the module as a base64 data URI.
+        val importObjectImportRegex = Regex(
+            """import\s+\{([^}]*)\}\s+from\s+'\./${Regex.escape(outputFileName)}\.$IMPORT_OBJECT_POSTFIX\.mjs'"""
+        )
+
         return wasmOutput.jsCode
-            .replace(
-                "import { importObject, setWasmExports } from './${outputFileName}.import-object.mjs'",
-                "const { importObject, setWasmExports } = await import(`data:application/javascript;base64,${
+            .replace(importObjectImportRegex) { match ->
+                "const {${match.groupValues[1]}} = await import(`data:application/javascript;base64,${
                     Base64.encode(
                         replacedImportObjectContent.toByteArray()
                     )
                 }`) "
-            )
+            }
             .substituteValidStaticUrl(staticUrl)
             .replace(
                 "wasmInstance = (await WebAssembly.instantiateStreaming(fetch(new URL('./${outputFileName}.wasm',import.meta.url).href), importObject, wasmOptions)).instance;",
