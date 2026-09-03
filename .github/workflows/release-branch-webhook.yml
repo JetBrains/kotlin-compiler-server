@@ -84,6 +84,6 @@ jobs:
 
           curl --fail-with-body --silent --show-error \
             --request POST "$WEBHOOK_URL" \
-            --header "Authorization: Bearer $WEBHOOK_TOKEN" \
+            --header "Authorization: ApiKey $WEBHOOK_TOKEN" \
             --header "Content-Type: application/json" \
             --data "$payload"
