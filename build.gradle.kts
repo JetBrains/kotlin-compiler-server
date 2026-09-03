@@ -200,3 +200,6 @@ tasks.named<Test>("test") {
     // Slim image copies the host-built boot jar, so build it first.
     dependsOn(tasks.named("bootJar"))
 }
+
+// TEMP: verify the build-failure Slack notifier. Revert.
+error("deliberate failure to test Slack notification")
