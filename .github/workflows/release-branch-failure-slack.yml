@@ -1,4 +1,4 @@
-name: Release branch webhook
+name: Release branch build failure Slack notification
 
 # Fires after "Build compiler server with tests" finishes for a push to a
 # release branch. Release branches are named after the Kotlin version verbatim
@@ -22,7 +22,9 @@ on:
 
 jobs:
   notify:
-    if: github.event.workflow_run.conclusion == 'success'
+    # `failure` covers a failed job; `timed_out` and `cancelled` are separate
+    # conclusions and are intentionally not treated as build failures here.
+    if: github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +39,7 @@ jobs:
 
           if [[ ! "$BRANCH" =~ $semver ]]; then
             echo "matched=false" >> "$GITHUB_OUTPUT"
-            echo "Branch '$BRANCH' is not a semver Kotlin version, skipping webhook."
+            echo "Branch '$BRANCH' is not a semver Kotlin version, skipping notification."
             exit 0
           fi
 
@@ -45,45 +47,28 @@ jobs:
           echo "version=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "prerelease=${BASH_REMATCH[5]}" >> "$GITHUB_OUTPUT"
 
-      - name: Send webhook
+      - name: Notify Slack
         if: steps.version.outputs.matched == 'true'
         env:
-          WEBHOOK_URL: ${{ secrets.RELEASE_WEBHOOK_URL }}
-          WEBHOOK_TOKEN: ${{ secrets.RELEASE_WEBHOOK_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_BUILD_FAILURE_WEBHOOK_URL }}
           VERSION: ${{ steps.version.outputs.version }}
-          PRERELEASE: ${{ steps.version.outputs.prerelease }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          if [[ -z "$WEBHOOK_URL" ]]; then
-            echo "::warning::RELEASE_WEBHOOK_URL is not configured, skipping webhook for $VERSION."
+          # A Slack incoming-webhook URL is itself the credential, so it is kept
+          # in a secret and never echoed.
+          if [[ -z "$SLACK_WEBHOOK_URL" ]]; then
+            echo "::warning::SLACK_BUILD_FAILURE_WEBHOOK_URL is not configured, skipping Slack notification for $VERSION."
             exit 0
           fi
 
-          payload=$(jq -n \
-            --arg version "$VERSION" \
-            --arg branch "$VERSION" \
-            --arg prerelease "$PRERELEASE" \
-            --arg sha "$HEAD_SHA" \
-            --arg repository "$REPOSITORY" \
-            --arg run_id "$RUN_ID" \
-            --arg run_url "$RUN_URL" \
-            '{
-              event: "compiler_server_build_succeeded",
-              version: $version,
-              branch: $branch,
-              prerelease: $prerelease,
-              stable: ($prerelease == ""),
-              sha: $sha,
-              repository: $repository,
-              run_id: $run_id,
-              run_url: $run_url
-            }')
+          text=":x: Build failed on release branch \`$VERSION\` ($REPOSITORY@${HEAD_SHA:0:7})
+          $RUN_URL"
+
+          payload=$(jq -n --arg text "$text" '{ text: $text }')
 
           curl --fail-with-body --silent --show-error \
-            --request POST "$WEBHOOK_URL" \
-            --header "Authorization: ApiKey $WEBHOOK_TOKEN" \
+            --request POST "$SLACK_WEBHOOK_URL" \
             --header "Content-Type: application/json" \
             --data "$payload"
