@@ -2,7 +2,7 @@
 kotlin = "2.5.0-dev-5456"
 spring-boot = "3.5.7"
 spring-dependency-managment = "1.1.7"
-springdoc = "2.8.14"
+springdoc = "3.1.0"
 aws-sdk = "2.54.0"
 aws-serverless-java-container-springboot3 = "2.1.5"
 aws-lambda-java = "1.2.3"
