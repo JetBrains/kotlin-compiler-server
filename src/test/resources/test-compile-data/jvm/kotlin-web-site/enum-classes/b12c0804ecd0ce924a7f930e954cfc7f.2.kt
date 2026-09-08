@@ -1,6 +1,16 @@
-enum class RGB { RED, GREEN, BLUE }
+enum class Color(val hex: String) {
+    RED("#FF0000"),
+    GREEN("#00FF00"),
+    BLUE("#0000FF")
+}
 
 fun main() {
-    for (color in RGB.entries) println(color.toString()) // prints RED, GREEN, BLUE
-    println("The first color is: ${RGB.valueOf("RED")}") // prints "The first color is: RED"
+    val color: Color = Color.RED
+
+    println(color)
+    // RED
+    println(color.hex)
+    // #FF0000
+    println(Color.GREEN.hex)
+    // #00FF00
 }
