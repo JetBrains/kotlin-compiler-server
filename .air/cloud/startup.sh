@@ -65,7 +65,7 @@ install_jdk() {
   rm -f "$tarball"
 
   local extracted
-  extracted=$(find "$staging" -maxdepth 1 -mindepth 1 -type d | head -1)
+  extracted=$(find "$staging" -maxdepth 1 -mindepth 1 -type d | sort | head -1)
   [ -x "$extracted/bin/javac" ] || fail "downloaded Corretto archive has no bin/javac"
 
   mkdir -p "$(dirname "$JDK_HOME")"
@@ -75,7 +75,7 @@ install_jdk() {
 
   grep -q 'Amazon' "$JDK_HOME/release" \
     || fail "installed JDK is not an Amazon Corretto build; the AMAZON toolchain requirement would fail"
-  log "installed $("$JDK_HOME/bin/java" -version 2>&1 | head -1) at $JDK_HOME"
+  log "installed $("$JDK_HOME/bin/java" -version 2>&1 | grep -v '^Picked up' | head -1) at $JDK_HOME"
 }
 
 # JAVA_HOME must survive this script: the launch runs it as a child process, so the
