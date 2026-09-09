@@ -1,27 +1,19 @@
-class MyStringCollection {
-    val items = mutableListOf<String>()
+data class OrderSummary(
+    val subtotal: Double,
+    val tax: Double,
+)
 
-    infix fun add(s: String) {
-        println("Adding: $s")
-        items += s
-    }
-
-    fun build() {
-        add("first")      // Correct: ordinary function call
-        this add "second" // Correct: infix call with an explicit receiver
-        // add "third"    // Compiler error: needs an explicit receiver
-    }
-
-    fun printAll() = println("Items = $items")
+fun calculateOrderSummary(prices: List<Double>): OrderSummary {
+    val subtotal = prices.sum()
+    val tax = subtotal * 0.2
+    return OrderSummary(subtotal, tax)
 }
 
 fun main() {
-    val myStrings = MyStringCollection()
-    // Adds "first" and "second" to the list
-    myStrings.build()
-      
-    myStrings.printAll()
-    // Adding: first
-    // Adding: second
-    // Items = [first, second]
+    val summary = calculateOrderSummary(listOf(12.50, 8.00, 4.50))
+
+    println(summary.subtotal)
+    // 25.0
+    println(summary.tax)
+    // 5.0
 }
