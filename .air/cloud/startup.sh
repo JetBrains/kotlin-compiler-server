@@ -6,6 +6,21 @@
 # toolchain in this build additionally requires JvmVendorSpec.AMAZON), primes the
 # Gradle dependency/build caches, and starts the Spring Boot compiler server.
 #
+# Network endpoints this script and the Gradle build contact (a restricted network
+# policy has to allow them):
+#   cache-redirector.jetbrains.com  JDK download mirror (see install_jdk)
+#   corretto.aws                    JDK download fallback
+#   services.gradle.org             Gradle distribution for the wrapper
+#   repo.maven.apache.org           mavenCentral()
+#   plugins.gradle.org              gradlePluginPortal()
+#   dl.google.com, maven.google.com google() — androidx/Compose artifacts
+#   redirector.kotlinlang.org       Kotlin dev repository declared in settings
+#   nodejs.org                      Node.js distribution for the Kotlin/Wasm targets
+#   registry.yarnpkg.com            Yarn distribution + npm packages (kotlinWasmNpmInstall)
+#   registry.npmjs.org              npm packages
+#   registry-1.docker.io, auth.docker.io, production.cloudflare.docker.com
+#                                   Docker images used by ThreadLeakE2ETest/Testcontainers
+#
 # AIR_STARTUP_MODE=warmup  -> snapshot-baking run: do the expensive work and block
 #                             on `healthcheck` so finished downloads/builds land in
 #                             the snapshot.
