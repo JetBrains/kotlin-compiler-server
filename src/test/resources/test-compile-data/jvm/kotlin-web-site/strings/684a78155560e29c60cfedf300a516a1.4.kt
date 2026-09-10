@@ -1,12 +1,11 @@
 fun main() {
 //sampleStart
-    val i = 10
-    println("i = $i") 
-    // i = 10
-    
-    val letters = listOf("a","b","c","d","e")
-    println("Letters: $letters") 
-    // Letters: [a, b, c, d, e]
-
+    val text = "abc"
+    println("The length of $text is ${text.length}")
+    // The length of abc is 3
+      
+    val language = "Kotlin"
+    println("${language}Lang")
+    // KotlinLang
 //sampleEnd
 }

@@ -1,9 +1,17 @@
-fun notImplementedFunction(): Int {
-    TODO("This function is not yet implemented")
+class Person(val name: String?)
+
+fun fail(message: String): Nothing {
+    throw IllegalArgumentException(message)
+    // This function will never return successfully.
+    // It will always throw an exception.
 }
 
 fun main() {
-    val result = notImplementedFunction()
-    // This throws a NotImplementedError
-    println(result)
+    // Creates an instance of Person with 'name' as null
+    val person = Person(name = null)
+    
+    val s: String = person.name ?: fail("Name required")
+
+    // 's' is guaranteed to be initialized at this point
+    println(s)
 }
