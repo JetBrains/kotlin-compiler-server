@@ -2,10 +2,12 @@ package com.compiler.server
 
 import com.compiler.server.base.BaseExecutorTest
 import com.compiler.server.model.JvmExecutionResult
+import com.compiler.server.model.ProjectSeveriry
 import org.junit.jupiter.api.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class JvmRunnerTest : BaseExecutorTest() {
 
@@ -121,6 +123,31 @@ class JvmRunnerTest : BaseExecutorTest() {
     )
 
     assertContains(result.compilerDiagnostics.map { it.message }, "Variable is unused.")
+  }
+
+  @Test
+  fun `internal compiler error is reported in errors map`() {
+    val code = buildString {
+      appendLine("fun main() {")
+      repeat(10_000) { appendLine("  println($it)") }
+      appendLine("}")
+    }
+    val result = run(
+      code = code,
+      contains = ""
+    )
+
+    assertNull(result.exception, "Exception should be null, compiler errors are expected in 'errors' map")
+    val fileErrors = result.compilerDiagnostics.map["File.kt"].orEmpty()
+    assertTrue(
+      fileErrors.any {
+        it.severity == ProjectSeveriry.ERROR &&
+          it.interval == null &&
+          it.className == ProjectSeveriry.ERROR.name &&
+          it.message.contains("MethodTooLargeException")
+      },
+      "Expected fallback compiler error for File.kt, but got: ${result.compilerDiagnostics}"
+    )
   }
 
   @Test
