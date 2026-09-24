@@ -231,7 +231,8 @@ class CompilerArgumentsUtil(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
         "Xexplicit-backing-fields" to true,
-        "XXLanguage" to "+ExplicitBackingFields"
+        "XXLanguage" to "+ExplicitBackingFields",
+        "Xreturn-value-checker" to "disable",
     )
 
     val PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS = mapOf(
