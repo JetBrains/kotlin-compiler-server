@@ -1,6 +1,8 @@
 fun main() {
 //sampleStart
-    val x = 5 / 2.toDouble()
-    println(x == 2.5)
-//sampleEnd
+    val d: Double = 1.5
+    val l: Long = d.toLong()
+    
+    println(l) // 1
+//sampleEnd    
 }

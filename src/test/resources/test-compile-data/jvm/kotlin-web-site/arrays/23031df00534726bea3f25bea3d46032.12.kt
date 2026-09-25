@@ -1,8 +1,13 @@
 fun main() {
 //sampleStart
-    // Creates an array of Int of size 5 with the values initialized to zero
-    val exampleArray = IntArray(5)
-    println(exampleArray.joinToString())
-    // 0, 0, 0, 0, 0
+    val simpleArray = arrayOf("a", "b", "c", "c")
+
+    // Converts to a Set
+    println(simpleArray.toSet())
+    // [a, b, c]
+
+    // Converts to a List
+    println(simpleArray.toList())
+    // [a, b, c, c]
 //sampleEnd
 }

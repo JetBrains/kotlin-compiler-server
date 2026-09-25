@@ -1,9 +1,14 @@
-class MyClass {
-    companion object { }  // will be called "Companion"
+fun Map<String, Int>.mostVoted(): String? {
+    return maxByOrNull { (key, value) -> value }?.key
 }
 
-fun MyClass.Companion.printCompanion() { println("companion") }
-
 fun main() {
-    MyClass.printCompanion()
+    val poll = mapOf(
+        "Cats" to 37,
+        "Dogs" to 58,
+        "Birds" to 22
+    )
+
+    println("Top choice: ${poll.mostVoted()}") 
+    // Dogs
 }
