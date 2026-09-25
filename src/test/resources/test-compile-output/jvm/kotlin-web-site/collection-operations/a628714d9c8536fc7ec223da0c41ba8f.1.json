@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>numbers are still [one, two, three, four]\nnumbers longer than 3 chars are [three, four]\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[{"interval":{"start":{"line":3,"ch":12},"end":{"line":3,"ch":18}},"message":"Unused return value of 'filter'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>numbers are still [one, two, three, four]\nnumbers longer than 3 chars are [three, four]\n</outStream>"}

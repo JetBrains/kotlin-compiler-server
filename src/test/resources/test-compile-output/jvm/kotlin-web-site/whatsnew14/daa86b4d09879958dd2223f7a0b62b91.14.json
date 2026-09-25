@@ -1,1 +1,1 @@
-{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":""}
+{"errors":{"File.kt":[{"interval":{"start":{"line":3,"ch":11},"end":{"line":3,"ch":23}},"message":"Unused return value of 'reduceOrNull'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":""}
