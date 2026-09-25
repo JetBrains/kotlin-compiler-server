@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>After removal: [two, three, four]\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[{"interval":{"start":{"line":5,"ch":20},"end":{"line":5,"ch":24}},"message":"Unused return value of 'next'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>After removal: [two, three, four]\n</outStream>"}
