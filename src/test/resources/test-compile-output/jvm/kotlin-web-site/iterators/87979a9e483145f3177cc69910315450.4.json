@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>Iterating backwards:\nIndex: 3, value: four\nIndex: 2, value: three\nIndex: 1, value: two\nIndex: 0, value: one\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[{"interval":{"start":{"line":4,"ch":48},"end":{"line":4,"ch":52}},"message":"Unused return value of 'next'.","severity":"WARNING","className":"WARNING"}]},"exception":null,"jvmByteCode":null,"text":"<outStream>Iterating backwards:\nIndex: 3, value: four\nIndex: 2, value: three\nIndex: 1, value: two\nIndex: 0, value: one\n</outStream>"}
