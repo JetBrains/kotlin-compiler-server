@@ -1,10 +1,9 @@
 fun main() {
 //sampleStart
-    val b: Int = 10000
-    val boxedB: Int? = b
-    val anotherBoxedB: Int? = b
+    val intValue = 5 / 2
+    println(intValue) // 2
     
-    println(boxedB === anotherBoxedB) // false
-    println(boxedB == anotherBoxedB) // true
+    val longValue = 5L / 2
+    println(longValue) // 2
 //sampleEnd
 }

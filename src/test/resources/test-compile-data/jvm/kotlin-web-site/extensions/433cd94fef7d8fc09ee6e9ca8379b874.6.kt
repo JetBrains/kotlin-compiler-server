@@ -1,33 +1,19 @@
-open class Base { }
-
-class Derived : Base() { }
-
-open class BaseCaller {
-    open fun Base.printFunctionInfo() {
-        println("Base extension function in BaseCaller")
-    }
-
-    open fun Derived.printFunctionInfo() {
-        println("Derived extension function in BaseCaller")
-    }
-
-    fun call(b: Base) {
-        b.printFunctionInfo()   // call the extension function
-    }
-}
-
-class DerivedCaller: BaseCaller() {
-    override fun Base.printFunctionInfo() {
-        println("Base extension function in DerivedCaller")
-    }
-
-    override fun Derived.printFunctionInfo() {
-        println("Derived extension function in DerivedCaller")
-    }
-}
-
 fun main() {
-    BaseCaller().call(Base())   // "Base extension function in BaseCaller"
-    DerivedCaller().call(Base())  // "Base extension function in DerivedCaller" - dispatch receiver is resolved virtually
-    DerivedCaller().call(Derived())  // "Base extension function in DerivedCaller" - extension receiver is resolved statically
+    //sampleStart
+    // Extension function on nullable Any
+    fun Any?.toString(): String {
+        if (this == null) return "null"
+        // After null check, `this` is smart-cast to non-nullable Any
+        // So this call resolves to the regular toString() function
+        return toString()
+    }
+    
+    val number: Int? = 42
+    val nothing: Any? = null
+    
+    println(number.toString())
+    // 42
+    println(nothing.toString()) 
+    // null
+    //sampleEnd
 }

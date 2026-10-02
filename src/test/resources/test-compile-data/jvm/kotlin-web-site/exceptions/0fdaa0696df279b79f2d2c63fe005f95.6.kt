@@ -1,25 +1,29 @@
-fun divideOrNull(a: Int): Int {
-    
-    // The try block is always executed
-    // An exception here (division by zero) causes an immediate jump to the catch block
-    try {
-        val b = 44 / a
-        println("try block: Executing division: $b")
-        return b
+open class WithdrawalException(message: String) : Exception(message)
+class InsufficientFundsException(message: String) : WithdrawalException(message)
+
+fun processWithdrawal(amount: Double, availableFunds: Double) {
+    if (amount > availableFunds) {
+        throw InsufficientFundsException("Insufficient funds for the withdrawal.")
     }
-    
-    // The catch block is executed due to the ArithmeticException (division by zero if a ==0)
-    catch (e: ArithmeticException) {
-        println("catch block: Encountered ArithmeticException $e")
-        return -1
+    if (amount < 1 || amount % 1 != 0.0) {
+        throw WithdrawalException("Invalid withdrawal amount.")
     }
-    finally {
-        println("finally block: The finally block is always executed")
-    }
+    println("Withdrawal processed")
 }
 
 fun main() {
-    
-    // Change this value to get a different result. An ArithmeticException will return: -1
-    divideOrNull(0)
+    val availableFunds = 500.0
+
+    // Change this value to test different scenarios
+    val withdrawalAmount = 500.5
+
+    try {
+        processWithdrawal(withdrawalAmount.toDouble(), availableFunds)
+
+    // The order of catch blocks is important!
+    } catch (e: InsufficientFundsException) {
+        println("Caught an InsufficientFundsException: ${e.message}")
+    } catch (e: WithdrawalException) {
+        println("Caught a WithdrawalException: ${e.message}")
+    }
 }
