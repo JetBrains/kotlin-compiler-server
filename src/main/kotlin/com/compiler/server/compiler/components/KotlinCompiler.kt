@@ -51,7 +51,7 @@ class KotlinCompiler(
         val classReader = ClassReader(this)
         val stringWriter = StringWriter()
         val printWriter = PrintWriter(stringWriter)
-        val traceClassVisitor = TraceClassVisitor(printWriter)
+        val traceClassVisitor = TraceClassVisitor(null as ClassVisitor?, printWriter)
 
         classReader.accept(traceClassVisitor, 0)
 
