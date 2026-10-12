@@ -10,5 +10,8 @@ class Derived(b: Base) : Base by b
 
 fun main() {
     val base = BaseImpl(10)
-    Derived(base).print()
+    val derived = Derived(base) 
+    
+    derived.print()
+    // 10
 }

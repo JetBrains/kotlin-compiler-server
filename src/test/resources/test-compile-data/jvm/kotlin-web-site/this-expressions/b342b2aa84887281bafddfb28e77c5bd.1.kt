@@ -1,15 +1,20 @@
-fun main() {
-    fun printLine() { println("Local function") }
-    
-    class A {
-        fun printLine() { println("Member function") }
-
-        fun invokePrintLine(omitThis: Boolean = false) {
-            if (omitThis) printLine()
-            else this.printLine()
+class User(val name: String) {
+    inner class Age(val value: Int) {
+        fun printInfo() {
+            
+            // Refers to the value property of the current Age object
+            println(this.value)
+            // 22
+            
+            // Refers to the name property of the outer User object 
+            println(this@User.name)
+            // Jane Doe
         }
     }
-    
-    A().invokePrintLine() // Member function
-    A().invokePrintLine(omitThis = true) // Local function
+}
+
+fun main() {
+    val user = User("Jane Doe")
+    val age = user.Age(22)
+    age.printInfo()
 }
