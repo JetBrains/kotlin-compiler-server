@@ -38,6 +38,7 @@ kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit"
 kotlin-mockito = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
 kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "kotlin" }
 kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "kotlin" }
+# TODO(Dmitrii Krasnov): we still use compiler for JS/Wasm builds and can not get rid of it before we fix KTL-4006
 kotlin-compiler-embeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", version.ref = "kotlin" }
 kotlin-tooling-core = { group = "org.jetbrains.kotlin", name = "kotlin-tooling-core", version.ref = "kotlin" }
 kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-arguments-description", version.ref = "kotlin" }
