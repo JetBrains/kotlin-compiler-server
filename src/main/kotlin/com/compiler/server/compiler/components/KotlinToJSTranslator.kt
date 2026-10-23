@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
 import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain
-import org.jetbrains.kotlin.cli.js.KotlinWasmCompiler
+import org.jetbrains.kotlin.buildtools.api.wasm.WasmPlatformToolchain
 import org.springframework.stereotype.Service
 import java.nio.file.Path
 import kotlin.io.encoding.Base64
@@ -214,29 +214,29 @@ class KotlinToJSTranslator(
                     else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
                 }
                 val ioFiles = files.writeToIoFiles(inputDir)
-                val filePaths = ioFiles.map { it.toFile().canonicalPath }
-                val klibPath = (outputDir / "klib").toFile().canonicalPath
 
-                val additionalCompilerArgumentsForKLib =
+                val firstPhaseArguments =
                     compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                         defaultCompilerArgs,
                         firstPhasePredefinedArguments,
                         userCompilerArguments.firstPhase
-                    ) + "-ir-output-dir=$klibPath"
+                    )
 
-                val wasmCompiler = KotlinWasmCompiler()
-                wasmCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
-                    .flatMap {
-                        val secondPhaseArguments = (compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
-                            defaultCompilerArgs,
-                            secondPhasePredefinedArguments,
-                            userCompilerArguments.secondPhase
-                        ) + "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}" + "-Xinclude=$klibPath").toMutableList()
+                val secondPhaseArguments = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                    defaultCompilerArgs,
+                    secondPhasePredefinedArguments,
+                    userCompilerArguments.secondPhase
+                ).toMutableList()
 
-                        if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
+                if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
 
-                        wasmCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
-                    }
+                compileWasmWithToolchain(
+                    sources = ioFiles,
+                    klibDir = outputDir / "klib",
+                    wasmDir = outputDir / "wasm",
+                    firstPhaseArguments = firstPhaseArguments,
+                    secondPhaseArguments = secondPhaseArguments,
+                )
                     .map {
                         val wasmOutputDir = outputDir / "wasm"
 
@@ -251,6 +251,48 @@ class KotlinToJSTranslator(
                     }
             }
         }
+
+    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
+    private fun compileWasmWithToolchain(
+        sources: List<Path>,
+        klibDir: Path,
+        wasmDir: Path,
+        firstPhaseArguments: List<String>,
+        secondPhaseArguments: List<String>,
+    ): CompilationResult<Unit> {
+        val logger = CompilationLogger()
+        logger.compilationLogs = sources
+            .filter { it.name.endsWith(".kt") }
+            .associate { it.name to mutableListOf() }
+
+        val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
+        val wasmToolchain = toolchains.getToolchain(WasmPlatformToolchain::class.java)
+
+        val klibOperationBuilder = wasmToolchain.wasmKlibCompilationOperationBuilder(sources, klibDir)
+        klibOperationBuilder.compilerArguments.applyCommandLineArguments(firstPhaseArguments)
+        val klibOperation = klibOperationBuilder.build()
+
+        val linkingOperationBuilder = wasmToolchain.wasmLinkingOperationBuilder(klibDir, wasmDir)
+        linkingOperationBuilder.compilerArguments.applyCommandLineArguments(secondPhaseArguments)
+        val linkingOperation = linkingOperationBuilder.build()
+
+        toolchains.createBuildSession().use { session ->
+            val result = try {
+                val executionPolicy = toolchains.createInProcessExecutionPolicy()
+                val klibResult = session.executeOperation(klibOperation, executionPolicy, logger)
+                if (klibResult == BuildToolsCompilationResult.COMPILATION_SUCCESS) {
+                    session.executeOperation(linkingOperation, executionPolicy, logger)
+                } else klibResult
+            } catch (e: Exception) {
+                throw Exception("Exception executing compilation operation", e)
+            }
+            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
+            return when (result) {
+                BuildToolsCompilationResult.COMPILATION_SUCCESS -> Compiled(compilerDiagnostics, Unit)
+                else -> NotCompiled(compilerDiagnostics)
+            }
+        }
+    }
 
     private fun mergeWasmOutputIntoOneJs(
         wasmOutput: WasmTranslationSuccessfulOutput,
