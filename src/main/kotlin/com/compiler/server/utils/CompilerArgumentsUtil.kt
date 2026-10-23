@@ -302,7 +302,6 @@ class CompilerArgumentsUtil(
     val PREDEFINED_JS_SECOND_PHASE_ARGUMENTS = mapOf(
         "Xreport-all-warnings" to true,
         "Wextra" to true,
-        "Xir-produce-js" to true,
         "Xir-dce" to true,
         "libraries" to Pair(
             kotlinEnvironment.JS_LIBRARIES.sorted().joinToString(PATH_SEPARATOR) { it.split("/").last() },
