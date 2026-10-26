@@ -109,6 +109,7 @@ class KotlinProjectExecutor(
             ProjectType,
             Boolean,
             JsCompilerArguments,
+            String,
         ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
 
