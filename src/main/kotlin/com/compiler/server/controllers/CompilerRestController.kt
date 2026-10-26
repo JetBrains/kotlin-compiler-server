@@ -17,7 +17,6 @@ import com.compiler.server.service.CompilerArgumentsService
 import com.compiler.server.service.KotlinProjectExecutor
 import com.compiler.server.validation.CompilerArgumentsValidator
 import jakarta.validation.Valid
-import org.jetbrains.kotlin.utils.mapToSetOrEmpty
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -116,7 +115,7 @@ class CompilerRestController(
     ): CompilerArgumentResponse =
         CompilerArgumentResponse(
             compilerArgumentsService.getCompilerArguments(projectType)
-                .mapToSetOrEmpty {
+                .mapTo(mutableSetOf()) {
                     CompilerArgumentResponse.CompilerArgument(
                         it.name,
                         it.shortName,

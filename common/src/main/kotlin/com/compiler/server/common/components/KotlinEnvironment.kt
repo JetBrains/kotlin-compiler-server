@@ -16,31 +16,6 @@ class KotlinEnvironment(
   val dependenciesComposeWasmHash: String = "",
   val dependenciesStaticUrl: String = "",
 ) {
-  companion object {
-    /**
-     * This list allows to configure behavior of webdemo compiler. Its effect is equivalent
-     * to passing this list of string to CLI compiler.
-     *
-     * See [org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments] and
-     * [org.jetbrains.kotlin.cli.common.arguments.K2JVMCompilerArguments] for list of possible flags
-     */
-    val additionalCompilerArguments: List<String> = listOf(
-      "-opt-in=kotlin.ExperimentalStdlibApi",
-      "-opt-in=kotlin.time.ExperimentalTime",
-      "-opt-in=kotlin.RequiresOptIn",
-      "-opt-in=kotlin.ExperimentalUnsignedTypes",
-      "-opt-in=kotlin.contracts.ExperimentalContracts",
-      "-opt-in=kotlin.experimental.ExperimentalTypeInference",
-      "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-      "-opt-in=kotlin.io.encoding.ExperimentalEncodingApi",
-      "-opt-in=kotlin.concurrent.atomics.ExperimentalAtomicApi",
-      "-Xcontext-parameters",
-      "-Xnested-type-aliases",
-      "-Xreport-all-warnings",
-      "-Wextra",
-      "-Xexplicit-backing-fields",
-    )
-  }
 
   val JS_LIBRARIES = additionalJsClasspath
     .map { it.absolutePath }
