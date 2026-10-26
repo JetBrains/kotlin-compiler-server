@@ -7,5 +7,4 @@ data class WasmArguments(
     val defaultCompilerArgs: Set<ExtendedCompilerArgument>,
     val firstPhasePredefinedArguments: Map<String, Serializable>,
     val secondPhasePredefinedArguments: Map<String, Serializable>,
-    val outputFileName: String,
 )
