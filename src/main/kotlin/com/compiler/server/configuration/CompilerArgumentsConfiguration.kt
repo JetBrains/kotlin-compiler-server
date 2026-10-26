@@ -7,7 +7,6 @@ import com.compiler.server.validation.AbstractCompilerArgumentsValidator
 import org.jetbrains.kotlin.arguments.description.kotlinCompilerArguments
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgument
 import org.jetbrains.kotlin.arguments.dsl.base.KotlinCompilerArgumentsLevel
-import org.jetbrains.kotlin.utils.keysToMap
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -53,7 +52,7 @@ class CompilerArgumentsConfiguration {
         wasmCompilerArgumentsValidator: AbstractCompilerArgumentsValidator,
         composeWasmCompilerArgumentsValidator: AbstractCompilerArgumentsValidator
     ): Map<ProjectType, AbstractCompilerArgumentsValidator> {
-        return ProjectType.entries.keysToMap {
+        return ProjectType.entries.associateWith {
             when (it) {
                 ProjectType.JAVA, ProjectType.JUNIT -> jvmCompilerArgumentsValidator
                 ProjectType.JS, ProjectType.JS_IR, ProjectType.CANVAS -> jsCompilerArgumentsValidator
