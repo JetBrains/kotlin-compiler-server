@@ -8,17 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
-import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain
-import org.jetbrains.kotlin.buildtools.api.wasm.WasmPlatformToolchain
+import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain.Companion.js
+import org.jetbrains.kotlin.buildtools.api.wasm.WasmPlatformToolchain.Companion.wasm
 import org.springframework.stereotype.Service
 import java.nio.file.Path
 import kotlin.io.encoding.Base64
 import kotlin.io.path.div
 import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
-import org.jetbrains.kotlin.buildtools.api.CompilationResult as BuildToolsCompilationResult
 
 private val JS_BUILTINS_ALIAS_NAME_REGEX =
     Regex("""import\s+\*\s+as\s+(\S+)\s+from\s+'\./$JS_DEFAULT_MODULE_NAME\.$JS_BUILTINS_POSTFIX\.mjs';""")
@@ -70,7 +68,8 @@ class KotlinToJSTranslator(
             List<ProjectFile>,
             ProjectType,
             Boolean,
-            JsCompilerArguments
+            JsCompilerArguments,
+            String,
         ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
@@ -87,7 +86,8 @@ class KotlinToJSTranslator(
                 files,
                 projectType,
                 debugInfo,
-                userCompilerArguments
+                userCompilerArguments,
+                outputFileName,
             )
             val wasmCompilationOutput = when (compilationResult) {
                 is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -122,7 +122,7 @@ class KotlinToJSTranslator(
                         compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
                         userCompilerArguments.secondPhase
                     )
-                compileJsWithToolchain(
+                compileJsWithBTA(
                     sources = ioFiles,
                     klibDir = outputDir / "klib",
                     jsDir = outputDir / "js",
@@ -134,48 +134,6 @@ class KotlinToJSTranslator(
                     .map(::redirectOutput)
             }
         }
-
-    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
-    private fun compileJsWithToolchain(
-        sources: List<Path>,
-        klibDir: Path,
-        jsDir: Path,
-        firstPhaseArguments: List<String>,
-        secondPhaseArguments: List<String>,
-    ): CompilationResult<Unit> {
-        val logger = CompilationLogger()
-        logger.compilationLogs = sources
-            .filter { it.name.endsWith(".kt") }
-            .associate { it.name to mutableListOf() }
-
-        val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
-        val jsToolchain = toolchains.getToolchain(JsPlatformToolchain::class.java)
-
-        val klibOperationBuilder = jsToolchain.jsKlibCompilationOperationBuilder(sources, klibDir)
-        klibOperationBuilder.compilerArguments.applyCommandLineArguments(firstPhaseArguments)
-        val klibOperation = klibOperationBuilder.build()
-
-        val linkingOperationBuilder = jsToolchain.jsLinkingOperationBuilder(klibDir, jsDir)
-        linkingOperationBuilder.compilerArguments.applyCommandLineArguments(secondPhaseArguments)
-        val linkingOperation = linkingOperationBuilder.build()
-
-        toolchains.createBuildSession().use { session ->
-            val result = try {
-                val executionPolicy = toolchains.createInProcessExecutionPolicy()
-                val klibResult = session.executeOperation(klibOperation, executionPolicy, logger)
-                if (klibResult == BuildToolsCompilationResult.COMPILATION_SUCCESS) {
-                    session.executeOperation(linkingOperation, executionPolicy, logger)
-                } else klibResult
-            } catch (e: Exception) {
-                throw Exception("Exception executing compilation operation", e)
-            }
-            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
-            return when (result) {
-                BuildToolsCompilationResult.COMPILATION_SUCCESS -> Compiled(compilerDiagnostics, Unit)
-                else -> NotCompiled(compilerDiagnostics)
-            }
-        }
-    }
 
     private fun redirectOutput(code: String): String {
         val listLines = code
@@ -192,23 +150,22 @@ class KotlinToJSTranslator(
         files: List<ProjectFile>,
         projectType: ProjectType,
         debugInfo: Boolean,
-        userCompilerArguments: JsCompilerArguments
+        userCompilerArguments: JsCompilerArguments,
+        outputFileName: String,
     ): CompilationResult<WasmTranslationSuccessfulOutput> =
         usingTempDirectory { inputDir ->
             usingTempDirectory { outputDir ->
-                val (defaultCompilerArgs, firstPhasePredefinedArguments, secondPhasePredefinedArguments, outputFileName) = when (projectType) {
+                val (defaultCompilerArgs, firstPhasePredefinedArguments, secondPhasePredefinedArguments) = when (projectType) {
                     ProjectType.WASM -> WasmArguments(
                         wasmCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
                         compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS,
-                        WASM_DEFAULT_MODULE_NAME,
                     )
 
                     ProjectType.COMPOSE_WASM -> WasmArguments(
                         composeWasmCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
                         compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS,
-                        "_${WASM_DEFAULT_MODULE_NAME}_" // The compose wasm compiler transforms klib uniqueName and escapes angle brackets with underscores
                     )
 
                     else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
@@ -230,7 +187,7 @@ class KotlinToJSTranslator(
 
                 if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
 
-                compileWasmWithToolchain(
+                compileWasmWithBTA(
                     sources = ioFiles,
                     klibDir = outputDir / "klib",
                     wasmDir = outputDir / "wasm",
@@ -253,45 +210,45 @@ class KotlinToJSTranslator(
         }
 
     @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
-    private fun compileWasmWithToolchain(
+    private fun compileJsWithBTA(
+        sources: List<Path>,
+        klibDir: Path,
+        jsDir: Path,
+        firstPhaseArguments: List<String>,
+        secondPhaseArguments: List<String>,
+    ): CompilationResult<Unit> {
+        val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
+
+        val klibOperation = toolchain.js.jsKlibCompilationOperationBuilder(sources, klibDir)
+            .apply { compilerArguments.applyCommandLineArguments(firstPhaseArguments) }
+            .build()
+
+        val linkingOperation = toolchain.js.jsLinkingOperationBuilder(klibDir, jsDir)
+            .apply { compilerArguments.applyCommandLineArguments(secondPhaseArguments) }
+            .build()
+
+        return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
+    }
+
+    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
+    private fun compileWasmWithBTA(
         sources: List<Path>,
         klibDir: Path,
         wasmDir: Path,
         firstPhaseArguments: List<String>,
         secondPhaseArguments: List<String>,
     ): CompilationResult<Unit> {
-        val logger = CompilationLogger()
-        logger.compilationLogs = sources
-            .filter { it.name.endsWith(".kt") }
-            .associate { it.name to mutableListOf() }
+        val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
 
-        val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
-        val wasmToolchain = toolchains.getToolchain(WasmPlatformToolchain::class.java)
+        val klibOperation = toolchain.wasm.wasmKlibCompilationOperationBuilder(sources, klibDir)
+            .apply { compilerArguments.applyCommandLineArguments(firstPhaseArguments) }
+            .build()
 
-        val klibOperationBuilder = wasmToolchain.wasmKlibCompilationOperationBuilder(sources, klibDir)
-        klibOperationBuilder.compilerArguments.applyCommandLineArguments(firstPhaseArguments)
-        val klibOperation = klibOperationBuilder.build()
+        val linkingOperation = toolchain.wasm.wasmLinkingOperationBuilder(klibDir, wasmDir)
+            .apply { compilerArguments.applyCommandLineArguments(secondPhaseArguments) }
+            .build()
 
-        val linkingOperationBuilder = wasmToolchain.wasmLinkingOperationBuilder(klibDir, wasmDir)
-        linkingOperationBuilder.compilerArguments.applyCommandLineArguments(secondPhaseArguments)
-        val linkingOperation = linkingOperationBuilder.build()
-
-        toolchains.createBuildSession().use { session ->
-            val result = try {
-                val executionPolicy = toolchains.createInProcessExecutionPolicy()
-                val klibResult = session.executeOperation(klibOperation, executionPolicy, logger)
-                if (klibResult == BuildToolsCompilationResult.COMPILATION_SUCCESS) {
-                    session.executeOperation(linkingOperation, executionPolicy, logger)
-                } else klibResult
-            } catch (e: Exception) {
-                throw Exception("Exception executing compilation operation", e)
-            }
-            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
-            return when (result) {
-                BuildToolsCompilationResult.COMPILATION_SUCCESS -> Compiled(compilerDiagnostics, Unit)
-                else -> NotCompiled(compilerDiagnostics)
-            }
-        }
+        return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
     }
 
     private fun mergeWasmOutputIntoOneJs(
