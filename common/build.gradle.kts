@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.kotlin.compiler.embeddable)
+    implementation(libs.kotlin.util.klib)
     implementation(libs.jackson.module.kotlin)
 }

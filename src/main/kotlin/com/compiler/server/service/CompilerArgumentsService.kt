@@ -2,7 +2,6 @@ package com.compiler.server.service
 
 import com.compiler.server.model.ExtendedCompilerArgument
 import com.compiler.server.model.ProjectType
-import org.jetbrains.kotlin.utils.filterToSetOrEmpty
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -28,7 +27,7 @@ class CompilerArgumentsService(
                     HttpStatus.BAD_REQUEST,
                     "Unsupported projectType '$projectType' for compiler arguments discovery"
                 )
-            }.filterToSetOrEmpty { arg -> arg.supportedOnCurrentVersion }
+            }.filter { arg -> arg.supportedOnCurrentVersion }.toSet()
         }
     }
 }
