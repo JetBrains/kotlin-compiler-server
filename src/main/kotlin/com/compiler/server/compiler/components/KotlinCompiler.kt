@@ -5,25 +5,22 @@ import com.compiler.server.common.components.PATH_SEPARATOR
 import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.executor.CommandLineArgument
 import com.compiler.server.executor.JavaExecutor
-import com.compiler.server.model.CompilerDiagnostics
-import com.compiler.server.model.ExtendedCompilerArgument
-import com.compiler.server.model.JvmExecutionResult
-import com.compiler.server.model.OutputDirectory
-import com.compiler.server.model.ProjectFile
+import com.compiler.server.model.*
 import com.compiler.server.model.bean.LibrariesFile
-import com.compiler.server.model.toExceptionDescriptor
 import com.compiler.server.utils.CompilerArgumentsUtil
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
+import org.jetbrains.kotlin.buildtools.api.BaseCompilationOperation
+import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
-import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain
-import org.jetbrains.org.objectweb.asm.ClassReader
-import org.jetbrains.org.objectweb.asm.ClassReader.*
-import org.jetbrains.org.objectweb.asm.ClassVisitor
-import org.jetbrains.org.objectweb.asm.MethodVisitor
-import org.jetbrains.org.objectweb.asm.Opcodes.*
-import org.jetbrains.org.objectweb.asm.util.TraceClassVisitor
+import org.jetbrains.kotlin.buildtools.api.jvm.JvmPlatformToolchain.Companion.jvm
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassReader.*
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.util.TraceClassVisitor
 import org.springframework.stereotype.Component
 import java.io.File
 import java.io.PrintWriter
@@ -107,73 +104,51 @@ class KotlinCompiler(
 
     fun compile(files: List<ProjectFile>, userCompilerArguments: Map<String, Any>): CompilationResult<JvmClasses> =
         usingTempDirectory { inputDir ->
-            val ioFiles = files.writeToIoFiles(inputDir)
+            files.writeToIoFiles(inputDir)
             usingTempDirectory { outputDir ->
-                val arguments = ioFiles.map { it.absolutePathString() } +
-                        compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
-                            jvmCompilerArguments,
-                            compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS,
-                            userCompilerArguments
-                        )
-                val result = compileWithToolchain(inputDir, outputDir, arguments)
+                val arguments = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                    jvmCompilerArguments,
+                    compilerArgumentsUtil.PREDEFINED_JVM_ARGUMENTS,
+                    userCompilerArguments
+                )
+                val result = compileWithBTA(inputDir, outputDir, arguments)
                 return@usingTempDirectory result
             }
         }
 
-    @OptIn(ExperimentalPathApi::class, ExperimentalBuildToolsApi::class, ExperimentalBuildToolsApi::class)
-    private fun compileWithToolchain(
+    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
+    private fun compileWithBTA(
         inputDir: Path,
         outputDir: Path,
         arguments: List<String>
     ): CompilationResult<JvmClasses> {
         val sources = inputDir.listDirectoryEntries()
 
-        val logger = CompilationLogger()
-        logger.compilationLogs = sources
-            .filter { it.name.endsWith(".kt") }
-            .associate { it.name to mutableListOf() }
-
-        val toolchains = KotlinToolchains.loadImplementation(this::class.java.classLoader)
-        val jvmToolchain = toolchains.getToolchain(JvmPlatformToolchain::class.java)
-        val operationBuilder = jvmToolchain.jvmCompilationOperationBuilder(sources, outputDir)
-        operationBuilder.compilerArguments.applyArgumentStrings(arguments)
-        val operation = operationBuilder.build()
-
-        toolchains.createBuildSession().use { session ->
-            val result = try {
-                session.executeOperation(operation, toolchains.createInProcessExecutionPolicy(), logger)
-            } catch (e: Exception) {
-                throw Exception("Exception executing compilation operation", e)
+        val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
+        val operation = toolchain.jvm.jvmCompilationOperationBuilder(sources, outputDir)
+            .apply {
+                compilerArguments.applyCommandLineArguments(arguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
             }
-            return toCompilationResult(result, logger, outputDir)
-        }
+            .build()
+
+        return toolchain.executeSequentially(sources, operation)
+            .map{ readJvmClasses(outputDir) }
     }
 
-    private fun toCompilationResult(
-        buildResult: org.jetbrains.kotlin.buildtools.api.CompilationResult,
-        logger: CompilationLogger,
-        outputDir: Path,
-    ): CompilationResult<JvmClasses> = when (buildResult) {
-        org.jetbrains.kotlin.buildtools.api.CompilationResult.COMPILATION_SUCCESS -> {
-            val compilerDiagnostics = CompilerDiagnostics(logger.compilationLogs)
-            val outputFiles = buildMap {
-                outputDir.visitFileTree {
-                    onVisitFile { file, _ ->
-                        put(file.relativeTo(outputDir).pathString, file.readBytes())
-                        FileVisitResult.CONTINUE
-                    }
+    private fun readJvmClasses(outputDir: Path): JvmClasses {
+        val outputFiles = buildMap {
+            outputDir.visitFileTree {
+                onVisitFile { file, _ ->
+                    put(file.relativeTo(outputDir).pathString, file.readBytes())
+                    FileVisitResult.CONTINUE
                 }
             }
-            Compiled(
-                compilerDiagnostics = compilerDiagnostics,
-                result = JvmClasses(
-                    files = outputFiles,
-                    mainClasses = findMainClasses(outputFiles),
-                )
-            )
         }
-
-        else -> NotCompiled(CompilerDiagnostics(logger.compilationLogs))
+        return JvmClasses(
+            files = outputFiles,
+            mainClasses = findMainClasses(outputFiles),
+        )
     }
 
     private fun findMainClasses(outputFiles: Map<String, ByteArray>): Set<String> =

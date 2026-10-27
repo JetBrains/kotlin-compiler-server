@@ -5,9 +5,14 @@ import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.model.*
 import com.compiler.server.utils.*
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.jetbrains.kotlin.cli.js.K2JSCompiler
-import org.jetbrains.kotlin.cli.js.KotlinWasmCompiler
+import org.jetbrains.kotlin.buildtools.api.BaseCompilationOperation
+import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
+import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
+import org.jetbrains.kotlin.buildtools.api.js.JsPlatformToolchain.Companion.js
+import org.jetbrains.kotlin.buildtools.api.wasm.WasmPlatformToolchain.Companion.wasm
 import org.springframework.stereotype.Service
+import java.nio.file.Path
 import kotlin.io.encoding.Base64
 import kotlin.io.path.div
 import kotlin.io.path.exists
@@ -64,7 +69,8 @@ class KotlinToJSTranslator(
             List<ProjectFile>,
             ProjectType,
             Boolean,
-            JsCompilerArguments
+            JsCompilerArguments,
+            String,
         ) -> CompilationResult<WasmTranslationSuccessfulOutput>
     ): TranslationResultWithJsCode {
         return try {
@@ -81,7 +87,8 @@ class KotlinToJSTranslator(
                 files,
                 projectType,
                 debugInfo,
-                userCompilerArguments
+                userCompilerArguments,
+                outputFileName,
             )
             val wasmCompilationOutput = when (compilationResult) {
                 is Compiled<WasmTranslationSuccessfulOutput> -> compilationResult.result
@@ -104,25 +111,25 @@ class KotlinToJSTranslator(
         usingTempDirectory { inputDir ->
             usingTempDirectory { outputDir ->
                 val ioFiles = files.writeToIoFiles(inputDir)
-                val filePaths = ioFiles.map { it.toFile().canonicalPath }
-                val klibPath = (outputDir / "klib").toFile().canonicalPath
-                val additionalCompilerArgumentsForKLib =
+                val firstPhaseArguments =
                     compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                         jsCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_JS_FIRST_PHASE_ARGUMENTS,
                         userCompilerArguments.firstPhase
-                    ) + "-ir-output-dir=$klibPath"
-                val jsCompiler = K2JSCompiler()
-                jsCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
-                    .flatMap {
-                        val secondPhaseArguments =
-                            compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
-                                jsCompilerArguments,
-                                compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
-                                userCompilerArguments.secondPhase
-                            ) + "-ir-output-dir=${(outputDir / "js").toFile().canonicalPath}" + "-Xinclude=$klibPath"
-                        jsCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
-                    }
+                    )
+                val secondPhaseArguments =
+                    compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                        jsCompilerArguments,
+                        compilerArgumentsUtil.PREDEFINED_JS_SECOND_PHASE_ARGUMENTS,
+                        userCompilerArguments.secondPhase
+                    )
+                compileJsWithBTA(
+                    sources = ioFiles,
+                    klibDir = outputDir / "klib",
+                    jsDir = outputDir / "js",
+                    firstPhaseArguments = firstPhaseArguments,
+                    secondPhaseArguments = secondPhaseArguments,
+                )
                     .map { (outputDir / "js" / "$JS_DEFAULT_MODULE_NAME.js").readText() }
                     .map { it.withMainArgumentsIr(arguments) }
                     .map(::redirectOutput)
@@ -144,51 +151,50 @@ class KotlinToJSTranslator(
         files: List<ProjectFile>,
         projectType: ProjectType,
         debugInfo: Boolean,
-        userCompilerArguments: JsCompilerArguments
+        userCompilerArguments: JsCompilerArguments,
+        outputFileName: String,
     ): CompilationResult<WasmTranslationSuccessfulOutput> =
         usingTempDirectory { inputDir ->
             usingTempDirectory { outputDir ->
-                val (defaultCompilerArgs, firstPhasePredefinedArguments, secondPhasePredefinedArguments, outputFileName) = when (projectType) {
+                val (defaultCompilerArgs, firstPhasePredefinedArguments, secondPhasePredefinedArguments) = when (projectType) {
                     ProjectType.WASM -> WasmArguments(
                         wasmCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_WASM_FIRST_PHASE_ARGUMENTS,
                         compilerArgumentsUtil.PREDEFINED_WASM_SECOND_PHASE_ARGUMENTS,
-                        WASM_DEFAULT_MODULE_NAME,
                     )
 
                     ProjectType.COMPOSE_WASM -> WasmArguments(
                         composeWasmCompilerArguments,
                         compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_FIRST_PHASE_ARGUMENTS,
                         compilerArgumentsUtil.PREDEFINED_COMPOSE_WASM_SECOND_PHASE_ARGUMENTS,
-                        "_${WASM_DEFAULT_MODULE_NAME}_" // The compose wasm compiler transforms klib uniqueName and escapes angle brackets with underscores
                     )
 
                     else -> throw IllegalStateException("Wasm should have wasm or compose-wasm project type")
                 }
                 val ioFiles = files.writeToIoFiles(inputDir)
-                val filePaths = ioFiles.map { it.toFile().canonicalPath }
-                val klibPath = (outputDir / "klib").toFile().canonicalPath
 
-                val additionalCompilerArgumentsForKLib =
+                val firstPhaseArguments =
                     compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
                         defaultCompilerArgs,
                         firstPhasePredefinedArguments,
                         userCompilerArguments.firstPhase
-                    ) + "-ir-output-dir=$klibPath"
+                    )
 
-                val wasmCompiler = KotlinWasmCompiler()
-                wasmCompiler.tryCompilation(inputDir, ioFiles, filePaths + additionalCompilerArgumentsForKLib)
-                    .flatMap {
-                        val secondPhaseArguments = (compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
-                            defaultCompilerArgs,
-                            secondPhasePredefinedArguments,
-                            userCompilerArguments.secondPhase
-                        ) + "-ir-output-dir=${(outputDir / "wasm").toFile().canonicalPath}" + "-Xinclude=$klibPath").toMutableList()
+                val secondPhaseArguments = compilerArgumentsUtil.convertCompilerArgumentsToCompilationString(
+                    defaultCompilerArgs,
+                    secondPhasePredefinedArguments,
+                    userCompilerArguments.secondPhase
+                ).toMutableList()
 
-                        if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
+                if (debugInfo) secondPhaseArguments.add("-Xwasm-generate-wat")
 
-                        wasmCompiler.tryCompilation(inputDir, ioFiles, secondPhaseArguments)
-                    }
+                compileWasmWithBTA(
+                    sources = ioFiles,
+                    klibDir = outputDir / "klib",
+                    wasmDir = outputDir / "wasm",
+                    firstPhaseArguments = firstPhaseArguments,
+                    secondPhaseArguments = secondPhaseArguments,
+                )
                     .map {
                         val wasmOutputDir = outputDir / "wasm"
 
@@ -203,6 +209,60 @@ class KotlinToJSTranslator(
                     }
             }
         }
+
+    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
+    private fun compileJsWithBTA(
+        sources: List<Path>,
+        klibDir: Path,
+        jsDir: Path,
+        firstPhaseArguments: List<String>,
+        secondPhaseArguments: List<String>,
+    ): CompilationResult<Unit> {
+        val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
+
+        val klibOperation = toolchain.js.jsKlibCompilationOperationBuilder(sources, klibDir)
+            .apply {
+                compilerArguments.applyCommandLineArguments(firstPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
+            .build()
+
+        val linkingOperation = toolchain.js.jsLinkingOperationBuilder(klibDir, jsDir)
+            .apply {
+                compilerArguments.applyCommandLineArguments(secondPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
+            .build()
+
+        return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
+    }
+
+    @OptIn(ExperimentalBuildToolsApi::class, DelicateBuildToolsApi::class)
+    private fun compileWasmWithBTA(
+        sources: List<Path>,
+        klibDir: Path,
+        wasmDir: Path,
+        firstPhaseArguments: List<String>,
+        secondPhaseArguments: List<String>,
+    ): CompilationResult<Unit> {
+        val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
+
+        val klibOperation = toolchain.wasm.wasmKlibCompilationOperationBuilder(sources, klibDir)
+            .apply {
+                compilerArguments.applyCommandLineArguments(firstPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
+            .build()
+
+        val linkingOperation = toolchain.wasm.wasmLinkingOperationBuilder(klibDir, wasmDir)
+            .apply {
+                compilerArguments.applyCommandLineArguments(secondPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
+            .build()
+
+        return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
+    }
 
     private fun mergeWasmOutputIntoOneJs(
         wasmOutput: WasmTranslationSuccessfulOutput,

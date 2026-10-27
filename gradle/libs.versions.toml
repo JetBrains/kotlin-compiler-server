@@ -1,8 +1,9 @@
 [versions]
-kotlin = "2.5.0-dev-8762"
+kotlin = "2.5.20-dev-2331"
 spring-boot = "3.5.7"
 spring-dependency-managment = "1.1.7"
 springdoc = "2.8.14"
+asm = "9.11.1"
 aws-sdk = "2.55.12"
 aws-serverless-java-container-springboot3 = "2.1.5"
 aws-lambda-java = "1.2.3"
@@ -38,8 +39,7 @@ kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit"
 kotlin-mockito = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito" }
 kotlin-build-tools-api = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-api", version.ref = "kotlin" }
 kotlin-build-tools-impl = { group = "org.jetbrains.kotlin", name = "kotlin-build-tools-impl", version.ref = "kotlin" }
-# TODO(Dmitrii Krasnov): we still use compiler for JS/Wasm builds and can not get rid of it before we fix KTL-4006
-kotlin-compiler-embeddable = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-embeddable", version.ref = "kotlin" }
+kotlin-util-klib = { group = "org.jetbrains.kotlin", name = "kotlin-util-klib", version.ref = "kotlin" }
 kotlin-tooling-core = { group = "org.jetbrains.kotlin", name = "kotlin-tooling-core", version.ref = "kotlin" }
 kotlin-compiler-arguments-description = { group = "org.jetbrains.kotlin", name = "kotlin-compiler-arguments-description", version.ref = "kotlin" }
 kotlin-script-runtime = { group = "org.jetbrains.kotlin", name = "kotlin-script-runtime", version.ref = "kotlin" }
@@ -57,6 +57,8 @@ kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", v
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json-jvm", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core-jvm", version.ref = "kotlinx-serialization" }
+asm = { group = "org.ow2.asm", name = "asm", version.ref = "asm" }
+asm-util = { group = "org.ow2.asm", name = "asm-util", version.ref = "asm" }
 org-eclipse-lsp4j = { group = "org.eclipse.lsp4j", name = "org.eclipse.lsp4j", version.ref = "lsp4j" }
 rector-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "reactor" }
 spring-boot-starter-webflux = { group = "org.springframework.boot", name = "spring-boot-starter-webflux" }

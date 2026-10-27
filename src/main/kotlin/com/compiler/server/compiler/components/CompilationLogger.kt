@@ -10,26 +10,20 @@ import org.jetbrains.kotlin.buildtools.api.KotlinLogger
  * This custom implementation of Kotlin Logger is needed for sending compilation logs to the user
  * on the frontend instead of printing them on the stderr. CompilationLogger extracts data from logs
  * and saves it in [compilationLogs] map, so that compilation messages can be later displayed to
- * the user, and their position can be marked in their code.
-
- * KotlinLogger interface will be changed in the future to contain more log details.
- * Implementation of the CompilationLogger should be therefore updated after KT-80963 is implemented.
+ * the user, and their position can be marked in their code. Messages are expected in the format
+ * produced by [CompilationMessageRenderer].
  *
+ * @property compilationLogs A map that stores a collection of compilation logs organized by file paths.
+ *                            The map keys represent file paths as strings, and the associated values are mutable lists of
+ *                            `ErrorDescriptor` objects containing details about compilation issues, such as error messages,
+ *                            intervals, severity, and optional class names.
  * @property isDebugEnabled A flag to indicate whether debug-level logging is enabled for the logger.
  *                          If true, all messages are printed to the standard output.
  */
 class CompilationLogger(
+    val compilationLogs: Map<String, MutableList<ErrorDescriptor>>,
     override val isDebugEnabled: Boolean = false,
 ) : KotlinLogger {
-
-    /**
-     * Stores a collection of compilation logs organized by file paths.
-     *
-     * The map keys represent file paths as strings, and the associated values are mutable lists of
-     * `ErrorDescriptor` objects containing details about compilation issues, such as error messages,
-     * intervals, severity, and optional class names.
-     */
-    var compilationLogs: Map<String, MutableList<ErrorDescriptor>> = emptyMap()
 
     override fun debug(msg: String) {
         if (isDebugEnabled) println("[DEBUG] $msg")
