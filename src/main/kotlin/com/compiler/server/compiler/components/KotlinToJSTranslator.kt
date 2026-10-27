@@ -5,6 +5,7 @@ import com.compiler.server.common.components.usingTempDirectory
 import com.compiler.server.model.*
 import com.compiler.server.utils.*
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.jetbrains.kotlin.buildtools.api.BaseCompilationOperation
 import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
@@ -220,11 +221,17 @@ class KotlinToJSTranslator(
         val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
 
         val klibOperation = toolchain.js.jsKlibCompilationOperationBuilder(sources, klibDir)
-            .apply { compilerArguments.applyCommandLineArguments(firstPhaseArguments) }
+            .apply {
+                compilerArguments.applyCommandLineArguments(firstPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
             .build()
 
         val linkingOperation = toolchain.js.jsLinkingOperationBuilder(klibDir, jsDir)
-            .apply { compilerArguments.applyCommandLineArguments(secondPhaseArguments) }
+            .apply {
+                compilerArguments.applyCommandLineArguments(secondPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
             .build()
 
         return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
@@ -241,11 +248,17 @@ class KotlinToJSTranslator(
         val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
 
         val klibOperation = toolchain.wasm.wasmKlibCompilationOperationBuilder(sources, klibDir)
-            .apply { compilerArguments.applyCommandLineArguments(firstPhaseArguments) }
+            .apply {
+                compilerArguments.applyCommandLineArguments(firstPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
             .build()
 
         val linkingOperation = toolchain.wasm.wasmLinkingOperationBuilder(klibDir, wasmDir)
-            .apply { compilerArguments.applyCommandLineArguments(secondPhaseArguments) }
+            .apply {
+                compilerArguments.applyCommandLineArguments(secondPhaseArguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
             .build()
 
         return toolchain.executeSequentially(sources, klibOperation, linkingOperation)
