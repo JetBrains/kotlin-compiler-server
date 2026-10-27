@@ -10,6 +10,7 @@ import com.compiler.server.model.bean.LibrariesFile
 import com.compiler.server.utils.CompilerArgumentsUtil
 import executors.JUnitExecutors
 import executors.JavaRunnerExecutor
+import org.jetbrains.kotlin.buildtools.api.BaseCompilationOperation
 import org.jetbrains.kotlin.buildtools.api.DelicateBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.ExperimentalBuildToolsApi
 import org.jetbrains.kotlin.buildtools.api.KotlinToolchains
@@ -125,7 +126,10 @@ class KotlinCompiler(
 
         val toolchain = KotlinToolchains.loadImplementation(this::class.java.classLoader)
         val operation = toolchain.jvm.jvmCompilationOperationBuilder(sources, outputDir)
-            .apply { compilerArguments.applyCommandLineArguments(arguments) }
+            .apply {
+                compilerArguments.applyCommandLineArguments(arguments)
+                this[BaseCompilationOperation.COMPILER_MESSAGE_RENDERER] = CompilationMessageRenderer
+            }
             .build()
 
         return toolchain.executeSequentially(sources, operation)
