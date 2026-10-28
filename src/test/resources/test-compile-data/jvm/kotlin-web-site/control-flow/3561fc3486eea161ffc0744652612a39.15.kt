@@ -1,17 +1,17 @@
 fun main() {
 //sampleStart
-    println("Closed-ended range:")
+    println("Range with an inclusive upper bound:")
     for (i in 1..6) {
         print(i)
     }
-    // Closed-ended range:
+    // Range with an inclusive upper bound:
     // 123456
   
-    println("\nOpen-ended range:")
+    println("\nRange with an exclusive upper bound:")
     for (i in 1..<6) {
         print(i)
     }
-    // Open-ended range:
+    // Range with an exclusive upper bound:
     // 12345
   
     println("\nReverse order in steps of 2:")
