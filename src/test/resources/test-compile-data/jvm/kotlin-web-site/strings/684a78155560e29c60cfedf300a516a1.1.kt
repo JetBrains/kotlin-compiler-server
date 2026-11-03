@@ -1,8 +1,10 @@
 fun main() {
-    val str = "abcd" 
 //sampleStart
-    for (c in str) {
-        println(c)
-    }
+    val text = """
+        Hello,
+        Kotlin
+    """.trimIndent()
+    
+    println(text)
 //sampleEnd
 }
