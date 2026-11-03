@@ -5,5 +5,6 @@ fun main() {
     numbersMap["one"] = 11
 
     println(numbersMap)
+    // {one=11, two=2, three=3}
 //sampleEnd
 }
