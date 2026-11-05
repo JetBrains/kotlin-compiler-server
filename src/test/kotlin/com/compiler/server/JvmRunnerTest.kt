@@ -105,7 +105,7 @@ class JvmRunnerTest : BaseExecutorTest() {
     assertEquals(1, result.compilerDiagnostics[0].interval?.start?.line)
     assertEquals(19, result.compilerDiagnostics[0].interval?.start?.ch)
     assertEquals(
-      "'fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.",
+      "'fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead. Replace with 'this.code'.",
       result.compilerDiagnostics[0].message
     )
   }
