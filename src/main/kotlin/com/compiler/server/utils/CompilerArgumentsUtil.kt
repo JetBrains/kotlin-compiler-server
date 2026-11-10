@@ -211,7 +211,7 @@ class CompilerArgumentsUtil(
         "module-name" to "web-module",
         "no-stdlib" to true,
         "no-reflect" to true,
-        "progressive" to true,
+        "progressive" to false,
         "Xplugin" to Pair(
             kotlinEnvironment.compilerPlugins.map { it.name },
             kotlinEnvironment.compilerPlugins.map { it.absolutePath }),
