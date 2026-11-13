@@ -105,7 +105,7 @@ You can find information about the development workflow in [workflow.md](docs/wo
 ### Gradle Build Scans
 
 [Gradle Build Scans](https://scans.gradle.com/) can provide insights into an Kotlin Compiler Server Build.
-JetBrains runs a [Gradle Develocity server](https://ge.jetbrains.com/scans?search.rootProjectNames=kotlinx-atomicfu).
+JetBrains runs a [Gradle Develocity server](https://develocity.jetbrains.com/scans?search.rootProjectNames=kotlinx-atomicfu).
 that can be used to automatically upload reports.
 
 To automatically opt in add the following to `$GRADLE_USER_HOME/gradle.properties`.
