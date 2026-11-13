@@ -7,7 +7,7 @@ plugins {
 develocity {
     val overriddenName = buildScanUsername.orNull
     val buildScanEnabled = buildScanEnabled
-    server = "https://ge.jetbrains.com/"
+    server = "https://develocity.jetbrains.com/"
     buildScan {
         publishing.onlyIf {
             buildScanEnabled.get()
