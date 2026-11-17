@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>PLUS(13, 31) = 44\nTIMES(13, 31) = 403\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>PLUS(13, 31) = 44\nTIMES(13, 31) = 403\n</outStream>"}

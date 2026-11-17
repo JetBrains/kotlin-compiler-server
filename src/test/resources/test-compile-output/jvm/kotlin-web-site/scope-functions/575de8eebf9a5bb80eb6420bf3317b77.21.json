@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>The list elements before adding new one: [one, two, three]\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>The list elements before adding new one: [one, two, three]\n</outStream>"}
