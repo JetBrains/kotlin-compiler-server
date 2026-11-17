@@ -1,1 +1,0 @@
-{"exception":null,"text":"<outStream>getResult() returns Result(value=42, status=ok)\nstatus is 'ok'\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}

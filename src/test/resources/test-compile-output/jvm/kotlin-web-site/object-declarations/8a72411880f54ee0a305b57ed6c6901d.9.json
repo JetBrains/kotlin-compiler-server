@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>Executing special transaction. New balance is 1500.\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>Executing special transaction. New balance is 1500.\n</outStream>"}

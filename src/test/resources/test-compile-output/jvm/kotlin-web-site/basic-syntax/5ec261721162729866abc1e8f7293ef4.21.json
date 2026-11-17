@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>One\nGreeting\nLong\nNot a string\nUnknown\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>One\nGreeting\nLong\nNot a string\nUnknown\n</outStream>"}

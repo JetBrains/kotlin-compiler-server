@@ -1,1 +1,1 @@
-{"exception":null,"text":"<outStream>start: one | two | three | four: end\n</outStream>","jvmByteCode":null,"errors":{"File.kt":[]}}
+{"errors":{"File.kt":[]},"exception":null,"jvmByteCode":null,"text":"<outStream>start: one | two | three | four: end\n</outStream>"}
