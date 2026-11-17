@@ -2,7 +2,10 @@ class Client() {
     var token: String? = null
     fun connect() = println("connected!")
     fun authenticate() = println("authenticated!")
-    fun getData(): String = "Mock data"
+    fun getData() : String {
+        println("getting data!")
+        return "Mock data"
+    }
 }
 
 //sampleStart
@@ -17,6 +20,7 @@ fun main() {
         authenticate()
         // authenticated!
         getData()
+        // getting data!
     }
 }
 //sampleEnd

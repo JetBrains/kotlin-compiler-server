@@ -1,16 +1,11 @@
 fun main() {
 //sampleStart
-    val myTrue: Boolean = true
-    val myFalse: Boolean = false
-    val boolNull: Boolean? = null
+    val number = 10
+    val isPositive = number > 0 
+    println(isPositive) // true
 
-    println(myTrue || myFalse)
-    // true
-    println(myTrue && myFalse)
-    // false
-    println(!myTrue)
-    // false
-    println(boolNull)
-    // null
+    val language = "Kotlin"
+    val isEmpty = language.isEmpty() 
+    println(isEmpty) // false
 //sampleEnd
 }
