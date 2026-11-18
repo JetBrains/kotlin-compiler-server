@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.springdoc.webflux)
     implementation(libs.org.eclipse.lsp4j)
     implementation(libs.kotlinx.coroutines.reactor)
+    implementation(libs.kotlinx.coroutines.core.jvm)
     implementation(libs.jackson.module.kotlin)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.bundles.testcontainers)
