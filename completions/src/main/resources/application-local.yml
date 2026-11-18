@@ -11,7 +11,7 @@ spring:
   docker:
     compose:
       enabled: true
-      file: completions/src/main/resources/lsp-compose.yml
+      file: classpath:lsp-compose.yml
       lifecycle-management: start_and_stop
 
 springdoc:
