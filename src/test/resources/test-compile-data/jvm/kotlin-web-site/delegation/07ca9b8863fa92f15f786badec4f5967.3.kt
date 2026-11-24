@@ -9,13 +9,17 @@ class BaseImpl(x: Int) : Base {
 }
 
 class Derived(b: Base) : Base by b {
-    // This property is not accessed from b's implementation of `print`
+    // This property is not accessible
+    // from b's implementation of `print()`
     override val message = "Message of Derived"
 }
 
 fun main() {
-    val b = BaseImpl(10)
-    val derived = Derived(b)
+    val base = BaseImpl(10)
+    val derived = Derived(base)
+    
     derived.print()
+    // BaseImpl: x = 10
     println(derived.message)
+    // Message of Derived
 }

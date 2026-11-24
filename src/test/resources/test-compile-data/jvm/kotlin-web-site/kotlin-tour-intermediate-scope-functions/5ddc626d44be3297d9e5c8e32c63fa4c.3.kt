@@ -2,7 +2,10 @@ class Client() {
     var token: String? = null
     fun connect() = println("connected!")
     fun authenticate() = println("authenticated!")
-    fun getData(): String = "Mock data"
+    fun getData() : String {
+        println("getting data!")
+        return "Mock data"
+    }
 }
 
 val client = Client()
@@ -14,4 +17,5 @@ fun main() {
     client.authenticate()
     // authenticated!
     client.getData()
+    // getting data!
 }

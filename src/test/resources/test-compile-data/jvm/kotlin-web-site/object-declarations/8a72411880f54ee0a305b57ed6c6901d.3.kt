@@ -1,8 +1,6 @@
-data object MyDataObject {
-    val number: Int = 3
-}
+object MyObject
 
 fun main() {
-    println(MyDataObject) 
-    // MyDataObject
+    println(MyObject) 
+    // MyObject@hashcode
 }
