@@ -98,6 +98,7 @@ class CompilerArgumentsUtil(
         "Xexplicit-context-arguments",
         "Xcollection-literals",
         "Xallow-returns-result-of",
+        "Xcompanion-blocks",
     )
 
     internal val ALLOWED_JVM_ARGUMENTS = ALLOWED_COMMON_TOOL_ARGUMENTS + ALLOWED_COMMON_ARGUMENTS + setOf(
