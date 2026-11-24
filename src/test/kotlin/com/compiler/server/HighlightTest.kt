@@ -84,26 +84,26 @@ class HighlightTest : BaseExecutorTest() {
   fun `highlight Type inference failed`() {
     val highlights = highlight("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 3)
-    errorContains(highlights, "Cannot infer type for type parameter 'B'. Specify it explicitly.")
-    errorContains(highlights, "Function invocation 'to(...)' expected")
-    errorContains(highlights, "No value passed for parameter 'that'.")
+    errorContains(highlights, "Cannot infer type for type parameter 'B' (of 'fun <A, B> A.to'). Specify it explicitly.")
+    errorContains(highlights, "Function invocation 'to(...)' expected.")
+    errorContains(highlights, "No value passed for parameter 'that' of type 'B (of fun <A, B> A.to)'.")
   }
 
   @Test
   fun `highlight js Type inference failed`() {
     val highlights = highlightJS("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 3)
-    errorContains(highlights, "Cannot infer type for type parameter 'B'. Specify it explicitly.")
-    errorContains(highlights, "Function invocation 'to(...)' expected")
-    errorContains(highlights, "No value passed for parameter 'that'.")
+    errorContains(highlights, "Cannot infer type for type parameter 'B' (of 'fun <A, B> A.to'). Specify it explicitly.")
+    errorContains(highlights, "Function invocation 'to(...)' expected.")
+    errorContains(highlights, "No value passed for parameter 'that' of type 'B (of fun <A, B> A.to)'.")
   }
 
   @Test
   fun `highlight wasm Type inference failed`() {
     val highlights = highlightWasm("fun main() {\n   \"sdf\".to\n}")
     Assertions.assertEquals(highlights.size, 3)
-    errorContains(highlights, "Cannot infer type for type parameter 'B'. Specify it explicitly.")
-    errorContains(highlights, "Function invocation 'to(...)' expected")
-    errorContains(highlights, "No value passed for parameter 'that'.")
+    errorContains(highlights, "Cannot infer type for type parameter 'B' (of 'fun <A, B> A.to'). Specify it explicitly.")
+    errorContains(highlights, "Function invocation 'to(...)' expected.")
+    errorContains(highlights, "No value passed for parameter 'that' of type 'B (of fun <A, B> A.to)'.")
   }
 }
