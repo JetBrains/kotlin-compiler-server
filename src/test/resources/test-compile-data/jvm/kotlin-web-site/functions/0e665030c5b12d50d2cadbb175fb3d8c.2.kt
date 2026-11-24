@@ -9,5 +9,5 @@ fun main() {
     read(1)
     // Prints only "1"
     read(1, null)
-    //sampleEnd
+//sampleEnd
 }

@@ -7,5 +7,5 @@ fun main() {
         number < 0 -> println("The number is negative.")
         else -> println("The number is zero.")
     }
-//sampleEnd    
+//sampleEnd
 }

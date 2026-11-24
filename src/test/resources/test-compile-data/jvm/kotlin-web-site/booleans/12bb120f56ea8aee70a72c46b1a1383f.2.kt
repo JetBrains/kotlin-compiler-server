@@ -6,5 +6,5 @@ fun main() {
     if (isPositive) {
         println("The number is positive.")
     }
-//sampleEnd    
+//sampleEnd
 }
